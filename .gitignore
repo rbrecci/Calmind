@@ -1,0 +1,34 @@
+# dependencias
+/vendor/
+node_modules/
+
+# ambiente e segredos (RNF-56: chave nunca no repositorio)
+.env
+.env.*
+!.env.example
+*.pem
+*.keystore
+*.jks
+
+# build
+/public/build/
+/public/hot
+/storage/*.key
+android/app/build/
+android/build/
+ios/build/
+*.apk
+*.aab
+.expo/
+dist/
+
+# editor e sistema
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+
+# material do professor, mantido so na maquina do grupo
+# (documento de terceiro, o repositorio pode ser publico)
+EscopoSCRUM*.pdf

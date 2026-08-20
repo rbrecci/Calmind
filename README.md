@@ -44,7 +44,7 @@ Estes não são detalhes de implementação. São o que define o produto, e cada
 | Requisitos funcionais e não funcionais | 1 | [`docs/documento-requisitos.md`](docs/documento-requisitos.md) | Pronto, 48 RF e 68 RNF |
 | Diagramas de modelagem (MER, DER e outros) | 1 | [`docs/diagramas/`](docs/diagramas/) | Pronto |
 | Prototipação da interface | 1 | [`docs/prototipo/wireframes.html`](docs/prototipo/wireframes.html) | Pronto, 16 telas |
-| Coleta e análise dos requisitos | 1 | `docs/pesquisa/` | Pendente |
+| Coleta e análise dos requisitos | 1 | [`docs/pesquisa/`](docs/pesquisa/) | Roteiro e formulário prontos, 4 entrevistas a aplicar |
 | Backend e frontend, primeiras funcionalidades | 2 | ainda não iniciado | Pendente |
 | Primeiros testes | 2 | [`docs/api/`](docs/api/) | Contrato e coleção de testes prontos |
 | Sistema completo | 3 | ainda não iniciado | Pendente |
@@ -65,6 +65,8 @@ mysql -u root --force --table tcc_schema_test < docs/diagramas/testes-do-modelo.
 ```
 
 As quatro provas verificam que o banco, e não o código da aplicação, garante o vínculo ativo único por paciente e o isolamento do relato privado.
+
+**Entrevistas.** O roteiro das 4 entrevistas de campo está em [`docs/pesquisa/roteiro-entrevistas.md`](docs/pesquisa/roteiro-entrevistas.md). Para aplicar, abra [`docs/pesquisa/formulario.html`](docs/pesquisa/formulario.html) no navegador: ele guarda as respostas na própria máquina, sobrevive a recarregar a página no meio da conversa e exporta a síntese anonimizada pronta em Markdown. Não precisa de servidor nem de internet.
 
 **Contrato da API.** Importe `docs/api/TCC-SENAI.postman_collection.json` no Postman e rode pelo Runner. São 42 requisições com 104 asserções. Enquanto o backend não existir, tudo fica vermelho: cada endpoint entregue acende um verde, e a coleção serve de critério de pronto da Sprint 2.
 
@@ -104,7 +106,7 @@ docs/
 ├── diagramas/                   MER, DER executável e provas do modelo
 ├── prototipo/                   wireframes das 16 telas
 ├── api/                         contrato e coleção de testes do Postman
-├── pesquisa/                    roteiro, sínteses e personas
+├── pesquisa/                    roteiro das entrevistas, formulário de aplicação, sínteses e personas
 └── planejamento/                cronograma, decisões e comparativo de rotas
 ```
 

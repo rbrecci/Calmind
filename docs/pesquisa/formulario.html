@@ -1,0 +1,1237 @@
+<title>Formulário de entrevistas · Calmind</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --papel: #F7F7F6;
+    --tela: #FFFFFF;
+    --tinta: #1C1D1F;
+    --tinta-2: #5A5D62;
+    --tinta-3: #8B8F96;
+    --linha: #D9DBDE;
+    --linha-2: #C2C5CA;
+    --preenche: #EBECEE;
+    --acao: #3F4A63;
+    --acao-tinta: #FFFFFF;
+    --nota: #7A5B12;
+    --nota-fundo: #FBF3DF;
+    --nota-linha: #E3CE94;
+    --alerta: #8A3529;
+    --alerta-fundo: #FAEBE8;
+    --alerta-linha: #E0B4AC;
+    --ok: #2C6141;
+    --ok-fundo: #E8F3EC;
+    --sans: ui-sans-serif, "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --mono: ui-monospace, "Cascadia Mono", Consolas, "SF Mono", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --papel: #131416; --tela: #1B1D20; --tinta: #E9EAEC; --tinta-2: #A8ACB3;
+      --tinta-3: #7A7E86; --linha: #34373B; --linha-2: #45484D; --preenche: #26292D;
+      --acao: #8FA0C4; --acao-tinta: #16181B; --nota: #E0C583; --nota-fundo: #2A230F;
+      --nota-linha: #4E4223; --alerta: #E9998C; --alerta-fundo: #331A16; --alerta-linha: #5B302A;
+      --ok: #8FCBA6; --ok-fundo: #16281D;
+    }
+  }
+  :root[data-theme="dark"] {
+    --papel: #131416; --tela: #1B1D20; --tinta: #E9EAEC; --tinta-2: #A8ACB3;
+    --tinta-3: #7A7E86; --linha: #34373B; --linha-2: #45484D; --preenche: #26292D;
+    --acao: #8FA0C4; --acao-tinta: #16181B; --nota: #E0C583; --nota-fundo: #2A230F;
+    --nota-linha: #4E4223; --alerta: #E9998C; --alerta-fundo: #331A16; --alerta-linha: #5B302A;
+    --ok: #8FCBA6; --ok-fundo: #16281D;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--papel); color: var(--tinta); font-family: var(--sans);
+    font-size: 15px; line-height: 1.55; -webkit-text-size-adjust: 100%;
+  }
+  h1, h2, h3 { line-height: 1.25; margin: 0; font-weight: 640; letter-spacing: -0.01em; }
+  p { margin: 0 0 10px; }
+  a { color: var(--acao); }
+  code, kbd { font-family: var(--mono); font-size: 0.88em; }
+
+  .env { max-width: 940px; margin: 0 auto; padding: 0 20px 96px; }
+
+  /* ---------- barra superior ---------- */
+  .topo {
+    position: sticky; top: 0; z-index: 40; background: var(--tela);
+    border-bottom: 1px solid var(--linha);
+  }
+  .topo-in {
+    max-width: 940px; margin: 0 auto; padding: 10px 20px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .marca { font-weight: 680; letter-spacing: -0.02em; white-space: nowrap; }
+  .marca span { color: var(--tinta-3); font-weight: 500; }
+  .topo-espaco { flex: 1 1 auto; }
+  .cronometro {
+    font-family: var(--mono); font-size: 13px; color: var(--tinta-2);
+    background: var(--preenche); border-radius: 6px; padding: 3px 8px; white-space: nowrap;
+  }
+  .cronometro.longa { color: var(--alerta); background: var(--alerta-fundo); }
+
+  .bt {
+    font: inherit; font-size: 13.5px; font-weight: 550; cursor: pointer;
+    background: var(--tela); color: var(--tinta); border: 1px solid var(--linha-2);
+    border-radius: 8px; padding: 6px 12px; white-space: nowrap;
+  }
+  .bt:hover { border-color: var(--tinta-3); }
+  .bt:focus-visible { outline: 2px solid var(--acao); outline-offset: 2px; }
+  .bt.forte { background: var(--acao); color: var(--acao-tinta); border-color: var(--acao); }
+  .bt.perigo:hover { border-color: var(--alerta); color: var(--alerta); }
+  .bt[aria-pressed="true"] { background: var(--acao); color: var(--acao-tinta); border-color: var(--acao); }
+  .bt:disabled { opacity: .45; cursor: not-allowed; }
+  .bt.pequeno { font-size: 12.5px; padding: 4px 9px; }
+
+  /* ---------- telas ---------- */
+  .tela { display: none; }
+  .tela.ativa { display: block; }
+
+  .cabeca { padding: 34px 0 20px; border-bottom: 1px solid var(--linha); margin-bottom: 24px; }
+  .cabeca h1 { font-size: 26px; }
+  .cabeca .lede { color: var(--tinta-2); margin-top: 8px; max-width: 62ch; }
+
+  /* ---------- escolha de pessoa ---------- */
+  .pessoas { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin: 20px 0 28px; }
+  .pcard {
+    text-align: left; background: var(--tela); border: 1px solid var(--linha);
+    border-radius: 12px; padding: 14px 15px; cursor: pointer; font: inherit; color: inherit;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .pcard:hover { border-color: var(--acao); }
+  .pcard:focus-visible { outline: 2px solid var(--acao); outline-offset: 2px; }
+  .pcard .cod { font-family: var(--mono); font-size: 11.5px; color: var(--tinta-3); }
+  .pcard .nome { font-size: 17px; font-weight: 650; }
+  .pcard .papel { font-size: 13px; color: var(--tinta-2); }
+  .pcard .foco { font-size: 12.5px; color: var(--tinta-3); margin-top: 4px; }
+  .pcard .selo {
+    margin-top: 8px; font-size: 11.5px; font-weight: 600; align-self: flex-start;
+    border-radius: 999px; padding: 2px 9px; background: var(--preenche); color: var(--tinta-2);
+  }
+  .pcard .selo.andamento { background: var(--nota-fundo); color: var(--nota); }
+  .pcard .selo.feita { background: var(--ok-fundo); color: var(--ok); }
+
+  /* ---------- caixas de aviso ---------- */
+  .caixa { border: 1px solid var(--linha); border-radius: 10px; padding: 13px 15px; margin: 0 0 16px; background: var(--tela); }
+  .caixa.aviso { background: var(--nota-fundo); border-color: var(--nota-linha); color: var(--nota); }
+  .caixa.risco { background: var(--alerta-fundo); border-color: var(--alerta-linha); color: var(--alerta); }
+  .caixa p:last-child { margin-bottom: 0; }
+  .caixa b { font-weight: 660; }
+
+  /* ---------- consentimento ---------- */
+  .campo { margin: 0 0 14px; }
+  .campo > label.rot { display: block; font-size: 13px; font-weight: 600; color: var(--tinta-2); margin-bottom: 5px; }
+  input[type="text"], input[type="date"], textarea, select {
+    font: inherit; width: 100%; background: var(--tela); color: var(--tinta);
+    border: 1px solid var(--linha-2); border-radius: 8px; padding: 8px 10px;
+  }
+  textarea { resize: vertical; min-height: 68px; }
+  input:focus, textarea:focus, select:focus { outline: 2px solid var(--acao); outline-offset: 1px; border-color: var(--acao); }
+  .roteiro-fala {
+    background: var(--preenche); border-left: 3px solid var(--linha-2);
+    padding: 12px 15px; border-radius: 0 8px 8px 0; color: var(--tinta-2); margin-bottom: 16px;
+  }
+  .roteiro-fala p:last-child { margin-bottom: 0; }
+
+  /* ---------- navegação de blocos ---------- */
+  .navblocos {
+    display: flex; gap: 6px; overflow-x: auto; padding: 10px 0 12px;
+    border-bottom: 1px solid var(--linha); margin-bottom: 20px; scrollbar-width: thin;
+  }
+  .navblocos button {
+    font: inherit; font-size: 12.5px; font-weight: 550; cursor: pointer; white-space: nowrap;
+    background: transparent; color: var(--tinta-2); border: 1px solid var(--linha);
+    border-radius: 999px; padding: 4px 11px; display: flex; align-items: center; gap: 6px;
+  }
+  .navblocos button:hover { border-color: var(--tinta-3); }
+  .navblocos button[aria-current="true"] { background: var(--acao); color: var(--acao-tinta); border-color: var(--acao); }
+  .navblocos .pt { width: 6px; height: 6px; border-radius: 50%; background: var(--linha-2); flex: none; }
+  .navblocos .pt.parcial { background: var(--nota); }
+  .navblocos .pt.cheio { background: var(--ok); }
+  .navblocos button[aria-current="true"] .pt { background: var(--acao-tinta); opacity: .8; }
+
+  .barra { height: 4px; background: var(--preenche); border-radius: 999px; overflow: hidden; margin-bottom: 4px; }
+  .barra > i { display: block; height: 100%; background: var(--acao); width: 0; transition: width .2s; }
+  .barra-rot { font-size: 12.5px; color: var(--tinta-3); margin-bottom: 16px; display: flex; justify-content: space-between; gap: 10px; }
+
+  /* ---------- bloco e perguntas ---------- */
+  .bloco-titulo { font-size: 19px; margin-bottom: 6px; }
+  .bloco-nota { font-size: 13.5px; color: var(--tinta-2); background: var(--preenche); border-radius: 8px; padding: 10px 13px; margin-bottom: 18px; }
+
+  .perg { background: var(--tela); border: 1px solid var(--linha); border-radius: 12px; padding: 15px 16px; margin-bottom: 12px; }
+  .perg.pulada { opacity: .55; }
+  .perg-topo { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 9px; }
+  .perg-id { font-family: var(--mono); font-size: 12px; color: var(--tinta-3); font-weight: 600; }
+  .tag { font-size: 10.5px; font-weight: 680; text-transform: uppercase; letter-spacing: .04em; border-radius: 4px; padding: 1px 6px; }
+  .tag.opc { background: var(--preenche); color: var(--tinta-3); }
+  .tag.sens { background: var(--alerta-fundo); color: var(--alerta); }
+  .tag.liga { background: transparent; color: var(--tinta-3); font-family: var(--mono); text-transform: none; letter-spacing: 0; font-weight: 500; border: 1px solid var(--linha); }
+  .perg-t { font-size: 15.5px; font-weight: 560; margin-bottom: 11px; }
+  .perg-t em { color: var(--tinta-2); font-style: normal; font-weight: 400; font-size: 13.5px; display: block; margin-top: 3px; }
+
+  .ops { display: flex; flex-direction: column; gap: 2px; margin-bottom: 10px; border: 0; padding: 0; }
+  .ops legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .op { display: flex; align-items: flex-start; gap: 9px; padding: 6px 8px; border-radius: 7px; cursor: pointer; }
+  .op:hover { background: var(--preenche); }
+  .op input { margin: 3px 0 0; accent-color: var(--acao); flex: none; width: 16px; height: 16px; }
+  .op span { font-size: 14.5px; }
+
+  .escala { display: flex; gap: 6px; align-items: stretch; margin-bottom: 8px; flex-wrap: wrap; }
+  .escala label {
+    flex: 1 1 54px; text-align: center; border: 1px solid var(--linha-2); border-radius: 8px;
+    padding: 9px 4px; cursor: pointer; font-weight: 600; font-size: 15px;
+  }
+  .escala label:hover { border-color: var(--tinta-3); }
+  .escala input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .escala input:checked + span { color: var(--acao-tinta); }
+  .escala label:has(input:checked) { background: var(--acao); border-color: var(--acao); color: var(--acao-tinta); }
+  .escala label:has(input:focus-visible) { outline: 2px solid var(--acao); outline-offset: 2px; }
+  .escala-rot { display: flex; justify-content: space-between; font-size: 12px; color: var(--tinta-3); margin-bottom: 10px; }
+
+  .extra { border-top: 1px dashed var(--linha); padding-top: 10px; margin-top: 4px; }
+  .extra .rot { display: block; font-size: 12px; font-weight: 600; color: var(--tinta-3); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .03em; }
+  .extra + .extra { margin-top: 10px; }
+  .perg-pe { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 11px; flex-wrap: wrap; }
+  .perg-pe .dica { font-size: 12.5px; color: var(--tinta-3); }
+
+  .rodape-nav { display: flex; gap: 10px; align-items: center; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--linha); flex-wrap: wrap; }
+
+  .acoes { display: flex; gap: 8px; flex-wrap: wrap; margin: 18px 0 0; }
+  .saida { width: 100%; min-height: 320px; font-family: var(--mono); font-size: 12.5px; white-space: pre; margin-top: 14px; }
+  .aviso-inline { font-size: 13px; color: var(--ok); background: var(--ok-fundo); border-radius: 6px; padding: 5px 10px; display: none; }
+  .aviso-inline.on { display: inline-block; }
+
+  .rodape-pg { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--linha); font-size: 12.5px; color: var(--tinta-3); }
+
+  @media (max-width: 620px) {
+    .env { padding: 0 14px 80px; }
+    .topo-in { padding: 8px 14px; gap: 8px; }
+    .marca span { display: none; }
+    .cabeca { padding: 22px 0 16px; }
+    .cabeca h1 { font-size: 22px; }
+  }
+
+  @media print {
+    .topo, .navblocos, .rodape-nav, .acoes, .bt, .barra, .barra-rot { display: none !important; }
+    .tela { display: block !important; }
+    body { background: #fff; color: #000; font-size: 11pt; }
+    .perg { break-inside: avoid; border-color: #bbb; }
+    .env { max-width: none; padding: 0; }
+  }
+</style>
+
+<header class="topo">
+  <div class="topo-in">
+    <div class="marca">Calmind <span>· formulário de entrevistas</span></div>
+    <div class="topo-espaco"></div>
+    <div class="cronometro" id="cronometro" hidden>00:00</div>
+    <button class="bt pequeno" id="bt-enxuto" aria-pressed="false" hidden title="Esconde as perguntas opcionais">Modo enxuto</button>
+    <button class="bt pequeno" id="bt-tema" title="Alternar tema">Tema</button>
+    <button class="bt pequeno" id="bt-trocar" hidden>Trocar pessoa</button>
+  </div>
+</header>
+
+<main class="env">
+
+  <!-- ============ TELA 1: ESCOLHA ============ -->
+  <section class="tela ativa" id="tela-inicio">
+    <div class="cabeca">
+      <h1>Quem você vai entrevistar agora?</h1>
+      <p class="lede">As respostas ficam gravadas neste navegador, nesta máquina. Dá para fechar, perder a conexão ou recarregar no meio da entrevista sem perder nada. O roteiro completo está em <code>roteiro-entrevistas.md</code>.</p>
+    </div>
+
+    <div class="pessoas" id="pessoas"></div>
+
+    <div class="caixa aviso">
+      <p><b>Antes de começar, três coisas.</b></p>
+      <p>1. Não leia as alternativas em voz alta. Faça a pergunta, deixe a pessoa responder do jeito dela, e só então marque o que corresponde. As opções servem para você tabular depois.</p>
+      <p>2. Não digite nada que identifique alguém: sem sobrenome, sem CRP, sem telefone, sem nome de clínica. A exportação usa só o código (E1, E2, P1, P2).</p>
+      <p>3. Perguntas marcadas <b>SENSÍVEL</b> podem ser puladas sem explicação. Avise isso uma vez, no início, e não insista.</p>
+    </div>
+
+    <div class="acoes">
+      <button class="bt" id="bt-importar">Importar respostas (.json)</button>
+      <input type="file" id="arquivo-import" accept="application/json,.json" hidden>
+      <span class="aviso-inline" id="aviso-import">Importado.</span>
+    </div>
+  </section>
+
+  <!-- ============ TELA 2: CONSENTIMENTO ============ -->
+  <section class="tela" id="tela-consentimento">
+    <div class="cabeca">
+      <h1 id="cons-titulo">Consentimento</h1>
+      <p class="lede">A pesquisa é com pessoa real, e dado de saúde é dado sensível. Sem este registro o roteiro não abre.</p>
+    </div>
+
+    <div class="roteiro-fala">
+      <p><b>Leia, não improvise:</b></p>
+      <p>"Obrigado por topar. Sou estudante do curso técnico de desenvolvimento de sistemas do SENAI e estou fazendo um trabalho de conclusão: um aplicativo de apoio no intervalo entre uma sessão de terapia e a seguinte. Não estou vendendo nada e não existe resposta certa. São mais ou menos 30 minutos.</p>
+      <p>Nada do que você falar vai para o trabalho com o seu nome: você aparece como <b id="cons-cod">E1</b>. Não vou anotar telefone, e-mail nem nada que identifique você ou outras pessoas. Pode pular qualquer pergunta sem me explicar por quê, e pode parar quando quiser.</p>
+      <p>Tudo bem se eu for registrando suas respostas enquanto a gente conversa?"</p>
+    </div>
+
+    <div class="caixa risco" id="cons-cuidado" hidden>
+      <p><b>Cuidado específico nesta entrevista.</b> O último bloco trata de ter interrompido o acompanhamento. Você é estudante de desenvolvimento, não terapeuta: o objetivo é entender uma decisão, não investigar um sofrimento.</p>
+      <p>Não pergunte diagnóstico, não peça detalhe clínico, não sugira que ela deveria ter continuado. Se pesar, pare o roteiro — entrevista incompleta é resultado aceitável, insistir não é. Tenha o <b>CVV 188</b> anotado antes de começar.</p>
+    </div>
+
+    <div class="campo">
+      <label class="op" style="padding-left:0">
+        <input type="checkbox" id="cons-ok">
+        <span><b>A pessoa consentiu</b> em participar e em ter as respostas registradas de forma anônima.</span>
+      </label>
+    </div>
+
+    <div class="campo">
+      <label class="rot" for="cons-forma">Como o consentimento foi dado</label>
+      <select id="cons-forma">
+        <option value="verbal-presencial">Verbal, presencialmente</option>
+        <option value="verbal-chamada">Verbal, por chamada de voz ou vídeo</option>
+        <option value="escrito-mensagem">Por escrito, em mensagem</option>
+      </select>
+    </div>
+
+    <div class="campo">
+      <label class="rot" for="cons-audio">Gravação de áudio</label>
+      <select id="cons-audio">
+        <option value="nao">Não vamos gravar</option>
+        <option value="sim">Autorizou gravar (o arquivo não entra no repositório)</option>
+        <option value="recusou">Foi oferecido e a pessoa recusou</option>
+      </select>
+    </div>
+
+    <div class="campo">
+      <label class="rot" for="cons-data">Data da entrevista</label>
+      <input type="date" id="cons-data">
+    </div>
+
+    <div class="campo">
+      <label class="rot" for="cons-obs">Observações de contexto (sem identificar ninguém)</label>
+      <textarea id="cons-obs" placeholder="Ex.: entrevista por chamada, ambiente com ruído, pessoa com pouco tempo"></textarea>
+    </div>
+
+    <div class="rodape-nav">
+      <button class="bt" id="bt-volta-inicio">Voltar</button>
+      <div class="topo-espaco"></div>
+      <button class="bt forte" id="bt-comecar" disabled>Começar a entrevista</button>
+    </div>
+  </section>
+
+  <!-- ============ TELA 3: ENTREVISTA ============ -->
+  <section class="tela" id="tela-entrevista">
+    <div class="cabeca" style="padding-bottom:14px">
+      <h1 id="ent-titulo">Entrevista</h1>
+      <p class="lede" id="ent-sub"></p>
+    </div>
+
+    <div class="barra"><i id="barra-in"></i></div>
+    <div class="barra-rot">
+      <span id="barra-txt">0 de 0 respondidas</span>
+      <span id="barra-salvo">salvo</span>
+    </div>
+
+    <nav class="navblocos" id="navblocos" aria-label="Blocos do roteiro"></nav>
+
+    <div id="bloco-area"></div>
+
+    <div class="rodape-nav">
+      <button class="bt" id="bt-anterior">← Bloco anterior</button>
+      <button class="bt" id="bt-proximo">Próximo bloco →</button>
+      <div class="topo-espaco"></div>
+      <button class="bt forte" id="bt-encerrar">Encerrar e exportar</button>
+    </div>
+  </section>
+
+  <!-- ============ TELA 4: EXPORTAR ============ -->
+  <section class="tela" id="tela-final">
+    <div class="cabeca">
+      <h1>Exportar</h1>
+      <p class="lede">O Markdown já sai no formato da síntese, sem nome nenhum, pronto para virar <code id="fin-arquivo">sintese-E1.md</code> na pasta <code>docs/pesquisa/</code>.</p>
+    </div>
+
+    <div class="caixa" id="fin-resumo"></div>
+
+    <div class="acoes">
+      <button class="bt forte" id="bt-baixar-md">Baixar Markdown</button>
+      <button class="bt" id="bt-copiar-md">Copiar Markdown</button>
+      <button class="bt" id="bt-baixar-json">Baixar JSON</button>
+      <button class="bt" id="bt-imprimir">Imprimir</button>
+      <span class="aviso-inline" id="aviso-copia">Copiado.</span>
+    </div>
+
+    <textarea class="saida" id="saida" readonly aria-label="Markdown gerado"></textarea>
+
+    <div class="rodape-nav">
+      <button class="bt" id="bt-voltar-ent">← Voltar para a entrevista</button>
+      <div class="topo-espaco"></div>
+      <button class="bt perigo" id="bt-limpar">Apagar as respostas desta pessoa</button>
+    </div>
+  </section>
+
+  <footer class="rodape-pg">
+    Calmind — Saúde Mental &amp; Acolhimento · TCC, SENAI-SP, 4º termo · Sprint 1, coleta e análise dos requisitos.
+    Ferramenta local: nada é enviado para servidor nenhum.
+  </footer>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  /* =================================================================
+     BANCO DE PERGUNTAS
+     Espelha docs/pesquisa/roteiro-entrevistas.md. Se mudar aqui, mude lá.
+     ================================================================= */
+
+  function q(id, t, tipo, ops, extra) {
+    var o = { id: id, t: t, tipo: tipo, ops: ops || [] };
+    if (extra) for (var k in extra) o[k] = extra[k];
+    return o;
+  }
+  function b(t, ps, extra) {
+    var o = { t: t, ps: ps };
+    if (extra) for (var k in extra) o[k] = extra[k];
+    return o;
+  }
+
+  var ROTEIROS = {};
+
+  ROTEIROS.psi = [
+    b("A1 · Perfil profissional", [
+      q("P-01", "Há quanto tempo você atende?", "unica", ["até 2 anos", "2 a 5", "5 a 10", "mais de 10"]),
+      q("P-02", "Você atende de que forma hoje?", "unica", ["só presencial", "só online", "os dois"], { liga: "RNF-61, A-04" }),
+      q("P-03", "Quantos pacientes você acompanha por semana?", "unica", ["até 5", "6 a 15", "16 a 30", "mais de 30"], { opc: 1, liga: "RF-35" }),
+      q("P-04", "Qual público predomina?", "multipla", ["crianças", "adolescentes", "adultos", "idosos"], { dica: "Se marcar crianças ou adolescentes, a P-09 passa a valer." })
+    ]),
+
+    b("A2 · Comunicação entre as sessões", [
+      q("P-05", "Fora do horário da sessão, seus pacientes te procuram?", "unica", ["nunca", "raramente", "às vezes", "com frequência", "o tempo todo"], { liga: "RF-15" }),
+      q("P-06", "Por onde eles te procuram?", "multipla", ["WhatsApp pessoal", "WhatsApp comercial", "e-mail", "telefone", "rede social", "não me procuram"], { liga: "linha de base" }),
+      q("P-07", "O que mais te incomoda nesse contato fora de sessão?", "multipla", ["mistura com a vida pessoal", "expectativa de resposta imediata", "o registro se perde no meio da conversa", "assunto que precisaria de sessão", "não me incomoda"], { liga: "RF-15, RF-16" }),
+      q("P-08", "Conte a última vez em que uma mensagem fora de horário te colocou numa situação difícil.", "aberta", null, { dica: "Deixe contar. Anote a frase, não o resumo." }),
+      q("P-09", "Quando o paciente é criança ou adolescente, como funciona a comunicação com a família?", "multipla", ["falo com os responsáveis em horário combinado", "os responsáveis me procuram a qualquer hora", "evito contato direto", "faço devolutivas periódicas", "não atendo esse público"], { opc: 1, liga: "lacuna: responsável legal" }),
+      q("P-10", "Um canal de mensagens dentro de uma plataforma de trabalho, em que fica combinado que a resposta não é imediata, ajudaria?", "escala", null, { rmin: "não ajudaria", rmax: "ajudaria muito", liga: "RF-15" })
+    ], { nota: "D-01. O objetivo aqui é descobrir o que o produto teria que substituir, e a que custo." }),
+
+    b("A3 · Risco e crise entre as sessões", [
+      q("P-11", "Já aconteceu de um paciente relatar algo grave entre as sessões?", "unica", ["sim, mais de uma vez", "sim, uma vez", "não", "prefiro não responder"], { sens: 1 }),
+      q("P-12", "Numa ferramenta em que o paciente escreve durante a semana, o que ela precisa fazer se aparecer conteúdo de risco?", "multipla", ["mostrar canais de emergência ao paciente na hora", "me notificar imediatamente, mesmo fora do horário", "me notificar no próximo acesso", "não fazer nada automático, só registrar", "deixar o paciente sinalizar urgência"], { liga: "gera RF novo" }),
+      q("P-13", "E o que essa ferramenta não pode fazer de jeito nenhum nessa situação?", "aberta", null, { opc: 1, liga: "gera RF novo" })
+    ], { nota: "Bloco fora da lista original de tópicos. Existe porque nenhum RF diz hoje o que o sistema faz diante de conteúdo de risco, e um app de saúde mental sem esse caminho não sobrevive a uma arguição." }),
+
+    b("A4 · Tarefas entre as sessões", [
+      q("P-14", "Você combina atividades para o paciente fazer entre as sessões?", "unica", ["sempre", "na maioria das vezes", "às vezes", "raramente", "não faz parte da minha abordagem"], { liga: "RF-37" }),
+      q("P-15", "Como isso fica registrado hoje?", "multipla", ["só falado na sessão", "o paciente anota", "eu anoto e mando depois", "papel impresso", "não formalizo"], { opc: 1, liga: "RF-25, RF-37" }),
+      q("P-16", "Na sua experiência, quanto volta feito?", "unica", ["quase tudo", "mais da metade", "menos da metade", "quase nada", "não acompanho"], { liga: "D-03" }),
+      q("P-17", "O que mais atrapalha a adesão?", "multipla", ["esquecimento", "tarefa mal combinada", "o paciente não vê sentido", "vergonha de mostrar o resultado", "a semana foi difícil demais"], { liga: "RF-16, RF-28" }),
+      q("P-18", "Um lembrete automático no celular do paciente ajudaria ou atrapalharia?", "unica", ["ajudaria muito", "ajudaria", "indiferente", "pode atrapalhar", "atrapalharia"], { liga: "RF-16" })
+    ], { nota: "D-03." }),
+
+    b("A5 · Recapitulação e preparo da sessão", [
+      q("P-19", "Quanto do tempo da sessão costuma ir em recapitular a semana?", "unica", ["quase nada", "até 10 minutos", "10 a 20 minutos", "mais de 20 minutos", "varia muito"], { liga: "D-04" }),
+      q("P-20", "E isso é um problema?", "unica", ["é perda de tempo", "é necessário, mas dá para encurtar", "é trabalho clínico legítimo, não é perda", "depende do paciente"], { liga: "pode derrubar D-04", dica: "Não induza. Se as duas psicólogas disserem que não é perda, a dor D-04 está errada como está escrita, e isso vai para a síntese." }),
+      q("P-21", "Como você se prepara hoje antes de atender?", "multipla", ["releio minhas anotações", "de memória", "não sobra tempo", "releio na hora, com o paciente entrando", "uso prontuário eletrônico"], { opc: 1, liga: "RF-36" }),
+      q("P-22", "Se antes da sessão você recebesse um resumo do que o paciente registrou na semana, isso mudaria seu preparo?", "escala", null, { rmin: "não mudaria nada", rmax: "mudaria muito", liga: "RF-41" }),
+      q("P-23", "Esse resumo seria gerado por inteligência artificial, só quando você pedir, e nada entraria no prontuário sem você confirmar. Como você se sente com isso?", "unica", ["confortável", "confortável, com ressalvas", "desconfortável, mas usaria", "não usaria", "preciso entender melhor"], { liga: "DEC-04, DEC-05, RF-41, RF-42" }),
+      q("P-24", "O que faria você não confiar nesse resumo?", "aberta", null, { opc: 1, liga: "RF-42" })
+    ], { nota: "D-04. Leia a P-23 inteira, com as duas garantias: só quando ela pedir, e nada gravado sem confirmação. Sem isso a resposta é sobre IA em geral, não sobre este produto." }),
+
+    b("A6 · Sigilo, relato privado e registro", [
+      q("P-25", "O paciente poderia marcar alguns relatos como privados: você não veria o conteúdo nem saberia que existem. Isso:", "unica", ["protege o processo", "é indiferente", "me deixa desconfortável", "atrapalha o trabalho clínico"], { liga: "DEC-12, DEC-14" }),
+      q("P-26", "E se você soubesse ao menos quantos relatos privados existem, sem ver o conteúdo?", "unica", ["melhor assim, quero saber que existem", "tanto faz", "pior, isso me faria cobrar o paciente", "não sei"], { opc: 1, liga: "DEC-14" }),
+      q("P-27", "Onde ficam suas anotações de paciente hoje?", "multipla", ["caderno de papel", "arquivo no computador", "prontuário eletrônico", "não anoto"], { opc: 1, liga: "RF-36" }),
+      q("P-28", "O que a Resolução CFP 9/2024 te obriga a registrar, e que uma plataforma teria que suportar?", "aberta", null, { opc: 1, liga: "RF-36, RF-48" })
+    ], { nota: "DEC-12 a DEC-15. Este é o bloco que hoje sustenta a decisão mais original do produto sem nenhuma prova de campo." }),
+
+    b("A7 · Medicação", [
+      q("P-29", "Seus pacientes usam medicação psiquiátrica?", "unica", ["a maioria", "cerca da metade", "a minoria", "é raro", "não sei dizer"], { opc: 1 }),
+      q("P-30", "Você acompanha a adesão de alguma forma?", "multipla", ["pergunto na sessão", "o paciente comenta espontaneamente", "falo com o psiquiatra quando autorizado", "não acompanho"], { opc: 1, liga: "RF-39" }),
+      q("P-31", "Na plataforma, você registraria a medicação já prescrita por um médico, o paciente confirmaria, e o app só lembraria do horário. O app nunca prescreve nem altera dose. Isso:", "unica", ["faz sentido e eu usaria", "faria com ressalvas", "não é meu papel registrar isso", "não usaria"], { liga: "DEC-10, risco 6.2", dica: "Leia a pergunta inteira. A frase 'o app nunca prescreve' é parte da pergunta, não é contexto." })
+    ]),
+
+    b("A8 · Ferramentas e chegada de pacientes", [
+      q("P-32", "Que ferramentas você usa hoje para trabalhar?", "multipla", ["WhatsApp", "agenda do Google", "caderno de papel", "planilha", "prontuário eletrônico pago", "nenhuma"], { liga: "D-05" }),
+      q("P-33", "O que te faz abandonar uma ferramenta?", "multipla", ["preço", "complicada demais", "não confio no sigilo", "não resolve meu problema real", "dá mais trabalho do que ajuda"], { opc: 1, liga: "RNF-34 a RNF-40" }),
+      q("P-34", "Como novos pacientes chegam até você hoje?", "multipla", ["indicação", "redes sociais", "plataforma de agendamento", "convênio", "clínica"], { opc: 1, liga: "D-06" }),
+      q("P-35", "Você toparia aparecer num catálogo dentro do app, com nome, CRP, abordagem e modalidade, sem nota, sem estrela e sem preço?", "unica", ["sim", "sim, com ressalvas", "não"], { liga: "DEC-06, RF-34" }),
+      q("P-36", "Se você fosse indicar um profissional para alguém, por quais critérios filtraria?", "multipla", ["abordagem", "especialidade", "modalidade", "região", "público atendido", "idioma"], { liga: "fecha A-01" })
+    ], { nota: "D-05 e D-06. A P-36 é a que fecha a assunção A-01, hoje em aberto no documento de requisitos." }),
+
+    b("A9 · Rotina e qualidade de vida", [
+      q("P-37", "Quantas sessões você atende num dia cheio?", "unica", ["até 4", "5 a 6", "7 a 8", "mais de 8"], { opc: 1 }),
+      q("P-38", "O que mais pesa na rotina?", "multipla", ["carga emocional", "trabalho administrativo entre sessões", "instabilidade de renda", "contato fora de horário", "deslocamento", "isolamento profissional"]),
+      q("P-39", "Quanto tempo por semana some em trabalho administrativo?", "unica", ["menos de 1h", "1 a 3h", "3 a 5h", "mais de 5h"], { opc: 1 }),
+      q("P-40", "Se uma ferramenta pudesse te devolver tempo em um ponto só, qual seria?", "unica", ["preparo de sessão", "anotação e prontuário", "agenda e remarcação", "comunicação fora de horário", "acompanhamento de tarefas"], { liga: "prioriza o MVP", dica: "Um ponto só. Se ela escolher dois, peça para cravar um." })
+    ]),
+
+    b("A10 · Fecho", [
+      q("P-41", "De tudo que a gente conversou, o que resolveria mais a sua vida?", "aberta"),
+      q("P-42", "O que eu não perguntei e você acha que eu deveria ter perguntado?", "aberta", null, { dica: "A melhor pergunta do roteiro. Espere o silêncio antes de encerrar." })
+    ])
+  ];
+
+  ROTEIROS.pac = [
+    b("B1 · Contexto do acompanhamento", [
+      q("C-01", "Você faz ou já fez acompanhamento psicológico?", "unica", ["faço atualmente", "já fiz e parei", "estou retomando", "nunca fiz"]),
+      q("C-02", "Por quanto tempo, ou há quanto tempo?", "unica", ["menos de 3 meses", "3 a 6 meses", "6 meses a 1 ano", "1 a 2 anos", "mais de 2 anos"], { opc: 1 }),
+      q("C-03", "De que forma?", "unica", ["presencial", "online", "os dois"], { liga: "A-04" }),
+      q("C-04", "Com que frequência?", "unica", ["semanal", "quinzenal", "mensal", "irregular"], { opc: 1 })
+    ]),
+
+    b("B2 · Como encontrou o profissional", [
+      q("C-05", "Como você encontrou seu psicólogo?", "multipla", ["indicação de conhecido", "busca na internet", "rede social", "convênio", "plataforma de agendamento", "escola ou trabalho", "posto de saúde ou CAPS"], { liga: "RF-09, D-06" }),
+      q("C-06", "O que foi mais difícil nessa procura?", "multipla", ["preço", "não saber escolher", "demora para conseguir vaga", "medo de não dar certo", "falta de informação sobre o profissional", "não foi difícil"], { liga: "D-06" }),
+      q("C-07", "Se existisse uma lista de profissionais dentro do app, o que você precisaria ver para escolher?", "multipla", ["abordagem", "especialidade", "preço", "modalidade", "região", "foto e apresentação", "avaliações de outros pacientes"], { liga: "fecha A-01", dica: "Se preço e avaliações forem os mais marcados, isso é conflito real com DEC-06 e vai para a síntese como tensão declarada. Não omita." })
+    ], { nota: "D-06. Este bloco valida o segundo modo do produto, o de facilitador de acesso." }),
+
+    b("B3 · Comunicação entre as sessões", [
+      q("C-08", "Entre uma sessão e outra, você já quis falar alguma coisa e não falou?", "unica", ["muitas vezes", "algumas vezes", "raramente", "nunca"], { liga: "D-01" }),
+      q("C-09", "O que te impediu?", "multipla", ["achei que não era hora", "não queria incomodar", "não tinha por onde", "esqueci até a sessão", "achei que seria cobrado à parte"], { liga: "RF-15" }),
+      q("C-10", "Quando chegou na sessão, você lembrava?", "unica", ["lembrava tudo", "lembrava parte", "esquecia quase tudo", "esquecia justamente o mais importante"], { liga: "D-04" }),
+      q("C-11", "Um chat dentro do app, que o psicólogo responde quando puder e não na hora, te ajudaria?", "escala", null, { rmin: "não ajudaria", rmax: "ajudaria muito", liga: "RF-15" })
+    ], { nota: "D-01." }),
+
+    b("B4 · Agenda e faltas", [
+      q("C-12", "Como você fica sabendo do horário da próxima sessão?", "multipla", ["combinamos na hora", "ele manda mensagem", "eu anoto", "coloco na agenda do celular", "nunca lembro direito"], { opc: 1, liga: "RF-26, RF-40" }),
+      q("C-13", "Já perdeu ou remarcou sessão por esquecimento ou confusão de horário?", "unica", ["várias vezes", "uma ou duas", "nunca"], { liga: "D-02" }),
+      q("C-14", "Um lembrete automático da sessão ajudaria?", "escala", null, { rmin: "não ajudaria", rmax: "ajudaria muito", liga: "RF-16" })
+    ], { nota: "Bloco novo. D-02 é uma das seis dores fundadoras e não estava na lista de tópicos dos pacientes." }),
+
+    b("B5 · Tarefas entre as sessões", [
+      q("C-15", "Seu psicólogo já pediu para você fazer algo entre as sessões?", "unica", ["sempre", "às vezes", "raramente", "nunca"], { liga: "RF-37" }),
+      q("C-16", "E você fazia?", "unica", ["sempre", "na maioria das vezes", "às vezes", "raramente", "nunca"], { liga: "D-03" }),
+      q("C-17", "O que atrapalhava?", "multipla", ["esquecimento", "não entendi direito o que era para fazer", "não vi sentido", "falta de tempo", "não estava bem", "vergonha de mostrar o resultado"], { liga: "RF-25" }),
+      q("C-18", "Ver essas tarefas em cards no celular, com lembrete, ajudaria?", "escala", null, { rmin: "não ajudaria", rmax: "ajudaria muito", liga: "RF-25, RF-16" })
+    ], { nota: "D-03." }),
+
+    b("B6 · Lembrar o que falar na sessão", [
+      q("C-19", "Você já tentou anotar o que queria falar na sessão?", "unica", ["sim, tenho esse hábito", "já tentei e parei", "nunca tentei", "faço de cabeça"], { opc: 1, liga: "D-04" }),
+      q("C-20", "Onde?", "multipla", ["notas do celular", "papel", "mensagem para mim mesmo", "não anoto"], { opc: 1 }),
+      q("C-21", "Um espaço no app para jogar esses tópicos ao longo da semana e levar para a sessão:", "unica", ["usaria toda semana", "usaria às vezes", "acho que não usaria"], { liga: "RF-22" })
+    ]),
+
+    b("B7 · Relatos, sigilo e resumo", [
+      q("C-22", "Escrever um relato livre durante a semana, sobre como você está e o que aconteceu, é algo que você faria?", "unica", ["sim, gosto de escrever", "faria se fosse rápido", "só se me pedissem", "não faria"], { liga: "RF-22" }),
+      q("C-23", "Saber que o psicólogo vai ler mudaria o que você escreve?", "unica", ["mudaria muito", "mudaria um pouco", "não mudaria", "não sei"], { liga: "testa DEC-12" }),
+      q("C-24", "Se você pudesse marcar alguns relatos como privados, que ele não vê nem sabe que existem:", "unica", ["usaria e escreveria mais", "usaria às vezes", "não faria diferença", "preferiria que ele visse tudo"], { liga: "DEC-12, DEC-14, RF-23" }),
+      q("C-25", "Antes da sessão, um resumo dos seus relatos apareceria para o psicólogo, para ele já chegar sabendo da sua semana. Isso:", "unica", ["facilitaria muito", "facilitaria", "tanto faz", "me deixaria desconfortável"], { liga: "RF-41" }),
+      q("C-26", "Esse resumo é feito por uma inteligência artificial, só quando o psicólogo pede, e só com o que você escolheu compartilhar. Como você se sente?", "unica", ["tranquilo", "tranquilo, desde que avisado antes", "desconfortável, mas aceitaria", "não aceitaria", "preciso entender melhor"], { liga: "RF-04, RNF-29" })
+    ], { nota: "O bloco mais importante do roteiro do paciente. C-23 e C-24 testam a hipótese que sustenta DEC-12, hoje sem prova nenhuma de campo." }),
+
+    b("B8 · Medicação", [
+      q("C-27", "Você usa ou já usou medicação prescrita por psiquiatra?", "unica", ["uso atualmente", "já usei", "nunca usei", "prefiro não responder"], { opc: 1, sens: 1 }),
+      q("C-28", "Já esqueceu de tomar?", "unica", ["com frequência", "às vezes", "raramente", "nunca", "não se aplica"], { sens: 1, liga: "RF-28" }),
+      q("C-29", "Um lembrete no celular, registrado pelo psicólogo e confirmado por você antes de valer:", "unica", ["ajudaria muito", "ajudaria", "indiferente", "não gostaria"], { liga: "DEC-10, RF-27" })
+    ]),
+
+    b("B9 · Notificações, quanto é demais", [
+      q("C-30", "Quantos avisos por dia desse app seriam aceitáveis?", "unica", ["nenhum", "1", "2 a 3", "mais de 3", "tanto faz"], { liga: "RF-16" }),
+      q("C-31", "O que faria você desligar as notificações ou desinstalar?", "multipla", ["aviso demais", "horário ruim", "texto que expõe o assunto na tela de bloqueio", "me lembrar de coisa ruim quando estou mal", "não resolver nada"], { liga: "gera RNF novo" })
+    ], { nota: "Bloco novo. Um app de saúde mental que insiste demais não é neutro: ele machuca e é desinstalado." }),
+
+    b("B10 · Rotina e qualidade de vida", [
+      q("C-32", "O que mais pesa na sua rotina hoje?", "multipla", ["trabalho ou estudo", "sono", "dinheiro", "relações", "saúde", "falta de tempo para mim"], { opc: 1 }),
+      q("C-33", "O acompanhamento se encaixa bem na sua rotina?", "unica", ["encaixa bem", "dá para levar", "é difícil encaixar", "foi um dos motivos de eu parar"]),
+      q("C-34", "E o custo?", "unica", ["tranquilo", "aperta, mas dá", "é o maior obstáculo", "não pago, é convênio ou gratuito"], { opc: 1, sens: 1 })
+    ]),
+
+    b("M · A relação e o que precisa melhorar", [
+      q("M-01", "O que funciona bem na relação com seu psicólogo?", "aberta"),
+      q("M-02", "E o que você mudaria, se pudesse?", "aberta", null, { dica: "Deixe o silêncio trabalhar. É aqui que aparece o atrito real." }),
+      q("M-03", "Já sentiu que ele não lembrava do que vocês tinham conversado antes?", "unica", ["várias vezes", "algumas vezes", "raramente", "nunca"], { liga: "D-04, RF-36" }),
+      q("M-04", "Já deixou de falar algo importante na sessão?", "multipla", ["por vergonha", "por medo de julgamento", "não era o momento", "esqueci", "achei que não era relevante", "nunca deixei"], { liga: "RF-22, DEC-12" }),
+      q("M-05", "Se você pudesse mandar um recado anônimo para o seu psicólogo, qual seria?", "aberta", null, { opc: 1 }),
+      q("M-06", "O que uma ferramenta entre as sessões teria que fazer para você usar de verdade?", "multipla", ["ser rápida de preencher", "não me cobrar nada", "me ajudar a lembrar do que falar", "me deixar escrever quando bater a vontade", "garantir que é privado"])
+    ], { so: "miguel", nota: "Bloco exclusivo do Miguel: o foco é o atrito da relação paciente–psicólogo e o que precisa melhorar." }),
+
+    b("B* · A interrupção", [
+      q("B-01", "Como foi essa parada?", "unica", ["avisei e encerramos", "fui espaçando até parar", "parei de uma vez, sem avisar", "o profissional encerrou", "mudança externa, como mudar de cidade ou perder o convênio"], { liga: "RF-13, RF-14" }),
+      q("B-02", "E os motivos?", "multipla", ["dinheiro", "horário e rotina", "não sentia evolução", "não me identifiquei com o profissional", "me senti melhor e achei que não precisava mais", "distância e deslocamento", "vergonha ou desconforto"], { sens: 1 }),
+      q("B-03", "Teve um momento específico em que você pensou “não vou mais”?", "aberta", null, { opc: 1, sens: 1 }),
+      q("B-04", "Alguma coisa poderia ter te feito continuar?", "multipla", ["sessão mais barata", "horário mais flexível", "ter sido online", "sentir que estava evoluindo", "o profissional ter percebido antes", "algum contato entre as sessões", "nada, foi a decisão certa"], { liga: "julga a tese do produto", dica: "Se a resposta for 'nada, foi a decisão certa', isso não invalida o produto: delimita a promessa. Registre exatamente assim." }),
+      q("B-05", "Nas semanas antes de parar, se alguém tivesse te perguntado, você teria dito que estava difícil?", "unica", ["sim, se me perguntassem", "talvez", "não diria", "não sei"], { liga: "detectar desengajamento" }),
+      q("B-06", "Você pensa em voltar?", "unica", ["já voltei", "quero voltar", "talvez", "não"]),
+      q("B-07", "O que te ajudaria a voltar?", "multipla", ["achar alguém que combine comigo", "preço", "horário", "alguém me lembrar", "não sei"], { liga: "D-06, RF-09" })
+    ], { so: "bruna", nota: "Bloco exclusivo da Bruna. Leia antes: “agora eu queria entender a parte de ter parado. Pode responder só o que você quiser.” Se pesar, pare." }),
+
+    b("B11 · Fecho", [
+      q("C-35", "Se esse app existisse na época, o que ele teria que resolver para valer a pena para você?", "aberta"),
+      q("C-36", "O que eu não perguntei e você acha que eu deveria ter perguntado?", "aberta", null, { dica: "Espere o silêncio antes de encerrar." })
+    ])
+  ];
+
+  var PESSOAS = {
+    elisa:    { nome: "Elisa",    cod: "E1", papel: "Psicóloga", roteiro: "psi", foco: "Roteiro A completo" },
+    stephany: { nome: "Stephany", cod: "E2", papel: "Psicóloga", roteiro: "psi", foco: "Roteiro A completo, idêntico ao da Elisa" },
+    miguel:   { nome: "Miguel",   cod: "P1", papel: "Paciente em acompanhamento", roteiro: "pac", so: "miguel", foco: "Roteiro B + bloco M: atritos da relação" },
+    bruna:    { nome: "Bruna",    cod: "P2", papel: "Paciente que interrompeu",   roteiro: "pac", so: "bruna",  foco: "Roteiro B + bloco B*: por que parou", cuidado: 1 }
+  };
+
+  /* =================================================================
+     ESTADO
+     ================================================================= */
+
+  var PREFIXO = "calmind.entrevista.";
+  var chave = null, pessoa = null, dados = null, blocos = [], iBloco = 0, enxuto = false, tick = null;
+
+  function vazio() {
+    return { versao: 1, cod: "", consent: {}, r: {}, tempoMs: 0, criado: new Date().toISOString(), tocado: "" };
+  }
+  function carregar(k) {
+    try { var s = localStorage.getItem(PREFIXO + k); return s ? JSON.parse(s) : null; }
+    catch (e) { return null; }
+  }
+  function salvar() {
+    if (!chave || !dados) return;
+    dados.tocado = new Date().toISOString();
+    try {
+      localStorage.setItem(PREFIXO + chave, JSON.stringify(dados));
+      piscar("salvo " + hhmm(new Date()));
+    } catch (e) { piscar("ERRO ao salvar"); }
+  }
+  var pisca = null;
+  function piscar(txt) {
+    var el = document.getElementById("barra-salvo");
+    if (!el) return;
+    el.textContent = txt;
+    clearTimeout(pisca);
+    pisca = setTimeout(function () { el.textContent = "salvo automaticamente"; }, 1600);
+  }
+  function hhmm(d) {
+    return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+  }
+  function resp(id) {
+    if (!dados.r[id]) dados.r[id] = { v: null, outra: "", obs: "", pulou: false };
+    return dados.r[id];
+  }
+  function respondida(id) {
+    var r = dados.r[id];
+    if (!r) return false;
+    if (r.pulou) return true;
+    if (Array.isArray(r.v)) return r.v.length > 0 || !!(r.outra || "").trim();
+    return (r.v !== null && r.v !== undefined && r.v !== "") || !!(r.outra || "").trim();
+  }
+
+  /* =================================================================
+     BLOCOS VISÍVEIS
+     ================================================================= */
+
+  function montarBlocos() {
+    var todos = ROTEIROS[pessoa.roteiro];
+    blocos = todos.filter(function (bl) { return !bl.so || bl.so === pessoa.so; });
+  }
+  function perguntasDe(bl) {
+    return bl.ps.filter(function (p) { return !enxuto || !p.opc; });
+  }
+  function todasPerguntas() {
+    var a = [];
+    blocos.forEach(function (bl) { perguntasDe(bl).forEach(function (p) { a.push(p); }); });
+    return a;
+  }
+
+  /* =================================================================
+     TELAS
+     ================================================================= */
+
+  function mostrar(id) {
+    ["tela-inicio", "tela-consentimento", "tela-entrevista", "tela-final"].forEach(function (t) {
+      document.getElementById(t).classList.toggle("ativa", t === id);
+    });
+    var naEnt = id === "tela-entrevista";
+    document.getElementById("cronometro").hidden = !naEnt;
+    document.getElementById("bt-enxuto").hidden = !naEnt;
+    document.getElementById("bt-trocar").hidden = (id === "tela-inicio");
+    if (naEnt) ligarCrono(); else pararCrono();
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- tela inicial ---------- */
+  function pintarPessoas() {
+    var alvo = document.getElementById("pessoas");
+    alvo.innerHTML = "";
+    Object.keys(PESSOAS).forEach(function (k) {
+      var p = PESSOAS[k];
+      var d = carregar(k);
+      var total = 0, feitas = 0;
+      if (d) {
+        var bl = ROTEIROS[p.roteiro].filter(function (x) { return !x.so || x.so === p.so; });
+        bl.forEach(function (x) { x.ps.forEach(function (qq) { total++; if (d.r[qq.id]) { var r = d.r[qq.id]; var ok = r.pulou || (Array.isArray(r.v) ? r.v.length > 0 : (r.v !== null && r.v !== "")) || !!(r.outra || "").trim(); if (ok) feitas++; } }); });
+      }
+      var bt = document.createElement("button");
+      bt.className = "pcard";
+      bt.type = "button";
+      var selo = "não iniciada", cls = "";
+      if (d && feitas > 0) { selo = feitas + " de " + total + " respondidas"; cls = feitas >= total ? " feita" : " andamento"; }
+      bt.innerHTML =
+        '<div class="cod">' + p.cod + '</div>' +
+        '<div class="nome"></div>' +
+        '<div class="papel"></div>' +
+        '<div class="foco"></div>' +
+        '<div class="selo' + cls + '"></div>';
+      bt.querySelector(".nome").textContent = p.nome;
+      bt.querySelector(".papel").textContent = p.papel;
+      bt.querySelector(".foco").textContent = p.foco;
+      bt.querySelector(".selo").textContent = selo;
+      bt.addEventListener("click", function () { abrir(k); });
+      alvo.appendChild(bt);
+    });
+  }
+
+  function abrir(k) {
+    chave = k;
+    pessoa = PESSOAS[k];
+    dados = carregar(k) || vazio();
+    dados.cod = pessoa.cod;
+    montarBlocos();
+    iBloco = 0;
+
+    document.getElementById("cons-titulo").textContent = "Consentimento · " + pessoa.nome + " (" + pessoa.cod + ")";
+    document.getElementById("cons-cod").textContent = pessoa.cod;
+    document.getElementById("cons-cuidado").hidden = !pessoa.cuidado;
+
+    var c = dados.consent || {};
+    document.getElementById("cons-ok").checked = !!c.ok;
+    document.getElementById("cons-forma").value = c.forma || "verbal-presencial";
+    document.getElementById("cons-audio").value = c.audio || "nao";
+    document.getElementById("cons-data").value = c.data || new Date().toISOString().slice(0, 10);
+    document.getElementById("cons-obs").value = c.obs || "";
+    travaComecar();
+
+    mostrar("tela-consentimento");
+  }
+
+  function travaComecar() {
+    document.getElementById("bt-comecar").disabled = !document.getElementById("cons-ok").checked;
+  }
+  function guardarConsent() {
+    dados.consent = {
+      ok: document.getElementById("cons-ok").checked,
+      forma: document.getElementById("cons-forma").value,
+      audio: document.getElementById("cons-audio").value,
+      data: document.getElementById("cons-data").value,
+      obs: document.getElementById("cons-obs").value
+    };
+    salvar();
+  }
+
+  /* ---------- entrevista ---------- */
+  function pintarEntrevista() {
+    document.getElementById("ent-titulo").textContent = pessoa.nome + " · " + pessoa.cod;
+    document.getElementById("ent-sub").textContent =
+      pessoa.papel + ". " + pessoa.foco + ". Faça a pergunta, deixe responder livre, depois marque.";
+    pintarNav();
+    pintarBloco();
+    pintarProgresso();
+  }
+
+  function pintarNav() {
+    var nav = document.getElementById("navblocos");
+    nav.innerHTML = "";
+    blocos.forEach(function (bl, i) {
+      var ps = perguntasDe(bl);
+      var f = ps.filter(function (p) { return respondida(p.id); }).length;
+      var bt = document.createElement("button");
+      bt.type = "button";
+      bt.setAttribute("aria-current", i === iBloco ? "true" : "false");
+      var cls = f === 0 ? "" : (f >= ps.length ? " cheio" : " parcial");
+      bt.innerHTML = '<i class="pt' + cls + '"></i><span></span>';
+      bt.querySelector("span").textContent = bl.t.split(" · ")[0];
+      bt.title = bl.t + " — " + f + " de " + ps.length;
+      bt.addEventListener("click", function () { iBloco = i; pintarBloco(); pintarNav(); });
+      nav.appendChild(bt);
+    });
+  }
+
+  function pintarBloco() {
+    var bl = blocos[iBloco];
+    var area = document.getElementById("bloco-area");
+    area.innerHTML = "";
+
+    var h = document.createElement("h2");
+    h.className = "bloco-titulo";
+    h.textContent = bl.t;
+    area.appendChild(h);
+
+    if (bl.nota) {
+      var n = document.createElement("div");
+      n.className = "bloco-nota";
+      n.textContent = bl.nota;
+      area.appendChild(n);
+    }
+
+    var ps = perguntasDe(bl);
+    if (!ps.length) {
+      var v = document.createElement("p");
+      v.className = "bloco-nota";
+      v.textContent = "Todas as perguntas deste bloco são opcionais e o modo enxuto está ligado.";
+      area.appendChild(v);
+    }
+    ps.forEach(function (p) { area.appendChild(cartao(p)); });
+
+    document.getElementById("bt-anterior").disabled = iBloco === 0;
+    document.getElementById("bt-proximo").disabled = iBloco >= blocos.length - 1;
+  }
+
+  function cartao(p) {
+    var r = resp(p.id);
+    var box = document.createElement("div");
+    box.className = "perg" + (r.pulou ? " pulada" : "");
+    box.id = "perg-" + p.id;
+
+    var topo = document.createElement("div");
+    topo.className = "perg-topo";
+    var idEl = document.createElement("span");
+    idEl.className = "perg-id";
+    idEl.textContent = p.id;
+    topo.appendChild(idEl);
+    if (p.opc) topo.appendChild(tag("opcional", "opc"));
+    if (p.sens) topo.appendChild(tag("sensível", "sens"));
+    if (p.liga) topo.appendChild(tag(p.liga, "liga"));
+    box.appendChild(topo);
+
+    var t = document.createElement("div");
+    t.className = "perg-t";
+    t.textContent = p.t;
+    box.appendChild(t);
+
+    if (p.tipo === "unica" || p.tipo === "multipla") {
+      var fs = document.createElement("fieldset");
+      fs.className = "ops";
+      var lg = document.createElement("legend");
+      lg.textContent = p.t;
+      fs.appendChild(lg);
+      p.ops.forEach(function (op, i) {
+        var lab = document.createElement("label");
+        lab.className = "op";
+        var inp = document.createElement("input");
+        inp.type = p.tipo === "unica" ? "radio" : "checkbox";
+        inp.name = p.id;
+        inp.value = op;
+        if (p.tipo === "unica") inp.checked = r.v === op;
+        else inp.checked = Array.isArray(r.v) && r.v.indexOf(op) >= 0;
+        inp.addEventListener("change", function () {
+          if (p.tipo === "unica") r.v = inp.checked ? op : null;
+          else {
+            if (!Array.isArray(r.v)) r.v = [];
+            var k = r.v.indexOf(op);
+            if (inp.checked && k < 0) r.v.push(op);
+            if (!inp.checked && k >= 0) r.v.splice(k, 1);
+          }
+          if (r.pulou) { r.pulou = false; box.classList.remove("pulada"); atualizarPular(box, r); }
+          salvar(); pintarProgresso(); pintarNav();
+        });
+        var sp = document.createElement("span");
+        sp.textContent = op;
+        lab.appendChild(inp);
+        lab.appendChild(sp);
+        fs.appendChild(lab);
+      });
+      box.appendChild(fs);
+    }
+
+    if (p.tipo === "escala") {
+      var esc = document.createElement("div");
+      esc.className = "escala";
+      for (var i = 1; i <= 5; i++) {
+        (function (n) {
+          var lab = document.createElement("label");
+          var inp = document.createElement("input");
+          inp.type = "radio";
+          inp.name = p.id;
+          inp.value = String(n);
+          inp.checked = String(r.v) === String(n);
+          inp.addEventListener("change", function () {
+            r.v = n;
+            if (r.pulou) { r.pulou = false; box.classList.remove("pulada"); atualizarPular(box, r); }
+            salvar(); pintarProgresso(); pintarNav();
+          });
+          var sp = document.createElement("span");
+          sp.textContent = String(n);
+          lab.appendChild(inp);
+          lab.appendChild(sp);
+          esc.appendChild(lab);
+        })(i);
+      }
+      box.appendChild(esc);
+      var rot = document.createElement("div");
+      rot.className = "escala-rot";
+      var a = document.createElement("span"), z = document.createElement("span");
+      a.textContent = "1 · " + (p.rmin || "nada");
+      z.textContent = (p.rmax || "muito") + " · 5";
+      rot.appendChild(a); rot.appendChild(z);
+      box.appendChild(rot);
+    }
+
+    if (p.tipo === "aberta") {
+      var ex = document.createElement("div");
+      ex.className = "extra";
+      ex.style.borderTop = "0";
+      ex.style.paddingTop = "0";
+      var rt = document.createElement("label");
+      rt.className = "rot";
+      rt.textContent = "Resposta, nas palavras da pessoa";
+      rt.setAttribute("for", "ab-" + p.id);
+      var ta = document.createElement("textarea");
+      ta.id = "ab-" + p.id;
+      ta.value = r.v || "";
+      ta.placeholder = "Transcreva o mais próximo possível do que foi dito.";
+      ta.addEventListener("input", function () {
+        r.v = ta.value;
+        if (r.pulou && ta.value.trim()) { r.pulou = false; box.classList.remove("pulada"); atualizarPular(box, r); }
+        agendarSalvar(); pintarProgresso(); pintarNav();
+      });
+      ex.appendChild(rt); ex.appendChild(ta);
+      box.appendChild(ex);
+    } else {
+      var exo = document.createElement("div");
+      exo.className = "extra";
+      var ro = document.createElement("label");
+      ro.className = "rot";
+      ro.textContent = "Outra resposta, ou a frase dela";
+      ro.setAttribute("for", "ou-" + p.id);
+      var io = document.createElement("input");
+      io.type = "text";
+      io.id = "ou-" + p.id;
+      io.value = r.outra || "";
+      io.placeholder = "Se não coube em nenhuma opção, escreva aqui. Isso é achado, não erro.";
+      io.addEventListener("input", function () {
+        r.outra = io.value;
+        agendarSalvar(); pintarProgresso(); pintarNav();
+      });
+      exo.appendChild(ro); exo.appendChild(io);
+      box.appendChild(exo);
+    }
+
+    var exb = document.createElement("div");
+    exb.className = "extra";
+    var rb = document.createElement("label");
+    rb.className = "rot";
+    rb.textContent = "Observações";
+    rb.setAttribute("for", "ob-" + p.id);
+    var tb = document.createElement("textarea");
+    tb.id = "ob-" + p.id;
+    tb.rows = 2;
+    tb.value = r.obs || "";
+    tb.placeholder = "Reação, hesitação, contradição com outra resposta, o que ela quis dizer.";
+    tb.addEventListener("input", function () { r.obs = tb.value; agendarSalvar(); });
+    exb.appendChild(rb); exb.appendChild(tb);
+    box.appendChild(exb);
+
+    var pe = document.createElement("div");
+    pe.className = "perg-pe";
+    var dica = document.createElement("span");
+    dica.className = "dica";
+    dica.textContent = p.dica || "";
+    var btP = document.createElement("button");
+    btP.type = "button";
+    btP.className = "bt pequeno";
+    btP.addEventListener("click", function () {
+      r.pulou = !r.pulou;
+      box.classList.toggle("pulada", r.pulou);
+      atualizarPular(box, r);
+      salvar(); pintarProgresso(); pintarNav();
+    });
+    pe.appendChild(dica);
+    pe.appendChild(btP);
+    box.appendChild(pe);
+    box._btPular = btP;
+    atualizarPular(box, r);
+
+    return box;
+  }
+
+  function atualizarPular(box, r) {
+    var bt = box._btPular;
+    if (!bt) return;
+    bt.textContent = r.pulou ? "Pulada — desfazer" : "Não quis responder";
+    bt.setAttribute("aria-pressed", r.pulou ? "true" : "false");
+  }
+
+  function tag(txt, cls) {
+    var s = document.createElement("span");
+    s.className = "tag " + cls;
+    s.textContent = txt;
+    return s;
+  }
+
+  var timerSalvar = null;
+  function agendarSalvar() {
+    clearTimeout(timerSalvar);
+    timerSalvar = setTimeout(salvar, 500);
+  }
+
+  function pintarProgresso() {
+    var ps = todasPerguntas();
+    var f = ps.filter(function (p) { return respondida(p.id); }).length;
+    var pct = ps.length ? Math.round((f / ps.length) * 100) : 0;
+    document.getElementById("barra-in").style.width = pct + "%";
+    document.getElementById("barra-txt").textContent = f + " de " + ps.length + " respondidas" + (enxuto ? " (modo enxuto)" : "");
+  }
+
+  /* ---------- cronômetro ---------- */
+  function ligarCrono() {
+    pararCrono();
+    tick = setInterval(function () {
+      dados.tempoMs = (dados.tempoMs || 0) + 1000;
+      pintarCrono();
+      if (dados.tempoMs % 15000 === 0) salvar();
+    }, 1000);
+    pintarCrono();
+  }
+  function pararCrono() { if (tick) { clearInterval(tick); tick = null; } }
+  function pintarCrono() {
+    var s = Math.floor((dados.tempoMs || 0) / 1000);
+    var m = Math.floor(s / 60);
+    var el = document.getElementById("cronometro");
+    el.textContent = String(m).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+    el.classList.toggle("longa", m >= 40);
+    el.title = m >= 40 ? "Passou de 40 minutos. Corte para o fecho." : "Alvo: 30 a 35 minutos.";
+  }
+
+  /* =================================================================
+     EXPORTAÇÃO
+     ================================================================= */
+
+  function valorTexto(p, r) {
+    if (!r) return "—";
+    if (r.pulou) return "_não quis responder_";
+    if (p.tipo === "aberta") return (r.v || "").trim() || "—";
+    if (p.tipo === "escala") return r.v ? (r.v + " de 5") : "—";
+    if (Array.isArray(r.v)) return r.v.length ? r.v.join("; ") : "—";
+    return r.v || "—";
+  }
+
+  function gerarMd() {
+    var L = [];
+    var c = dados.consent || {};
+    var mins = Math.round((dados.tempoMs || 0) / 60000);
+    var formas = { "verbal-presencial": "verbal, presencialmente", "verbal-chamada": "verbal, por chamada", "escrito-mensagem": "por escrito, em mensagem" };
+    var audios = { "nao": "não houve gravação", "sim": "autorizou gravação de áudio", "recusou": "recusou a gravação" };
+
+    L.push("# Síntese " + pessoa.cod + " · " + pessoa.papel);
+    L.push("");
+    L.push("**TCC · Técnico em Desenvolvimento de Sistemas · SENAI-SP · 4º termo**");
+    L.push("**Calmind** — Saúde Mental & Acolhimento");
+    L.push("Sprint 1, coleta e análise dos requisitos.");
+    L.push("");
+    L.push("> Registro anonimizado. Nenhum nome, contato ou identificador aparece neste arquivo, conforme a seção 3 de `roteiro-entrevistas.md`.");
+    L.push("");
+    L.push("| | |");
+    L.push("|---|---|");
+    L.push("| Código | " + pessoa.cod + " |");
+    L.push("| Papel | " + pessoa.papel + " |");
+    L.push("| Roteiro | " + (pessoa.roteiro === "psi" ? "A (psicólogas)" : "B (pacientes)") + (pessoa.so ? " + bloco específico" : "") + " |");
+    L.push("| Data | " + (c.data || "—") + " |");
+    L.push("| Duração registrada | " + (mins ? mins + " min" : "—") + " |");
+    L.push("| Consentimento | " + (c.ok ? "obtido, " + (formas[c.forma] || c.forma || "—") : "**NÃO REGISTRADO**") + " |");
+    L.push("| Áudio | " + (audios[c.audio] || "—") + " |");
+    if (c.obs && c.obs.trim()) {
+      L.push("");
+      L.push("**Contexto da aplicação:** " + c.obs.trim());
+    }
+    L.push("");
+    L.push("---");
+    L.push("");
+
+    blocos.forEach(function (bl) {
+      var ps = bl.ps.filter(function (p) { return dados.r[p.id]; });
+      if (!ps.length) return;
+      L.push("## " + bl.t);
+      L.push("");
+      ps.forEach(function (p) {
+        var r = dados.r[p.id];
+        L.push("**" + p.id + "** " + p.t);
+        L.push("");
+        L.push("- **Resposta:** " + valorTexto(p, r));
+        if ((r.outra || "").trim()) L.push("- **Nas palavras dela:** “" + r.outra.trim() + "”");
+        if ((r.obs || "").trim()) L.push("- **Observações:** " + r.obs.trim());
+        if (p.liga) L.push("- **Valida:** " + p.liga);
+        L.push("");
+      });
+    });
+
+    var faltando = todasPerguntas().filter(function (p) { return !respondida(p.id); });
+    L.push("---");
+    L.push("");
+    L.push("## Cobertura");
+    L.push("");
+    if (faltando.length) {
+      L.push("Perguntas não aplicadas nesta entrevista: " + faltando.map(function (p) { return p.id; }).join(", ") + ".");
+    } else {
+      L.push("Roteiro aplicado por inteiro" + (enxuto ? ", em modo enxuto" : "") + ".");
+    }
+    L.push("");
+    L.push("## Próximo passo");
+    L.push("");
+    L.push("Comparar com a outra entrevista do mesmo roteiro e registrar convergências e divergências em `analise-convergencias.md`. Onde o campo contrariar uma hipótese do projeto, a hipótese cai e isso vai escrito (seção 6.2 de `roteiro-entrevistas.md`).");
+    L.push("");
+    return L.join("\n");
+  }
+
+  function baixar(nome, texto, mime) {
+    var blob = new Blob([texto], { type: (mime || "text/plain") + ";charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = nome;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+  }
+
+  function pintarFinal() {
+    var ps = todasPerguntas();
+    var f = ps.filter(function (p) { return respondida(p.id); }).length;
+    var pul = ps.filter(function (p) { return dados.r[p.id] && dados.r[p.id].pulou; }).length;
+    var mins = Math.round((dados.tempoMs || 0) / 60000);
+    var res = document.getElementById("fin-resumo");
+    res.innerHTML = "";
+    var linhas = [
+      ["Pessoa", pessoa.nome + " — no arquivo exportado aparece só como " + pessoa.cod],
+      ["Respondidas", f + " de " + ps.length],
+      ["Puladas por escolha da pessoa", String(pul)],
+      ["Duração registrada", mins ? mins + " minutos" : "não registrada"],
+      ["Consentimento", (dados.consent && dados.consent.ok) ? "registrado" : "NÃO REGISTRADO"]
+    ];
+    linhas.forEach(function (l) {
+      var p = document.createElement("p");
+      var b1 = document.createElement("b");
+      b1.textContent = l[0] + ": ";
+      p.appendChild(b1);
+      p.appendChild(document.createTextNode(l[1]));
+      res.appendChild(p);
+    });
+    document.getElementById("fin-arquivo").textContent = "sintese-" + pessoa.cod + ".md";
+    document.getElementById("saida").value = gerarMd();
+  }
+
+  /* =================================================================
+     LIGAÇÕES
+     ================================================================= */
+
+  document.getElementById("bt-tema").addEventListener("click", function () {
+    var raiz = document.documentElement;
+    var atual = raiz.getAttribute("data-theme");
+    var escuroPadrao = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var novo = atual ? (atual === "dark" ? "light" : "dark") : (escuroPadrao ? "light" : "dark");
+    raiz.setAttribute("data-theme", novo);
+    try { localStorage.setItem(PREFIXO + "tema", novo); } catch (e) {}
+  });
+  try {
+    var temaSalvo = localStorage.getItem(PREFIXO + "tema");
+    if (temaSalvo) document.documentElement.setAttribute("data-theme", temaSalvo);
+  } catch (e) {}
+
+  document.getElementById("bt-trocar").addEventListener("click", function () {
+    salvar();
+    pintarPessoas();
+    mostrar("tela-inicio");
+  });
+
+  ["cons-ok", "cons-forma", "cons-audio", "cons-data", "cons-obs"].forEach(function (id) {
+    var el = document.getElementById(id);
+    el.addEventListener("change", function () { travaComecar(); guardarConsent(); });
+    if (el.tagName === "TEXTAREA") el.addEventListener("input", function () { guardarConsent(); });
+  });
+
+  document.getElementById("bt-volta-inicio").addEventListener("click", function () {
+    pintarPessoas();
+    mostrar("tela-inicio");
+  });
+
+  document.getElementById("bt-comecar").addEventListener("click", function () {
+    guardarConsent();
+    pintarEntrevista();
+    mostrar("tela-entrevista");
+  });
+
+  document.getElementById("bt-enxuto").addEventListener("click", function () {
+    enxuto = !enxuto;
+    this.setAttribute("aria-pressed", enxuto ? "true" : "false");
+    this.textContent = enxuto ? "Modo enxuto ligado" : "Modo enxuto";
+    pintarBloco(); pintarNav(); pintarProgresso();
+  });
+
+  document.getElementById("bt-anterior").addEventListener("click", function () {
+    if (iBloco > 0) { iBloco--; pintarBloco(); pintarNav(); window.scrollTo(0, 0); }
+  });
+  document.getElementById("bt-proximo").addEventListener("click", function () {
+    if (iBloco < blocos.length - 1) { iBloco++; pintarBloco(); pintarNav(); window.scrollTo(0, 0); }
+  });
+  document.addEventListener("keydown", function (e) {
+    if (!e.altKey) return;
+    if (e.key === "ArrowLeft") document.getElementById("bt-anterior").click();
+    if (e.key === "ArrowRight") document.getElementById("bt-proximo").click();
+  });
+
+  document.getElementById("bt-encerrar").addEventListener("click", function () {
+    salvar();
+    pintarFinal();
+    mostrar("tela-final");
+  });
+  document.getElementById("bt-voltar-ent").addEventListener("click", function () {
+    pintarEntrevista();
+    mostrar("tela-entrevista");
+  });
+
+  document.getElementById("bt-baixar-md").addEventListener("click", function () {
+    baixar("sintese-" + pessoa.cod + ".md", gerarMd(), "text/markdown");
+  });
+  document.getElementById("bt-baixar-json").addEventListener("click", function () {
+    var pacote = { pessoa: pessoa.cod, papel: pessoa.papel, roteiro: pessoa.roteiro, dados: dados };
+    baixar("entrevista-" + pessoa.cod + ".json", JSON.stringify(pacote, null, 2), "application/json");
+  });
+  document.getElementById("bt-copiar-md").addEventListener("click", function () {
+    var ta = document.getElementById("saida");
+    var aviso = document.getElementById("aviso-copia");
+    function ok() { aviso.classList.add("on"); setTimeout(function () { aviso.classList.remove("on"); }, 1800); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(ta.value).then(ok, function () { ta.select(); document.execCommand("copy"); ok(); });
+    } else { ta.select(); document.execCommand("copy"); ok(); }
+  });
+  document.getElementById("bt-imprimir").addEventListener("click", function () { window.print(); });
+
+  document.getElementById("bt-limpar").addEventListener("click", function () {
+    if (!confirm("Apagar todas as respostas de " + pessoa.nome + " (" + pessoa.cod + ")?\n\nIsso não tem volta. Se ainda não exportou, cancele e exporte antes.")) return;
+    try { localStorage.removeItem(PREFIXO + chave); } catch (e) {}
+    dados = vazio();
+    dados.cod = pessoa.cod;
+    pintarPessoas();
+    mostrar("tela-inicio");
+  });
+
+  document.getElementById("bt-importar").addEventListener("click", function () {
+    document.getElementById("arquivo-import").click();
+  });
+  document.getElementById("arquivo-import").addEventListener("change", function (ev) {
+    var f = ev.target.files && ev.target.files[0];
+    if (!f) return;
+    var leitor = new FileReader();
+    leitor.onload = function () {
+      try {
+        var pacote = JSON.parse(leitor.result);
+        var cod = pacote.pessoa;
+        var k = Object.keys(PESSOAS).filter(function (x) { return PESSOAS[x].cod === cod; })[0];
+        if (!k || !pacote.dados) throw new Error("formato");
+        localStorage.setItem(PREFIXO + k, JSON.stringify(pacote.dados));
+        pintarPessoas();
+        var a = document.getElementById("aviso-import");
+        a.textContent = "Importado: " + cod + ".";
+        a.classList.add("on");
+        setTimeout(function () { a.classList.remove("on"); }, 2600);
+      } catch (e) {
+        alert("Não consegui ler esse arquivo. Use um JSON exportado por esta mesma ferramenta.");
+      }
+      ev.target.value = "";
+    };
+    leitor.readAsText(f);
+  });
+
+  window.addEventListener("beforeunload", function () { if (dados) salvar(); });
+
+  pintarPessoas();
+})();
+</script>

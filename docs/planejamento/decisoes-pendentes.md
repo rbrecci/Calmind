@@ -168,6 +168,8 @@ Não precisam ser tomadas hoje, mas precisam estar fechadas antes do último dia
 
 ### DP-14 Idioma do código
 
+> **FECHADA em 19/08/2026: inglês nos identificadores.** Vale para nome de tabela, coluna, variável, função e campo de API. Português apenas no texto que o usuário lê. O `schema.sql` já nasceu assim.
+
 **Contexto:** pendência 8.2 e RNF-52. Parece detalhe e não é: decidido tarde, gera tabela em português com coluna em inglês, e isso aparece no MER entregue.
 **Recomendação:** decidir junto com DP-02, para o MER já nascer com os nomes definitivos.
 

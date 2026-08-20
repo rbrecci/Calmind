@@ -73,11 +73,11 @@ Manhã e início da tarde seguem o plano: fechamento até as 11h, montagem do pa
 
 **Incerteza declarada:** eu não tenho como confirmar daqui o comportamento exato da versão atual do Expo para notificação agendada com o app fechado no Android. Isso é justamente o que o spike da seção 6 tem que provar, e por isso ele é o primeiro item do critério de aprovação. Não assumam que funciona: testem no dia um.
 
-### D2. Nome do produto
+### D2. Nome do produto — FECHADO
 
-Ninguém decidiu isso, e agora virou bloqueio real: o APK precisa de nome e de identificador de pacote, a landing page precisa de nome, a capa em ABNT precisa de nome e os slides também. Uma plataforma chamada "plataforma de apoio à relação paciente e psicólogo" não sobrevive a uma apresentação.
+**Decidido: Calmind, com o slogan "Saúde Mental & Acolhimento".** Vale para o APK, a landing page, a capa em ABNT e os slides. O nome de exibição no aparelho é `Calmind`.
 
-**A fechar junto:** nome, identificador do pacote no formato `com.<grupo>.<app>` e o nome de exibição no aparelho.
+Com isso saem do bloqueio a capa do documento final, a landing page e a apresentação. **Segue em aberto:** o identificador do pacote, no formato `com.<grupo>.calmind`, que precisa fechar antes do primeiro build assinado.
 
 ### D3. Um repositório ou dois
 

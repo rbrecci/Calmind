@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "TCC SENAI - API da plataforma paciente e psicologo",
+    "name": "Calmind - API da plataforma paciente e psicologo",
     "description": "Contrato executavel da API. Cada requisicao carrega os testes do requisito que ela atende.\n\nIMPORTANTE: enquanto o backend nao existir, rodar esta colecao da tudo vermelho. Isso e o esperado. Cada endpoint entregue pelo backend acende um verde, e a colecao vira o criterio de pronto da Sprint 2.\n\nComo rodar: importe o arquivo, ajuste baseUrl se precisar, e use o Runner (botao Run collection). A ordem das pastas importa, porque uma requisicao alimenta a seguinte com token e identificadores.\n\nPre-requisito do backend: um usuario administrador semeado, com o e-mail e a senha das variaveis emailAdmin e senhaAdmin.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },

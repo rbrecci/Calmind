@@ -1,6 +1,7 @@
 # Contrato da API
 
 **TCC · Técnico em Desenvolvimento de Sistemas · SENAI-SP · 4º termo**
+**Calmind** — Saúde Mental & Acolhimento
 Versão 1, de 19/08/2026. Cobre os blocos que as semanas 1 a 4 da Sprint 2 implementam.
 
 > A versão executável deste contrato é a coleção `TCC-SENAI.postman_collection.json`, na mesma pasta. Este documento traz o que a coleção não expressa bem: as convenções que valem para **todos** os endpoints.

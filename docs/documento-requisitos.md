@@ -1,6 +1,7 @@
 # Documento de Requisitos
 
 **TCC · Técnico em Desenvolvimento de Sistemas · SENAI-SP · 4º termo**
+**Calmind** — Saúde Mental & Acolhimento
 Plataforma de apoio à relação paciente/psicólogo
 Entregável da Sprint 1
 

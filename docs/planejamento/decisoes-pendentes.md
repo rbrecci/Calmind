@@ -1,6 +1,7 @@
 # Decisões pendentes para destravar a documentação do TCC
 
 **TCC · Técnico em Desenvolvimento de Sistemas · SENAI-SP · 4º termo**
+**Calmind** — Saúde Mental & Acolhimento
 Plataforma de apoio à relação paciente/psicólogo
 Documento de trabalho, para a reunião do grupo. Revisão de 18/08/2026.
 

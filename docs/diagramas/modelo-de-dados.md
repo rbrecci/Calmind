@@ -1,6 +1,7 @@
 # Modelo de dados
 
 **TCC · Técnico em Desenvolvimento de Sistemas · SENAI-SP · 4º termo**
+**Calmind** — Saúde Mental & Acolhimento
 Sprint 1, entregável de diagramação. Revisão de 19/08/2026.
 
 > **Rascunho para revisão de Rafael e Zanetti.** O modelo abaixo cobre todos os requisitos Must do `documento-requisitos.md`. Cada decisão de modelagem está justificada na seção 4, e o DDL executável está em `schema.sql`, testado contra o MariaDB da máquina do grupo.

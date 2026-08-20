@@ -1,10 +1,10 @@
-# Plataforma de apoio à relação paciente e psicólogo
+# Calmind — Saúde Mental & Acolhimento
 
 **Trabalho de Conclusão de Curso · Técnico em Desenvolvimento de Sistemas · SENAI-SP · 4º termo · 2026**
 
 Aplicativo mobile que atua no intervalo entre uma sessão de terapia e a seguinte.
 
-> O produto ainda não tem nome definitivo. A escolha está pendente e bloqueia o identificador do pacote do aplicativo, a landing page e a capa do documento final. Ver `docs/planejamento/arranque-react-native.md`.
+> **Nome e slogan fechados:** Calmind, com o slogan **Saúde Mental & Acolhimento**. Vale para o APK, a landing page, a capa do documento final e os slides. Segue em aberto apenas o identificador do pacote do aplicativo, no formato `com.<grupo>.calmind`. Ver `docs/planejamento/arranque-react-native.md`.
 
 ---
 

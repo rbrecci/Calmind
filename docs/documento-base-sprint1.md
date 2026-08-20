@@ -1,6 +1,7 @@
 # Documento Base — Sprint 1
 
 **TCC · Técnico em Desenvolvimento de Sistemas · SENAI-SP · 4º termo**
+**Calmind** — Saúde Mental & Acolhimento
 Plataforma de apoio à relação paciente–psicólogo
 
 > Documento de trabalho. Consolida o que foi definido, as decisões tomadas com suas justificativas e as pendências em aberto. Serve de base para o Documento de Requisitos formal (entregável da Sprint 1).

@@ -1,0 +1,2145 @@
+{
+  "info": {
+    "name": "TCC SENAI - API da plataforma paciente e psicologo",
+    "description": "Contrato executavel da API. Cada requisicao carrega os testes do requisito que ela atende.\n\nIMPORTANTE: enquanto o backend nao existir, rodar esta colecao da tudo vermelho. Isso e o esperado. Cada endpoint entregue pelo backend acende um verde, e a colecao vira o criterio de pronto da Sprint 2.\n\nComo rodar: importe o arquivo, ajuste baseUrl se precisar, e use o Runner (botao Run collection). A ordem das pastas importa, porque uma requisicao alimenta a seguinte com token e identificadores.\n\nPre-requisito do backend: um usuario administrador semeado, com o e-mail e a senha das variaveis emailAdmin e senhaAdmin.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 Conta e autenticacao",
+      "description": "RF-01, RF-02, RF-05. Cria as duas contas usadas pelo resto da colecao.",
+      "item": [
+        {
+          "name": "Cadastrar paciente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "RF-01. Cria conta de paciente. CA-01.1: a conta nasce presa a um unico perfil.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Paciente de Teste\",\n  \"email\": \"{{emailPaciente}}\",\n  \"password\": \"senha-de-teste-123\",\n  \"role\": \"patient\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Gera identificadores unicos por execucao, para a colecao poder rodar",
+                  "// varias vezes sem esbarrar no e-mail unico do RF-01.",
+                  "const runId = Date.now().toString().slice(-8);",
+                  "pm.collectionVariables.set('runId', runId);",
+                  "pm.collectionVariables.set('emailPaciente', `paciente.${runId}@teste.local`);",
+                  "pm.collectionVariables.set('emailPsicologo', `psicologo.${runId}@teste.local`);",
+                  "pm.collectionVariables.set('crpNumero', runId.slice(-6));",
+                  "console.log('Execucao', runId);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "const b = pm.response.json();",
+                  "pm.test('devolve id e papel', () => { pm.expect(b.user.id).to.be.a('number'); pm.expect(b.user.role).to.eql('patient'); });",
+                  "pm.test('nunca devolve a senha', () => pm.expect(pm.response.text()).to.not.include('password_hash'));",
+                  "pm.collectionVariables.set('idUsuarioPaciente', b.user.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cadastrar com e-mail repetido deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "CA-01.2. O sistema recusa e nao revela dados da conta existente.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Outro\",\n  \"email\": \"{{emailPaciente}}\",\n  \"password\": \"senha-de-teste-123\",\n  \"role\": \"patient\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "pm.test('nao vaza dado da conta existente', () => { const t = pm.response.text(); pm.expect(t).to.not.include('Paciente de Teste'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cadastrar psicologo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "RF-01 no perfil profissional. O cadastro so fica utilizavel apos a aprovacao do RF-44.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Psicologa de Teste\",\n  \"email\": \"{{emailPsicologo}}\",\n  \"password\": \"senha-de-teste-123\",\n  \"role\": \"psychologist\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('idUsuarioPsicologo', pm.response.json().user.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login do paciente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "RF-02. Guarda o token na variavel patientToken, usada pelas requisicoes seguintes.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{emailPaciente}}\",\n  \"password\": \"senha-de-teste-123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.test('devolve token', () => pm.expect(b.token).to.be.a('string').and.not.empty);",
+                  "pm.collectionVariables.set('patientToken', b.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login com senha errada",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "CA-02.2. Mensagem generica: nao pode dizer se errou o e-mail ou a senha.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{emailPaciente}}\",\n  \"password\": \"senha-errada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 401', () => pm.response.to.have.status(401));",
+                  "pm.test('mensagem generica', () => { const t = pm.response.text().toLowerCase(); pm.expect(t).to.not.include('senha incorreta'); pm.expect(t).to.not.include('usuario nao encontrado'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login do psicologo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "RF-02.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{emailPsicologo}}\",\n  \"password\": \"senha-de-teste-123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('psyToken', pm.response.json().token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login do administrador",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Usa a conta de administrador semeada pelo seeder. Sem ela o bloco 03 nao roda.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{emailAdmin}}\",\n  \"password\": \"{{senhaAdmin}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('adminToken', pm.response.json().token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Dados do usuario logado",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "me"
+              ]
+            },
+            "description": "RF-05. Confere que o token identifica o papel correto."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('papel paciente', () => pm.expect(pm.response.json().role).to.eql('patient'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Area interna sem token deve ser negada",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "me"
+              ]
+            },
+            "description": "CA-02.3. Requisicao sem autenticacao nao passa."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 Consentimento",
+      "description": "RF-03, RF-04, RNF-13. Consentimento versionado, e o de IA e separado.",
+      "item": [
+        {
+          "name": "Termo geral vigente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/consent-terms/current?type=general",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "consent-terms",
+                "current"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "general"
+                }
+              ]
+            },
+            "description": "RF-03. Devolve a versao vigente do termo de tratamento de dados de saude."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.test('tem versao e data', () => { pm.expect(b.version).to.be.a('string'); pm.expect(b.effective_from).to.be.a('string'); });",
+                  "pm.collectionVariables.set('idTermoGeral', b.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Aceitar termo geral",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/consent-acceptances",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "consent-acceptances"
+              ]
+            },
+            "description": "RF-03, RNF-13. Grava data, hora e versao aceita.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consent_term_id\": \"{{idTermoGeral}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.test('registra a versao aceita', () => pm.expect(pm.response.json().consent_term_id).to.not.be.undefined);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Termo de IA vigente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/consent-terms/current?type=ai_analysis",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "consent-terms",
+                "current"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "ai_analysis"
+                }
+              ]
+            },
+            "description": "RF-04. O consentimento de envio de relatos ao servico de IA e separado e destacado."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('idTermoIA', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Aceitar termo de IA",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/consent-acceptances",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "consent-acceptances"
+              ]
+            },
+            "description": "RF-04. Sem este aceite, a analise semanal do RF-41 tem que ser recusada.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consent_term_id\": \"{{idTermoIA}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('idAceiteIA', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 Cadastro profissional e aprovacao",
+      "description": "RF-33, RF-34, RF-44. O perfil so vai ao ar depois do administrador aprovar.",
+      "item": [
+        {
+          "name": "Enviar registro profissional",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/registration",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "registration"
+              ]
+            },
+            "description": "RF-33. CRP em formato valido mais documento comprobatorio. Fica pendente.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"crp_number\": \"{{crpNumero}}\",\n  \"crp_region\": \"06\",\n  \"document_url\": \"comprovante-teste.pdf\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.test('nasce pendente', () => pm.expect(pm.response.json().approval_status).to.eql('pending'));",
+                  "pm.collectionVariables.set('idPsicologo', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "CRP em formato invalido deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/registration",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "registration"
+              ]
+            },
+            "description": "CA-33.2. Formato invalido ou regiao inexistente e recusado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"crp_number\": \"abc\",\n  \"crp_region\": \"99\",\n  \"document_url\": \"x.pdf\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Publicar perfil antes da aprovacao deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/profile/publish",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "profile",
+                "publish"
+              ]
+            },
+            "description": "CA-33.4. Cadastro pendente nao publica perfil nem gera convite."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Gerar convite antes da aprovacao deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/invitations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "invitations"
+              ]
+            },
+            "description": "CA-06.3. Mesma regra aplicada ao convite."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Fila de cadastros pendentes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/registrations?status=pending",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "registrations"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                }
+              ]
+            },
+            "description": "RF-44. O administrador ve os cadastros aguardando decisao."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('e uma lista', () => pm.expect(pm.response.json().data).to.be.an('array'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Aprovar cadastro",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/registrations/{{idPsicologo}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "registrations",
+                "{{idPsicologo}}",
+                "approve"
+              ]
+            },
+            "description": "RF-44. Libera as funcoes de psicologo e permite publicar o perfil."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('fica aprovado', () => pm.expect(pm.response.json().approval_status).to.eql('approved'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reprovar sem justificativa deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/registrations/{{idPsicologo}}/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "registrations",
+                "{{idPsicologo}}",
+                "reject"
+              ]
+            },
+            "description": "CA-44.3. Justificativa e obrigatoria na reprovacao.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Documento comprobatorio nao e publico",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/{{idPsicologo}}/document",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "{{idPsicologo}}",
+                "document"
+              ]
+            },
+            "description": "RNF-11. So o administrador e o proprio dono alcancam o documento."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar e publicar perfil",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "profile"
+              ]
+            },
+            "description": "RF-34. O texto e escrito pelo profissional, nunca gerado pela plataforma.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"approach\": \"Terapia cognitivo comportamental\",\n  \"specialty\": \"Ansiedade\",\n  \"modality\": \"online\",\n  \"region\": \"Sao Paulo\",\n  \"bio\": \"Atendimento a adultos. Texto escrito pela propria profissional.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Perfil com honorario deve ser recusado",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "profile"
+              ]
+            },
+            "description": "CA-34.4. Valor e expressao promocional bloqueiam a publicacao, por restricao de divulgacao do CFP.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bio\": \"Sessao por R$ 100,00, promocao de primeira consulta.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Publicar perfil",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/profile/publish",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "profile",
+                "publish"
+              ]
+            },
+            "description": "RF-34. A partir daqui o perfil aparece no catalogo do RF-09."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('tem data de publicacao', () => pm.expect(pm.response.json().profile_published_at).to.not.be.null);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 Convite e vinculo",
+      "description": "RF-06 a RF-13. Inclui a prova de que o paciente nao tem dois vinculos ativos.",
+      "item": [
+        {
+          "name": "Gerar convite",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/invitations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "invitations"
+              ]
+            },
+            "description": "RF-06, RNF-05. Codigo aleatorio, de uso unico, com expiracao e sem caracteres ambiguos."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "const b = pm.response.json();",
+                  "pm.test('sem caracteres ambiguos', () => pm.expect(b.code).to.not.match(/[0O1Il]/));",
+                  "pm.test('tem expiracao', () => pm.expect(b.expires_at).to.be.a('string'));",
+                  "pm.collectionVariables.set('codigoConvite', b.code);",
+                  "pm.collectionVariables.set('idConvite', b.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Codigo inexistente deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/bonds/redeem-invitation",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "bonds",
+                "redeem-invitation"
+              ]
+            },
+            "description": "CA-07.2. Mensagem unica, sem dizer qual condicao falhou nem de quem era o codigo.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"ZZZZZZ\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "pm.test('nao revela o profissional', () => pm.expect(pm.response.text()).to.not.include('Psicologa de Teste'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Entrar pelo convite",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/bonds/redeem-invitation",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "bonds",
+                "redeem-invitation"
+              ]
+            },
+            "description": "RF-07. Cria o vinculo ativo e consome o codigo no mesmo ato.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"{{codigoConvite}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "const b = pm.response.json();",
+                  "pm.test('vinculo nasce ativo', () => pm.expect(b.status).to.eql('active'));",
+                  "pm.collectionVariables.set('idVinculo', b.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reusar o mesmo convite deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/bonds/redeem-invitation",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "bonds",
+                "redeem-invitation"
+              ]
+            },
+            "description": "CA-07.1 e RNF-05. Uso unico: o codigo ja foi consumido.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"{{codigoConvite}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Catalogo com vinculo ativo deve ser negado",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/catalog/psychologists",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "catalog",
+                "psychologists"
+              ]
+            },
+            "description": "CA-09.2 e DEC-02. Paciente com vinculo ativo nao acessa a busca."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Encerrar vinculo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bonds/{{idVinculo}}/end",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bonds",
+                "{{idVinculo}}",
+                "end"
+              ]
+            },
+            "description": "RF-13. Qualquer das partes encerra, e o catalogo volta a ficar disponivel ao paciente."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('fica encerrado', () => pm.expect(pm.response.json().status).to.eql('ended'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Catalogo liberado apos encerrar",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/catalog/psychologists?modality=online",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "catalog",
+                "psychologists"
+              ],
+              "query": [
+                {
+                  "key": "modality",
+                  "value": "online"
+                }
+              ]
+            },
+            "description": "CA-13.3 e RF-09. Sem vinculo ativo, a busca abre."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.test('e uma lista', () => pm.expect(b.data).to.be.an('array'));",
+                  "pm.test('CA-09.3: sem preco, nota ou ranking', () => { const t = JSON.stringify(b); ['price','rating','score','reviews','preco','nota'].forEach(c => pm.expect(t.toLowerCase()).to.not.include('\"' + c)); });",
+                  "pm.test('exibe nome completo e CRP', () => { if (b.data.length) { pm.expect(b.data[0].name).to.be.a('string'); pm.expect(b.data[0].crp).to.be.a('string'); } });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Solicitar vinculo pelo catalogo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/bonds/requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "bonds",
+                "requests"
+              ]
+            },
+            "description": "RF-10. Cria vinculo pendente ate o psicologo responder.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"psychologist_id\": \"{{idPsicologo}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.test('nasce pendente', () => pm.expect(pm.response.json().status).to.eql('pending'));",
+                  "pm.collectionVariables.set('idSolicitacao', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Aceitar solicitacao",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/bond-requests/{{idSolicitacao}}/accept",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "bond-requests",
+                "{{idSolicitacao}}",
+                "accept"
+              ]
+            },
+            "description": "RF-11. O aceite promove o vinculo a ativo e libera o nucleo do produto."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('fica ativo', () => pm.expect(pm.response.json().status).to.eql('active'));",
+                  "pm.collectionVariables.set('idVinculo', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Segundo vinculo ativo deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/bonds/requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "bonds",
+                "requests"
+              ]
+            },
+            "description": "RF-12 e DEC-03. No maximo 1 vinculo ativo por paciente. O banco ja impede pelo indice unico; aqui se prova que a API responde com clareza em vez de estourar erro 500.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"psychologist_id\": \"{{idPsicologo}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('recusa com 409 ou 422, nunca 500', () => pm.expect(pm.response.code).to.be.oneOf([409, 422]));",
+                  "pm.test('nao estourou erro de banco', () => pm.expect(pm.response.text().toLowerCase()).to.not.include('sqlstate'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 Relatos e a garantia de privacidade",
+      "description": "RF-22, RF-23, RF-24, RNF-08. Este bloco e o mais importante da colecao.",
+      "item": [
+        {
+          "name": "Relato compartilhado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/reports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "reports"
+              ]
+            },
+            "description": "RF-22 e DEC-13. O padrao e compartilhado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"Relato compartilhado da execucao {{runId}}.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.test('padrao e compartilhado', () => pm.expect(pm.response.json().visibility).to.eql('shared'));",
+                  "pm.collectionVariables.set('idRelatoCompartilhado', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Relato privado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/reports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "reports"
+              ]
+            },
+            "description": "RF-22 e DEC-12. O paciente marca como privado no momento da postagem.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"MARCADOR-PRIVADO-{{runId}} este texto nunca pode chegar ao psicologo.\",\n  \"visibility\": \"private\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.test('gravado como privado', () => pm.expect(pm.response.json().visibility).to.eql('private'));",
+                  "pm.collectionVariables.set('idRelatoPrivado', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Promover privado para compartilhado deve falhar",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/reports/{{idRelatoPrivado}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "reports",
+                "{{idRelatoPrivado}}"
+              ]
+            },
+            "description": "CA-22.3. O sentido privado para compartilhado nao foi previsto e fica bloqueado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"visibility\": \"shared\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('recusa a promocao', () => pm.expect(pm.response.code).to.be.oneOf([403, 422]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PROVA RNF-08: psicologo nao ve o relato privado",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/patients/{{idUsuarioPaciente}}/reports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "patients",
+                "{{idUsuarioPaciente}}",
+                "reports"
+              ]
+            },
+            "description": "A prova central do produto. O relato privado nao pode aparecer no conteudo, nem na contagem, nem como lacuna. Esta requisicao le a view shared_reports."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const bruto = JSON.stringify(b);",
+                  "const marcador = 'MARCADOR-PRIVADO-' + pm.collectionVariables.get('runId');",
+                  "pm.test('o conteudo privado nao aparece', () => pm.expect(bruto).to.not.include(marcador));",
+                  "pm.test('o id do relato privado nao aparece', () => { const ids = (b.data || []).map(r => String(r.id)); pm.expect(ids).to.not.include(String(pm.collectionVariables.get('idRelatoPrivado'))); });",
+                  "pm.test('CA-23.2: a contagem so soma os compartilhados', () => { if (b.meta && b.meta.total !== undefined) pm.expect(b.meta.total).to.eql((b.data || []).length); });",
+                  "pm.test('nenhum campo denuncia a existencia de privados', () => { ['private_count','hidden_count','private','has_private'].forEach(c => pm.expect(bruto).to.not.include(c)); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PROVA CA-23.5: acesso direto ao relato privado",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/reports/{{idRelatoPrivado}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "reports",
+                "{{idRelatoPrivado}}"
+              ]
+            },
+            "description": "O psicologo tenta abrir o relato privado pelo identificador. A resposta tem que ser recurso inexistente, e nao acesso negado: 404 nega a existencia, 403 confirma que existe algo ali."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 404, nao 403', () => pm.response.to.have.status(404));",
+                  "pm.test('nao vaza o conteudo', () => pm.expect(pm.response.text()).to.not.include('MARCADOR-PRIVADO'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Despublicar relato compartilhado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/reports/{{idRelatoCompartilhado}}/unpublish",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "reports",
+                "{{idRelatoCompartilhado}}",
+                "unpublish"
+              ]
+            },
+            "description": "RF-24. O paciente retira o compartilhamento. Se o relato ja tiver entrado em uma analise, a resposta precisa avisar, sem prometer apagamento retroativo (CA-24.2)."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.test('informa se ja foi usado em analise', () => pm.expect(b).to.have.property('used_in_analysis'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Relato despublicado some da visao do psicologo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/patients/{{idUsuarioPaciente}}/reports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "patients",
+                "{{idUsuarioPaciente}}",
+                "reports"
+              ]
+            },
+            "description": "CA-24.3. Some sem deixar marca de remocao no lugar."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const ids = (b.data || []).map(r => String(r.id));",
+                  "pm.test('o relato despublicado nao aparece', () => pm.expect(ids).to.not.include(String(pm.collectionVariables.get('idRelatoCompartilhado'))));",
+                  "pm.test('sem marca de removido', () => { const t = JSON.stringify(b); ['removed','deleted','unpublished'].forEach(c => pm.expect(t).to.not.include(c)); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Paciente ve os proprios relatos, inclusive os privados",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/reports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "reports"
+              ]
+            },
+            "description": "RF-22. Do lado do paciente, tudo aparece: a restricao existe so na direcao do psicologo."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('o proprio relato privado aparece para o dono', () => pm.expect(pm.response.text()).to.include('MARCADOR-PRIVADO-' + pm.collectionVariables.get('runId')));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "emailAdmin",
+      "value": "admin@plataforma.local",
+      "type": "string"
+    },
+    {
+      "key": "senhaAdmin",
+      "value": "admin-de-teste-123",
+      "type": "string"
+    },
+    {
+      "key": "runId",
+      "value": ""
+    },
+    {
+      "key": "emailPaciente",
+      "value": ""
+    },
+    {
+      "key": "emailPsicologo",
+      "value": ""
+    },
+    {
+      "key": "crpNumero",
+      "value": ""
+    },
+    {
+      "key": "patientToken",
+      "value": ""
+    },
+    {
+      "key": "psyToken",
+      "value": ""
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "idUsuarioPaciente",
+      "value": ""
+    },
+    {
+      "key": "idUsuarioPsicologo",
+      "value": ""
+    },
+    {
+      "key": "idPsicologo",
+      "value": ""
+    },
+    {
+      "key": "idTermoGeral",
+      "value": ""
+    },
+    {
+      "key": "idTermoIA",
+      "value": ""
+    },
+    {
+      "key": "idAceiteIA",
+      "value": ""
+    },
+    {
+      "key": "codigoConvite",
+      "value": ""
+    },
+    {
+      "key": "idConvite",
+      "value": ""
+    },
+    {
+      "key": "idVinculo",
+      "value": ""
+    },
+    {
+      "key": "idSolicitacao",
+      "value": ""
+    },
+    {
+      "key": "idRelatoCompartilhado",
+      "value": ""
+    },
+    {
+      "key": "idRelatoPrivado",
+      "value": ""
+    }
+  ]
+}

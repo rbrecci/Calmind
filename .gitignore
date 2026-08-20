@@ -1,5 +1,11 @@
-# dependencias
-/vendor/
+# ---------------------------------------------------------------
+# Calmind - Saude Mental & Acolhimento
+# Ajustado em 20/08/2026: o Laravel nao fica na raiz, fica em
+# backend/. Regras ancoradas em / paravam de casar por causa disso.
+# ---------------------------------------------------------------
+
+# dependencias (sem barra inicial: casa em qualquer profundidade)
+vendor/
 node_modules/
 
 # ambiente e segredos (RNF-56: chave nunca no repositorio)
@@ -10,17 +16,42 @@ node_modules/
 *.keystore
 *.jks
 
-# build
-/public/build/
-/public/hot
-/storage/*.key
-android/app/build/
-android/build/
-ios/build/
+# backend Laravel
+backend/public/build/
+backend/public/hot
+backend/public/storage
+backend/storage/*.key
+backend/storage/logs/
+backend/bootstrap/cache/*
+!backend/bootstrap/cache/.gitignore
+.phpunit.result.cache
+.phpunit.cache/
+
+# app React Native
+.expo/
+app/android/build/
+app/android/.gradle/
+app/android/app/build/
+app/ios/build/
+app/ios/Pods/
 *.apk
 *.aab
-.expo/
+*.ipa
+
+# build generico
 dist/
+build/
+
+# ---------------------------------------------------------------
+# pesquisa de campo: audio de entrevista NUNCA entra no repositorio
+# (secao 3 de docs/pesquisa/roteiro-entrevistas.md). As sinteses
+# anonimizadas em Markdown entram normalmente.
+# ---------------------------------------------------------------
+*.m4a
+*.mp3
+*.wav
+*.ogg
+*.aac
 
 # editor e sistema
 .vscode/

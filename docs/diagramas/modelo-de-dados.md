@@ -120,7 +120,7 @@ Quando o vínculo está ativo, a coluna vale o id do paciente e o índice único
 
 ### 4.2 Relato privado: revisão da recomendação da DP-06
 
-Na `decisoes-pendentes.md` eu recomendei separar os relatos privados em tabela própria. **Mudei de recomendação, e vale explicar por quê**, porque a decisão contrária também é defensável.
+Numa versão anterior do planejamento eu recomendei separar os relatos privados em tabela própria. **Mudei de recomendação, e vale explicar por quê**, porque a decisão contrária também é defensável.
 
 O problema apareceu no RF-24: o paciente pode despublicar um relato já compartilhado. Com duas tabelas, despublicar vira mover linha de uma tabela para outra, o que quebra as chaves estrangeiras que apontam para aquele relato, em especial a de `analysis_reports`, que o CA-24.2 precisa manter para avisar que o relato já foi usado em análise.
 

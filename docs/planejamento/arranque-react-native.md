@@ -112,9 +112,15 @@ O spike existe para matar o maior risco do projeto o quanto antes. Ele não é "
 | 3 | Uma **notificação local agendada dispara com o app fechado** | É o RF-28 inteiro. Se falhar, é melhor descobrir agora e reescrever o requisito com a limitação declarada |
 | 4 | Um **APK gerado é instalado por outra pessoa** do grupo, que não foi quem gerou | Prova que o build é reproduzível e não depende da máquina de uma pessoa só |
 
+> **Onde está o plano de aplicação web.** Ele foi retirado do `cronograma.md` na limpeza de 20/08/2026, junto com o comparativo `decisao-cenarios.html`, e vive no histórico do Git. Enquanto esta regra de corte estiver valendo, ele é a contingência real do projeto:
+>
+> ```bash
+> git show f91e4de:docs/planejamento/cronograma.md > cronograma-com-plano-web.md
+> ```
+
 **Prazo:** o marco M2 continua em **sexta 28/08**, mas com a decisão antecipada dá para mirar **terça 25/08**. As quatro provas não precisam estar bonitas, precisam estar passando.
 
-**A regra de corte continua valendo, e ela é o que protege o semestre:** se em 28/08 as provas 1 e 4 não estiverem passando, o grupo volta para o cenário A, tendo perdido uma semana e não o semestre. Isso não é pessimismo, é a razão pela qual essa semana foi colocada primeiro.
+**A regra de corte continua valendo, e ela é o que protege o semestre:** se em 28/08 as provas 1 e 4 não estiverem passando, o grupo volta para o plano de aplicação web, tendo perdido uma semana e não o semestre. Isso não é pessimismo, é a razão pela qual essa semana foi colocada primeiro.
 
 ---
 

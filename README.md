@@ -68,7 +68,7 @@ As quatro provas verificam que o banco, e não o código da aplicação, garante
 
 **Entrevistas.** O roteiro das 4 entrevistas de campo está em [`docs/pesquisa/roteiro-entrevistas.md`](docs/pesquisa/roteiro-entrevistas.md). Para aplicar, abra [`docs/pesquisa/formulario.html`](docs/pesquisa/formulario.html) no navegador: ele guarda as respostas na própria máquina, sobrevive a recarregar a página no meio da conversa e exporta a síntese anonimizada pronta em Markdown. Não precisa de servidor nem de internet.
 
-**Contrato da API.** Importe `docs/api/TCC-SENAI.postman_collection.json` no Postman e rode pelo Runner. São 42 requisições com 104 asserções. Enquanto o backend não existir, tudo fica vermelho: cada endpoint entregue acende um verde, e a coleção serve de critério de pronto da Sprint 2.
+**Contrato da API.** Importe `docs/api/Calmind.postman_collection.json` no Postman e rode pelo Runner. São 42 requisições com 104 asserções. Enquanto o backend não existir, tudo fica vermelho: cada endpoint entregue acende um verde, e a coleção serve de critério de pronto da Sprint 2.
 
 ---
 
@@ -100,17 +100,26 @@ Identificadores de código, tabela, coluna e campo de API em inglês. Texto volt
 ## Estrutura do repositório
 
 ```
+backend/       Laravel + MySQL: API /api/v1 e painel do admin em Blade
+app/           React Native: o aplicativo de paciente e psicólogo
+landing/       página de divulgação
 docs/
 ├── documento-base-sprint1.md    visão do produto e as 15 decisões de produto
 ├── documento-requisitos.md      48 RF e 68 RNF, priorizados por MoSCoW
+├── pesquisa/                    roteiro das entrevistas, formulário de aplicação, sínteses e personas
 ├── diagramas/                   MER, DER executável e provas do modelo
 ├── prototipo/                   wireframes das 16 telas
 ├── api/                         contrato e coleção de testes do Postman
-├── pesquisa/                    roteiro das entrevistas, formulário de aplicação, sínteses e personas
-└── planejamento/                cronograma, decisões e comparativo de rotas
+├── planejamento/                cronograma, arranque do React Native e decisões abertas
+├── manual/                      manual do usuário          · Sprint 3
+├── testes/                      relatório de testes        · Sprint 3
+├── documento-final/             documentação ABNT          · Sprint 3
+└── apresentacao/                slides e ensaios           · Sprint 3
 ```
 
-O código do backend, do aplicativo e do painel entra na raiz a partir da Sprint 2.
+As pastas de código entram na Sprint 2 e as quatro últimas de `docs/` na Sprint 3. Cada uma tem um `README.md` dizendo o que vai lá dentro, quando, e qual entregável da regulamentação ela atende.
+
+**Não existe pasta `painel/`, e isso é de propósito.** O painel do administrador são views Blade dentro de `backend/`, sobre o mesmo Laravel, o mesmo banco e os mesmos Models. Separá-lo em projeto próprio significaria duplicar regra de negócio, que é o que o RNF-57 proíbe.
 
 ## Cronograma
 

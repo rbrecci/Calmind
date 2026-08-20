@@ -227,47 +227,33 @@ Os relatos do paciente são dado de saúde. Enviá-los a um serviço de IA exige
 
 ## 8. Pendências
 
-### 8.1 Decisões de produto em aberto
+> **Esta seção deixou de listar pendências em 20/08/2026.** Elas viviam em três lugares ao mesmo tempo, e os três divergiram: aqui, no antigo `decisoes-pendentes.md` e no `README.md`. Agora existe uma fonte só.
 
-Resolvidas: medicação (DEC-10), formato do convite (DEC-11), privacidade dos relatos (DEC-12, DEC-13, DEC-14, DEC-15). Restam:
+| O que você procura | Onde está |
+|--------------------|-----------|
+| Decisões ainda em aberto | [`planejamento/decisoes-abertas.md`](planejamento/decisoes-abertas.md) |
+| Situação de cada entregável da regulamentação | tabela no `README.md` da raiz |
+| Decisões de stack já fechadas | [`planejamento/arranque-react-native.md`](planejamento/arranque-react-native.md), seção 8 |
 
-1. **Plataforma de cada app** — confirmar a proposta de 6.4 (psicólogo web, paciente mobile).
-2. **Critérios de busca do catálogo** — abordagem, especialidade, modalidade, região? Sem preço.
-3. **Validade e revogação do código de convite** — prazo de expiração e possibilidade de o psicólogo revogar um código ainda não usado.
-
-### 8.2 Definições técnicas em aberto
-
-- Stack de frontend web
-- Stack mobile
-- Stack de backend
-- Banco de dados
-- Provedor e modelo de IA
-- Serviço de notificações push
-- Repositório e ferramenta de board Scrum
-- Padrão de commits e branches
-- Idioma do código (variáveis, tabelas)
-
-### 8.3 Definições de equipe em aberto
-
-- Divisão de papéis (Scrum Master, Product Owner, devs)
-- Distribuição de trabalho entre os dois apps
-- Cronograma das 3 sprints com datas
+O que este documento continua sendo dono: o problema, a visão, os fluxos, as 15 decisões de produto (DEC-01 a DEC-15), os riscos e as restrições legais. Isso não mudou e não sai daqui.
 
 ---
 
-## 9. Próximos passos
+## 9. Situação dos passos definidos nesta versão
 
-| # | Passo | Status |
-|---|-------|--------|
-| 1 | Definir MVP | ✅ Concluído (seção 4) |
-| 2 | Formalizar pesquisa de campo: roteiro, dores, 2 personas | ⬜ Pendente |
-| 3 | Escrever RF e RNF numerados com prioridade MoSCoW | ⬜ Pendente |
-| 4 | Diagrama de casos de uso | ⬜ Pendente |
-| 5 | MER e DER | ⬜ Pendente |
-| 6 | Wireframes das telas principais | ⬜ Pendente |
-| 7 | Fechar stack, repositório, board e papéis | ⬜ Pendente |
+| # | Passo | Situação em 20/08/2026 |
+|---|-------|------------------------|
+| 1 | Definir MVP | Concluído, seção 4 |
+| 2 | Formalizar pesquisa de campo: roteiro, dores, personas | Roteiro e ferramenta prontos em `pesquisa/`. Entrevistas ainda não aplicadas, personas dependem delas |
+| 3 | Escrever RF e RNF numerados com prioridade MoSCoW | Concluído, 48 RF e 68 RNF em `documento-requisitos.md` |
+| 4 | Diagrama de casos de uso | **Não feito.** É o único item de diagramação da Sprint 1 que não existe: `diagramas/modelo-de-dados.md` tem MER e diagrama de estados, casos de uso não |
+| 5 | MER e DER | Concluído, com DER executável e quatro provas em `diagramas/` |
+| 6 | Wireframes das telas principais | Concluído, 16 telas em `prototipo/wireframes.html` |
+| 7 | Fechar stack, repositório, board e papéis | Stack, repositório e papéis fechados. Board é a decisão DA-05 |
 
 **Entregáveis da Sprint 1 conforme o escopo oficial:** Documento de Requisitos · Diagramas iniciais (MER, DER) · Wireframes ou mockups da interface.
+
+O escopo oficial cobra "MER, DER e outros de modelagem". MER e DER estão entregues; o "e outros" é onde o diagrama de casos de uso caberia, e a entrega é 21/08.
 
 ---
 

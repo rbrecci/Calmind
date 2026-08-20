@@ -5,7 +5,7 @@
 Plataforma de apoio à relação paciente/psicólogo
 Montado em 18/08/2026 (terça).
 
-> Dois planejamentos completos, um por cenário, porque a decisão de plataforma ainda não foi tomada. A Parte 1 (Sprint 1) é **comum aos dois cenários** e vence nesta sexta.
+> Plano único, do jeito que o projeto vai acontecer. A comparação entre aplicação web e app React Native foi feita em 19/08/2026 e resultou no React Native: o cenário web e o quadro da decisão saíram deste documento na limpeza de 20/08. Quem precisar dessa análise, ela está no histórico do Git.
 
 ---
 
@@ -39,15 +39,15 @@ Aulas em período integral às **quintas e sextas**. Sprint 1 entrega **sexta 21
 
 **Feriados no caminho:** 07/09, 12/10 e 02/11 caem em segunda-feira. Não atingem dia de aula, mas cortam um dia de trabalho da trinca que produz durante a semana. Já estão descontados na distribuição abaixo.
 
-### 0.3 Premissa de stack comum aos dois cenários
+### 0.3 Premissa de stack
 
-O backend é **Laravel com MySQL** nos dois cenários, porque é o conhecimento real do grupo e porque o RNF-57 exige um único serviço central com um único banco. O que muda entre A e B é apenas o cliente.
+O backend é **Laravel com MySQL**, porque é o conhecimento real do grupo e porque o RNF-57 exige um único serviço central com um único banco. Essa premissa nunca esteve em disputa: a decisão de 19/08 mudou apenas o cliente, que passou a ser app React Native em vez de aplicação web responsiva.
 
 ---
 
 # PARTE 1: SPRINT 1, ENTREGA NESTA SEXTA
 
-Esta parte é idêntica nos dois cenários. Nada aqui depende da decisão entre web e mobile, e isso é proposital: os wireframes serão desenhados **mobile-first**, formato que serve tanto para a aplicação web responsiva do cenário A quanto para o app React Native do cenário B.
+Nada nesta parte dependeu da decisão entre web e mobile, e isso foi proposital: os wireframes foram desenhados **mobile-first**, formato que serviria às duas rotas. É o que permitiu a Sprint 1 rodar inteira com a plataforma ainda em aberto.
 
 ## 1.1 O que falta entregar
 
@@ -81,7 +81,7 @@ Esta parte é idêntica nos dois cenários. Nada aqui depende da decisão entre 
 **08h00 a 08h40, todos:** revisão coletiva do MER e do DER. Cada um tenta furar o modelo com um caso: "onde fica o relato privado", "como o sistema impede o segundo vínculo ativo", "onde está a versão do termo aceita". Correção na hora.
 
 **08h40 a 09h00, Rafael:** perguntar ao professor as duas coisas que só ele responde:
-1. Uma aplicação **somente web**, sem app mobile, atende o item 2.2 da regulamentação? O item 1.1 diz "web e/ou mobile", mas o item 2.2 fala em sincronização do mobile com a aplicação web. Essa resposta decide entre o Cenário A e o Cenário B.
+1. Uma aplicação **somente web**, sem app mobile, atende o item 2.2 da regulamentação? O item 1.1 diz "web e/ou mobile", mas o item 2.2 fala em sincronização do mobile com a aplicação web. Essa resposta sustenta por escrito a escolha do app mobile, tomada em 19/08.
 2. Existe versão mais nova deste escopo? O rodapé do PDF diz "2024" e o arquivo diz 2026.
 
 | Quem | Tarefa do dia | Pronto quando |
@@ -103,7 +103,7 @@ Esta parte é idêntica nos dois cenários. Nada aqui depende da decisão entre 
 | 11h00 a 13h00 | Rafael | Consolidar o pacote final e gerar o PDF |
 | 13h00 a 14h00 | Nicoly e Isabela | Revisão de texto, numeração de figuras e sumário |
 | 14h00 | Todos | **Entrega.** Duas horas de folga antes do fim da tarde, de propósito |
-| 14h30 a 16h00 | Todos | Reunião de planejamento da Sprint 2 e decisão final entre Cenário A e B, com a resposta do professor em mãos |
+| 14h30 a 16h00 | Todos | Reunião de planejamento da Sprint 2 e confirmação da rota React Native, com a resposta do professor em mãos |
 
 ## 1.6 Inventário de telas para o protótipo (14 telas)
 
@@ -140,75 +140,27 @@ Cortar nesta ordem, e avisar no documento o que ficou para a Sprint 2:
 
 ---
 
-# PARTE 2: CENÁRIO A, APLICAÇÃO WEB
-
-**Stack:** Laravel, PHP, MySQL, Vue, Bootstrap, HTML, CSS, JS.
-**Produto:** aplicação web única, responsiva, mobile-first, atendendo paciente, psicólogo e administrador por papel. Mais a landing page de divulgação.
-
-## 2.1 Divisão de frentes
-
-| Frente | Quem | Escopo |
-|--------|------|--------|
-| Backend Laravel | Rafael e Zanetti | Migrations, models, autenticação e papéis, regras de negócio, API interna |
-| Frontend Vue e Bootstrap | Caio | Telas, componentes, design system, responsividade |
-| Suporte fullstack | Mariana | Fecha o que estiver atrasado na semana, mais telas do administrador |
-| Documentação e slides | Nicoly e Isabela | Trilha da Parte 4 |
-
-## 2.2 Sprint 2, semanas 1 a 6 (24/08 a 02/10)
-
-| Semana | Período | Backend (Rafael, Zanetti) | Frontend (Caio) | Entrega da semana |
-|--------|---------|---------------------------|-----------------|-------------------|
-| 1 | 24 a 28/08 | Projeto Laravel, migrations de todas as tabelas do DER, seeders com massa fictícia, autenticação e papéis (RF-01, RF-02, RF-05) | Estrutura do projeto Vue, design system em Bootstrap, telas de entrada e cadastro | Login funcionando com os 3 papéis |
-| 2 | 31/08 a 04/09 | Consentimento versionado (RF-03, RF-04, RNF-13), cadastro profissional com CRP e upload (RF-33), aprovação pelo admin (RF-44) | Telas de consentimento, cadastro de psicólogo, tela de aguardando aprovação | Psicólogo cadastra, admin aprova |
-| 3 | 07 a 11/09 (feriado dia 07) | Convite (RF-06, RF-07), vínculo com regra de 1 ativo (RF-10 a RF-13), catálogo (RF-09) | Telas de convite, catálogo com filtros, solicitação de vínculo | Paciente entra pelos dois caminhos |
-| 4 | 14 a 18/09 | Relato com privacidade na camada de dados (RF-22, RF-23, RF-24), a decisão do DP-06 implementada | Telas de relato, listagem, despublicar | **Marco crítico:** teste automatizado do RNF-08 passando |
-| 5 | 21 a 25/09 | Tarefas (RF-25, RF-37), chat (RF-15) | Telas de tarefa em card e chat | Ciclo semanal navegável ponta a ponta |
-| 6 | 28/09 a 02/10 | Agenda (RF-26, RF-40), notificações em aplicação (RF-16) | Calendário, central de notificações | **Entrega da Sprint 2** |
-
-**Primeiros testes exigidos pela regulamentação:** a partir da semana 4, todo fim de semana de trabalho tem 1 teste automatizado novo por regra crítica do RNF-53. Não deixar para a Sprint 3.
-
-## 2.3 Sprint 3, semanas 7 a 12 (05/10 a 13/11)
-
-| Semana | Período | Foco | Entrega da semana |
-|--------|---------|------|-------------------|
-| 7 | 05 a 09/10 | Medicação inteira: registro pelo psicólogo com origem obrigatória (RF-38), confirmação, recusa e contestação (RF-27), suspensão (RF-29), aviso permanente (RF-43) | Ciclo de medicação completo com os 3 estados |
-| 8 | 12 a 16/10 (feriado dia 12) | Lembrete de adesão (RF-28) e integração com o serviço de IA: chave no servidor (RNF-56), pseudonimização (RNF-29) | Análise retornando resumo real de relato fictício |
-| 9 | 19 a 23/10 | Solicitação e confirmação da análise (RF-41, RF-42), prontuário consolidado (RF-36), auditoria (RF-17) | Ciclo semanal completo, incluindo a IA |
-| 10 | 26 a 30/10 | **Congelamento de funcionalidades em 30/10.** Semana de fechamento de pontas, responsividade e acessibilidade (RNF-34, RNF-35) | Nenhuma funcionalidade nova entra depois desta sexta |
-| 11 | 02 a 06/11 (feriado dia 02) | Testes completos: unitários e integrados. Correção de defeitos. Landing page de divulgação | Suíte verde, relatório de testes escrito |
-| 12 | 09 a 13/11 | Documentação final em ABNT, manual do usuário, slides, 2 ensaios cronometrados | **Entrega da Sprint 3** |
-
-## 2.4 Riscos específicos do Cenário A
-
-| Risco | Mitigação |
-|-------|-----------|
-| A regulamentação pode exigir a perna mobile (item 2.2) | Perguntar ao professor **nesta quinta**. É a pergunta que decide o cenário |
-| Notificação push em web exige service worker e permissão do navegador | Não fazer push. O CA-16.3 já aceita o evento visível dentro da aplicação. Central de notificações interna resolve, e o lembrete de medicação vira aviso na aplicação mais e-mail se sobrar tempo |
-| Vue e Laravel juntos podem virar duas arquiteturas concorrentes | Decidir na semana 1: ou Laravel servindo API e Vue como aplicação separada, ou Blade com Vue embutido nos componentes que precisam de reatividade. Escolher uma e não misturar |
-
----
-
-# PARTE 3: CENÁRIO B, APP MOBILE EM REACT NATIVE
+# PARTE 2: O PLANO — APP MOBILE EM REACT NATIVE
 
 **Stack:** React Native no cliente, Laravel e MySQL no servidor, painel administrativo web em Blade e Bootstrap, mais a landing page.
 **Produto:** app mobile único atendendo paciente e psicólogo por papel, com painel web do administrador.
 
-## 3.1 A jogada que salva o item 2.2
+## 2.1 A jogada que salva o item 2.2
 
-No Cenário B, faça o **painel do administrador em web** (RF-44, RF-45, RF-46). São 3 requisitos, cerca de 4 telas simples em Blade e Bootstrap, reutilizando o mesmo backend e o mesmo banco.
+Faça o **painel do administrador em web** (RF-44, RF-45, RF-46). São 3 requisitos, cerca de 4 telas simples em Blade e Bootstrap, reutilizando o mesmo backend e o mesmo banco.
 
 Com isso o projeto passa a ter aplicação mobile e aplicação web compartilhando dados, que é exatamente o que o item 2.2 da regulamentação pede na Integração e nas Funcionalidades Básicas. O RNF-61 já define o critério de verificação: o admin aprova um psicólogo no painel web e o psicólogo passa a aparecer no app mobile, na mesma sessão de demonstração. É o custo mais baixo possível para fechar a exigência.
 
-## 3.2 Divisão de frentes
+## 2.2 Divisão de frentes
 
 | Frente | Quem | Escopo |
 |--------|------|--------|
 | Backend Laravel como API | Rafael e Zanetti | Migrations, autenticação por token, endpoints, regras de negócio |
 | App React Native | Caio e Mariana | Telas, navegação, consumo da API, notificações locais |
 | Painel admin web | Zanetti (semanas 5 e 6) | Blade e Bootstrap sobre o mesmo backend |
-| Documentação e slides | Nicoly e Isabela | Trilha da Parte 4 |
+| Documentação e slides | Nicoly e Isabela | Trilha da Parte 3 |
 
-## 3.3 Sprint 2, semanas 1 a 6 (24/08 a 02/10)
+## 2.3 Sprint 2, semanas 1 a 6 (24/08 a 02/10)
 
 | Semana | Período | Backend (Rafael, Zanetti) | App RN (Caio, Mariana) | Entrega da semana |
 |--------|---------|---------------------------|------------------------|-------------------|
@@ -219,11 +171,11 @@ Com isso o projeto passa a ter aplicação mobile e aplicação web compartilhan
 | 5 | 21 a 25/09 | Tarefas (RF-25, RF-37) e chat (RF-15). Zanetti começa o painel admin web (RF-44) | Telas de tarefa e chat | Ciclo semanal navegável |
 | 6 | 28/09 a 02/10 | Agenda (RF-26, RF-40). Painel admin web concluído | Calendário e **notificação local agendada**, prova de conceito | **Entrega da Sprint 2**, com a sincronização entre app e painel web demonstrada |
 
-## 3.4 Sprint 3, semanas 7 a 12 (05/10 a 13/11)
+## 2.4 Sprint 3, semanas 7 a 12 (05/10 a 13/11)
 
-Mesma espinha do Cenário A, com duas diferenças de peso:
+A espinha é a mesma que valeria numa aplicação web. O que muda por ser app nativo está marcado na última coluna:
 
-| Semana | Período | Foco | Diferença em relação ao Cenário A |
+| Semana | Período | Foco | O que muda por ser app nativo |
 |--------|---------|------|-----------------------------------|
 | 7 | 05 a 09/10 | Medicação completa (RF-38, RF-27, RF-29, RF-43) | Igual |
 | 8 | 12 a 16/10 (feriado dia 12) | Lembrete de adesão (RF-28) e serviço de IA | **O lembrete usa notificação local agendada no aparelho, não push.** É mais simples, funciona sem servidor de push e sem internet no horário do lembrete. Push fica só para chat e tarefa (RF-16), e é opcional |
@@ -232,18 +184,25 @@ Mesma espinha do Cenário A, com duas diferenças de peso:
 | 11 | 02 a 06/11 (feriado dia 02) | Testes, correções, landing page | Somar aqui a **geração do APK final assinado** e a instalação em pelo menos 2 aparelhos diferentes |
 | 12 | 09 a 13/11 | ABNT, manual, slides, 2 ensaios | O ensaio precisa ser com o APK instalado, não com emulador no notebook |
 
-## 3.5 Riscos específicos do Cenário B
+## 2.5 Riscos específicos do app React Native
 
 | Risco | Gravidade | Mitigação |
 |-------|-----------|-----------|
-| Ninguém no grupo tem experiência real com React Native | Alta | A semana 1 existe só para isso. Se na sexta 28/08 não houver APK instalado em celular, **mude para o Cenário A na hora**, sem discussão. Esse é o ponto de não retorno |
+| Ninguém no grupo tem experiência real com React Native | Alta | A semana 1 existe só para isso. Se na sexta 28/08 não houver APK instalado em celular, **volte para o plano de aplicação web na hora**, sem discussão. Esse é o ponto de não retorno |
 | Build de APK deixado para o fim | Alta | Build já na semana 1 e outro na semana 6. Um terceiro na semana 11. Nunca só no fim |
 | Notificação agendada não dispara com o app fechado | Média | Testar na semana 6, não na 8. Se falhar, o lembrete vira aviso na abertura do app, e o RF-28 é reescrito com a limitação declarada |
 | Dois clientes (app e painel) com regra de negócio duplicada | Média | O RNF-57 proíbe. A regra vive no Laravel; o app e o painel só chamam |
 
+> **O plano de aplicação web não foi perdido, foi arquivado.** Ele saiu deste documento na limpeza de 20/08/2026, junto com o comparativo `decisao-cenarios.html`. Enquanto o marco M2 de 28/08 não passar, esse plano continua sendo a contingência real do projeto. Para trazer os dois de volta:
+>
+> ```bash
+> git show f91e4de:docs/planejamento/cronograma.md > cronograma-com-plano-web.md
+> git show f91e4de:docs/planejamento/decisao-cenarios.html > decisao-cenarios.html
+> ```
+
 ---
 
-# PARTE 4: TRILHA DE DOCUMENTAÇÃO (COMUM AOS DOIS CENÁRIOS)
+# PARTE 3: TRILHA DE DOCUMENTAÇÃO
 
 Responsáveis: Nicoly e Isabela. Trabalham quinta e sexta, então cada bloco abaixo é uma tarefa de um dia de aula.
 
@@ -263,7 +222,7 @@ Responsáveis: Nicoly e Isabela. Trabalham quinta e sexta, então cada bloco aba
 
 ---
 
-# PARTE 5: RITOS DA SPRINT
+# PARTE 4: RITOS DA SPRINT
 
 Como a unidade curricular avalia metodologia ágil, o processo precisa deixar rastro.
 
@@ -280,53 +239,25 @@ Como a unidade curricular avalia metodologia ágil, o processo precisa deixar ra
 
 ---
 
-# PARTE 6: A DECISÃO ENTRE A E B
-
-## 6.1 O que pesa de cada lado
-
-| Critério | Cenário A (web) | Cenário B (mobile RN) |
-|----------|-----------------|------------------------|
-| Domínio da stack pelo grupo | Alto, é o que vocês sabem | Baixo, RN é conhecimento superficial |
-| Risco de cronograma | Baixo | Alto na primeira semana, depois normaliza |
-| Aderência ao item 2.2 da regulamentação | **Dúvida real**, pode faltar a perna mobile | Atende, ainda mais com o painel admin web |
-| Lembrete de medicação (RF-28) | Fraco em web, depende de o usuário abrir a aplicação | Forte, notificação local agendada no aparelho |
-| Adequação ao produto | O paciente registra relato no meio da semana, no celular. Web responsiva atende, app atende melhor | Melhor |
-| Esforço total | Menor | Maior, cerca de uma semana a mais na fundação |
-
-## 6.2 Recomendação
-
-**Se o professor responder que web sozinho atende o item 2.2:** vá de Cenário A. Vocês entregam com folga e a nota de qualidade de código e de testes tende a ser melhor, porque sobra tempo.
-
-**Se houver qualquer dúvida na resposta dele:** vá de Cenário B com o painel admin em web. O custo é a semana 1, e existe um ponto de retorno claro: se em 28/08 não houver APK instalado em celular, vocês voltam para o Cenário A tendo perdido 5 dias, não o semestre.
-
-**O que não fazer:** começar sem decidir, escrevendo "backend genérico" por duas semanas na esperança de decidir depois. O backend é o mesmo nos dois cenários, sim, mas o cliente não é, e a semana 1 do Cenário B é justamente a que não pode ser adiada.
-
-## 6.3 Prazo desta decisão
-
-**Sexta 21/08, na reunião de planejamento das 14h30**, com a resposta do professor em mãos. A Sprint 2 começa na segunda seguinte e não existe versão deste cronograma que sobreviva a uma semana de indecisão.
-
----
-
-# PARTE 7: MARCOS DE CONTROLE
+# PARTE 5: MARCOS DE CONTROLE
 
 Cinco datas em que o grupo para e verifica. Se um marco falhar, o escopo é cortado no mesmo dia, e o que sai vira "evolução futura" no documento final, com justificativa, exatamente como foi feito com o limite de uso de aplicativos.
 
 | Marco | Data | Critério objetivo | Se falhar |
 |-------|------|-------------------|-----------|
 | M1 Sprint 1 entregue | 21/08 | Requisitos, diagramas e wireframes no pacote | Entregar o que existe e declarar o que falta |
-| M2 Fundação de pé | 28/08 | Login funcionando contra o banco. No Cenário B, APK instalado em celular | Cenário B vira Cenário A |
+| M2 Fundação de pé | 28/08 | Login funcionando contra o banco e APK instalado em celular | Volta para o plano de aplicação web, recuperado do histórico do Git |
 | M3 Coração do produto | 18/09 | Relato com privacidade funcionando e teste do RNF-08 passando | Reduzir escopo da agenda e do chat |
 | M4 Sprint 2 entregue | 02/10 | Ciclo semanal navegável ponta a ponta | Reprioriza: medicação vira Should, IA continua Must |
 | M5 Congelamento | 30/10 | Nenhuma funcionalidade nova a partir daqui | Cortar as funcionalidades incompletas e documentar o corte |
 
 ---
 
-# PARTE 8: O QUE AINDA PRECISA SER RESPONDIDO
+# PARTE 6: O QUE AINDA PRECISA SER RESPONDIDO
 
 | # | Pendência | Quem responde | Quando |
 |---|-----------|---------------|--------|
 | 1 | Web sozinho atende o item 2.2 da regulamentação? | Professor | Quinta 20/08 |
 | 2 | Data exata da apresentação final | Professor | Quinta 20/08 |
 | 3 | Existe versão 2026 do escopo, com pesos de nota? | Professor | Quinta 20/08 |
-| 4 | Cenário A ou B | Grupo | Sexta 21/08, 14h30 |
-| 5 | Formato exato da entrega da Sprint 1 (PDF único, repositório, board) | Professor | Quinta 20/08 |
+| 4 | Formato exato da entrega da Sprint 1 (PDF único, repositório, board) | Professor | Quinta 20/08 |

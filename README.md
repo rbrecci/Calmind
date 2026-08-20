@@ -41,7 +41,7 @@ Estes não são detalhes de implementação. São o que define o produto, e cada
 
 | Exigência | Sprint | Onde | Estado |
 |-----------|--------|------|--------|
-| Requisitos funcionais e não funcionais | 1 | [`docs/documento-requisitos.md`](docs/documento-requisitos.md) | Pronto, 48 RF e 68 RNF |
+| Requisitos funcionais e não funcionais | 1 | [`docs/documento-requisitos.md`](docs/documento-requisitos.md) | Pronto, 49 RF e 68 RNF |
 | Diagramas de modelagem (MER, DER e outros) | 1 | [`docs/diagramas/`](docs/diagramas/) | Pronto |
 | Prototipação da interface | 1 | [`docs/prototipo/wireframes.html`](docs/prototipo/wireframes.html) | Pronto, 16 telas |
 | Coleta e análise dos requisitos | 1 | [`docs/pesquisa/`](docs/pesquisa/) | Roteiro e formulário prontos, 4 entrevistas a aplicar |
@@ -105,7 +105,7 @@ app/           React Native: o aplicativo de paciente e psicólogo
 landing/       página de divulgação
 docs/
 ├── documento-base-sprint1.md    visão do produto e as 15 decisões de produto
-├── documento-requisitos.md      48 RF e 68 RNF, priorizados por MoSCoW
+├── documento-requisitos.md      49 RF e 68 RNF, priorizados por MoSCoW
 ├── pesquisa/                    roteiro das entrevistas, formulário de aplicação, sínteses e personas
 ├── diagramas/                   MER, DER executável e provas do modelo
 ├── prototipo/                   wireframes das 16 telas

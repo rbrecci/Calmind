@@ -45,23 +45,19 @@ Estas não são decisões de mesa: já têm pergunta no `../pesquisa/roteiro-ent
 | DA-12 | **O que o sistema faz diante de conteúdo de risco num relato.** Hoje nenhum RF cobre isso | P-12 e P-13 |
 | DA-13 | **Teto de frequência de notificação e sigilo do texto na tela de bloqueio** | C-30 e C-31 |
 
-## 5. A decisão que ninguém tomou e ninguém percebeu
-
-| # | Questão | Por que é grave |
-|---|---------|-----------------|
-| DA-14 | **O Calmind atende menor de idade?** | Não existe ator "responsável legal" em nenhum documento, e não existe frase dizendo que o produto atende só maiores de 18. Se atender menor, mexe em vínculo, consentimento e sigilo, que são três dos quatro compromissos do produto. "Ainda não decidimos" é a pior das três respostas possíveis numa banca |
-
-## 6. Perguntas que dependem do professor
+## 5. Perguntas que dependem do professor
 
 | # | Pergunta | Situação |
 |---|----------|----------|
 | DA-15 | Data exata da apresentação final | Perguntar em aula |
 | DA-16 | Existe versão 2026 do escopo, com pesos de nota? O rodapé do PDF diz 2024 | Perguntar em aula |
-| DA-17 | Formato exato da entrega da Sprint 1: PDF único, repositório ou board | Perguntar em aula |
+| DA-17 | **Data e formato da entrega da Sprint 1.** Em 20/08/2026 o grupo soube que não é mais 21/08, e não há data nova. Sem ela o `cronograma.md` inteiro fica sem âncora | Perguntar em aula, é a mais urgente das três |
 
 ---
 
-## 7. Fechadas, para não reabrir por engano
+## 6. Fechadas, para não reabrir por engano
+
+> A numeração não é reaproveitada, mesma convenção do `documento-requisitos.md`. A DA-14, que perguntava se o produto atende menor de idade, foi fechada em 20/08/2026 e virou as três últimas linhas desta tabela.
 
 | Decisão | Fechada em | Onde vive agora |
 |---------|-----------|-----------------|
@@ -71,6 +67,9 @@ Estas não são decisões de mesa: já têm pergunta no `../pesquisa/roteiro-ent
 | Idioma do código: inglês nos identificadores | 19/08/2026 | `arranque-react-native.md` D4 |
 | Autenticação por token em toda requisição | 19/08/2026 | `../api/contrato-api.md` §2.2 |
 | Nome e slogan: Calmind — Saúde Mental & Acolhimento | 20/08/2026 | `arranque-react-native.md` D2 |
+| Idade mínima de 12 anos para conta de paciente | 20/08/2026 | DEC-16, RF-01 (CA-01.4) |
+| Menor de 18 informa contato do responsável; responsável sem acesso ao app | 20/08/2026 | DEC-17, RF-01 (CA-01.5), RF-36 (CA-36.5) |
+| Consentimento do responsável registrado pelo psicólogo, não por ele | 20/08/2026 | DEC-18, RF-49 |
 | Modelo de identidade, banco relacional, isolamento do relato privado | 19/08/2026 | `../diagramas/modelo-de-dados.md` |
 | Inventário de telas e fidelidade do protótipo | 19/08/2026 | `../prototipo/wireframes.html` |
 | Formalização da pesquisa de campo | 20/08/2026 | `../pesquisa/roteiro-entrevistas.md` |

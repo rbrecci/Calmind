@@ -50,6 +50,7 @@ A plataforma opera em dois modos, dependendo de como o paciente entra:
 | Paciente | Usuário final em acompanhamento psicológico. Máximo 1 vínculo ativo. |
 | Psicólogo | Profissional com registro CRP validado. Pode ter N pacientes. |
 | Administrador | Perfil interno. Aprova cadastros profissionais e trata denúncias. |
+| Responsável legal | **Não é ator.** Não tem conta e não acessa o sistema. Existe como contato no cadastro do paciente menor de 18 anos e como sujeito do consentimento registrado pelo psicólogo (DEC-17, DEC-18). |
 | Serviço de IA | Não é ator no sentido de caso de uso — é um componente acionado por outros atores. Nunca age sozinho. |
 
 ---
@@ -149,6 +150,9 @@ Ponto crítico: a IA é acionada **por decisão humana**, nunca automaticamente.
 | DEC-13 | Escolha feita no momento da postagem; padrão é compartilhado | Mantém o fluxo do produto (o valor está no compartilhamento) sem tirar o controle do paciente |
 | DEC-14 | O psicólogo não vê nem a existência de relatos privados | Exibir contagem pressiona o paciente e esvazia a garantia de sigilo. A análise de IA é rotulada como baseada nos relatos compartilhados |
 | DEC-15 | Despublicar é permitido; o paciente é avisado se o relato já foi usado em uma análise | Preserva o direito de retirar o compartilhamento sem criar falsa impressão de apagamento — o psicólogo pode já ter lido |
+| DEC-16 | Idade mínima de 12 anos para conta de paciente | Abaixo disso o produto não funciona como desenhado: relato semanal escrito, tarefa e chat pressupõem autonomia de escrita que uma criança pequena não tem. O corte também separa a faixa que a LGPD trata como criança, com regime de consentimento próprio, da faixa adolescente |
+| DEC-17 | Paciente com menos de 18 anos informa o contato de um responsável legal, que fica disponível ao psicólogo. O responsável **não** tem conta nem acesso a nada | O relato só tem valor terapêutico se o paciente puder escrever sem plateia, e é justamente entre 12 e 17 anos que os assuntos mais difíceis envolvem a própria família. Dar acesso ao responsável mataria o compromisso do relato privado exatamente onde ele mais importa, e num cenário de violência doméstica entregaria uma ferramenta de vigilância a quem é o risco. A devolutiva ao responsável é ato do psicólogo, fora da plataforma |
+| DEC-18 | O consentimento do responsável é obtido fora da plataforma e **registrado pelo psicólogo**, com data, forma e versão do termo | Mesmo padrão de DEC-10: o profissional registra na plataforma um ato que aconteceu fora dela. Fecha a exigência da LGPD sem criar tela, conta ou fluxo para um ator que a DEC-17 decidiu manter fora do sistema |
 
 ---
 
@@ -210,6 +214,9 @@ Os relatos do paciente são dado de saúde. Enviá-los a um serviço de IA exige
 | **Código de Ética, art. 20** | Toda divulgação pública de serviços psicológicos deve informar nome completo, CRP e número de registro → obrigatório no perfil do catálogo |
 | **Nota Técnica CFP nº 1/2022** | A responsabilidade ética pela divulgação permanece do profissional mesmo em plataformas coletivas → perfil é editado e aprovado pelo próprio psicólogo, nunca gerado automaticamente |
 | **Orientações de CRPs sobre divulgação** | Valores de honorários têm restrições de divulgação → sem ordenação por preço, sem "promoções", sem comparação de valores no catálogo |
+| **LGPD (Lei 13.709/2018), art. 14** | Dado de criança e adolescente é tratado no melhor interesse, e dado de criança exige consentimento específico e destacado do responsável → piso de 12 anos (DEC-16) e registro do consentimento do responsável para menores de 18 (RF-49) |
+| **Código de Ética Profissional do Psicólogo, art. 13** | No atendimento a criança e adolescente, informa-se ao responsável o estritamente essencial, em benefício de quem é atendido → quem decide o que comunicar é o profissional, não a plataforma. Confirmar a redação exata ao citar na ABNT |
+| **ECA (Lei 8.069/1990), art. 17** | Direito ao respeito, que inclui autonomia e preservação de espaços pessoais → o relato privado do adolescente é invisível ao responsável, não só ao psicólogo |
 | **Nota Técnica CRP-PR 002/2022** | Recomenda que profissionais se vinculem apenas a plataformas com psicólogo como Responsável Técnico registrado no CRP → limitação conhecida do modelo, a ser citada na documentação |
 
 ### 7.1 Requisitos de segurança derivados
@@ -245,7 +252,7 @@ O que este documento continua sendo dono: o problema, a visão, os fluxos, as 15
 |---|-------|------------------------|
 | 1 | Definir MVP | Concluído, seção 4 |
 | 2 | Formalizar pesquisa de campo: roteiro, dores, personas | Roteiro e ferramenta prontos em `pesquisa/`. Entrevistas ainda não aplicadas, personas dependem delas |
-| 3 | Escrever RF e RNF numerados com prioridade MoSCoW | Concluído, 48 RF e 68 RNF em `documento-requisitos.md` |
+| 3 | Escrever RF e RNF numerados com prioridade MoSCoW | Concluído, 49 RF e 68 RNF em `documento-requisitos.md` |
 | 4 | Diagrama de casos de uso | **Não feito.** É o único item de diagramação da Sprint 1 que não existe: `diagramas/modelo-de-dados.md` tem MER e diagrama de estados, casos de uso não |
 | 5 | MER e DER | Concluído, com DER executável e quatro provas em `diagramas/` |
 | 6 | Wireframes das telas principais | Concluído, 16 telas em `prototipo/wireframes.html` |

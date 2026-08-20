@@ -96,6 +96,8 @@ Cada linha tem os testes correspondentes na coleção do Postman.
 | GET | `/consent-terms/current?type=general\|ai_analysis` | RF-03, RF-04 |
 | POST | `/consent-acceptances` | RF-03, RNF-13 |
 | POST | `/consent-acceptances/{id}/revoke` | RF-04 |
+| POST | `/psychologist/patients/{id}/guardian-consent` | RF-49 |
+| GET | `/psychologist/patients/{id}/guardian-consent` | RF-49 |
 
 ### 3.3 Cadastro profissional e administração
 
@@ -129,6 +131,12 @@ Cada linha tem os testes correspondentes na coleção do Postman.
 | GET | `/patient/reports` | RF-22 |
 | POST | `/patient/reports/{id}/unpublish` | RF-24 |
 | GET | `/psychologist/patients/{id}/reports` | RF-23, RNF-08 |
+
+---
+
+### 3.6 Uma observação sobre o responsável legal
+
+Não existe rota sob `/guardian`, e isso é decisão de produto, não esquecimento. O responsável legal de paciente menor de idade não autentica na plataforma (DEC-17). Ele aparece em dois lugares e só neles: como contato no cadastro do paciente, devolvido ao psicólogo em `/psychologist/patients/{id}` conforme CA-36.5, e como sujeito do registro de consentimento acima, que **quem cria é o psicólogo**, nunca ele próprio.
 
 ---
 

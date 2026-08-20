@@ -3,8 +3,10 @@
 **TCC · Técnico em Desenvolvimento de Sistemas · SENAI-SP · 4º termo**
 **Calmind** — Saúde Mental & Acolhimento
 Plataforma de apoio à relação paciente/psicólogo
-Montado em 18/08/2026 (terça).
+Montado em 18/08/2026 (terça). **Datas revisadas em 20/08/2026: ver o aviso abaixo.**
 
+> **A entrega da Sprint 1 não tem data.** Em 20/08/2026 o grupo soube que não entrega na sexta 21/08 nem na semana seguinte, e nenhuma data nova foi dada. Todo o calendário abaixo foi montado a partir do dia 21/08, então **as datas da Parte 1 já passaram e as das Sprints 2 e 3 são estimativas que se movem junto com a data real da entrega.** O dia a dia da Parte 1 fica como registro do que foi trabalhado naquela semana. Assim que a data sair (é a DA-17 em `decisoes-abertas.md`), este documento precisa ser recalculado inteiro, não remendado.
+>
 > Plano único, do jeito que o projeto vai acontecer. A comparação entre aplicação web e app React Native foi feita em 19/08/2026 e resultou no React Native: o cenário web e o quadro da decisão saíram deste documento na limpeza de 20/08. Quem precisar dessa análise, ela está no histórico do Git.
 
 ---
@@ -45,7 +47,7 @@ O backend é **Laravel com MySQL**, porque é o conhecimento real do grupo e por
 
 ---
 
-# PARTE 1: SPRINT 1, ENTREGA NESTA SEXTA
+# PARTE 1: SPRINT 1, ENTREGA SEM DATA DEFINIDA
 
 Nada nesta parte dependeu da decisão entre web e mobile, e isso foi proposital: os wireframes foram desenhados **mobile-first**, formato que serviria às duas rotas. É o que permitiu a Sprint 1 rodar inteira com a plataforma ainda em aberto.
 
@@ -53,7 +55,7 @@ Nada nesta parte dependeu da decisão entre web e mobile, e isso foi proposital:
 
 | Entregável exigido | Estado | Responsável |
 |--------------------|--------|-------------|
-| Documento de Requisitos | **Pronto**, 48 RF e 68 RNF | Rafael |
+| Documento de Requisitos | **Pronto**, 49 RF e 68 RNF | Rafael |
 | Coleta e análise dos requisitos (a pesquisa escrita) | Não iniciado | Nicoly e Isabela |
 | Diagramas iniciais (MER, DER e outros) | Não iniciado | Rafael e Zanetti |
 | Wireframes da interface | Não iniciado | Caio e Mariana |
@@ -245,7 +247,7 @@ Cinco datas em que o grupo para e verifica. Se um marco falhar, o escopo é cort
 
 | Marco | Data | Critério objetivo | Se falhar |
 |-------|------|-------------------|-----------|
-| M1 Sprint 1 entregue | 21/08 | Requisitos, diagramas e wireframes no pacote | Entregar o que existe e declarar o que falta |
+| M1 Sprint 1 entregue | sem data | Requisitos, diagramas e wireframes no pacote | Entregar o que existe e declarar o que falta |
 | M2 Fundação de pé | 28/08 | Login funcionando contra o banco e APK instalado em celular | Volta para o plano de aplicação web, recuperado do histórico do Git |
 | M3 Coração do produto | 18/09 | Relato com privacidade funcionando e teste do RNF-08 passando | Reduzir escopo da agenda e do chat |
 | M4 Sprint 2 entregue | 02/10 | Ciclo semanal navegável ponta a ponta | Reprioriza: medicação vira Should, IA continua Must |

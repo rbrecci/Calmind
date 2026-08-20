@@ -411,7 +411,9 @@
       q("P-06", "Por onde eles te procuram?", "multipla", ["WhatsApp pessoal", "WhatsApp comercial", "e-mail", "telefone", "rede social", "não me procuram"], { liga: "linha de base" }),
       q("P-07", "O que mais te incomoda nesse contato fora de sessão?", "multipla", ["mistura com a vida pessoal", "expectativa de resposta imediata", "o registro se perde no meio da conversa", "assunto que precisaria de sessão", "não me incomoda"], { liga: "RF-15, RF-16" }),
       q("P-08", "Conte a última vez em que uma mensagem fora de horário te colocou numa situação difícil.", "aberta", null, { dica: "Deixe contar. Anote a frase, não o resumo." }),
-      q("P-09", "Quando o paciente é criança ou adolescente, como funciona a comunicação com a família?", "multipla", ["falo com os responsáveis em horário combinado", "os responsáveis me procuram a qualquer hora", "evito contato direto", "faço devolutivas periódicas", "não atendo esse público"], { opc: 1, liga: "lacuna: responsável legal" }),
+      q("P-09", "Quando o paciente é criança ou adolescente, como funciona a comunicação com a família?", "multipla", ["falo com os responsáveis em horário combinado", "os responsáveis me procuram a qualquer hora", "evito contato direto", "faço devolutivas periódicas", "não atendo esse público"], { liga: "DEC-17, RF-49" }),
+      q("P-43", "Com paciente adolescente, onde você traça a linha entre o que conta ao responsável e o que fica só entre vocês dois?", "aberta", null, { liga: "valida DEC-17", dica: "O Calmind decidiu não dar acesso nenhum ao responsável. Esta é a pergunta que confirma ou derruba essa decisão. Não defenda o produto: escute." }),
+      q("P-44", "E quando o responsável é parte do problema, o que muda no seu trabalho?", "aberta", null, { sens: 1, liga: "DEC-17, protocolo de risco" }),
       q("P-10", "Um canal de mensagens dentro de uma plataforma de trabalho, em que fica combinado que a resposta não é imediata, ajudaria?", "escala", null, { rmin: "não ajudaria", rmax: "ajudaria muito", liga: "RF-15" })
     ], { nota: "D-01. O objetivo aqui é descobrir o que o produto teria que substituir, e a que custo." }),
 

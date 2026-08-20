@@ -30,6 +30,7 @@ O ciclo semanal é o coração do produto: o psicólogo atribui tarefas após a 
 | Paciente | Usuário em acompanhamento psicológico. No máximo 1 vínculo ativo. |
 | Psicólogo | Profissional com registro no conselho regional validado. Pode ter N pacientes. |
 | Administrador | Perfil interno. Aprova cadastros profissionais e trata denúncias. |
+| Responsável legal | **Não é ator do sistema.** Não tem conta, não autentica e não acessa nenhuma tela. Existe como dado de contato no cadastro do paciente menor de 18 anos (RF-01) e como sujeito do consentimento que o psicólogo registra (RF-49). A devolutiva a ele acontece fora da plataforma, por decisão clínica do profissional. |
 | Serviço de IA | Não é ator de caso de uso: é componente acionado por outro ator, e nunca age por iniciativa própria. |
 
 ## 4. Convenções de leitura
@@ -67,12 +68,15 @@ Autenticação, consentimento, vínculo, chat, notificações e restrições tra
 | Ator | Paciente / Psicólogo |
 | Prioridade | Must |
 | Origem | P-01, S-01 |
-| Descrição | O sistema permite que um novo usuário crie conta informando dados de identificação e credenciais, escolhendo o perfil de paciente ou de psicólogo no momento do cadastro. |
+| Descrição | O sistema permite que um novo usuário crie conta informando dados de identificação, data de nascimento e credenciais, escolhendo o perfil de paciente ou de psicólogo no momento do cadastro. Para paciente com menos de 18 anos, exige também o contato de um responsável legal. |
 
 **Critérios de aceitação**
 - CA-01.1 Dado um visitante na tela de cadastro, quando ele informa dados válidos e escolhe o perfil, então o sistema cria a conta e a associa exclusivamente a esse perfil.
 - CA-01.2 Dado um visitante que informa um identificador de acesso já cadastrado, quando confirma o cadastro, então o sistema recusa a criação e informa que o identificador já está em uso, sem revelar dados da conta existente.
 - CA-01.3 Dado um visitante que deixa campo obrigatório em branco ou informa formato inválido, quando confirma o cadastro, então o sistema bloqueia a criação e aponta cada campo com problema.
+- CA-01.4 Dado um visitante que informa data de nascimento correspondente a menos de 12 anos completos, quando confirma o cadastro de paciente, então o sistema recusa a criação, informa que a idade mínima de uso é 12 anos e não armazena os demais dados informados.
+- CA-01.5 Dado um visitante com idade entre 12 e 17 anos completos, quando confirma o cadastro de paciente, então o sistema exige nome, telefone e grau de parentesco de um responsável legal, e bloqueia a criação enquanto os três não estiverem preenchidos.
+- CA-01.6 Dado um paciente cadastrado como menor de idade, quando ele completa 18 anos, então o contato do responsável deixa de ser exigido e permanece no histórico do cadastro, sem exclusão automática.
 
 #### RF-02 Autenticar usuário
 
@@ -330,6 +334,24 @@ Autenticação, consentimento, vínculo, chat, notificações e restrições tra
 - CA-48.2 Dado um vínculo ativo cujo contrato ainda não foi aceito pelas duas partes, quando qualquer das partes consulta a situação do vínculo, então o sistema sinaliza o aceite pendente e identifica qual parte falta, sem bloquear o atendimento em curso.
 - CA-48.3 Dado uma nova versão do contrato publicada, quando o vínculo segue ativo, então o sistema solicita novo aceite e preserva o registro do aceite anterior com sua data e versão.
 - CA-48.4 Dado um vínculo encerrado, quando qualquer das partes consulta o histórico, então o sistema exibe a versão do contrato vigente naquele período em modo somente leitura.
+
+#### RF-49 Registrar o consentimento do responsável legal de paciente menor de idade
+
+> RF-49 foi criado em 20/08/2026, quando o grupo decidiu que o produto atende a partir dos 12 anos. A numeração segue a ordem de criação, não a posição no texto.
+
+| Campo | Conteúdo |
+|-------|----------|
+| Ator | Psicólogo |
+| Prioridade | Must |
+| Origem | Seção 7 (LGPD art. 14), DEC-16, DEC-17, DEC-18, RF-03 |
+| Descrição | Para paciente com menos de 18 anos, o sistema exige que o psicólogo registre que obteve do responsável legal o consentimento para o tratamento de dados de saúde, informando data, forma de obtenção e versão do termo vigente. O responsável não acessa a plataforma: o consentimento é obtido fora dela e registrado pelo profissional, mesmo padrão adotado em DEC-10 para a medicação prescrita por médico. |
+
+**Critérios de aceitação**
+- CA-49.1 Dado um vínculo ativo com paciente menor de 18 anos, quando o psicólogo registra o consentimento do responsável, então o sistema grava data de obtenção, forma, versão do termo vigente e a identificação do profissional que registrou.
+- CA-49.2 Dado um vínculo ativo com paciente menor de 18 anos e sem consentimento do responsável registrado, quando o psicólogo solicita a análise por serviço de IA, então o sistema recusa a solicitação e informa qual registro está faltando.
+- CA-49.3 Dado um registro de consentimento de responsável já gravado, quando o psicólogo o consulta, então o sistema exibe quem registrou e quando, e não permite editar o registro existente, apenas acrescentar um novo.
+- CA-49.4 Dado um paciente com 18 anos ou mais, quando o psicólogo abre o vínculo, então o sistema não apresenta o registro de consentimento de responsável, por não se aplicar.
+- CA-49.5 Dado um vínculo com paciente menor de idade cujo registro de consentimento está ausente, quando o psicólogo acessa o vínculo, então o sistema sinaliza a pendência sem bloquear o atendimento em curso.
 
 #### RF-19 Avaliar e ranquear psicólogos no catálogo
 
@@ -596,6 +618,7 @@ Autenticação, consentimento, vínculo, chat, notificações e restrições tra
 - CA-36.2 Dado a abertura do prontuário, quando o acesso ocorre, então o sistema grava o registro de auditoria previsto em RF-17.
 - CA-36.3 Dado um psicólogo sem vínculo com o paciente, quando tenta abrir o prontuário por qualquer caminho, então o sistema nega o acesso.
 - CA-36.4 Dado um paciente que possui relatos privados no período exibido, quando o prontuário é montado, então nenhum indício desses relatos aparece, conforme RF-23.
+- CA-36.5 Dado um paciente vinculado com menos de 18 anos, quando o psicólogo abre o prontuário, então o sistema exibe o contato do responsável legal informado no cadastro, para que o profissional possa fazer contato fora da plataforma.
 
 #### RF-37 Atribuir tarefas terapêuticas
 
@@ -768,13 +791,13 @@ Autenticação, consentimento, vínculo, chat, notificações e restrições tra
 
 | Prioridade | Quantidade |
 |------------|------------|
-| Must | 34 |
+| Must | 35 |
 | Should | 8 |
 | Could | 2 |
 | Won't | 4 |
-| **Total** | **48** |
+| **Total** | **49** |
 
-**Must (34):** RF-01, RF-02, RF-03, RF-04, RF-05, RF-06, RF-07, RF-09, RF-10, RF-11, RF-12, RF-13, RF-14, RF-15, RF-16, RF-22, RF-23, RF-24, RF-25, RF-26, RF-27, RF-28, RF-29, RF-33, RF-34, RF-35, RF-36, RF-37, RF-38, RF-40, RF-41, RF-42, RF-43, RF-44
+**Must (35):** RF-01, RF-02, RF-03, RF-04, RF-05, RF-06, RF-07, RF-09, RF-10, RF-11, RF-12, RF-13, RF-14, RF-15, RF-16, RF-22, RF-23, RF-24, RF-25, RF-26, RF-27, RF-28, RF-29, RF-33, RF-34, RF-35, RF-36, RF-37, RF-38, RF-40, RF-41, RF-42, RF-43, RF-44, RF-49
 
 **Should (8):** RF-08, RF-17, RF-18, RF-30, RF-39, RF-45, RF-46, RF-48
 
@@ -802,7 +825,7 @@ Autenticação, consentimento, vínculo, chat, notificações e restrições tra
 | D-05 | Ausência de ferramentas de apoio para os dois lados | RF-15, RF-22, RF-25, RF-26, RF-27, RF-28, RF-29, RF-35, RF-36, RF-37, RF-38, RF-39, RF-40, RF-41 |
 | D-06 | Dificuldade de acesso a profissionais | RF-09, RF-10, RF-11, RF-33, RF-34, RF-44 |
 
-Requisitos que não atacam dor diretamente e existem por obrigação legal, ética ou de segurança: RF-01, RF-02, RF-03, RF-04, RF-05, RF-06, RF-07, RF-08, RF-12, RF-13, RF-14, RF-17, RF-18, RF-23, RF-30, RF-31, RF-43, RF-45, RF-46, RF-47, RF-48.
+Requisitos que não atacam dor diretamente e existem por obrigação legal, ética ou de segurança: RF-01, RF-02, RF-03, RF-04, RF-05, RF-06, RF-07, RF-08, RF-12, RF-13, RF-14, RF-17, RF-18, RF-23, RF-30, RF-31, RF-43, RF-45, RF-46, RF-47, RF-48, RF-49.
 
 ---
 
@@ -1060,9 +1083,9 @@ Nenhum RNF deste documento depende de uma tecnologia específica ter sido escolh
 
 | Categoria | Must | Should | Could | Won't | Total |
 |-----------|------|--------|-------|-------|-------|
-| Requisitos funcionais | 34 | 8 | 2 | 4 | 48 |
+| Requisitos funcionais | 35 | 8 | 2 | 4 | 49 |
 | Requisitos não funcionais | 42 | 16 | 5 | 5 | 68 |
-| **Total** | **76** | **24** | **7** | **9** | **116** |
+| **Total** | **77** | **24** | **7** | **9** | **117** |
 
 A concentração em Must é alta e isso é consequência do domínio, não falta de critério de corte: dado de saúde é dado pessoal sensível, e a maior parte dos requisitos vem de restrição legal ou ética que não admite negociação de prioridade. A folga real do grupo está em desempenho, acessibilidade estendida e nos direitos do titular que dependem de dado real, que este projeto não usa.
 
@@ -1092,6 +1115,12 @@ Registradas aqui por decisão de projeto. Documentar o que foi cortado, e por qu
 **8.3 Ausência de Responsável Técnico (RNF-25).** A Nota Técnica CRP-PR 002/2022 recomenda que profissionais se vinculem apenas a plataformas que tenham psicólogo como Responsável Técnico registrado no conselho regional. O modelo proposto neste TCC não conta com esse profissional. A limitação é declarada abertamente: em uso real, seria pré-requisito de operação.
 
 **8.4 Operação apenas com dados fictícios (RNF-63).** O sistema não recebe dados de paciente real em nenhum ambiente do projeto. Isso é o que permite priorizar como Could alguns direitos do titular, como a exportação de dados (RF-31, RNF-18). Se o projeto for usado com dado real, esses requisitos sobem imediatamente para Must.
+
+**8.6 O responsável legal não acessa a plataforma (RF-49, DEC-17).** O produto atende pacientes a partir de 12 anos e, para menores de 18, exige no cadastro o contato de um responsável legal, disponível ao psicólogo. O responsável não recebe conta, não autentica e não visualiza nada: nem relato, nem conversa, nem prontuário. A devolutiva a ele é ato do profissional, fora da plataforma.
+
+Isso é decisão de projeto, não omissão, e apoia-se em dois pontos. O primeiro é clínico: o relato só tem valor terapêutico se o paciente puder escrever sem plateia, e o compromisso do relato privado perderia sentido justamente na faixa etária em que os assuntos mais difíceis envolvem a própria família. O segundo é ético: no atendimento a criança e adolescente cabe ao psicólogo informar ao responsável o estritamente essencial, em benefício de quem é atendido, e um painel de acesso amplo passaria por cima desse julgamento profissional.
+
+**A contrapartida está declarada:** o consentimento do responsável ocorre fora do sistema e entra nele por registro do psicólogo (RF-49). A plataforma comprova que o registro existe, quem o fez e quando, mas não comprova o ato do consentimento em si. Um portal do responsável, com visão restrita de agenda e medicação, fica documentado como evolução futura.
 
 **8.5 Dobro de frontend (RNF-34, RNF-57, RNF-58, RNF-61).** Dois aplicativos com 3 sprints e um grupo de estudantes é risco real. As mitigações adotadas são backend, banco, autenticação e contrato de interface compartilhados, design system único, e a proposta de o aplicativo do psicólogo ser web, com menos telas, e o do paciente ser mobile. A confirmação dessa divisão segue pendente.
 

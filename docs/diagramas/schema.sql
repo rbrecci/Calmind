@@ -43,14 +43,32 @@ CREATE TABLE users (
   KEY ix_users_role (role)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- RF-01: idade minima de 12 anos (DEC-16) e, abaixo de 18, contato de um
+-- responsavel legal (DEC-17). O responsavel NAO tem conta: nao existe user_id
+-- para ele, e nenhuma tabela deste schema lhe da acesso a conteudo clinico.
+--
+-- Por que a idade minima nao e uma CHECK: a regra depende da data de hoje, e
+-- CHECK em MariaDB so aceita expressao deterministica. CURDATE() nao entra.
+-- A verificacao de idade vive na aplicacao (CA-01.4, CA-01.5). O que o banco
+-- consegue garantir, e garante abaixo, e que os tres campos do responsavel
+-- estejam todos preenchidos ou todos vazios: contato pela metade nao serve
+-- para o psicologo fazer contato (CA-36.5).
 CREATE TABLE patients (
-  id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  user_id     INT UNSIGNED NOT NULL,
-  birth_date  DATE         NULL,
-  phone       VARCHAR(20)  NULL,
-  created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  id                    INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id               INT UNSIGNED NOT NULL,
+  birth_date            DATE         NOT NULL,   -- RF-01: obrigatoria, e ela que decide a faixa etaria
+  phone                 VARCHAR(20)  NULL,
+  guardian_name         VARCHAR(150) NULL,       -- CA-01.5: exigido pela aplicacao se menor de 18
+  guardian_phone        VARCHAR(20)  NULL,
+  guardian_relationship VARCHAR(60)  NULL,       -- mae, pai, avo, tutor
+  created_at            DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY uq_patients_user (user_id),
-  CONSTRAINT fk_patients_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  CONSTRAINT fk_patients_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT ck_patients_guardian CHECK (
+    (guardian_name IS NULL     AND guardian_phone IS NULL     AND guardian_relationship IS NULL)
+    OR
+    (guardian_name IS NOT NULL AND guardian_phone IS NOT NULL AND guardian_relationship IS NOT NULL)
+  )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- RF-33: registro profissional. RF-34: perfil publicado pelo proprio psicologo.
@@ -92,7 +110,7 @@ CREATE TABLE psychologist_documents (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------
--- 2. Consentimento versionado  (RF-03, RF-04, RF-46, RNF-13)
+-- 2. Consentimento versionado  (RF-03, RF-04, RF-46, RF-49, RNF-13)
 -- ---------------------------------------------------------------------
 
 CREATE TABLE consent_terms (
@@ -117,6 +135,27 @@ CREATE TABLE consent_acceptances (
   KEY ix_acceptance_user (user_id, revoked_at),
   CONSTRAINT fk_acc_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   CONSTRAINT fk_acc_term FOREIGN KEY (consent_term_id) REFERENCES consent_terms(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- RF-49: consentimento do responsavel legal de paciente menor de idade.
+-- O responsavel nao acessa a plataforma (DEC-17): o consentimento e obtido
+-- fora dela e REGISTRADO pelo psicologo, mesmo padrao de DEC-10 para a
+-- medicacao prescrita por medico. A tabela e append-only: CA-49.3 proibe
+-- editar registro existente, so acrescentar outro.
+CREATE TABLE guardian_consents (
+  id                    INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  patient_id            INT UNSIGNED NOT NULL,
+  consent_term_id       INT UNSIGNED NOT NULL,   -- RNF-13: versao vigente na data da obtencao
+  registered_by_user_id INT UNSIGNED NOT NULL,   -- CA-49.1: qual psicologo registrou
+  guardian_name         VARCHAR(150) NOT NULL,   -- copia no momento do registro, nao referencia
+  obtained_at           DATE         NOT NULL,   -- CA-49.1: quando o responsavel consentiu
+  method                ENUM('presencial','telefone','videochamada','mensagem_escrita') NOT NULL,
+  note                  TEXT         NULL,
+  created_at            DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY ix_gconsent_patient (patient_id, obtained_at),
+  CONSTRAINT fk_gconsent_patient FOREIGN KEY (patient_id)            REFERENCES patients(id)      ON DELETE CASCADE,
+  CONSTRAINT fk_gconsent_term    FOREIGN KEY (consent_term_id)       REFERENCES consent_terms(id),
+  CONSTRAINT fk_gconsent_user    FOREIGN KEY (registered_by_user_id) REFERENCES users(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------

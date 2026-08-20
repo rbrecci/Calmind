@@ -29,6 +29,9 @@ erDiagram
     users ||--o| psychologists : "é"
     users ||--o{ consent_acceptances : aceita
     consent_terms ||--o{ consent_acceptances : "é aceito em"
+    patients ||--o{ guardian_consents : "tem registrado"
+    consent_terms ||--o{ guardian_consents : "versiona"
+    users ||--o{ guardian_consents : registra
 
     psychologists ||--o{ psychologist_documents : comprova
     psychologists ||--o{ invitations : gera
@@ -66,6 +69,7 @@ erDiagram
 | `psychologists` para `bonds` com status ativo | 1 para N, sem teto | RF-12, CA-12.3 |
 | `users` para `patients` e `psychologists` | 1 para 0 ou 1, e nunca os dois ao mesmo tempo | DP-02, RF-05 |
 | `invitations` para `bonds` | 1 para 0 ou 1, porque o convite é de uso único | RF-07, RNF-05 |
+| `patients` para `guardian_consents` | 1 para N, e N pode ser 0 | RF-49, DEC-17 |
 | `reports` para `analysis_reports` | N para N com `analyses` | CA-24.2 |
 
 ---
@@ -154,6 +158,7 @@ Os dois convivem assim: a linha em `analyses` sempre existe, com quem pediu e qu
 | `invitations` | RF-06, RF-07, RF-08, RNF-05, RNF-06 |
 | `bonds` | RF-10 a RF-14, DEC-02, DEC-03 |
 | `service_contracts`, `contract_acceptances` | RF-48, RNF-24 |
+| `patients.guardian_*`, `guardian_consents` | RF-01, RF-49, DEC-16, DEC-17, DEC-18 |
 | `reports` mais a view `shared_reports` | RF-22, RF-23, RF-24, RNF-08 |
 | `tasks` | RF-25, RF-37 |
 | `messages` | RF-15 |
@@ -202,7 +207,14 @@ mysql -u root --force --table tcc_schema_test < docs/diagramas/testes-do-modelo.
 
 Registrado para não passar por pronto o que não está:
 
-1. **Dados clínicos do paciente** estão mínimos. O documento base não define quais dados de perfil o paciente informa além de identificação, então só entrou o essencial. Se o grupo quiser data de nascimento, telefone ou contato de emergência, entra em `patients`.
-2. **Anexo em relato ou mensagem** não existe. Não há requisito pedindo, e acrescentar depois é barato.
-3. **Índices de desempenho** estão só nos caminhos óbvios: chaves estrangeiras, código de convite e as consultas por vínculo e por período. O RNF-41 e o RNF-43 vão dizer se falta algum, e isso só se descobre medindo, na semana 11.
-4. **Soft delete** não foi adotado em lugar nenhum. O RF-14 exige preservar histórico, e o modelo faz isso por estado (`ended`), não por exclusão lógica.
+1. **Dados clínicos do paciente** seguem mínimos. A data de nascimento deixou de ser opcional em 20/08/2026, quando o grupo decidiu atender a partir dos 12 anos: agora ela é `NOT NULL` e é ela que define a faixa etária. Contato de emergência, distinto do responsável legal, continua fora do modelo.
+
+2. **A idade mínima não é verificável pelo banco.** A regra depende da data corrente e `CHECK` em MariaDB só aceita expressão determinística, o que exclui `CURDATE()`. A verificação vive na aplicação, em CA-01.4 e CA-01.5. O banco garante apenas o que consegue garantir: que os três campos do responsável estejam todos preenchidos ou todos vazios. Isso está escrito aqui porque é o tipo de garantia que alguém assume que o banco faz e não faz.
+
+3. **O responsável legal não é entidade.** Ele não tem conta, não autentica e não aparece em `users`. É um trio de colunas em `patients` mais o registro em `guardian_consents`. Modelá-lo como usuário abriria a porta para dar acesso a ele, que é exatamente o que DEC-17 proíbe.
+
+4. **Anexo em relato ou mensagem** não existe. Não há requisito pedindo, e acrescentar depois é barato.
+
+5. **Índices de desempenho** estão só nos caminhos óbvios: chaves estrangeiras, código de convite e as consultas por vínculo e por período. O RNF-41 e o RNF-43 vão dizer se falta algum, e isso só se descobre medindo, na semana 11.
+
+6. **Soft delete** não foi adotado em lugar nenhum. O RF-14 exige preservar histórico, e o modelo faz isso por estado (`ended`), não por exclusão lógica.

@@ -33,8 +33,8 @@ Estas cinco regras valem mais que o roteiro em si.
 2. **Anote a frase original.** Toda pergunta tem o campo "nas palavras da pessoa". Uma frase textual vale mais na defesa do TCC que dez marcações. Se a resposta não couber em nenhuma opção, use "Outra" — isso é achado, não erro.
 3. **Não persiga o roteiro.** Se a pessoa já respondeu a P-12 enquanto falava da P-08, marque e siga. Repetir pergunta já respondida é a principal causa de entrevista cansativa.
 4. **Perguntas marcadas `opcional` são descartáveis.** O formulário tem o **modo enxuto**, que esconde todas elas de uma vez.
-   O roteiro completo tem 42 perguntas para as psicólogas e 42 para o Miguel, 43 para a Bruna: algo entre 30 e 35 minutos.
-   No modo enxuto sobram 27 para as psicólogas e 33 ou 34 para os pacientes, o que fecha em 20 a 25 minutos.
+   O roteiro completo tem 44 perguntas para as psicólogas e 42 para o Miguel, 43 para a Bruna: algo entre 30 e 35 minutos.
+   No modo enxuto sobram 30 para as psicólogas e 33 ou 34 para os pacientes, o que fecha em 20 a 25 minutos.
    O cronômetro do formulário fica vermelho aos 40 minutos. Quando ficar, pule direto para o bloco de fecho.
 5. **Perguntas marcadas `sensível` podem ser puladas sem explicação.** Diga isso uma vez, antes de começar, e respeite sem insistir. Nenhuma delas é necessária para o projeto.
 
@@ -101,8 +101,14 @@ Legenda: `essencial` entra sempre · `opcional` cai no modo enxuto · `sensível
 
 **P-08** `essencial` `aberta` Conte a última vez em que uma mensagem fora de horário te colocou numa situação difícil.
 
-**P-09** `opcional` Quando o paciente é criança ou adolescente, como funciona a comunicação com a família? *(múltipla)* → lacuna: não existe RF para responsável legal
+**P-09** `essencial` Quando o paciente é criança ou adolescente, como funciona a comunicação com a família? *(múltipla)* → DEC-17, RF-49
 `falo com os responsáveis em horário combinado` · `os responsáveis me procuram a qualquer hora` · `evito contato direto` · `faço devolutivas periódicas` · `não atendo esse público`
+
+**P-43** `essencial` `aberta` Com paciente adolescente, onde você traça a linha entre o que conta ao responsável e o que fica só entre vocês dois? → **valida DEC-17: o Calmind decidiu não dar acesso nenhum ao responsável, e essa é a pergunta que confirma ou derruba a decisão**
+
+**P-44** `essencial` `sensível` `aberta` E quando o responsável é parte do problema, o que muda no seu trabalho? → DEC-17, e a lacuna de protocolo de risco de P-12
+
+> P-43 e P-44 foram criadas em 20/08/2026, junto com a decisão de atender a partir dos 12 anos. Os números seguem a ordem de criação e não a posição no texto, mesma convenção do `documento-requisitos.md`.
 
 **P-10** `essencial` `escala 1-5` Um canal de mensagens dentro de uma plataforma de trabalho, em que fica combinado que a resposta não é imediata, ajudaria? → RF-15
 
@@ -410,9 +416,9 @@ Três blocos foram acrescentados porque apontam para lacunas do documento atual.
 |--------|--------|--------------------|
 | P-12, P-13 | Nenhum RF diz o que o sistema faz diante de conteúdo de risco num relato | RF de protocolo de risco, com canal de emergência exibido ao paciente e regra explícita de o que o app **não** decide |
 | C-30, C-31 | RF-16 define notificação, mas não teto de frequência nem sigilo do texto na tela bloqueada | RNF de frequência máxima e de notificação sem conteúdo clínico no preview |
-| P-09 | Paciente menor de idade e responsável legal não aparecem em nenhum ator nem RF | Decisão de escopo: ou o produto declara que atende só maiores de idade, ou precisa modelar responsável legal |
+| P-09, P-43, P-44 | ~~Paciente menor de idade não aparece em nenhum ator nem RF~~ **Fechado em 20/08/2026:** o produto atende a partir de 12 anos, e o responsável legal entra como contato, sem acesso (DEC-16 a DEC-18, RF-49) | O campo agora não abre a decisão, ele a testa. Se as duas psicólogas disserem que precisam de um canal com o responsável dentro da plataforma, DEC-17 volta para a mesa |
 
-O terceiro é o mais urgente: hoje o documento não diz nem uma coisa nem outra, e "não decidido" é a pior das três respostas possíveis numa banca.
+O terceiro deixou de ser lacuna e virou decisão registrada antes mesmo da primeira entrevista. As perguntas continuam no roteiro, agora com outra função: em vez de descobrir o que fazer, verificar se a decisão se sustenta diante de quem atende adolescente toda semana.
 
 ### 6.2 Regra de honestidade
 

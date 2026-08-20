@@ -1,0 +1,578 @@
+<title>Wireframes da Sprint 1</title>
+<style>
+  :root {
+    --papel: #F7F7F6;
+    --tela: #FFFFFF;
+    --tinta: #1C1D1F;
+    --tinta-2: #5A5D62;
+    --tinta-3: #8B8F96;
+    --linha: #D9DBDE;
+    --linha-2: #C2C5CA;
+    --preenche: #EBECEE;
+    --acao: #3F4A63;
+    --acao-tinta: #FFFFFF;
+    --nota: #7A5B12;
+    --nota-fundo: #FBF3DF;
+    --nota-linha: #E3CE94;
+    --alerta: #8A3529;
+    --alerta-fundo: #FAEBE8;
+    --sans: ui-sans-serif, "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --mono: ui-monospace, "Cascadia Mono", Consolas, "SF Mono", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --papel: #131416;
+      --tela: #1B1D20;
+      --tinta: #E9EAEC;
+      --tinta-2: #A8ACB3;
+      --tinta-3: #7A7E86;
+      --linha: #34373B;
+      --linha-2: #45484D;
+      --preenche: #26292D;
+      --acao: #8FA0C4;
+      --acao-tinta: #16181B;
+      --nota: #E0C583;
+      --nota-fundo: #2A230F;
+      --nota-linha: #4E4223;
+      --alerta: #E9998C;
+      --alerta-fundo: #331A16;
+    }
+  }
+  :root[data-theme="dark"] {
+    --papel: #131416;
+    --tela: #1B1D20;
+    --tinta: #E9EAEC;
+    --tinta-2: #A8ACB3;
+    --tinta-3: #7A7E86;
+    --linha: #34373B;
+    --linha-2: #45484D;
+    --preenche: #26292D;
+    --acao: #8FA0C4;
+    --acao-tinta: #16181B;
+    --nota: #E0C583;
+    --nota-fundo: #2A230F;
+    --nota-linha: #4E4223;
+    --alerta: #E9998C;
+    --alerta-fundo: #331A16;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--papel); color: var(--tinta); font-family: var(--sans); font-size: 15px; line-height: 1.5; }
+  .pagina { max-width: 1400px; margin: 0 auto; padding: 32px 20px 80px; display: flex; flex-direction: column; gap: 28px; }
+
+  h1 { margin: 0; font-size: clamp(26px, 3.5vw, 34px); letter-spacing: -.02em; font-weight: 620; text-wrap: balance; }
+  h2 { margin: 0; font-size: 18px; font-weight: 600; }
+  p { margin: 0; }
+  .olho { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--tinta-3); }
+  .lede { color: var(--tinta-2); max-width: 70ch; }
+  .aviso-doc { border-left: 3px solid var(--nota-linha); background: var(--nota-fundo); color: var(--nota); padding: 12px 16px; border-radius: 0 8px 8px 0; font-size: 13.5px; }
+
+  .secao { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+  .telas { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 26px; align-items: start; }
+
+  .tela { display: flex; flex-direction: column; gap: 8px; }
+  .rotulo { display: flex; align-items: baseline; gap: 8px; }
+  .rotulo .n { font-family: var(--mono); font-size: 12px; color: var(--tinta-3); }
+  .rotulo .t { font-size: 14px; font-weight: 600; }
+
+  .aparelho { border: 1px solid var(--linha-2); border-radius: 18px; background: var(--tela); overflow: hidden; display: flex; flex-direction: column; height: 560px; }
+  .status { display: flex; justify-content: space-between; padding: 6px 14px 2px; font-family: var(--mono); font-size: 10px; color: var(--tinta-3); }
+  .topo { padding: 10px 14px; border-bottom: 1px solid var(--linha); display: flex; align-items: center; gap: 10px; }
+  .topo .voltar { color: var(--tinta-3); font-size: 16px; }
+  .topo .titulo { font-size: 14px; font-weight: 600; }
+  .corpo { flex: 1; overflow: hidden; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+  .abas { border-top: 1px solid var(--linha); display: flex; }
+  .abas span { flex: 1; text-align: center; padding: 8px 2px; font-size: 10px; color: var(--tinta-3); }
+  .abas span.ativa { color: var(--acao); font-weight: 600; }
+  .abas span i { display: block; width: 16px; height: 16px; margin: 0 auto 3px; border: 1.5px solid currentColor; border-radius: 4px; }
+
+  .campo { border: 1px solid var(--linha-2); border-radius: 7px; padding: 9px 11px; font-size: 12px; color: var(--tinta-3); background: var(--tela); }
+  .campo.preenchido { color: var(--tinta); }
+  .rot { font-size: 11px; color: var(--tinta-2); margin-bottom: 3px; }
+  .botao { background: var(--acao); color: var(--acao-tinta); border-radius: 7px; padding: 10px; text-align: center; font-size: 13px; font-weight: 600; }
+  .botao.fantasma { background: none; border: 1px solid var(--acao); color: var(--acao); }
+  .botao.fraco { background: var(--preenche); color: var(--tinta-2); border: 1px solid var(--linha); }
+  .texto { font-size: 12px; color: var(--tinta-2); }
+  .texto.pequeno { font-size: 11px; color: var(--tinta-3); }
+  .barras { display: flex; flex-direction: column; gap: 5px; }
+  .barras i { display: block; height: 7px; border-radius: 3px; background: var(--preenche); }
+  .barras i:nth-child(2) { width: 92%; }
+  .barras i:nth-child(3) { width: 78%; }
+  .barras i:nth-child(4) { width: 86%; }
+  .barras i:nth-child(5) { width: 54%; }
+
+  .cartao { border: 1px solid var(--linha); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+  .cartao .cab { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .cartao .nome { font-size: 12.5px; font-weight: 600; }
+  .selo { font-family: var(--mono); font-size: 9.5px; padding: 2px 6px; border-radius: 3px; border: 1px solid var(--linha-2); color: var(--tinta-2); white-space: nowrap; }
+  .selo.destaque { border-color: var(--acao); color: var(--acao); }
+  .selo.aviso { border-color: var(--alerta); color: var(--alerta); background: var(--alerta-fundo); }
+
+  .chips { display: flex; gap: 5px; flex-wrap: wrap; }
+  .chips span { font-size: 10px; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--linha-2); color: var(--tinta-2); }
+  .chips span.ativo { border-color: var(--acao); color: var(--acao); }
+
+  .switcher { display: flex; border: 1px solid var(--linha-2); border-radius: 7px; overflow: hidden; }
+  .switcher span { flex: 1; text-align: center; padding: 7px 4px; font-size: 11px; color: var(--tinta-2); }
+  .switcher span.on { background: var(--acao); color: var(--acao-tinta); font-weight: 600; }
+
+  .balao { max-width: 78%; padding: 8px 10px; border-radius: 10px; font-size: 11.5px; }
+  .balao.deles { background: var(--preenche); color: var(--tinta); align-self: flex-start; border-bottom-left-radius: 3px; }
+  .balao.meu { background: var(--acao); color: var(--acao-tinta); align-self: flex-end; border-bottom-right-radius: 3px; }
+
+  .alerta-tela { background: var(--alerta-fundo); color: var(--alerta); border: 1px solid var(--alerta); border-radius: 7px; padding: 8px 10px; font-size: 10.5px; }
+
+  .nota { border-left: 3px solid var(--nota-linha); background: var(--nota-fundo); color: var(--nota); padding: 9px 11px; border-radius: 0 6px 6px 0; font-size: 11.5px; }
+  .nota b { font-family: var(--mono); font-size: 10.5px; letter-spacing: .04em; }
+
+  .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+  .cal span { height: 25px; display: flex; align-items: center; justify-content: center; font-size: 9.5px; color: var(--tinta-3); border-radius: 4px; }
+  .cal span.mes { color: var(--tinta-2); }
+  .cal span.hoje { background: var(--preenche); color: var(--tinta); font-weight: 600; }
+  .cal span.marcado { background: var(--acao); color: var(--acao-tinta); font-weight: 600; }
+  .cal .dia-sem { font-size: 8.5px; text-transform: uppercase; color: var(--tinta-3); }
+
+  footer { margin-top: 20px; color: var(--tinta-3); font-size: 12.5px; display: flex; flex-direction: column; gap: 5px; }
+</style>
+
+<div class="pagina">
+
+  <header style="display:flex; flex-direction:column; gap:10px;">
+    <span class="olho">TCC · Desenvolvimento de Sistemas · SENAI-SP · 4º termo</span>
+    <h1>Wireframes da Sprint 1</h1>
+    <p class="lede">As 14 telas do fluxo principal, desenhadas mobile-first para o aplicativo React Native. Cada tela traz, abaixo, o requisito que ela atende e o critério de aceitação que precisa ser verdadeiro na implementação.</p>
+    <p class="aviso-doc"><b>Fidelidade média, de propósito.</b> Estes são wireframes de estrutura e conteúdo, não a identidade visual do produto. Cor, tipografia e ilustração entram no design system da Sprint 2 (RNF-34). O que está congelado aqui é o que cada tela mostra, em que ordem, e o que o usuário consegue fazer nela.</p>
+  </header>
+
+  <div class="secao">
+    <span class="olho">Lado do paciente</span>
+    <h2>Entrada e vínculo</h2>
+  </div>
+
+  <div class="telas">
+
+    <!-- 1 -->
+    <div class="tela">
+      <div class="rotulo"><span class="n">01</span><span class="t">Entrada</span></div>
+      <div class="aparelho">
+        <div class="status"><span>9:41</span><span>100%</span></div>
+        <div class="corpo" style="justify-content:center; gap:16px;">
+          <div style="text-align:center; display:flex; flex-direction:column; gap:6px;">
+            <div style="width:52px; height:52px; border-radius:14px; background:var(--preenche); margin:0 auto;"></div>
+            <div class="texto" style="font-weight:600; color:var(--tinta);">Nome do produto</div>
+            <div class="texto pequeno">Apoio entre uma sessão e outra</div>
+          </div>
+          <div>
+            <div class="rot">E-mail</div>
+            <div class="campo">seu@email.com</div>
+          </div>
+          <div>
+            <div class="rot">Senha</div>
+            <div class="campo">••••••••</div>
+          </div>
+          <div class="botao">Entrar</div>
+          <div class="botao fantasma">Criar conta</div>
+          <div class="texto pequeno" style="text-align:center;">Ao criar conta você escolhe se é paciente ou psicólogo</div>
+        </div>
+      </div>
+      <p class="nota"><b>RF-01, RF-02.</b> O perfil é escolhido no cadastro e a conta fica presa a ele (CA-01.1). Erro de login usa mensagem genérica, sem dizer se o errado foi o e-mail ou a senha (CA-02.2).</p>
+    </div>
+
+    <!-- 2 -->
+    <div class="tela">
+      <div class="rotulo"><span class="n">02</span><span class="t">Consentimento</span></div>
+      <div class="aparelho">
+        <div class="status"><span>9:41</span><span>100%</span></div>
+        <div class="topo"><span class="titulo">Antes de começar</span></div>
+        <div class="corpo">
+          <div class="texto" style="font-weight:600; color:var(--tinta);">Tratamento dos seus dados de saúde</div>
+          <div class="barras"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="texto pequeno">Versão 1.0, vigente desde 01/08/2026</div>
+          <div class="cartao" style="border-color:var(--acao);">
+            <div class="cab"><span class="nome">Li e aceito o termo</span><span class="selo destaque">obrigatório</span></div>
+          </div>
+          <div class="cartao">
+            <div class="cab"><span class="nome">Autorizo a análise por IA</span><span class="selo">separado</span></div>
+            <div class="texto pequeno">Seus relatos compartilhados podem ser resumidos por um serviço de IA, quando o seu psicólogo solicitar. Você pode revogar quando quiser.</div>
+          </div>
+          <div class="botao">Continuar</div>
+        </div>
+      </div>
+      <p class="nota"><b>RF-03, RF-04, RNF-13.</b> São dois consentimentos independentes, e o de IA é destacado por exigência do art. 11 da LGPD. Cada aceite grava data, hora e versão. Recusar o primeiro bloqueia as funções clínicas (CA-03.2).</p>
+    </div>
+
+    <!-- 3 -->
+    <div class="tela">
+      <div class="rotulo"><span class="n">03</span><span class="t">Como você chegou aqui</span></div>
+      <div class="aparelho">
+        <div class="status"><span>9:41</span><span>100%</span></div>
+        <div class="corpo" style="justify-content:center; gap:14px;">
+          <div class="texto" style="font-weight:600; color:var(--tinta); text-align:center;">Você já faz acompanhamento?</div>
+          <div class="cartao">
+            <div class="nome">Tenho psicólogo</div>
+            <div class="texto pequeno">Use o código que ele te passou na sessão</div>
+          </div>
+          <div class="cartao">
+            <div class="nome">Quero encontrar um profissional</div>
+            <div class="texto pequeno">Busque no catálogo e solicite o vínculo</div>
+          </div>
+          <div class="texto pequeno" style="text-align:center;">Você pode mudar de ideia depois</div>
+        </div>
+      </div>
+      <p class="nota"><b>Fluxo 3.1 do documento base.</b> As duas portas de entrada do produto: ferramenta de continuidade e facilitador de acesso.</p>
+    </div>
+
+    <!-- 4 -->
+    <div class="tela">
+      <div class="rotulo"><span class="n">04</span><span class="t">Código de convite</span></div>
+      <div class="aparelho">
+        <div class="status"><span>9:41</span><span>100%</span></div>
+        <div class="topo"><span class="voltar">‹</span><span class="titulo">Tenho psicólogo</span></div>
+        <div class="corpo" style="gap:16px;">
+          <div class="texto">Digite o código de 6 caracteres que o seu psicólogo passou.</div>
+          <div style="display:flex; gap:6px;">
+            <div class="campo preenchido" style="flex:1; text-align:center; font-family:var(--mono); font-size:18px; letter-spacing:.3em;">K7M9PQ</div>
+          </div>
+          <div class="texto pequeno">O código não usa as letras O e I nem os números 0 e 1, para não haver confusão ao anotar.</div>
+          <div class="botao">Vincular</div>
+          <div class="alerta-tela">Código inválido, expirado ou já utilizado. Peça um novo ao seu psicólogo.</div>
+        </div>
+      </div>
+      <p class="nota"><b>RF-07, RNF-05.</b> Mensagem de erro única para todas as causas, e sem revelar de quem era o código (CA-07.2). Alfabeto sem caracteres ambíguos porque o código é ditado na sessão presencial.</p>
+    </div>
+
+    <!-- 5 -->
+    <div class="tela">
+      <div class="rotulo"><span class="n">05</span><span class="t">Catálogo</span></div>
+      <div class="aparelho">
+        <div class="status"><span>9:41</span><span>100%</span></div>
+        <div class="topo"><span class="voltar">‹</span><span class="titulo">Encontrar profissional</span></div>
+        <div class="corpo" style="gap:10px;">
+          <div class="campo">Buscar por nome ou abordagem</div>
+          <div class="chips">
+            <span class="ativo">Online</span><span>Presencial</span><span>Ansiedade</span><span>TCC</span><span>São Paulo</span>
+          </div>
+          <div class="cartao">
+            <div class="cab"><span class="nome">Ana Paula Ribeiro</span><span class="selo">CRP 06/123456</span></div>
+            <div class="texto pequeno">Terapia cognitivo comportamental · Online</div>
+          </div>
+          <div class="cartao">
+            <div class="cab"><span class="nome">Marcos Vinícius Alves</span><span class="selo">CRP 06/654321</span></div>
+            <div class="texto pequeno">Psicanálise · Online e presencial</div>
+          </div>
+          <div class="cartao">
+            <div class="cab"><span class="nome">Juliana Torres</span><span class="selo">CRP 05/998877</span></div>
+            <div class="texto pequeno">Terapia sistêmica · Presencial</div>
+          </div>
+        </div>
+        <div class="abas"><span class="ativa"><i></i>Buscar</span><span><i></i>Conta</span></div>
+      </div>
+      <p class="nota"><b>RF-09, art. 20 do Código de Ética.</b> Nome completo e CRP sempre visíveis. Sem preço, sem nota, sem estrela e sem ordenação por reputação (CA-09.3, DEC-06). Quem já tem vínculo ativo não acessa esta tela (CA-09.2).</p>
+    </div>
+
+    <!-- 6 -->
+    <div class="tela">
+      <div class="rotulo"><span class="n">06</span><span class="t">Perfil e solicitação</span></div>
+      <div class="aparelho">
+        <div class="status"><span>9:41</span><span>100%</span></div>
+        <div class="topo"><span class="voltar">‹</span><span class="titulo">Perfil</span></div>
+        <div class="corpo" style="gap:12px;">
+          <div style="display:flex; gap:10px; align-items:center;">
+            <div style="width:46px; height:46px; border-radius:50%; background:var(--preenche); flex:none;"></div>
+            <div>
+              <div class="texto" style="font-weight:600; color:var(--tinta);">Ana Paula Ribeiro</div>
+              <div class="texto pequeno">CRP 06/123456</div>
+            </div>
+          </div>
+          <div class="chips"><span>Ansiedade</span><span>TCC</span><span>Online</span><span>São Paulo</span></div>
+          <div class="rot">Apresentação</div>
+          <div class="barras"><i></i><i></i><i></i><i></i></div>
+          <div class="texto pequeno">Texto escrito pela própria profissional.</div>
+          <div class="botao">Solicitar vínculo</div>
+          <div class="texto pequeno" style="text-align:center;">Ela precisa aceitar antes de vocês começarem</div>
+        </div>
+      </div>
+      <p class="nota"><b>RF-10, RF-34, Nota Técnica CFP 1/2022.</b> O perfil é escrito e publicado pelo próprio profissional, nunca gerado pela plataforma (CA-34.3). A solicitação cria vínculo pendente até a resposta dele.</p>
+    </div>
+  </div>
+
+  <div class="secao">
+    <span class="olho">Lado do paciente</span>
+    <h2>O ciclo semanal</h2>
+  </div>
+
+  <div class="telas">
+
+    <!-- 7 -->
+    <div class="tela">
+      <div class="rotulo"><span class="n">07</span><span class="t">Início do paciente</span></div>
+      <div class="aparelho">
+        <div class="status"><span>9:41</span><span>100%</span></div>
+        <div class="topo"><span class="titulo">Olá, Camila</span></div>
+        <div class="corpo" style="gap:10px;">
+          <div class="cartao">
+            <div class="cab"><span class="nome">Ana Paula Ribeiro</span><span class="selo destaque">vínculo ativo</span></div>
+            <div class="texto pequeno">Próxima consulta: quinta, 22/08, às 15h</div>
+          </div>
+          <div class="rot">Esta semana</div>
+          <div class="cartao">
+            <div class="cab"><span class="nome">2 tarefas pendentes</span><span class="selo aviso">1 vence hoje</span></div>
+          </div>
+          <div class="cartao">
+            <div class="cab"><span class="nome">3 relatos escritos</span></div>
+            <div class="texto pequeno">Último há 2 dias</div>
+          </div>
+          <div class="botao">Escrever relato</div>
+        </div>
+        <div class="abas">
+          <span class="ativa"><i></i>Início</span><span><i></i>Relatos</span><span><i></i>Tarefas</span><span><i></i>Conversa</span><span><i></i>Agenda</span>
+        </div>
+      </div>
+      <p class="nota"><b>Ciclo 3.3 do documento base.</b> A tela existe para responder uma pergunta só: o que falta de mim esta semana. A ação principal é escrever relato, porque é o que alimenta a sessão seguinte.</p>
+    </div>
+
+    <!-- 8 -->
+    <div class="tela">
+      <div class="rotulo"><span class="n">08</span><span class="t">Novo relato</span></div>
+      <div class="aparelho">
+        <div class="status"><span>9:41</span><span>100%</span></div>
+        <div class="topo"><span class="voltar">‹</span><span class="titulo">Novo relato</span></div>
+        <div class="corpo" style="gap:10px;">
+          <div class="rot">Quem pode ver</div>
+          <div class="switcher">
+            <span class="on">Compartilhado</span><span>Só para mim</span>
+          </div>
+          <div class="texto pequeno">Compartilhado: sua psicóloga lê. Só para mim: ninguém além de você, nunca.</div>
+          <div class="campo preenchido" style="flex:1; min-height:150px; align-items:flex-start;">
+            Terça foi difícil. Discussão no trabalho e voltei pensando naquilo a noite toda.
+          </div>
+          <div class="botao">Salvar relato</div>
+        </div>
+      </div>
+      <p class="nota"><b>RF-22, DEC-12, DEC-13, RNF-37.</b> A tela mais característica do produto. O seletor fica <b>acima do campo de texto e visível sem rolagem</b>, e já vem em compartilhado. A escolha acontece no momento da postagem, e depois não dá para promover privado para compartilhado (CA-22.3).</p>
+    </div>
+
+    <!-- 9 -->
+    <div class="tela">
+      <div class="rotulo"><span class="n">09</span><span class="t">Meus relatos</span></div>
+      <div class="aparelho">
+        <div class="status"><span>9:41</span><span>100%</span></div>
+        <div class="topo"><span class="titulo">Meus relatos</span></div>
+        <div class="corpo" style="gap:9px;">
+          <div class="cartao">
+            <div class="cab"><span class="nome">Terça, 18/08</span><span class="selo">compartilhado</span></div>
+            <div class="texto pequeno">Discussão no trabalho e voltei pensando naquilo...</div>
+          </div>
+          <div class="cartao" style="border-style:dashed;">
+            <div class="cab"><span class="nome">Segunda, 17/08</span><span class="selo destaque">só para mim</span></div>
+            <div class="texto pequeno">Não consegui dormir de novo...</div>
+          </div>
+          <div class="cartao">
+            <div class="cab"><span class="nome">Sábado, 15/08</span><span class="selo">compartilhado</span></div>
+            <div class="texto pequeno">Dia bom. Consegui sair de casa...</div>
+          </div>
+          <div class="botao fraco">Deixar de compartilhar um relato</div>
+        </div>
+        <div class="abas">
+          <span><i></i>Início</span><span class="ativa"><i></i>Relatos</span><span><i></i>Tarefas</span><span><i></i>Conversa</span><span><i></i>Agenda</span>
+        </div>
+      </div>
+      <p class="nota"><b>RF-22, RF-24.</b> Do lado do paciente tudo aparece, com o estado sinalizado em cada relato. Ao despublicar, se o relato já entrou em uma análise, o app avisa antes de confirmar, sem prometer apagamento retroativo (CA-24.2).</p>
+    </div>
+
+    <!-- 10 -->
+    <div class="tela">
+      <div class="rotulo"><span class="n">10</span><span class="t">Tarefas</span></div>
+      <div class="aparelho">
+        <div class="status"><span>9:41</span><span>100%</span></div>
+        <div class="topo"><span class="titulo">Tarefas</span></div>
+        <div class="corpo" style="gap:9px;">
+          <div class="rot">Pendentes</div>
+          <div class="cartao">
+            <div class="cab"><span class="nome">Registrar gatilhos de ansiedade</span><span class="selo aviso">hoje</span></div>
+            <div class="texto pequeno">Anote a situação e a intensidade, de 0 a 10.</div>
+            <div class="botao fraco">Marcar como concluída</div>
+          </div>
+          <div class="cartao">
+            <div class="cab"><span class="nome">Exercício de respiração</span><span class="selo">até 22/08</span></div>
+          </div>
+          <div class="rot" style="margin-top:4px;">Concluídas</div>
+          <div class="cartao" style="opacity:.6;">
+            <div class="cab"><span class="nome">Ler o texto sobre sono</span><span class="selo">feita 16/08</span></div>
+          </div>
+        </div>
+        <div class="abas">
+          <span><i></i>Início</span><span><i></i>Relatos</span><span class="ativa"><i></i>Tarefas</span><span><i></i>Conversa</span><span><i></i>Agenda</span>
+        </div>
+      </div>
+      <p class="nota"><b>RF-25.</b> Pendentes separadas das concluídas, prazo visível em cada card. Concluir grava data e hora, e concluir de novo não duplica (CA-25.3).</p>
+    </div>
+
+    <!-- 11 -->
+    <div class="tela">
+      <div class="rotulo"><span class="n">11</span><span class="t">Conversa</span></div>
+      <div class="aparelho">
+        <div class="status"><span>9:41</span><span>100%</span></div>
+        <div class="topo"><span class="voltar">‹</span><span class="titulo">Ana Paula Ribeiro</span></div>
+        <div class="corpo" style="gap:8px;">
+          <div class="texto pequeno" style="text-align:center;">Segunda, 17/08</div>
+          <div class="balao deles">Camila, conseguiu fazer o registro dos gatilhos?</div>
+          <div class="balao meu">Consegui em dois dias, nos outros esqueci</div>
+          <div class="balao deles">Tudo bem. A gente vê isso na quinta.</div>
+          <div style="flex:1;"></div>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <div class="campo" style="flex:1;">Escreva uma mensagem</div>
+            <div class="botao" style="padding:9px 12px;">›</div>
+          </div>
+        </div>
+      </div>
+      <p class="nota"><b>RF-15.</b> Canal assíncrono dentro do vínculo ativo, com histórico por data e marcação de não lidas. Não é atendimento em tempo real, e a plataforma não hospeda sessão (DEC-08).</p>
+    </div>
+
+    <!-- 12 -->
+    <div class="tela">
+      <div class="rotulo"><span class="n">12</span><span class="t">Agenda</span></div>
+      <div class="aparelho">
+        <div class="status"><span>9:41</span><span>100%</span></div>
+        <div class="topo"><span class="titulo">Agenda</span></div>
+        <div class="corpo" style="gap:10px;">
+          <div class="texto" style="font-weight:600; color:var(--tinta);">Agosto de 2026</div>
+          <div class="cal">
+            <span class="dia-sem">D</span><span class="dia-sem">S</span><span class="dia-sem">T</span><span class="dia-sem">Q</span><span class="dia-sem">Q</span><span class="dia-sem">S</span><span class="dia-sem">S</span>
+            <span></span><span></span><span></span><span></span><span></span><span class="mes">1</span><span class="mes">2</span>
+            <span class="mes">3</span><span class="mes">4</span><span class="mes">5</span><span class="mes">6</span><span class="mes">7</span><span class="mes">8</span><span class="mes">9</span>
+            <span class="mes">10</span><span class="mes">11</span><span class="mes">12</span><span class="mes">13</span><span class="mes">14</span><span class="marcado">15</span><span class="mes">16</span>
+            <span class="mes">17</span><span class="mes">18</span><span class="hoje">19</span><span class="mes">20</span><span class="marcado">21</span><span class="mes">22</span><span class="mes">23</span>
+            <span class="mes">24</span><span class="mes">25</span><span class="mes">26</span><span class="mes">27</span><span class="marcado">28</span><span class="mes">29</span><span class="mes">30</span>
+          </div>
+          <div class="rot">Próximas</div>
+          <div class="cartao">
+            <div class="cab"><span class="nome">Sexta, 21/08 às 15h</span><span class="selo destaque">confirmada</span></div>
+            <div class="texto pequeno">Online</div>
+          </div>
+        </div>
+        <div class="abas">
+          <span><i></i>Início</span><span><i></i>Relatos</span><span><i></i>Tarefas</span><span><i></i>Conversa</span><span class="ativa"><i></i>Agenda</span>
+        </div>
+      </div>
+      <p class="nota"><b>RF-26.</b> O paciente só visualiza: criar, alterar e cancelar é atribuição do psicólogo (CA-26.3). Cancelamento e reagendamento chegam por notificação.</p>
+    </div>
+  </div>
+
+  <div class="secao">
+    <span class="olho">Lado do psicólogo</span>
+    <h2>Cadastro e trabalho clínico</h2>
+  </div>
+
+  <div class="telas">
+
+    <!-- 13 -->
+    <div class="tela">
+      <div class="rotulo"><span class="n">13</span><span class="t">Cadastro profissional</span></div>
+      <div class="aparelho">
+        <div class="status"><span>9:41</span><span>100%</span></div>
+        <div class="topo"><span class="titulo">Seu registro no CRP</span></div>
+        <div class="corpo" style="gap:11px;">
+          <div>
+            <div class="rot">Região</div>
+            <div class="campo preenchido">06 · São Paulo</div>
+          </div>
+          <div>
+            <div class="rot">Número de registro</div>
+            <div class="campo preenchido">123456</div>
+          </div>
+          <div>
+            <div class="rot">Documento comprobatório</div>
+            <div class="campo" style="border-style:dashed; text-align:center;">Enviar arquivo ou foto</div>
+          </div>
+          <div class="texto pequeno">Seu cadastro passa por conferência antes de o perfil ir ao ar. Enquanto isso você não aparece no catálogo nem gera convites.</div>
+          <div class="botao">Enviar para análise</div>
+        </div>
+      </div>
+      <p class="nota"><b>RF-33, RF-44, seção 6.3.</b> Validação de formato mais documento mais aprovação humana, porque não existe consulta pública automatizada ao cadastro nacional. Enquanto pendente, publicar perfil e gerar convite ficam bloqueados (CA-33.4, CA-06.3).</p>
+    </div>
+
+    <!-- 14 -->
+    <div class="tela">
+      <div class="rotulo"><span class="n">14</span><span class="t">Meus pacientes</span></div>
+      <div class="aparelho">
+        <div class="status"><span>9:41</span><span>100%</span></div>
+        <div class="topo"><span class="titulo">Pacientes</span></div>
+        <div class="corpo" style="gap:9px;">
+          <div class="cartao">
+            <div class="cab"><span class="nome">Camila S.</span><span class="selo aviso">2 não lidas</span></div>
+            <div class="texto pequeno">3 relatos novos · consulta sexta, 15h</div>
+          </div>
+          <div class="cartao">
+            <div class="cab"><span class="nome">Rodrigo M.</span><span class="selo aviso">tarefa vencida</span></div>
+            <div class="texto pequeno">1 relato novo · sem consulta marcada</div>
+          </div>
+          <div class="cartao">
+            <div class="cab"><span class="nome">Beatriz L.</span></div>
+            <div class="texto pequeno">Sem novidades desde 12/08</div>
+          </div>
+          <div class="botao fantasma">Gerar convite para novo paciente</div>
+        </div>
+        <div class="abas">
+          <span class="ativa"><i></i>Pacientes</span><span><i></i>Agenda</span><span><i></i>Perfil</span>
+        </div>
+      </div>
+      <p class="nota"><b>RF-35, RF-06.</b> A lista existe para responder de quem cuidar primeiro, então sinaliza pendência em vez de listar nomes em ordem alfabética. Barra de abas diferente da do paciente: mesmo app, dois lados (DEC-01).</p>
+    </div>
+
+    <!-- 15 -->
+    <div class="tela">
+      <div class="rotulo"><span class="n">15</span><span class="t">Prontuário</span></div>
+      <div class="aparelho">
+        <div class="status"><span>9:41</span><span>100%</span></div>
+        <div class="topo"><span class="voltar">‹</span><span class="titulo">Camila S.</span></div>
+        <div class="corpo" style="gap:10px;">
+          <div class="chips"><span class="ativo">Relatos</span><span>Tarefas</span><span>Consultas</span><span>Medicação</span></div>
+          <div class="cartao">
+            <div class="cab"><span class="nome">Terça, 18/08</span></div>
+            <div class="texto pequeno">Discussão no trabalho e voltei pensando naquilo a noite toda.</div>
+          </div>
+          <div class="cartao">
+            <div class="cab"><span class="nome">Sábado, 15/08</span></div>
+            <div class="texto pequeno">Dia bom. Consegui sair de casa e encontrar a Marina.</div>
+          </div>
+          <div class="texto pequeno" style="text-align:center;">2 relatos compartilhados no período</div>
+          <div class="botao">Gerar resumo da semana</div>
+          <div class="botao fraco">Atribuir tarefa</div>
+        </div>
+        <div class="abas">
+          <span class="ativa"><i></i>Pacientes</span><span><i></i>Agenda</span><span><i></i>Perfil</span>
+        </div>
+      </div>
+      <p class="nota"><b>RF-36, RF-37, RF-41, RNF-08.</b> A contagem diz <b>2 relatos compartilhados</b> e não "2 de 3": nada aqui pode denunciar a existência de relato privado, nem por número, nem por lacuna, nem por espaço reservado (CA-23.1, CA-23.2).</p>
+    </div>
+
+    <!-- 16 -->
+    <div class="tela">
+      <div class="rotulo"><span class="n">16</span><span class="t">Resumo da semana</span></div>
+      <div class="aparelho">
+        <div class="status"><span>9:41</span><span>100%</span></div>
+        <div class="topo"><span class="voltar">‹</span><span class="titulo">Resumo da semana</span></div>
+        <div class="corpo" style="gap:10px;">
+          <div class="selo destaque" style="align-self:flex-start;">sugestão, ainda não salva</div>
+          <div class="texto pequeno">Gerado a partir dos relatos que a paciente compartilhou entre 12 e 18/08.</div>
+          <div class="cartao">
+            <div class="nome">Tópicos identificados</div>
+            <div class="barras"><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+          <div class="alerta-tela">Revise antes de salvar. Este texto foi produzido por IA e não substitui a sua leitura dos relatos.</div>
+          <div style="flex:1;"></div>
+          <div class="botao">Revisar e salvar no prontuário</div>
+          <div class="botao fraco">Descartar</div>
+        </div>
+      </div>
+      <p class="nota"><b>RF-41, RF-42, DEC-04, DEC-05.</b> A análise só roda quando o profissional pede, nunca por rotina (CA-41.2). Nada é gravado sem confirmação, e o descarte não deixa rastro consultável (CA-42.2). O rótulo de origem é obrigatório (CA-41.3).</p>
+    </div>
+  </div>
+
+  <footer>
+    <p>16 telas. As 14 do inventário congelado da Sprint 1, mais a listagem de relatos do paciente e a tela de resumo, que se mostraram necessárias ao desenhar o fluxo.</p>
+    <p>Fora deste conjunto, por decisão registrada: telas de medicação e do painel do administrador entram na Sprint 2. O aviso permanente de não prescrição (RF-43) aparece em todas as telas de medicação, quando elas forem desenhadas.</p>
+    <p>Fonte dos requisitos: <span style="font-family:var(--mono);">docs/documento-requisitos.md</span>. Modelo de dados correspondente: <span style="font-family:var(--mono);">docs/diagramas/modelo-de-dados.md</span>.</p>
+  </footer>
+</div>

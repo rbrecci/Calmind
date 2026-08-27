@@ -100,6 +100,7 @@ Identificadores de código, tabela, coluna e campo de API em inglês. Texto volt
 ## Estrutura do repositório
 
 ```
+CONTRIBUTING.md   como commitar e abrir PR neste repositório — leia antes do primeiro commit
 backend/       Laravel + MySQL: API /api/v1 e painel do admin em Blade
 app/           React Native: o aplicativo de paciente e psicólogo
 landing/       página de divulgação
@@ -118,6 +119,8 @@ docs/
 ```
 
 As pastas de código entram na Sprint 2 e as quatro últimas de `docs/` na Sprint 3. Cada uma tem um `README.md` dizendo o que vai lá dentro, quando, e qual entregável da regulamentação ela atende.
+
+**Antes do seu primeiro commit, leia [`CONTRIBUTING.md`](CONTRIBUTING.md).** Ele traz o modelo de mensagem de commit, o passo a passo do branch ao merge e o que é um Pull Request, para quem nunca abriu um. Nada entra no `main` sem passar por PR.
 
 **Não existe pasta `painel/`, e isso é de propósito.** O painel do administrador são views Blade dentro de `backend/`, sobre o mesmo Laravel, o mesmo banco e os mesmos Models. Separá-lo em projeto próprio significaria duplicar regra de negócio, que é o que o RNF-57 proíbe.
 

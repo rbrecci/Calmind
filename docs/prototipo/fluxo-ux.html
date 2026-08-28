@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calmind · Fluxo de UX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* =============================================================================
+   Calmind — mapa de UX das 16 telas.
+
+   Não simula tela: cada nó é um cartão com um glifo gerado em SVG na hora.
+   As cores seguem a seção 2.3 do CONTEXTO.md — verde no paciente, rosa no
+   psicólogo, gradiente no que acontece antes de o sistema saber quem é a
+   pessoa. Tinta sobre cor é sempre Dark, nunca branco (seção 3).
+   ========================================================================== */
+
+:root{
+  --primario-1:#A858A9; --primario:#F07EF2; --primario-p1:#DFB3F2;
+  --secundario-1:#5BA958; --secundario:#82F27E; --secundario-p1:#D6F2C2;
+  --light-1:#989898; --light:#D9D9D9; --light-p1:#E4E4E4;
+  --dark:#1C1C1C; --dark-p1:#606060; --dark-m1:#141414;
+
+  --fundo:#FBFBFC; --papel:#FFFFFF; --tinta:var(--dark); --tinta-fraca:var(--dark-p1);
+  --linha:var(--light); --fio:#B9B9C2; --sombra:0 1px 2px rgba(20,20,20,.05), 0 8px 24px rgba(20,20,20,.06);
+  --titulo:'Quicksand','Trebuchet MS',sans-serif;
+  --corpo:'Poppins','Segoe UI',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --fundo:#141416; --papel:#1E1E21; --tinta:#F2F2F4; --tinta-fraca:#A6A6AE;
+    --linha:#33333A; --fio:#4A4A55; --sombra:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  }
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--fundo);color:var(--tinta);font-family:var(--corpo);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--titulo);font-weight:600;letter-spacing:-.01em}
+
+/* -- cabeçalho ------------------------------------------------------------ */
+.topo{max-width:1180px;margin:0 auto;padding:40px 24px 8px}
+.olho{font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--tinta-fraca);font-weight:500}
+.topo h1{font-size:34px;margin:8px 0 6px}
+.lede{color:var(--tinta-fraca);max-width:68ch;font-size:14.5px}
+
+/* -- barra de controles --------------------------------------------------- */
+.controles{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--fundo) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--linha);margin-top:24px}
+.controles-in{max-width:1180px;margin:0 auto;padding:12px 24px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.chip{font:inherit;font-size:13px;font-weight:500;padding:7px 14px;min-height:36px;border-radius:20px;border:1px solid var(--linha);background:var(--papel);color:var(--tinta);cursor:pointer;transition:.15s}
+.chip:hover{border-color:var(--fio)}
+.chip[aria-pressed="true"]{border-color:transparent;font-weight:600}
+.chip[data-lado="tudo"][aria-pressed="true"]{background:var(--light-p1);color:var(--dark)}
+.chip[data-lado="paciente"][aria-pressed="true"]{background:var(--secundario-p1);color:var(--dark)}
+.chip[data-lado="psicologo"][aria-pressed="true"]{background:var(--primario-p1);color:var(--dark)}
+.chip[data-lado="neutro"][aria-pressed="true"]{background:linear-gradient(100deg,var(--secundario-p1),var(--primario-p1));color:var(--dark)}
+.sep{width:1px;height:24px;background:var(--linha);margin:0 4px}
+.zoom{display:flex;gap:4px;align-items:center}
+.zoom button{width:36px;height:36px;border-radius:10px;border:1px solid var(--linha);background:var(--papel);color:var(--tinta);cursor:pointer;font:inherit;font-size:16px;line-height:1}
+.zoom button:hover{border-color:var(--fio)}
+.zoom span{font-size:12.5px;color:var(--tinta-fraca);min-width:44px;text-align:center;font-variant-numeric:tabular-nums}
+.dica{margin-left:auto;font-size:12.5px;color:var(--tinta-fraca)}
+.exporta{display:flex;gap:6px;margin-left:auto}
+.chip.saida{border-color:var(--fio)}
+.chip.saida:disabled{opacity:.5;cursor:progress}
+.chip.saida b{font-weight:600}
+
+/* -- palco ---------------------------------------------------------------- */
+.palco{overflow:auto;padding:36px 24px 80px}
+.canvas{position:relative;width:1120px;margin:0 auto;transform-origin:top center}
+.fios{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:1}
+.fios path{fill:none;stroke:var(--fio);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;transition:.2s}
+.fios path.cruza{stroke-dasharray:5 5;stroke-width:1.4;opacity:.55}
+.fios path.aceso{stroke:var(--dark-p1);stroke-width:2.4;opacity:1}
+.fios .ponta{fill:var(--fio);transition:.2s}
+.fios .ponta.aceso{fill:var(--dark-p1)}
+
+/* -- trilhas e fileiras --------------------------------------------------- */
+.trilha{position:relative;z-index:2;margin-bottom:8px;scroll-margin-top:96px}
+.faixa{display:flex;align-items:center;gap:12px;margin:34px 0 20px}
+.faixa h2{font-size:19px}
+.faixa .traco{flex:1;height:1px;background:var(--linha)}
+.faixa .conta{font-size:12px;color:var(--tinta-fraca);font-weight:500}
+.fileiras{display:block}
+.fileira{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin-bottom:44px}
+.fileira:last-child{margin-bottom:0}
+
+/* -- mapa deitado: o fluxo corre da esquerda para a direita ---------------
+   As fileiras viram colunas e passam a ficar lado a lado. Nada gira: o texto
+   continua na horizontal, que é a única forma de o mapa continuar legível. */
+body.deitado .canvas{width:max-content}
+body.deitado .fileiras{display:flex;flex-direction:row;align-items:flex-start;gap:60px}
+body.deitado .fileira{flex-direction:column;align-items:center;flex-wrap:nowrap;margin-bottom:0;gap:18px}
+body.deitado .trilha{margin-bottom:52px}
+body.deitado .faixa{margin:26px 0 18px}
+
+/* -- cartão --------------------------------------------------------------- */
+.no{position:relative;width:210px;background:var(--papel);border:1px solid var(--linha);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:9px;cursor:pointer;text-align:left;font:inherit;color:inherit;transition:transform .18s, box-shadow .18s, border-color .18s;box-shadow:var(--sombra)}
+.no:hover,.no:focus-visible{transform:translateY(-3px);border-color:var(--fio);outline:none}
+.no:focus-visible{box-shadow:0 0 0 3px var(--secundario-p1),var(--sombra)}
+.no.apagado{opacity:.22;filter:grayscale(1)}
+.no.aceso{border-color:var(--dark-p1)}
+
+.no .cabeca{display:flex;align-items:center;gap:10px}
+.no .quadro{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;flex:none}
+.no .quadro svg{width:22px;height:22px;display:block}
+.no .num{font-family:var(--titulo);font-weight:700;font-size:12px;letter-spacing:.06em;color:var(--tinta-fraca)}
+.no h3{font-size:15px;line-height:1.25}
+.no .diz{font-size:12.5px;color:var(--tinta-fraca);line-height:1.45}
+.no .req{display:flex;flex-wrap:wrap;gap:4px}
+.no .req i{font-style:normal;font-size:10.5px;font-weight:500;padding:2px 7px;border-radius:20px;background:var(--light-p1);color:var(--dark-p1);letter-spacing:.02em}
+
+/* contexto de cor — seção 2.3, regra 4 */
+.no[data-lado="paciente"] .quadro{background:var(--secundario-p1);color:var(--secundario-1)}
+.no[data-lado="psicologo"] .quadro{background:var(--primario-p1);color:var(--primario-1)}
+.no[data-lado="neutro"] .quadro{background:linear-gradient(135deg,var(--secundario-p1),var(--primario-p1));color:var(--dark)}
+.no[data-lado="admin"] .quadro{background:var(--light-p1);color:var(--dark-p1)}
+.no[data-lado="paciente"]:hover{border-color:var(--secundario-1)}
+.no[data-lado="psicologo"]:hover{border-color:var(--primario-1)}
+
+/* estado e ação não são tela: cartão mais leve, sem número */
+.no[data-tipo="estado"],.no[data-tipo="acao"]{width:186px;background:transparent;box-shadow:none;border-style:dashed}
+.no[data-tipo="estado"] h3,.no[data-tipo="acao"] h3{font-size:14px}
+.no[data-tipo="decisao"]{border-width:2px}
+
+/* -- painel de detalhe ---------------------------------------------------- */
+.painel{position:fixed;top:0;right:0;width:min(400px,92vw);height:100vh;background:var(--papel);border-left:1px solid var(--linha);box-shadow:-12px 0 40px rgba(20,20,20,.10);padding:28px;overflow-y:auto;transform:translateX(100%);transition:transform .26s cubic-bezier(.4,0,.2,1);z-index:50}
+.painel.aberto{transform:none}
+.painel .fecha{position:absolute;top:18px;right:18px;width:34px;height:34px;border-radius:10px;border:1px solid var(--linha);background:transparent;color:var(--tinta);cursor:pointer;font-size:17px;line-height:1}
+.painel .selo-lado{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:20px;margin-bottom:14px;color:var(--dark)}
+.painel h3{font-size:23px;margin-bottom:6px}
+.painel .sub{color:var(--tinta-fraca);font-size:13px;margin-bottom:18px}
+.painel .bloco{margin-top:20px}
+.painel .bloco b{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--tinta-fraca);margin-bottom:6px;font-weight:600}
+.painel .bloco p{font-size:14px}
+.painel ul{list-style:none;display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.painel ul li{font-size:13.5px;padding-left:16px;position:relative;color:var(--tinta-fraca)}
+.painel ul li::before{content:'';position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:50%;background:var(--fio)}
+.veu{position:fixed;inset:0;background:rgba(20,20,20,.35);opacity:0;pointer-events:none;transition:.26s;z-index:45}
+.veu.aberto{opacity:1;pointer-events:auto}
+
+/* -- rodapé --------------------------------------------------------------- */
+.rodape{max-width:1180px;margin:0 auto;padding:0 24px 70px}
+.legenda{display:flex;flex-wrap:wrap;gap:18px;padding:18px 0;border-top:1px solid var(--linha);font-size:12.5px;color:var(--tinta-fraca)}
+.legenda span{display:flex;align-items:center;gap:8px}
+.amostra{width:22px;height:14px;border-radius:5px;border:1px solid var(--linha)}
+.aviso{border-left:3px solid var(--light-1);background:var(--papel);padding:12px 16px;border-radius:0 8px 8px 0;font-size:13px;color:var(--tinta-fraca);margin-top:8px}
+
+@media (max-width:1180px){ .dica{display:none} }
+</style>
+</head>
+<body>
+
+<header class="topo">
+  <span class="olho">TCC · Desenvolvimento de Sistemas · SENAI-SP · 4º termo</span>
+  <h1>Fluxo de UX do Calmind</h1>
+  <p class="lede">As 16 telas do protótipo e os estados entre elas, das duas portas de entrada até o ciclo semanal de cada lado. Clique em qualquer cartão para ver o requisito que ele atende e a regra que precisa ser verdadeira na implementação.</p>
+</header>
+
+<nav class="controles">
+  <div class="controles-in">
+    <button class="chip" data-lado="tudo" aria-pressed="true">Tudo</button>
+    <button class="chip" data-lado="paciente" aria-pressed="false">Paciente</button>
+    <button class="chip" data-lado="psicologo" aria-pressed="false">Psicólogo</button>
+    <button class="chip" data-lado="neutro" aria-pressed="false">Antes do login</button>
+    <div class="sep"></div>
+    <button class="chip" id="btCruza" aria-pressed="true">Ligações entre os lados</button>
+    <div class="sep"></div>
+    <div class="zoom">
+      <button id="btMenos" title="Diminuir">−</button>
+      <span id="nivelZoom">100%</span>
+      <button id="btMais" title="Aumentar">+</button>
+      <button id="btAjusta" title="Ajustar à tela" style="width:auto;padding:0 12px;font-size:13px">Ajustar</button>
+    </div>
+    <button class="chip" id="btDeita" aria-pressed="false" title="Faz o fluxo correr da esquerda para a direita">Deitar o mapa</button>
+    <div class="exporta">
+      <button class="chip saida" id="btPng" title="Imagem do mapa inteiro, em alta resolução">Baixar PNG</button>
+      <button class="chip saida" id="btPdf" title="Abre a caixa de impressão já pronta para salvar em PDF">Salvar PDF</button>
+    </div>
+  </div>
+</nav>
+
+<main class="palco" id="palco">
+  <div class="canvas" id="canvas">
+    <svg class="fios" id="fios" aria-hidden="true"></svg>
+    <div id="trilhas"></div>
+  </div>
+</main>
+
+<div class="veu" id="veu"></div>
+<aside class="painel" id="painel" role="dialog" aria-modal="false" aria-labelledby="painelTitulo">
+  <button class="fecha" id="btFecha" aria-label="Fechar">×</button>
+  <span class="selo-lado" id="painelLado"></span>
+  <h3 id="painelTitulo"></h3>
+  <p class="sub" id="painelSub"></p>
+  <div class="bloco"><b>O que a pessoa faz aqui</b><p id="painelDiz"></p></div>
+  <div class="bloco" id="blocoRegra"><b>A regra que precisa ser verdadeira</b><p id="painelRegra"></p></div>
+  <div class="bloco" id="blocoLiga"><b>Leva para</b><ul id="painelLiga"></ul></div>
+</aside>
+
+<footer class="rodape">
+  <div class="legenda">
+    <span><i class="amostra" style="background:linear-gradient(135deg,#D6F2C2,#DFB3F2)"></i> antes do login, sem lado definido</span>
+    <span><i class="amostra" style="background:#D6F2C2"></i> paciente</span>
+    <span><i class="amostra" style="background:#DFB3F2"></i> psicólogo</span>
+    <span><i class="amostra" style="background:#E4E4E4"></i> administrador</span>
+    <span><i class="amostra" style="border-style:dashed;background:transparent"></i> estado ou ação sem tela própria na Sprint 1</span>
+    <span><svg width="26" height="8"><line x1="0" y1="4" x2="26" y2="4" stroke="#B9B9C2" stroke-width="1.6" stroke-dasharray="5 5"/></svg> ligação entre os dois lados</span>
+  </div>
+  <p class="aviso"><b>Sobre a numeração.</b> Os números seguem o <code>wireframes.html</code>, que tem 16 telas. O arquivo do Figma tem 14 e diverge a partir da nona. Ao comparar os dois documentos, use o nome da tela, nunca o número.</p>
+</footer>
+
+<script>
+/* =============================================================================
+   1. Os nós. Cada um sabe de que lado está, que glifo desenha e o que valida.
+   ========================================================================== */
+const NOS = {
+  app:      {lado:'neutro', tipo:'inicio', titulo:'Abrir o Calmind', glifo:'app',
+             diz:'Primeiro contato com o produto, ainda sem saber quem é a pessoa.',
+             regra:'As telas anteriores ao login não escolhem lado: usam o gradiente que funde o verde e o rosa.'},
+  t01:      {lado:'neutro', num:'01', titulo:'Entrada', glifo:'chave', req:['RF-01','RF-02'],
+             diz:'Entrar com e-mail e senha, ou criar conta.',
+             regra:'Erro de login usa mensagem genérica, sem dizer se o errado foi o e-mail ou a senha (CA-02.2).'},
+  perfil:   {lado:'neutro', tipo:'decisao', titulo:'Escolha de perfil', glifo:'bifurca', req:['RF-01'],
+             diz:'Paciente ou psicólogo. A conta fica presa à escolha.',
+             regra:'O perfil é escolhido no cadastro e não muda depois (CA-01.1).'},
+  t02:      {lado:'neutro', num:'02', titulo:'Consentimento', glifo:'escudo', req:['RF-03','RF-04','RNF-13'],
+             diz:'Dois aceites independentes: o tratamento de dados de saúde e, separado dele, a análise por IA.',
+             regra:'Recusar o primeiro bloqueia as funções clínicas. Cada aceite grava data, hora e versão. O consentimento de IA é exclusivo do paciente e pode ser revogado a qualquer momento (art. 11 da LGPD).'},
+
+  /* ---- trilha do paciente ---- */
+  t03:      {lado:'paciente', num:'03', tipo:'decisao', titulo:'Como você chegou aqui', glifo:'bifurca',
+             diz:'As duas portas do produto: já tenho psicólogo, ou preciso encontrar um.',
+             regra:'Fluxo 3.1 do documento base: ferramenta de continuidade de um lado, facilitador de acesso do outro.'},
+  t04:      {lado:'paciente', num:'04', titulo:'Código de convite', glifo:'convite', req:['RF-07','RNF-05'],
+             diz:'Digita o código que o psicólogo ditou na sessão presencial.',
+             regra:'O alfabeto do código não usa O, I, 0 nem 1. A mensagem de erro é única para todas as causas e não revela de quem era o código (CA-07.2).'},
+  t05:      {lado:'paciente', num:'05', titulo:'Catálogo', glifo:'busca', req:['RF-09'],
+             diz:'Procura profissional por abordagem, especialidade, modalidade e região.',
+             regra:'Sem preço, sem nota, sem estrela e sem ordenação por reputação — art. 20 do Código de Ética, DEC-06. Nome completo e CRP sempre visíveis. Quem já tem vínculo ativo não acessa esta tela.'},
+  t06:      {lado:'paciente', num:'06', titulo:'Perfil e solicitação', glifo:'pessoa', req:['RF-10','RF-34'],
+             diz:'Lê a apresentação do profissional e solicita o vínculo.',
+             regra:'A apresentação é escrita e publicada pelo próprio psicólogo, nunca gerada pela plataforma (CA-34.3). A solicitação cria vínculo pendente até ele responder.'},
+  vinculo:  {lado:'paciente', tipo:'estado', titulo:'Vínculo ativo', glifo:'elo', req:['RF-11','RF-12'],
+             diz:'Estado, não tela. É o que destrava relato, tarefa, conversa e agenda.',
+             regra:'No máximo um vínculo ativo por paciente, garantido pelo banco e não pelo código da aplicação.'},
+  t07:      {lado:'paciente', num:'07', titulo:'Início do paciente', glifo:'casa',
+             diz:'O centro do lado do paciente. Responde uma pergunta só: o que falta de mim esta semana.',
+             regra:'A ação principal é escrever relato, porque é o que alimenta a sessão seguinte. Ao rolar, o topo se retrai e a tela passa ao estado de leitura (07b).'},
+  t08:      {lado:'paciente', num:'08', titulo:'Novo relato', glifo:'escrever', req:['RF-22','DEC-12','RNF-37'],
+             diz:'Escreve o relato da semana e escolhe se ele é compartilhado ou privado.',
+             regra:'O seletor fica acima do campo de texto, visível sem rolagem, já marcado em compartilhado, com o estado ativo indicado por preenchimento e peso — não só por borda. Depois de salvo, privado não vira compartilhado (CA-22.3).'},
+  t09:      {lado:'paciente', num:'09', titulo:'Meus relatos', glifo:'lista', req:['RF-22','RF-24'],
+             diz:'Histórico completo, com o estado sinalizado em cada relato.',
+             regra:'Do lado do paciente tudo aparece. Ao despublicar, se o relato já entrou numa análise, o app avisa antes de confirmar e não promete apagamento retroativo (CA-24.2).'},
+  t10:      {lado:'paciente', num:'10', titulo:'Tarefas', glifo:'tarefa', req:['RF-25'],
+             diz:'Cards do que foi combinado na sessão, com prazo visível.',
+             regra:'Pendentes separadas das concluídas. Concluir grava data e hora, e concluir de novo não duplica (CA-25.3).'},
+  t11:      {lado:'paciente', num:'11', titulo:'Conversa', glifo:'chat', req:['RF-15'],
+             diz:'Canal assíncrono dentro do vínculo ativo.',
+             regra:'Não é atendimento em tempo real e a plataforma não hospeda sessão (DEC-08). O combinado de que a resposta não é imediata fica explícito na interface.'},
+  t12:      {lado:'paciente', num:'12', titulo:'Agenda', glifo:'agenda', req:['RF-26'],
+             diz:'Vê as próximas consultas e recebe lembrete.',
+             regra:'O paciente só visualiza: criar, alterar e cancelar é atribuição do psicólogo (CA-26.3).'},
+  remedio:  {lado:'paciente', tipo:'acao', titulo:'Lembrete de adesão', glifo:'remedio', req:['RF-27','RF-28'],
+             diz:'Confirma a medicação já registrada pelo psicólogo.',
+             regra:'A plataforma não prescreve. O lembrete só passa a valer depois que o paciente confirma, e o vocabulário nunca usa "prescrever" (RNF-36).'},
+
+  /* ---- trilha do psicólogo ---- */
+  t13:      {lado:'psicologo', num:'13', titulo:'Cadastro profissional', glifo:'credencial', req:['RF-33'],
+             diz:'Informa o CRP e envia o documento comprobatório.',
+             regra:'Validação de formato, mais documento, mais aprovação humana: não existe consulta pública automatizada ao cadastro nacional. Enquanto pendente, publicar perfil e gerar convite ficam bloqueados (CA-33.4).'},
+  aprova:   {lado:'admin', tipo:'estado', titulo:'Aprovação do administrador', glifo:'confere', req:['RF-44'],
+             diz:'Painel interno. Analisa o documento e aprova ou recusa.',
+             regra:'É o único ponto do produto em que uma pessoa de fora do vínculo decide alguma coisa, e por isso fica registrado em trilha de auditoria.'},
+  publica:  {lado:'psicologo', tipo:'acao', titulo:'Publicar perfil', glifo:'publicar', req:['RF-34'],
+             diz:'Escreve a própria apresentação e a torna visível no catálogo.',
+             regra:'O conteúdo é escrito pelo profissional, nunca gerado pela plataforma nem por IA (RNF-22).'},
+  t14:      {lado:'psicologo', num:'14', titulo:'Meus pacientes', glifo:'pessoas', req:['RF-35','RF-06'],
+             diz:'O centro do lado clínico. Existe para responder de quem cuidar primeiro.',
+             regra:'Sinaliza pendência em vez de listar nomes em ordem alfabética. A barra de abas é diferente da do paciente: mesmo app, dois lados (DEC-01).'},
+  convite:  {lado:'psicologo', tipo:'acao', titulo:'Gerar convite', glifo:'convite', req:['RF-06','RF-08'],
+             diz:'Cria o código que será ditado ao paciente na sessão.',
+             regra:'O código expira e pode ser revogado. Só é gerado depois do cadastro aprovado (CA-06.3).'},
+  solicita: {lado:'psicologo', tipo:'acao', titulo:'Solicitações de vínculo', glifo:'elo', req:['RF-11'],
+             diz:'Aceita ou recusa quem pediu vínculo pelo catálogo.',
+             regra:'Aceitar é o que transforma o vínculo pendente em ativo, e a transição é atômica.'},
+  t15:      {lado:'psicologo', num:'15', titulo:'Prontuário', glifo:'pasta', req:['RF-36','RNF-08'],
+             diz:'Reúne relatos compartilhados, tarefas, agenda e histórico do paciente.',
+             regra:'A contagem diz "2 relatos compartilhados" e nunca "2 de 3". Nada aqui pode denunciar a existência de relato privado, nem por número, nem por lacuna, nem por espaço reservado (CA-23.1, CA-23.2).'},
+  t16:      {lado:'psicologo', num:'16', titulo:'Resumo da semana', glifo:'ia', req:['RF-41','RF-42','DEC-04'],
+             diz:'Pede à IA um resumo dos relatos compartilhados, antes da sessão.',
+             regra:'A análise só roda quando o profissional pede, nunca por rotina (CA-41.2). O conteúdo enviado é pseudonimizado e o rótulo de origem é obrigatório em toda exibição (CA-41.3, RNF-29, RNF-32).'},
+  confirma: {lado:'psicologo', tipo:'estado', titulo:'Confirmar ou descartar', glifo:'confere', req:['RNF-31'],
+             diz:'Nada da IA entra no prontuário sem esta decisão.',
+             regra:'O descarte não deixa rastro consultável (CA-42.2). É o compromisso número 1 do produto: a IA nunca age sozinha.'},
+  atribui:  {lado:'psicologo', tipo:'acao', titulo:'Atribuir tarefa', glifo:'tarefa', req:['RF-37'],
+             diz:'Combina o que o paciente faz entre uma sessão e outra.',
+             regra:'A tarefa nasce da sessão, com prazo, e aparece no app do paciente com lembrete.'},
+  marca:    {lado:'psicologo', tipo:'acao', titulo:'Criar e remarcar consulta', glifo:'agenda', req:['RF-26','RF-40'],
+             diz:'Agenda, altera e cancela — atribuição exclusiva dele.',
+             regra:'Toda alteração notifica o paciente. O lembrete padrão chega com antecedência de dois dias, achado da pesquisa de campo.'},
+  responde: {lado:'psicologo', tipo:'acao', titulo:'Responder conversa', glifo:'chat', req:['RF-15'],
+             diz:'Responde quando puder, dentro do vínculo ativo.',
+             regra:'O produto existe para tirar esse contato do WhatsApp pessoal, que foi a dor mais citada pelas duas psicólogas.'},
+  registra: {lado:'psicologo', tipo:'acao', titulo:'Registrar medicação em uso', glifo:'remedio', req:['RF-27'],
+             diz:'Anota a medicação já prescrita por médico, com origem obrigatória.',
+             regra:'A plataforma não prescreve nem altera dose. O paciente confirma antes de qualquer lembrete valer (DEC-10).'}
+};
+
+/* =============================================================================
+   2. O desenho: fileiras por trilha, e as arestas.
+   ========================================================================== */
+const TRILHAS = [
+  {id:'tronco', rotulo:'Antes de o sistema saber quem é você', fileiras:[['app'],['t01'],['perfil'],['t02']]},
+  {id:'pac', rotulo:'Trilha do paciente', fileiras:[
+      ['t03'], ['t04','t05'], ['t06'], ['vinculo'], ['t07'],
+      ['t08','t09','t10'], ['t11','t12','remedio']
+  ]},
+  {id:'psi', rotulo:'Trilha do psicólogo', fileiras:[
+      ['t13'], ['aprova'], ['t14'], ['publica','convite','solicita'],
+      ['t15'], ['atribui','marca','responde','registra'], ['t16'], ['confirma']
+  ]}
+];
+
+/* tipo: 'fluxo' desce na mesma trilha · 'cruza' liga os dois lados */
+const ARESTAS = [
+  ['app','t01'], ['t01','perfil'], ['perfil','t02'],
+  ['t02','t03'], ['t02','t13','fluxo','esquerda'],
+
+  ['t03','t04'], ['t03','t05'], ['t05','t06'],
+  ['t04','vinculo'], ['t06','vinculo'], ['vinculo','t07'],
+  ['t07','t08'], ['t07','t09'], ['t07','t10'],
+  ['t07','t11','fluxo','direita'], ['t07','t12','fluxo','direita'], ['t07','remedio','fluxo','direita'],
+  ['t08','t09'],
+
+  ['t13','aprova'], ['aprova','t14'],
+  ['t14','publica'], ['t14','convite'], ['t14','solicita'], ['t14','t15','fluxo','esquerda'],
+  ['t15','atribui'], ['t15','marca'], ['t15','responde'], ['t15','registra'],
+  ['t15','t16','fluxo','direita'], ['t16','confirma'],
+
+  ['convite','t04','cruza','esquerda'],
+  ['publica','t05','cruza','esquerda'],
+  ['t06','solicita','cruza','direita'],
+  ['solicita','vinculo','cruza','esquerda'],
+  ['t08','t15','cruza','direita'],
+  ['atribui','t10','cruza','esquerda'],
+  ['marca','t12','cruza','esquerda'],
+  ['responde','t11','cruza','esquerda'],
+  ['registra','remedio','cruza','esquerda']
+];
+
+/* =============================================================================
+   3. Glifos gerados na hora. Nenhuma imagem externa, nenhuma tela simulada.
+   ========================================================================== */
+const G = {
+  app:      '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.2" opacity=".45"/>',
+  chave:    '<rect x="4" y="10" width="16" height="10" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2"/>',
+  bifurca:  '<path d="M12 3v6M12 9 6 15v6M12 9l6 6v6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
+  escudo:   '<path d="M12 3l7 3v6c0 4.4-3 8-7 9-4-1-7-4.6-7-9V6z"/>',
+  convite:  '<rect x="3" y="6" width="18" height="12" rx="2.5"/><path d="M3.5 8l8.5 6 8.5-6" fill="none" stroke="var(--papel)" stroke-width="1.8"/>',
+  busca:    '<circle cx="10.5" cy="10.5" r="6" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15 15l5 5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>',
+  pessoa:   '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z"/>',
+  pessoas:  '<circle cx="8.5" cy="8" r="3.4"/><circle cx="16.5" cy="9" r="2.8" opacity=".5"/><path d="M2 20c0-3.6 3-6 6.5-6s6.5 2.4 6.5 6z"/><path d="M15 20c0-2.6 1.4-4.6 3.4-5.4 1.9.8 3.1 2.8 3.1 5.4z" opacity=".5"/>',
+  elo:      '<path d="M9 15l6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M13.5 6.5l1.5-1.5a3.5 3.5 0 1 1 5 5l-1.5 1.5M10.5 17.5L9 19a3.5 3.5 0 1 1-5-5l1.5-1.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
+  casa:     '<path d="M4 11l8-7 8 7v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 20z"/><rect x="9.5" y="14" width="5" height="7.5" rx="1" fill="var(--papel)"/>',
+  escrever: '<path d="M4 20h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M5 16.5L16 5.5l3 3L8 19.5H5z"/>',
+  lista:    '<rect x="4" y="5" width="16" height="3" rx="1.5"/><rect x="4" y="10.5" width="16" height="3" rx="1.5" opacity=".6"/><rect x="4" y="16" width="10" height="3" rx="1.5" opacity=".35"/>',
+  tarefa:   '<rect x="3.5" y="4.5" width="17" height="15" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 12l3 3 5-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',
+  chat:     '<path d="M4 5h16a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 20 17h-7l-5 4v-4H4a1.5 1.5 0 0 1-1.5-1.5v-9A1.5 1.5 0 0 1 4 5z"/>',
+  agenda:   '<rect x="3.5" y="5.5" width="17" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 10h17" stroke="currentColor" stroke-width="2"/><path d="M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="15" r="1.8"/>',
+  remedio:  '<rect x="2.5" y="8" width="19" height="8" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 8v8" stroke="currentColor" stroke-width="2"/><circle cx="7" cy="12" r="1.4"/>',
+  credencial:'<rect x="3" y="5" width="18" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8.5" cy="11" r="2.4"/><path d="M13 9.5h5M13 13h3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+  confere:  '<circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 12.2l2.8 2.8L16 9.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>',
+  publicar: '<path d="M12 4v11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M7.5 8.5L12 4l4.5 4.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 15v3.5a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5V15" fill="none" stroke="currentColor" stroke-width="2"/>',
+  pasta:    '<path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4l2 2.5h9A1.5 1.5 0 0 1 21 9v9.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/>',
+  ia:       '<path d="M12 3l1.9 4.6L18.5 9l-4.6 1.9L12 15.5l-1.9-4.6L5.5 9l4.6-1.4z"/><circle cx="17.5" cy="17" r="2.2" opacity=".55"/><circle cx="7" cy="18.5" r="1.5" opacity=".35"/>'
+};
+const glifo = (k) => '<svg viewBox="0 0 24 24" fill="currentColor">' + (G[k] || G.app) + '</svg>';
+
+/* =============================================================================
+   4. Montagem
+   ========================================================================== */
+const trilhasEl = document.getElementById('trilhas');
+const svg = document.getElementById('fios');
+
+TRILHAS.forEach(tr => {
+  const sec = document.createElement('section');
+  sec.className = 'trilha';
+  sec.dataset.trilha = tr.id;
+
+  const total = tr.fileiras.flat().filter(id => NOS[id].num).length;
+  const faixa = document.createElement('div');
+  faixa.className = 'faixa';
+  faixa.innerHTML = '<h2>' + tr.rotulo + '</h2><i class="traco"></i>' +
+    (total ? '<span class="conta">' + total + (total > 1 ? ' telas' : ' tela') + '</span>' : '');
+  sec.appendChild(faixa);
+
+  const caixaFileiras = document.createElement('div');
+  caixaFileiras.className = 'fileiras';
+  tr.fileiras.forEach(fileira => {
+    const div = document.createElement('div');
+    div.className = 'fileira';
+    fileira.forEach(id => div.appendChild(cartao(id, NOS[id])));
+    caixaFileiras.appendChild(div);
+  });
+  sec.appendChild(caixaFileiras);
+  trilhasEl.appendChild(sec);
+});
+
+function cartao(id, n){
+  const b = document.createElement('button');
+  b.className = 'no';
+  b.id = 'no-' + id;
+  b.dataset.id = id;
+  b.dataset.lado = n.lado;
+  b.dataset.tipo = n.tipo || 'tela';
+  b.type = 'button';
+  b.innerHTML =
+    '<div class="cabeca">' +
+      '<div class="quadro">' + glifo(n.glifo) + '</div>' +
+      '<div>' + (n.num ? '<div class="num">TELA ' + n.num + '</div>' : '') +
+      '<h3>' + n.titulo + '</h3></div>' +
+    '</div>' +
+    '<p class="diz">' + n.diz + '</p>' +
+    (n.req ? '<div class="req">' + n.req.map(r => '<i>' + r + '</i>').join('') + '</div>' : '');
+  b.addEventListener('click', () => abrir(id));
+  b.addEventListener('mouseenter', () => acender(id));
+  b.addEventListener('mouseleave', apagar);
+  b.addEventListener('focus', () => acender(id));
+  b.addEventListener('blur', apagar);
+  return b;
+}
+
+/* =============================================================================
+   5. Os fios. Coordenadas em offsetLeft/offsetTop, que ignoram o zoom.
+   ========================================================================== */
+const NS = 'http://www.w3.org/2000/svg';
+const canvas = document.getElementById('canvas');
+
+/* Sobe a cadeia de offsetParent até o canvas. Não dá para usar offsetTop
+   direto: .trilha é position:relative, então ela vira o offsetParent dos
+   cartões e as coordenadas sairiam relativas à trilha, não ao canvas. */
+function caixa(id){
+  const el = document.getElementById('no-' + id);
+  let x = 0, y = 0, n = el;
+  while (n && n !== canvas){ x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; }
+  return {x: x, y: y, w: el.offsetWidth, h: el.offsetHeight};
+}
+
+/* Geometria de uma aresta, compartilhada pelo SVG da tela e pelo PNG.
+   Em pé o fio sai da base e entra pelo topo; deitado sai da direita e entra
+   pela esquerda. O `via` das arestas longas continua o mesmo dado: em pé ele
+   escolhe a calha lateral, deitado escolhe a calha de cima ou de baixo. */
+function geometria(de, para, via){
+  const A = caixa(de), B = caixa(para);
+
+  if (!deitado){
+    const ax = A.x + A.w / 2, ay = A.y + A.h;
+    const bx = B.x + B.w / 2, by = B.y;
+    if (Math.abs(by - ay) < 130 && !via){
+      return {k:'curva', eixo:'v', ax:ax, ay:ay, bx:bx, by:by, m:(ay + by) / 2};
+    }
+    const gx = via === 'esquerda' ? -34 : canvas.offsetWidth + 34;
+    return {k:'orto', eixo:'v', bx:bx, by:by,
+            pts:[[ax,ay],[ax,ay+22],[gx,ay+22],[gx,by-22],[bx,by-22],[bx,by]]};
+  }
+
+  const ax = A.x + A.w, ay = A.y + A.h / 2;
+  const bx = B.x, by = B.y + B.h / 2;
+  if (Math.abs(bx - ax) < 130 && !via){
+    return {k:'curva', eixo:'h', ax:ax, ay:ay, bx:bx, by:by, m:(ax + bx) / 2};
+  }
+  const gy = via === 'esquerda' ? -34 : canvas.offsetHeight + 34;
+  return {k:'orto', eixo:'h', bx:bx, by:by,
+          pts:[[ax,ay],[ax+22,ay],[ax+22,gy],[bx-22,gy],[bx-22,by],[bx,by]]};
+}
+
+/* Traço da curva curta, no eixo certo. */
+function curvaSvg(g){
+  return g.eixo === 'v'
+    ? 'M' + g.ax + ' ' + g.ay + ' C' + g.ax + ' ' + g.m + ' ' + g.bx + ' ' + g.m + ' ' + g.bx + ' ' + g.by
+    : 'M' + g.ax + ' ' + g.ay + ' C' + g.m + ' ' + g.ay + ' ' + g.m + ' ' + g.by + ' ' + g.bx + ' ' + g.by;
+}
+
+/* Os três pontos da ponta de seta, apontando para dentro do cartão de destino. */
+function pontaSeta(g){
+  return g.eixo === 'v'
+    ? [[g.bx-4.5, g.by-6], [g.bx, g.by], [g.bx+4.5, g.by-6]]
+    : [[g.bx-6, g.by-4.5], [g.bx, g.by], [g.bx-6, g.by+4.5]];
+}
+
+/* caminho ortogonal com cantos arredondados, para as ligações longas */
+function ortogonal(pts, r){
+  let d = 'M' + pts[0][0] + ' ' + pts[0][1];
+  for (let i = 1; i < pts.length - 1; i++){
+    const [px,py] = pts[i-1], [cx,cy] = pts[i], [nx,ny] = pts[i+1];
+    const e1 = Math.min(r, Math.hypot(cx-px, cy-py) / 2);
+    const e2 = Math.min(r, Math.hypot(nx-cx, ny-cy) / 2);
+    const a = [cx + Math.sign(px-cx) * (px===cx?0:e1), cy + Math.sign(py-cy) * (py===cy?0:e1)];
+    const b = [cx + Math.sign(nx-cx) * (nx===cx?0:e2), cy + Math.sign(ny-cy) * (ny===cy?0:e2)];
+    d += ' L' + a[0] + ' ' + a[1] + ' Q' + cx + ' ' + cy + ' ' + b[0] + ' ' + b[1];
+  }
+  const f = pts[pts.length-1];
+  return d + ' L' + f[0] + ' ' + f[1];
+}
+
+function desenhar(){
+  svg.innerHTML = '';
+  svg.setAttribute('width', canvas.offsetWidth);
+  svg.setAttribute('height', canvas.offsetHeight);
+
+  ARESTAS.forEach(([de, para, tipo = 'fluxo', via]) => {
+    const g = geometria(de, para, via);
+    const d = g.k === 'curva' ? curvaSvg(g) : ortogonal(g.pts, 14);
+
+    const p = document.createElementNS(NS, 'path');
+    p.setAttribute('d', d);
+    p.setAttribute('class', tipo);
+    p.dataset.de = de; p.dataset.para = para; p.dataset.tipo = tipo;
+    svg.appendChild(p);
+
+    const s = pontaSeta(g);
+    const ponta = document.createElementNS(NS, 'path');
+    ponta.setAttribute('d', 'M' + s[0][0] + ' ' + s[0][1] + ' L' + s[1][0] + ' ' + s[1][1] +
+                            ' L' + s[2][0] + ' ' + s[2][1] + ' Z');
+    ponta.setAttribute('class', 'ponta');
+    ponta.dataset.de = de; ponta.dataset.para = para; ponta.dataset.tipo = tipo;
+    svg.appendChild(ponta);
+  });
+  aplicarFiltro();
+}
+
+/* =============================================================================
+   6. Interação
+   ========================================================================== */
+function acender(id){
+  svg.querySelectorAll('path').forEach(p => {
+    const liga = p.dataset.de === id || p.dataset.para === id;
+    p.classList.toggle('aceso', liga);
+  });
+  document.querySelectorAll('.no').forEach(n => {
+    const v = n.dataset.id;
+    const liga = v === id || ARESTAS.some(([a,b]) => (a===id && b===v) || (b===id && a===v));
+    n.classList.toggle('aceso', liga);
+  });
+}
+function apagar(){
+  svg.querySelectorAll('path').forEach(p => p.classList.remove('aceso'));
+  document.querySelectorAll('.no').forEach(n => n.classList.remove('aceso'));
+}
+
+/* -- orientação -- */
+let deitado = false;
+document.getElementById('btDeita').addEventListener('click', function(){
+  deitado = !deitado;
+  document.body.classList.toggle('deitado', deitado);
+  this.setAttribute('aria-pressed', String(deitado));
+  this.textContent = deitado ? 'Colocar em pé' : 'Deitar o mapa';
+  aplicarZoom(1);
+  desenhar();
+  window.scrollTo({top:0});
+});
+
+/* -- filtro por lado, que também é âncora de navegação -- */
+let lado = 'tudo', mostraCruza = true;
+const ANCORA = {paciente:'pac', psicologo:'psi', neutro:'tronco'};
+
+document.querySelectorAll('.chip[data-lado]').forEach(c => {
+  c.addEventListener('click', () => {
+    lado = c.dataset.lado;
+    document.querySelectorAll('.chip[data-lado]').forEach(o =>
+      o.setAttribute('aria-pressed', String(o === c)));
+    aplicarFiltro();
+
+    const alvo = ANCORA[lado];
+    if (alvo){
+      document.querySelector('[data-trilha="' + alvo + '"]')
+              .scrollIntoView({behavior:'smooth', block:'start'});
+    } else {
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+  });
+});
+document.getElementById('btCruza').addEventListener('click', function(){
+  mostraCruza = !mostraCruza;
+  this.setAttribute('aria-pressed', String(mostraCruza));
+  aplicarFiltro();
+});
+
+function visivel(id){
+  if (lado === 'tudo') return true;
+  const l = NOS[id].lado;
+  return l === lado || (lado !== 'neutro' && l === 'admin' && lado === 'psicologo');
+}
+function aplicarFiltro(){
+  document.querySelectorAll('.no').forEach(n =>
+    n.classList.toggle('apagado', !visivel(n.dataset.id)));
+  svg.querySelectorAll('path').forEach(p => {
+    const cruz = p.dataset.tipo === 'cruza';
+    const ok = visivel(p.dataset.de) && visivel(p.dataset.para) && (!cruz || mostraCruza);
+    p.style.opacity = ok ? '' : '0';
+  });
+}
+
+/* -- painel -- */
+const painel = document.getElementById('painel'), veu = document.getElementById('veu');
+const ROTULO = {paciente:'Paciente', psicologo:'Psicólogo', neutro:'Antes do login', admin:'Administrador'};
+const TINTA  = {paciente:'#D6F2C2', psicologo:'#DFB3F2', neutro:'linear-gradient(100deg,#D6F2C2,#DFB3F2)', admin:'#E4E4E4'};
+
+function abrir(id){
+  const n = NOS[id];
+  document.getElementById('painelLado').textContent = ROTULO[n.lado];
+  document.getElementById('painelLado').style.background = TINTA[n.lado];
+  document.getElementById('painelTitulo').textContent = n.titulo;
+  document.getElementById('painelSub').textContent =
+    (n.num ? 'Tela ' + n.num + ' · ' : '') + (n.req ? n.req.join(' · ') : 'Sem tela própria na Sprint 1');
+  document.getElementById('painelDiz').textContent = n.diz;
+  document.getElementById('painelRegra').textContent = n.regra;
+
+  const ul = document.getElementById('painelLiga');
+  ul.innerHTML = '';
+  const saidas = ARESTAS.filter(a => a[0] === id);
+  saidas.forEach(([, para, tipo]) => {
+    const li = document.createElement('li');
+    li.textContent = NOS[para].titulo + (tipo === 'cruza' ? ' — atravessa para o outro lado' : '');
+    ul.appendChild(li);
+  });
+  document.getElementById('blocoLiga').style.display = saidas.length ? '' : 'none';
+
+  painel.classList.add('aberto');
+  veu.classList.add('aberto');
+}
+function fechar(){ painel.classList.remove('aberto'); veu.classList.remove('aberto'); }
+document.getElementById('btFecha').addEventListener('click', fechar);
+veu.addEventListener('click', fechar);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') fechar(); });
+
+/* -- zoom -- */
+let z = 1;
+function aplicarZoom(v){
+  z = Math.min(1.4, Math.max(0.4, v));
+  canvas.style.transform = 'scale(' + z + ')';
+  document.getElementById('palco').style.height = '';
+  document.getElementById('nivelZoom').textContent = Math.round(z * 100) + '%';
+}
+document.getElementById('btMais').addEventListener('click', () => aplicarZoom(z + 0.1));
+document.getElementById('btMenos').addEventListener('click', () => aplicarZoom(z - 0.1));
+document.getElementById('btAjusta').addEventListener('click', () => {
+  const disp = document.getElementById('palco').clientWidth - 48;
+  aplicarZoom(Math.min(1, disp / canvas.offsetWidth));
+});
+
+/* =============================================================================
+   7. Exportação. Redesenha o mapa inteiro num canvas 2D, em vez de fotografar
+   a página: assim o PNG sai em alta resolução, sempre no tema claro, com o
+   mapa completo — o filtro da tela não vale aqui, senão sobrariam buracos onde
+   estavam as trilhas escondidas. O PDF é o mesmo desenho, numa única página
+   contínua, para nenhum cartão ser partido ao meio.
+   ========================================================================== */
+const MARGEM = 70, CABECA = 152, PE = 118;
+const CORLADO = {
+  paciente:  {quadro:'#D6F2C2', tinta:'#5BA958'},
+  psicologo: {quadro:'#DFB3F2', tinta:'#A858A9'},
+  neutro:    {quadro:null,      tinta:'#1C1C1C'},
+  admin:     {quadro:'#E4E4E4', tinta:'#606060'}
+};
+
+function posicao(el){
+  let x = 0, y = 0, n = el;
+  while (n && n !== canvas){ x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; }
+  return {x:x, y:y, w:el.offsetWidth, h:el.offsetHeight};
+}
+
+function carregarGlifo(chave, corpo, tinta){
+  return new Promise((ok, falha) => {
+    const s = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="44" height="44" fill="' +
+              tinta + '">' + corpo.replace(/currentColor/g, tinta).replace(/var\(--papel\)/g, '#FFFFFF') + '</svg>';
+    const img = new Image();
+    img.onload = () => ok(img);
+    img.onerror = falha;
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
+  });
+}
+
+function quebra(ctx, texto, largura){
+  const palavras = String(texto).split(' '), linhas = [];
+  let atual = '';
+  palavras.forEach(p => {
+    const teste = atual ? atual + ' ' + p : p;
+    if (ctx.measureText(teste).width > largura && atual){ linhas.push(atual); atual = p; }
+    else atual = teste;
+  });
+  if (atual) linhas.push(atual);
+  return linhas;
+}
+
+function caixaArredondada(ctx, x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y,     x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x,     y + h, r);
+  ctx.arcTo(x,     y + h, x,     y,     r);
+  ctx.arcTo(x,     y,     x + w, y,     r);
+  ctx.closePath();
+}
+
+function polilinha(ctx, pts, r){
+  ctx.moveTo(pts[0][0], pts[0][1]);
+  for (let i = 1; i < pts.length - 1; i++){
+    const px = pts[i-1][0], py = pts[i-1][1];
+    const cx = pts[i][0],   cy = pts[i][1];
+    const nx = pts[i+1][0], ny = pts[i+1][1];
+    const e1 = Math.min(r, Math.hypot(cx-px, cy-py) / 2);
+    const e2 = Math.min(r, Math.hypot(nx-cx, ny-cy) / 2);
+    ctx.lineTo(cx + Math.sign(px-cx) * (px===cx ? 0 : e1), cy + Math.sign(py-cy) * (py===cy ? 0 : e1));
+    ctx.quadraticCurveTo(cx, cy,
+      cx + Math.sign(nx-cx) * (nx===cx ? 0 : e2), cy + Math.sign(ny-cy) * (ny===cy ? 0 : e2));
+  }
+  ctx.lineTo(pts[pts.length-1][0], pts[pts.length-1][1]);
+}
+
+async function pintar(escala){
+  const L = canvas.offsetWidth + MARGEM * 2;
+  const A = canvas.offsetHeight + CABECA + PE;
+  const cv = document.createElement('canvas');
+  cv.width = Math.round(L * escala);
+  cv.height = Math.round(A * escala);
+  const ctx = cv.getContext('2d');
+  ctx.scale(escala, escala);
+  ctx.textBaseline = 'alphabetic';
+
+  const espaco = (v) => { try { ctx.letterSpacing = v; } catch(e){} };
+
+  /* fundo */
+  ctx.fillStyle = '#FBFBFC';
+  ctx.fillRect(0, 0, L, A);
+
+  /* cabeçalho */
+  espaco('1.5px');
+  ctx.font = '500 11.5px Poppins, sans-serif';
+  ctx.fillStyle = '#606060';
+  ctx.fillText('TCC · DESENVOLVIMENTO DE SISTEMAS · SENAI-SP · 4º TERMO', MARGEM, 54);
+  espaco('0px');
+  ctx.font = '600 34px Quicksand, sans-serif';
+  ctx.fillStyle = '#1C1C1C';
+  ctx.fillText('Fluxo de UX do Calmind', MARGEM, 96);
+  ctx.font = '400 14.5px Poppins, sans-serif';
+  ctx.fillStyle = '#606060';
+  ctx.fillText('As 16 telas do protótipo e os estados entre elas, das duas portas de entrada até o ciclo semanal de cada lado.', MARGEM, 122);
+  ctx.strokeStyle = '#E4E4E4';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(MARGEM, 138); ctx.lineTo(L - MARGEM, 138); ctx.stroke();
+
+  ctx.save();
+  ctx.translate(MARGEM, CABECA);
+
+  /* fios, por baixo dos cartões */
+  ARESTAS.forEach(([de, para, tipo = 'fluxo', via]) => {
+    const g = geometria(de, para, via);
+    const cruza = tipo === 'cruza';
+    ctx.save();
+    ctx.strokeStyle = cruza ? 'rgba(185,185,194,.6)' : '#B9B9C2';
+    ctx.lineWidth = cruza ? 1.4 : 1.6;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    if (cruza) ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    if (g.k === 'curva'){
+      ctx.moveTo(g.ax, g.ay);
+      if (g.eixo === 'v') ctx.bezierCurveTo(g.ax, g.m, g.bx, g.m, g.bx, g.by);
+      else                ctx.bezierCurveTo(g.m, g.ay, g.m, g.by, g.bx, g.by);
+    } else {
+      polilinha(ctx, g.pts, 14);
+    }
+    ctx.stroke();
+    ctx.restore();
+
+    const s = pontaSeta(g);
+    ctx.fillStyle = cruza ? 'rgba(185,185,194,.6)' : '#B9B9C2';
+    ctx.beginPath();
+    ctx.moveTo(s[0][0], s[0][1]);
+    ctx.lineTo(s[1][0], s[1][1]);
+    ctx.lineTo(s[2][0], s[2][1]);
+    ctx.closePath();
+    ctx.fill();
+  });
+
+  /* faixas de seção */
+  document.querySelectorAll('.faixa').forEach(f => {
+    const p = posicao(f);
+    const titulo = f.querySelector('h2').textContent;
+    const conta = f.querySelector('.conta');
+    ctx.font = '600 19px Quicksand, sans-serif';
+    ctx.fillStyle = '#1C1C1C';
+    ctx.fillText(titulo, p.x, p.y + p.h / 2 + 6);
+    const larg = ctx.measureText(titulo).width;
+    let fim = p.x + p.w;
+    if (conta){
+      ctx.font = '500 12px Poppins, sans-serif';
+      ctx.fillStyle = '#606060';
+      const t = conta.textContent;
+      fim = p.x + p.w - ctx.measureText(t).width;
+      ctx.fillText(t, fim, p.y + p.h / 2 + 5);
+      fim -= 12;
+    }
+    ctx.strokeStyle = '#E4E4E4';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(p.x + larg + 12, p.y + p.h / 2);
+    ctx.lineTo(fim, p.y + p.h / 2);
+    ctx.stroke();
+  });
+
+  /* glifos, carregados uma vez por combinação de desenho e lado */
+  const cache = {};
+  for (const id of Object.keys(NOS)){
+    const n = NOS[id], chave = n.glifo + '|' + n.lado;
+    if (!cache[chave]) cache[chave] = await carregarGlifo(chave, G[n.glifo] || G.app, CORLADO[n.lado].tinta);
+  }
+
+  /* cartões */
+  for (const id of Object.keys(NOS)){
+    const n = NOS[id];
+    const el = document.getElementById('no-' + id);
+    const p = posicao(el);
+    const leve = n.tipo === 'estado' || n.tipo === 'acao';
+
+    ctx.save();
+    ctx.shadowColor = 'rgba(20,20,20,.07)';
+    ctx.shadowBlur = leve ? 0 : 16;
+    ctx.shadowOffsetY = leve ? 0 : 5;
+    caixaArredondada(ctx, p.x, p.y, p.w, p.h, 14);
+    ctx.fillStyle = leve ? '#FBFBFC' : '#FFFFFF';
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    caixaArredondada(ctx, p.x + .5, p.y + .5, p.w - 1, p.h - 1, 14);
+    ctx.strokeStyle = '#D9D9D9';
+    ctx.lineWidth = 1;
+    if (leve) ctx.setLineDash([4, 4]);
+    ctx.stroke();
+    ctx.restore();
+
+    /* quadro do glifo */
+    const qx = p.x + 14, qy = p.y + 14;
+    caixaArredondada(ctx, qx, qy, 38, 38, 10);
+    if (n.lado === 'neutro'){
+      const grad = ctx.createLinearGradient(qx, qy, qx + 38, qy + 38);
+      grad.addColorStop(0, '#D6F2C2');
+      grad.addColorStop(1, '#DFB3F2');
+      ctx.fillStyle = grad;
+    } else {
+      ctx.fillStyle = CORLADO[n.lado].quadro;
+    }
+    ctx.fill();
+    ctx.drawImage(cache[n.glifo + '|' + n.lado], qx + 8, qy + 8, 22, 22);
+
+    /* textos */
+    const tx = qx + 38 + 10;
+    const largTit = p.w - 14 - (tx - p.x);
+    let y = qy;
+    if (n.num){
+      espaco('.7px');
+      ctx.font = '700 12px Quicksand, sans-serif';
+      ctx.fillStyle = '#606060';
+      ctx.fillText('TELA ' + n.num, tx, y + 11);
+      espaco('0px');
+      y += 15;
+    }
+    ctx.font = '600 15px Quicksand, sans-serif';
+    ctx.fillStyle = '#1C1C1C';
+    const lt = quebra(ctx, n.titulo, largTit);
+    lt.forEach((linha, i) => ctx.fillText(linha, tx, y + 14 + i * 18));
+
+    let yb = Math.max(qy + 38, y + 14 + (lt.length - 1) * 18 + 4) + 16;
+    ctx.font = '400 12.5px Poppins, sans-serif';
+    ctx.fillStyle = '#606060';
+    quebra(ctx, n.diz, p.w - 28).forEach((linha, i) => ctx.fillText(linha, p.x + 14, yb + i * 18));
+
+    if (n.req){
+      let px = p.x + 14;
+      const py = p.y + p.h - 14 - 17;
+      ctx.font = '500 10.5px Poppins, sans-serif';
+      n.req.forEach(r => {
+        const larg = ctx.measureText(r).width + 14;
+        caixaArredondada(ctx, px, py, larg, 17, 8.5);
+        ctx.fillStyle = '#E4E4E4';
+        ctx.fill();
+        ctx.fillStyle = '#606060';
+        ctx.fillText(r, px + 7, py + 12);
+        px += larg + 4;
+      });
+    }
+  }
+  ctx.restore();
+
+  /* rodapé: legenda e a nota da numeração */
+  const yr = CABECA + canvas.offsetHeight + 34;
+  ctx.strokeStyle = '#E4E4E4';
+  ctx.beginPath(); ctx.moveTo(MARGEM, yr - 18); ctx.lineTo(L - MARGEM, yr - 18); ctx.stroke();
+
+  const itens = [
+    ['grad', 'antes do login'], ['#D6F2C2', 'paciente'], ['#DFB3F2', 'psicólogo'],
+    ['#E4E4E4', 'administrador'], ['tracejado', 'estado ou ação sem tela própria']
+  ];
+  let lx = MARGEM;
+  ctx.font = '400 12.5px Poppins, sans-serif';
+  itens.forEach(([cor, rotulo]) => {
+    caixaArredondada(ctx, lx, yr - 2, 22, 14, 5);
+    if (cor === 'grad'){
+      const g2 = ctx.createLinearGradient(lx, yr, lx + 22, yr + 14);
+      g2.addColorStop(0, '#D6F2C2'); g2.addColorStop(1, '#DFB3F2');
+      ctx.fillStyle = g2; ctx.fill();
+    } else if (cor === 'tracejado'){
+      ctx.save(); ctx.setLineDash([3,3]); ctx.strokeStyle = '#989898'; ctx.stroke(); ctx.restore();
+    } else { ctx.fillStyle = cor; ctx.fill(); }
+    ctx.fillStyle = '#606060';
+    ctx.fillText(rotulo, lx + 30, yr + 10);
+    lx += 30 + ctx.measureText(rotulo).width + 26;
+  });
+
+  ctx.font = '400 12px Poppins, sans-serif';
+  ctx.fillStyle = '#989898';
+  ctx.fillText('Os números seguem o wireframes.html, que tem 16 telas. O arquivo do Figma tem 14 e diverge a partir da nona: ao comparar os dois, use o nome da tela.',
+               MARGEM, yr + 42);
+  ctx.fillText('Gerado em ' + new Date().toLocaleDateString('pt-BR'), MARGEM, yr + 62);
+
+  return cv;
+}
+
+function comBotoes(txt, fn){
+  return async function(){
+    const bts = document.querySelectorAll('.chip.saida');
+    const antes = this.textContent;
+    bts.forEach(b => b.disabled = true);
+    this.textContent = txt;
+    try { await fn(); }
+    catch(e){ alert('Não consegui gerar o arquivo: ' + e.message); }
+    finally { bts.forEach(b => b.disabled = false); this.textContent = antes; }
+  };
+}
+
+document.getElementById('btPng').addEventListener('click', comBotoes('Gerando…', async () => {
+  const cv = await pintar(2);
+  const blob = await new Promise(ok => cv.toBlob(ok, 'image/png'));
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'calmind-fluxo-ux.png';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}));
+
+document.getElementById('btPdf').addEventListener('click', comBotoes('Preparando…', async () => {
+  const cv = await pintar(2);
+  const blob = await new Promise(ok => cv.toBlob(ok, 'image/png'));
+  const url = URL.createObjectURL(blob);
+  /* Página única, do tamanho que o mapa precisar: assim a impressão não corta
+     cartão nenhum ao meio. Em pé o mapa é estreito e comprido, e a largura do
+     A4 basta; deitado ele é largo, e 210mm deixaria o texto pequeno demais. */
+  const larguraMm = cv.width > cv.height ? 297 : 210;
+  const alturaMm = Math.round(larguraMm * (cv.height / cv.width));
+  const w = window.open('', '_blank');
+  if (!w){ URL.revokeObjectURL(url); throw new Error('o navegador bloqueou a janela de impressão'); }
+  w.document.write(
+    '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8">' +
+    '<title>Calmind · Fluxo de UX</title><style>' +
+    '@page{size:' + larguraMm + 'mm ' + alturaMm + 'mm;margin:0}' +
+    'html,body{margin:0;padding:0;background:#FBFBFC}' +
+    'img{display:block;width:100%}' +
+    '</style></head><body><img src="' + url + '"></body></html>');
+  w.document.close();
+  const img = w.document.querySelector('img');
+  img.onload = () => { w.focus(); w.print(); };
+}));
+
+/* -- ciclo de vida --
+   O primeiro desenho é síncrono de propósito: aba em segundo plano não executa
+   requestAnimationFrame, e o arquivo aberto numa aba sem foco apareceria com os
+   cartões e sem nenhum fio. Só o redesenho por resize é adiado. */
+let adiado;
+function redesenhar(){ clearTimeout(adiado); adiado = setTimeout(desenhar, 80); }
+window.addEventListener('resize', redesenhar);
+window.addEventListener('load', desenhar);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) desenhar(); });
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(desenhar);
+desenhar();
+</script>
+</body>
+</html>

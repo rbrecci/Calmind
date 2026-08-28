@@ -8,21 +8,7 @@ Ninguém aqui tinha usado PR antes deste documento. Ele foi escrito assumindo is
 
 ---
 
-## 1. A regra, em uma frase
-
-> **Ninguém escreve direto no `main`. Todo trabalho vai para um branch, vira PR, e outra pessoa
-> do grupo aprova antes de entrar.**
-
-Três motivos, e o terceiro é o que costuma convencer:
-
-- **O `main` nunca quebra.** Se o seu trabalho der errado, quebra só o seu branch.
-- **O grupo vê o que cada um fez** sem precisar perguntar no WhatsApp.
-- **Vira prova de processo para a banca.** Histórico de PR mostra trabalho distribuído e
-  revisado. Commit solto no `main` não mostra nada disso.
-
----
-
-## 2. A mensagem de commit
+## 1. A mensagem de commit
 
 ### O modelo
 
@@ -60,14 +46,6 @@ Se mexeu em várias, deixe sem escopo.
 2. **Tudo minúsculo, sem ponto final.**
 3. **No máximo 70 caracteres**, que é o que cabe na tela do GitHub sem cortar.
 
-### O teste para saber se a mensagem está boa
-
-Leia assim, em voz alta:
-
-> *"Se eu aplicar este commit, ele vai... **corrigir o contraste do botao entrar**."*
-
-Se a frase fizer sentido, a mensagem está boa. Se ficar estranho, reescreva.
-
 ### Mensagens ruins, e por quê
 
 | Não escreva | Motivo |
@@ -79,73 +57,7 @@ Se a frase fizer sentido, a mensagem está boa. Se ficar estranho, reescreva.
 
 ---
 
-## 3. O passo a passo
-
-Copie e cole. Troque só o que está em MAIÚSCULO.
-
-### Antes de começar qualquer coisa, atualize o seu main
-
-```bash
-git checkout main
-git pull
-```
-
-> Faça isso **toda vez** que sentar para trabalhar. Se pular, você trabalha em cima de uma
-> versão velha e depois dá conflito.
-
-### Crie o branch do seu trabalho
-
-```bash
-git checkout -b TIPO/ASSUNTO-CURTO
-```
-
-O nome do branch usa o **mesmo tipo do commit**, barra, e o assunto em duas ou três palavras
-com hífen:
-
-```
-feat/tela-relato
-fix/contraste-botao
-docs/cronograma-semana-6
-```
-
-### Trabalhe. Depois, salve
-
-```bash
-git add .
-git commit -m "TIPO(escopo): o que mudou"
-```
-
-### Mande o branch para o GitHub
-
-```bash
-git push -u origin TIPO/ASSUNTO-CURTO
-```
-
-O terminal vai imprimir um link. **Clique nele** — ele abre o PR já preenchido pela metade.
-
-### Depois que o PR entrar, volte para o main
-
-```bash
-git checkout main
-git pull
-```
-
----
-
-## 4. O que é um PR, para quem nunca usou
-
-**PR quer dizer Pull Request.** É um pedido: *"pessoal, terminei isso aqui no meu branch, deem
-uma olhada e me digam se pode entrar no `main`."*
-
-Não é prova nem cobrança. É uma página no GitHub onde ficam três coisas juntas: **o que você
-fez**, **os arquivos que mudaram** e **os comentários de quem leu**.
-
-O trabalho só entra no `main` quando alguém clica em aprovar. Até lá ele fica esperando no
-branch, sem atrapalhar ninguém.
-
----
-
-## 5. O modelo de PR
+## 2. O modelo de PR
 
 **Título do PR:** exatamente igual à mensagem do commit principal.
 
@@ -191,74 +103,4 @@ do frame Logos.
 As telas do psicologo. Entram no proximo PR.
 ```
 
-> **"O que ficou de fora" é a seção mais valiosa das quatro.** Ela evita que alguém abra o PR
-> achando que está completo e descubra na apresentação que faltava metade.
-
 ---
-
-## 6. Como revisar o PR de outra pessoa
-
-Leva cinco minutos, não uma hora.
-
-1. Abra o PR no GitHub e leia o corpo.
-2. Clique na aba **"Files changed"**. Verde é o que entrou, vermelho é o que saiu.
-3. Faça o que está escrito em **"Como conferir"**.
-4. Escolha uma das três:
-
-| Situação | O que fazer |
-|---|---|
-| Está bom | Aprovar, com um comentário curto: *"conferi as 4 telas, pode entrar"* |
-| Tem algo errado | Comentar **na linha** onde está o problema, dizendo o que mudar |
-| Não entendi | Perguntar. Não aprove o que você não entendeu |
-
-**Você não precisa entender o código todo para revisar.** Se o PR é de documentação, leia o
-texto. Se é de tela, olhe a tela. Revisar é conferir se a entrega bate com o que o PR prometeu.
-
----
-
-## 7. Regras de convivência
-
-1. **Um PR, um assunto.** Mexeu nas telas e no cronograma? São dois PRs. PR misturado ninguém
-   consegue revisar.
-2. **PR pequeno é aprovado rápido; PR gigante fica parado.** Prefira três PRs de quatro telas a
-   um PR de doze.
-3. **Precisa de uma aprovação** de outra pessoa do grupo. Não aprove o seu próprio.
-4. **Quem abre o PR é quem faz o merge**, depois de aprovado. Assim ninguém entra em cima de
-   trabalho que o autor ainda estava ajustando.
-5. **PR parado mais de um dia?** Cobre no grupo. PR parado atrasa todo mundo.
-6. **Deu conflito? Não force nada.** Chame no grupo. Conflito resolvido às pressas apaga
-   trabalho dos outros.
-
----
-
-## 8. Configuração inicial, uma vez por pessoa
-
-Hoje o histórico tem a mesma pessoa aparecendo com dois nomes diferentes. Rode uma vez na sua
-máquina:
-
-```bash
-git config --global user.name "SEU NOME COMPLETO"
-git config --global user.email "SEU EMAIL DO GITHUB"
-```
-
-> **Um lembrete que vale para o grupo todo:** metade das pessoas ainda não tem nenhum commit
-> aqui. Para a banca, um repositório com trabalho de três pessoas parece um projeto de três
-> pessoas, independentemente de quem fez o quê fora do Git. Trabalho feito em Figma, Miro ou
-> Word também deve virar pelo menos um commit de documentação, feito por quem fez.
-
----
-
-## 9. Cola rápida
-
-```bash
-git checkout main && git pull                  # 1. atualiza
-git checkout -b feat/assunto-curto             # 2. cria o branch
-# ... trabalha ...
-git add .                                      # 3. seleciona
-git commit -m "feat(escopo): o que mudou"      # 4. salva
-git push -u origin feat/assunto-curto          # 5. envia, e clica no link
-```
-
-**Tipos:** `feat` novo · `fix` correção · `docs` documentação · `chore` arrumação
-
-**Sempre:** minúscula, sem acento, sem ponto final, no máximo 70 caracteres

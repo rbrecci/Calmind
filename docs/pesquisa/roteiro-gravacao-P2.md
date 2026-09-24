@@ -1,6 +1,6 @@
 # Roteiro de gravação · P2 · Paciente que interrompeu
 
-Base: `Entrevista-Bruna.md`. 12 perguntas.
+Base: `sintese-P2-paciente-que-interrompeu.md`. 12 perguntas.
 
 ---
 

@@ -9,7 +9,7 @@ Entregável da Sprint 1
 
 ## 1. Objetivo deste documento
 
-Este documento especifica os requisitos funcionais e não funcionais da plataforma, numerados e priorizados por MoSCoW, e serve de contrato de escopo entre o grupo, o orientador e a banca. Ele responde O QUE o sistema faz e SOB QUE RESTRIÇÕES, não COMO será construído: nenhuma linguagem, framework, banco de dados ou provedor aparece aqui, porque essa definição pertence à documentação técnica e segue aberta na pendência 8.2 do documento base.
+Este documento especifica os requisitos funcionais e não funcionais da plataforma, numerados e priorizados por MoSCoW, mais as regras de negócio do domínio, e serve de contrato de escopo entre o grupo, o orientador e a banca. Ele responde O QUE o sistema faz, SOB QUE CONDIÇÕES e SOB QUE RESTRIÇÕES, não COMO será construído: nenhuma linguagem, framework, banco de dados ou provedor aparece aqui, porque essa definição pertence à documentação técnica e segue aberta na pendência 8.2 do documento base.
 
 A fonte de tudo o que está escrito aqui é o `documento-base-sprint1.md`, que consolida a pesquisa de campo, a visão do produto, as decisões tomadas com suas justificativas e as restrições legais. Todo requisito é rastreável a uma dor levantada em campo (D-01 a D-06), a uma funcionalidade do MVP (P-0x, S-0x), a uma decisão registrada (DEC-01 a DEC-15) ou a uma restrição legal e ética da seção 7 daquele documento. O que precisou ser derivado para fechar um fluxo está marcado como "derivado" e explicado nas seções de assunções.
 
@@ -35,7 +35,9 @@ O ciclo semanal é o coração do produto: o psicólogo atribui tarefas após a 
 
 ## 4. Convenções de leitura
 
-**Numeração.** Requisitos funcionais recebem identificador RF-nn, contínuo e único em todo o documento, sem reinício por seção. Requisitos não funcionais recebem RNF-nn, na mesma regra. Um identificador nunca é reaproveitado: se um requisito for descartado em sprint futura, o número fica vago e o motivo é registrado.
+**Numeração.** Requisitos funcionais recebem identificador RF-nn, contínuo e único em todo o documento, sem reinício por seção. Requisitos não funcionais recebem RNF-nn e regras de negócio recebem RN-nn, na mesma regra. Um identificador nunca é reaproveitado: se um requisito for descartado em sprint futura, o número fica vago e o motivo é registrado.
+
+**A diferença entre RF, RNF e RN**, que este documento trata como distinção de fundo e não de forma: o **RF** diz o que o sistema faz, e é verificável executando a funcionalidade; o **RNF** diz com que qualidade ou sob que restrição técnica ele faz, e é verificável medindo; a **RN** diz sob que condição do domínio aquilo é permitido, e continua valendo ainda que a tela, a linguagem e o banco mudem inteiros. Um mesmo assunto aparece nos três: RF-23 diz que o paciente marca o relato como privado, RNF-08 exige que o isolamento seja provado por teste na camada de dados, e RN-23 diz o que "privado" significa no domínio — não aparece para o psicólogo, não vai para a IA, não entra em exportação e não é contado.
 
 **Prioridade MoSCoW.**
 
@@ -1079,7 +1081,129 @@ Nenhum RNF deste documento depende de uma tecnologia específica ter sido escolh
 
 ---
 
-## 7. Visão consolidada
+## 7. Regras de negócio (RN)
+
+Requisito funcional diz **o que** o sistema faz; regra de negócio diz **sob que condição** e **com
+que restrição**. As regras abaixo são as do domínio — clínico, ético e legal — e valem
+independentemente da tela, da tecnologia e do cliente que fizer a chamada.
+
+Cada uma traz **onde é imposta**, e essa coluna é a que importa na revisão de código: regra imposta
+só na interface é regra que o primeiro `curl` derruba. Onde está escrito **banco**, existe restrição
+de esquema que recusa a gravação inválida mesmo que a aplicação erre; onde está escrito
+**aplicação**, a regra vive no Laravel e precisa de teste automatizado, porque nada no banco a
+segura.
+
+### 7.1 Cadastro, identidade e consentimento
+
+| # | Regra | Onde é imposta | Origem | Requisitos |
+|---|-------|----------------|--------|------------|
+| RN-01 | Uma conta pertence a um único papel: paciente, psicólogo ou administrador. Ninguém é paciente e psicólogo ao mesmo tempo, nem troca de papel. | Banco (`users.role`, mais unicidade de `user_id` em `patients` e em `psychologists`) | DP-02 | RF-05 |
+| RN-02 | O endereço de e-mail é único em toda a plataforma. | Banco (`uq_users_email`) | Derivado | RF-01, RF-02 |
+| RN-03 | A idade mínima para conta de paciente é 12 anos completos na data do cadastro. | Aplicação (depende da data de hoje, que `CHECK` determinístico não alcança) | DEC-16, LGPD art. 14 | RF-01 |
+| RN-04 | Paciente com menos de 18 anos informa nome, telefone e grau de parentesco de um responsável legal. Os três campos são preenchidos juntos ou ficam vazios juntos. | Banco (`ck_patients_guardian`) para a integridade do trio; aplicação para a obrigatoriedade por idade | DEC-17 | RF-01, RF-36 |
+| RN-05 | O responsável legal não tem conta, não autentica e não acessa nenhum conteúdo clínico — nem o relato, nem a tarefa, nem a conversa do paciente adolescente. | Aplicação (ausência de rota) e modelo (ausência de `user_id` para o responsável) | DEC-17, ECA art. 17, Código de Ética art. 13 | RF-49 |
+| RN-06 | O consentimento do responsável legal é obtido fora da plataforma e registrado pelo psicólogo, com data, forma e versão do termo vigente. O registro não se edita: corrige-se acrescentando outro. | Aplicação (append-only sobre `guardian_consents`) | DEC-18, LGPD art. 14 | RF-49 |
+| RN-07 | O consentimento é versionado. Toda aceitação guarda qual versão do termo foi aceita e quando. Versão já publicada nunca é alterada; publica-se outra. | Banco (`uq_terms_type_version`, FK de aceitação para a versão) | LGPD art. 11 | RF-03, RF-46 |
+| RN-08 | O consentimento para envio de dados ao serviço de IA é separado do consentimento geral, e é revogável a qualquer momento. A revogação não tem efeito retroativo sobre análise já gerada. | Banco (`consent_terms.type`, `consent_acceptances.revoked_at`) | DEC-04, LGPD art. 11 | RF-04 |
+| RN-09 | O psicólogo só aparece no catálogo depois de aprovado por um administrador **e** de publicar o próprio perfil. Uma das duas condições sozinha não basta. | Banco (`approval_status` mais `profile_published_at`, ambos no índice do catálogo) | RF-44 | RF-09, RF-34, RF-44 |
+| RN-10 | A reprovação de um cadastro profissional exige justificativa registrada. | Aplicação (`approval_note` obrigatório quando `approval_status = rejected`) | Derivado | RF-44 |
+| RN-11 | O par região mais número de CRP é único na plataforma: dois cadastros não reivindicam o mesmo registro profissional. | Banco (`uq_psychologists_crp`) | Código de Ética art. 20 | RF-33 |
+| RN-12 | O documento comprobatório do registro profissional é visível apenas ao administrador e ao próprio dono, e nunca aparece no catálogo. | Aplicação (autorização por perfil) | Derivado | RNF-11 |
+
+### 7.2 Vínculo entre paciente e psicólogo
+
+| # | Regra | Onde é imposta | Origem | Requisitos |
+|---|-------|----------------|--------|------------|
+| RN-13 | **Um paciente tem no máximo um vínculo ativo por vez.** Um psicólogo tem quantos vínculos ativos precisar, sem teto. | Banco (coluna gerada `active_patient_id` mais índice único `uq_one_active_bond_per_patient`) | DEC-03 | RF-12 |
+| RN-14 | Paciente com vínculo ativo não acessa o catálogo de profissionais. Encerrar o vínculo devolve o acesso. | Aplicação | DEC-02 | RF-09, RF-14 |
+| RN-15 | O código de convite é de uso único, aleatório, não sequencial, tem prazo de expiração e pode ser revogado pelo psicólogo antes de ser usado. | Banco (`uq_invitation_code`, `consumed_at`, `expires_at`, `revoked_at`) e aplicação (geração e validação) | DEC-11, RNF-05 | RF-06, RF-07, RF-08 |
+| RN-16 | O alfabeto do código de convite não contém caracteres ambíguos: sem `0`/`O`, sem `1`/`I`/`l`. O código é ditado em sessão presencial e anotado à mão. | Aplicação (gerador) | RNF-05 | RF-06 |
+| RN-17 | Todo vínculo nasce pendente. Só vira ativo com a aceitação da outra parte, e o caminho de origem — convite ou catálogo — fica registrado. | Banco (`bonds.status`, `bonds.origin`) | 3.2 do documento base | RF-10, RF-11, RF-12 |
+| RN-18 | Qualquer um dos dois lados encerra o vínculo, e fica registrado quem encerrou e quando. Encerrar não apaga o histórico. | Banco (`ended_at`, `ended_by_user_id`, ausência de exclusão em cascata do conteúdo) | Derivado | RF-14 |
+| RN-19 | Relato, tarefa, mensagem, consulta, medicação e análise pertencem ao **vínculo**, não ao paciente solto. Sem vínculo não existe conteúdo clínico. | Banco (`bond_id` obrigatório nas seis tabelas) | Derivado | RF-22, RF-25, RF-26, RF-37, RF-40 |
+| RN-20 | O psicólogo só acessa dados de paciente com quem tem vínculo ativo. Vínculo encerrado não devolve acesso corrente. | Aplicação (autorização por vínculo) | 7.1 do documento base | RNF-03, RNF-09 |
+| RN-21 | O contrato de prestação de serviços é aceito por ambas as partes no vínculo, e a versão aceita fica registrada. | Banco (`contract_acceptances`, único por vínculo, usuário e versão) | Resolução CFP 9/2024 | RF-48, RNF-24 |
+
+### 7.3 Relato e sigilo
+
+| # | Regra | Onde é imposta | Origem | Requisitos |
+|---|-------|----------------|--------|------------|
+| RN-22 | O paciente decide, **no momento de postar**, se o relato é compartilhado ou privado. O padrão é compartilhado. | Banco (`reports.visibility`, default `shared`) | DEC-12, DEC-13 | RF-22, RF-23 |
+| RN-23 | **O relato privado não sai do escopo do paciente.** Não aparece em consulta do psicólogo, não entra no pacote enviado à IA, não entra em exportação e não é contado em nenhum total exibido ao profissional. | Banco (view `shared_reports`, que é a única leitura permitida ao lado do psicólogo) | DEC-12, DEC-14 | RF-23, RNF-08, RNF-19 |
+| RN-24 | O psicólogo não percebe **nem a existência** de um relato privado. A resposta a uma tentativa de acesso direto é 404, nunca 403 — o 403 confirmaria que existe algo ali. | Aplicação (contrato da API) | DEC-14 | RNF-08, CA-23.5 |
+| RN-25 | O paciente pode despublicar um relato já compartilhado. Se o relato já tiver sido usado em uma análise, ele é avisado disso antes de confirmar — despublicar não é apagar da memória de quem leu. | Aplicação (aviso), banco (`unpublished_at` e a tabela `analysis_reports`, que registra o uso) | DEC-15 | RF-24 |
+| RN-26 | Relato despublicado sai da view compartilhada, mas a linha permanece na tabela: o paciente continua vendo o próprio histórico completo. | Banco (view filtra `unpublished_at IS NULL`) | DEC-15 | RF-24 |
+| RN-27 | A notificação carrega o tipo do evento, nunca conteúdo clínico. "Você tem uma nova mensagem" é aceitável; o texto da mensagem, não. | Aplicação (`notifications.type` mais ausência de corpo) | RNF-19 | RF-16 |
+
+### 7.4 Tarefa, consulta e conversa
+
+| # | Regra | Onde é imposta | Origem | Requisitos |
+|---|-------|----------------|--------|------------|
+| RN-28 | Quem atribui tarefa é o psicólogo. O paciente marca conclusão, e a conclusão não se duplica. | Aplicação (autorização) e banco (`completed_at` único por tarefa) | 4.2 do documento base | RF-25, RF-37 |
+| RN-29 | Prazo de tarefa não pode ser no passado no momento da criação. | Aplicação | CA-37.3 | RF-37 |
+| RN-30 | Tarefa não se exclui, se arquiva. O histórico de adesão é dado clínico. | Banco (`archived_at` em vez de `DELETE`) | CA-37.4 | RF-37 |
+| RN-31 | A conversa é assíncrona e acontece apenas dentro de um vínculo ativo. Não há sessão por vídeo na plataforma. | Aplicação e banco (`messages.bond_id`) | DEC-08 | RF-26, RF-15 |
+| RN-32 | O sistema avisa o profissional quando a nova consulta conflita com outra já agendada por ele no mesmo horário. | Aplicação (índice `ix_appt_conflict` dá suporte à consulta) | CA-40.3 | RF-40 |
+| RN-33 | Remarcar e cancelar preservam o registro anterior: a consulta muda de estado, não desaparece. | Banco (`appointments.status`) | Resolução CFP 9/2024, registro documental | RF-40 |
+
+### 7.5 Medicação
+
+| # | Regra | Onde é imposta | Origem | Requisitos |
+|---|-------|----------------|--------|------------|
+| RN-34 | **A plataforma não prescreve.** O psicólogo apenas registra medicação já prescrita por profissional habilitado, e a origem da prescrição é campo obrigatório. | Banco (`prescription_source NOT NULL`) e aplicação | DEC-10 | RF-38, RF-43 |
+| RN-35 | Nenhum lembrete dispara antes da confirmação do paciente. Registro recém-criado nasce em `awaiting_confirmation`. | Banco (default do `status`) e aplicação (rotina de lembrete lê só `active`) | DEC-10 | RF-27, RF-28 |
+| RN-36 | A recusa do paciente exige motivo registrado, e a recusa é visível ao psicólogo. | Aplicação (`refusal_reason` obrigatório quando `status = refused`) | CA-27.4 | RF-27 |
+| RN-37 | O paciente pode suspender a medicação a qualquer momento, e de quem partiu a suspensão fica registrado. Estado suspenso **não volta** para ativo: é preciso criar outro registro, sujeito a nova confirmação. | Banco (`suspended_by_user_id`) e aplicação (transição proibida) | CA-29.2, CA-39.3 | RF-29, RF-39 |
+| RN-38 | Ausência de registro de tomada significa **não marcado**, nunca tomado. O sistema não presume adesão. | Banco (ausência de linha em `medication_intakes`) | CA-28.4 | RF-28 |
+| RN-39 | Toda tela de medicação exibe, de forma não ocultável, o aviso de que a plataforma não prescreve. | Aplicação (interface) | DEC-10 | RF-43, RNF-26 |
+
+### 7.6 Inteligência artificial
+
+| # | Regra | Onde é imposta | Origem | Requisitos |
+|---|-------|----------------|--------|------------|
+| RN-40 | **A análise só roda quando um psicólogo pede.** Não existe rotina automática, agendada ou reativa que acione o serviço de IA. | Banco (`requested_by_user_id NOT NULL`) e aplicação (ausência de job) | DEC-04 | RF-41, RNF-30 |
+| RN-41 | **Nada gerado por IA entra no prontuário sem confirmação humana.** Até a confirmação, o texto vive em campo temporário; no descarte, o texto é apagado e sobra apenas o rastro de que alguém pediu uma análise e quando. | Banco (`summary_raw` apagado no descarte, texto confirmado vai para `analysis_versions`) | DEC-05 | RF-42, RNF-31 |
+| RN-42 | O pacote enviado ao serviço de IA contém apenas relatos compartilhados, pseudonimizados, e do período pedido. Relato privado e relato despublicado nunca entram. | Aplicação (montagem lê a view `shared_reports`) | DEC-12, DEC-14 | RNF-08, RNF-32 |
+| RN-43 | Toda saída de IA exibida ao profissional é rotulada como gerada por IA e como baseada nos relatos compartilhados do período. | Aplicação (interface) | DEC-14 | RF-41, RNF-33 |
+| RN-44 | Cada edição do texto confirmado preserva a versão anterior. O prontuário é histórico, não rascunho. | Banco (`analysis_versions`, append-only) | CA-42.4 | RF-42 |
+
+### 7.7 Catálogo, ética profissional e administração
+
+| # | Regra | Onde é imposta | Origem | Requisitos |
+|---|-------|----------------|--------|------------|
+| RN-45 | **O catálogo não tem nota, estrela, média, contagem de avaliações, depoimento público nem ordenação por reputação ou preço.** A escolha de tratamento não vira ranking comercial. | Modelo (ausência de tabela de avaliação) e aplicação | DEC-06, orientações de CRPs sobre divulgação | RF-19, RNF-23 |
+| RN-46 | Os filtros do catálogo são clínicos e geográficos: abordagem, especialidade, modalidade e região. Nunca preço, nunca popularidade. | Banco (colunas de perfil existentes) | Nota Técnica CFP 1/2022 | RF-09 |
+| RN-47 | Todo perfil publicado exibe nome completo, sigla do conselho regional e número de registro, de forma visível e não ocultável. | Aplicação (interface) | Código de Ética art. 20 | RNF-20 |
+| RN-48 | O texto do perfil é escrito e submetido pelo próprio psicólogo. A plataforma nunca gera nem completa o perfil automaticamente, nem por IA. | Aplicação (ausência de rotina de preenchimento) | Nota Técnica CFP 1/2022 | RF-34, RNF-22 |
+| RN-49 | **Não há pagamento, honorário, cobrança nem registro de valor na plataforma.** | Modelo (ausência de tabela financeira) | DEC-07 | RF-20 |
+| RN-50 | A denúncia exige motivo, e a decisão do administrador exige justificativa registrada, com quem decidiu e quando. | Banco (`reason NOT NULL`) e aplicação (`decision` obrigatório ao fechar) | CA-18.2 | RF-18, RF-45 |
+| RN-51 | Conta suspensa não autentica e não acessa nada, mas o conteúdo dela permanece no vínculo para efeito de histórico e de auditoria. | Banco (`users.status`) e aplicação | Derivado | RF-45 |
+| RN-52 | Todo acesso a prontuário é auditado, **inclusive a tentativa negada**, e a trilha é somente inserção: a aplicação nunca altera nem apaga linha de auditoria. | Banco (`audit_logs.result`) e aplicação (ausência de `UPDATE` e `DELETE`) | 7.1 do documento base | RF-17, RNF-04, CA-17.3 |
+
+### 7.8 Rastreabilidade das regras aos quatro compromissos do produto
+
+| Compromisso | Regras que o tornam verificável |
+|-------------|----------------------------------|
+| A IA nunca age sozinha nem persiste nada sem confirmação humana | RN-40, RN-41, RN-42, RN-43, RN-44 |
+| O relato privado do paciente não sai do escopo dele | RN-22, RN-23, RN-24, RN-25, RN-26, RN-27, RN-42 |
+| A plataforma não prescreve | RN-34, RN-35, RN-36, RN-37, RN-38, RN-39 |
+| A escolha de tratamento não vira ranking comercial | RN-45, RN-46, RN-47, RN-48, RN-49 |
+
+### 7.9 Nota sobre onde as regras são impostas
+
+Das 52 regras, **30 têm garantia no banco de dados**, 2 são garantidas pela ausência deliberada de estrutura no modelo (RN-45 e RN-49: não existe tabela de avaliação nem tabela financeira, então a regra não tem como ser violada) e 20 vivem só na aplicação. A distinção não
+é burocrática: as duas regras que mais definem o produto — vínculo ativo único (RN-13) e isolamento
+do relato privado (RN-23) — foram deliberadamente empurradas para a camada de dados justamente
+porque são as que não podem depender de ninguém lembrar de escrever o `WHERE` certo. As quatro
+provas em [`diagramas/testes-do-modelo.sql`](diagramas/testes-do-modelo.sql) verificam exatamente
+isso, contra o banco e sem uma linha de PHP no caminho.
+
+As 20 regras marcadas como **aplicação** são dívida de teste: cada uma precisa de teste automatizado
+na suíte da Sprint 2, porque nada no esquema as segura.
+
+---
+
+## 8. Visão consolidada
 
 | Categoria | Must | Should | Could | Won't | Total |
 |-----------|------|--------|-------|-------|-------|
@@ -1089,7 +1213,9 @@ Nenhum RNF deste documento depende de uma tecnologia específica ter sido escolh
 
 A concentração em Must é alta e isso é consequência do domínio, não falta de critério de corte: dado de saúde é dado pessoal sensível, e a maior parte dos requisitos vem de restrição legal ou ética que não admite negociação de prioridade. A folga real do grupo está em desempenho, acessibilidade estendida e nos direitos do titular que dependem de dado real, que este projeto não usa.
 
-### 7.1 Requisitos que sustentam os trilhos éticos do produto
+Somam-se a esses **52 regras de negócio** (seção 7), que não recebem prioridade MoSCoW porque não são escopo negociável: são a condição sob a qual o escopo é válido. Delas, 30 têm garantia no próprio esquema do banco, 2 são garantidas pela ausência deliberada de estrutura no modelo — não existe tabela de avaliação nem tabela financeira — e 20 vivem só na aplicação. Essas 20 são a dívida de teste automatizado da Sprint 2.
+
+### 8.1 Requisitos que sustentam os trilhos éticos do produto
 
 Quatro compromissos do produto não podem ser relaxados sem descaracterizá-lo. Cada um está amarrado a requisitos verificáveis:
 
@@ -1104,7 +1230,7 @@ O isolamento do relato privado merece destaque: RNF-08 exige que a garantia viva
 
 ---
 
-## 8. Limitações conhecidas
+## 9. Limitações conhecidas
 
 Registradas aqui por decisão de projeto. Documentar o que foi cortado, e por quê, é parte da entrega.
 
@@ -1126,7 +1252,7 @@ Isso é decisão de projeto, não omissão, e apoia-se em dois pontos. O primeir
 
 ---
 
-## 9. Pendências abertas ao fim desta versão
+## 10. Pendências abertas ao fim desta versão
 
 Nenhuma delas impede a aprovação deste documento, mas todas precisam de decisão antes do avanço das sprints.
 
@@ -1144,7 +1270,7 @@ As definições técnicas em aberto da seção 8.2 do documento base (frontend w
 
 ---
 
-## 10. Glossário
+## 11. Glossário
 
 | Termo | Definição |
 |-------|-----------|

@@ -23,6 +23,10 @@ Sprint 1, entregável de diagramação. Revisão de 19/08/2026.
 
 ## 2. MER, modelo entidade relacionamento
 
+Este é o diagrama **conceitual**: as entidades e como se relacionam, sem atributos e sem tipo. A
+evolução dele, com atributos, chaves primárias, chaves estrangeiras e tipos de dados, é o **DER** e
+está em [`der.md`](der.md). A versão executável em DDL está em [`schema.sql`](schema.sql).
+
 ```mermaid
 erDiagram
     users ||--o| patients : "é"

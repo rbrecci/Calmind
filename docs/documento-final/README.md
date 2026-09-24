@@ -13,6 +13,6 @@ Entregável da Sprint 3 e guarda-chuva de todo o resto. Ferramenta e template s�
 | Protótipo | `../prototipo/wireframes.html` |
 | Arquitetura e API | `../api/contrato-api.md` |
 | Testes | `../testes/` |
-| Limitações e evolução futura | `../documento-requisitos.md` seção 8 |
+| Limitações e evolução futura | `../documento-requisitos.md` seção 9 |
 
 O capítulo de limitações conhecidas é o que separa trabalho maduro de trabalho ingênuo. O limite de uso de aplicativos foi cortado com análise de viabilidade escrita, e o modelo não tem psicólogo Responsável Técnico registrado no CRP. Declarar isso conta a favor, não contra.

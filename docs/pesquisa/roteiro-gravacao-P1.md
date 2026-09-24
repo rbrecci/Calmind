@@ -1,6 +1,6 @@
 # Roteiro de gravação · P1 · Paciente em acompanhamento
 
-Base: `Entrevista-Miguel.md`. 11 perguntas.
+Base: `sintese-P1-paciente-em-acompanhamento.md`. 11 perguntas.
 
 ---
 

@@ -35,6 +35,12 @@ describe('contraste da identidade visual', () => {
     assert.ok(contrast(Colors.textSecondary, Colors.background) >= MIN_TEXT_CONTRAST);
   });
 
+  // Campo de texto: o valor digitado e o placeholder ficam sobre o fundo cinza do campo.
+  test('texto e placeholder passam sobre o fundo de campo', () => {
+    assert.ok(contrast(Colors.text, Colors.surface) >= MIN_TEXT_CONTRAST);
+    assert.ok(contrast(Colors.textSecondary, Colors.surface) >= MIN_TEXT_CONTRAST);
+  });
+
   test('texto de erro passa sobre o fundo branco', () => {
     assert.ok(contrast(Colors.error, Colors.background) >= MIN_TEXT_CONTRAST);
   });

@@ -27,6 +27,10 @@ export const Colors = {
   // Sobre `surface` ele dá 4,46:1 e reprova: a mensagem fica abaixo do campo, nunca dentro dele.
   error: Palette.danger.shade,
   success: Palette.success.shade,
+  // Estado desabilitado usa a família Light (identidade, 5.2). Controle desabilitado é isento
+  // do contraste mínimo, por isso aqui o texto é só mais apagado, não medido contra 4,5:1.
+  disabled: Palette.light.base,
+  onDisabled: Palette.dark.tint,
 } as const;
 
 // Cor de cada lado do app. Primária e secundária entram em botão, linha e detalhe, nunca em
@@ -54,3 +58,8 @@ export const Spacing = {
 } as const;
 
 export const MinTouchTarget = 44; // RNF-35
+
+export const Radius = { md: 16 } as const;
+
+// Largura máxima do conteúdo: em tablet ou na web o formulário não se estica pela tela toda.
+export const MaxContentWidth = 480;

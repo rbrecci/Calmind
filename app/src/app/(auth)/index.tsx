@@ -1,11 +1,12 @@
 import { Redirect } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput } from 'react-native';
+import { Pressable, StyleSheet, Text as NativeText, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ApiError, type FieldErrors } from '@/api';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { Text } from '@/design-system/text';
 import { MinTouchTarget, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/session/session-context';
@@ -52,7 +53,7 @@ export default function EntryScreen() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="title">Calmind</ThemedText>
+        <Text variant="h1">Calmind</Text>
 
         <TextInput
           accessibilityLabel="E-mail"
@@ -101,9 +102,9 @@ export default function EntryScreen() {
           disabled={submitting}
           onPress={submit}
           style={[styles.button, { backgroundColor: theme.text, opacity: submitting ? 0.6 : 1 }]}>
-          <Text style={[styles.buttonText, { color: theme.background }]}>
+          <NativeText style={[styles.buttonText, { color: theme.background }]}>
             {submitting ? 'Entrando...' : 'Entrar'}
-          </Text>
+          </NativeText>
         </Pressable>
 
         {__DEV__ && MOCK_ACTIVE ? (

@@ -3,22 +3,25 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 
+import { useDesignSystemFonts } from '@/design-system/fonts';
 import { SessionProvider, useSession } from '@/session/session-context';
 
-// A splash fica na tela até o app saber se há sessão guardada; sem isso o login piscaria
-// por um instante antes de o app pular para a tela do papel.
+// A splash fica na tela até o app saber se há sessão guardada e ter as fontes carregadas; sem
+// isso o login piscaria, ou o texto trocaria de fonte, no instante em que o app abre.
 SplashScreen.preventAutoHideAsync();
 
 // Cada papel vê só a sua árvore de telas: paciente e psicólogo são o mesmo app,
 // escolhido pelo papel, não telas com `if` no meio.
 function RootNavigator() {
   const { role, isLoading } = useSession();
+  const fontsReady = useDesignSystemFonts();
+  const ready = !isLoading && fontsReady;
 
   useEffect(() => {
-    if (!isLoading) SplashScreen.hideAsync();
-  }, [isLoading]);
+    if (ready) SplashScreen.hideAsync();
+  }, [ready]);
 
-  if (isLoading) return null;
+  if (!ready) return null;
 
   return (
     <Stack screenOptions={{ headerShown: false }}>

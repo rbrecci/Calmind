@@ -102,17 +102,26 @@ O RNF-34 exige **design system único e versionado**, com os mesmos componentes,
 paleta e padrões de interação. Componente criado fora do conjunto é divergência listada e corrigida
 antes do fechamento da sprint.
 
-A fonte de verdade é [`../identidade-visual.md`](../identidade-visual.md). O resumo que vira código
-na fundação:
+A fonte de verdade é [`../identidade-visual.md`](../identidade-visual.md), seção 5, e o código está
+em `app/src/design-system/tokens.ts`. São 6 famílias com 3 tons cada (`-1`, **base** e `+1`), e o
+tom principal de cada família é a **base**:
 
-| Família | Primário | Claro | Onde |
-|---------|----------|-------|------|
-| Primária | `#A858A9` | `#F07EF2` | Lado do **psicólogo** |
-| Secundária | `#5BA958` | `#82F27E` | Lado do **paciente** |
-| Danger | `#B24040` | `#FF5C5C` | Erro, recusa, ação destrutiva |
-| Success | `#5FA2B2` | `#88E7FF` | Confirmação, estado concluído |
-| Dark | `#141414` | `#606060` | Texto, ícone, contorno |
-| Light | `#989898` | `#E4E4E4` | Borda, divisória, fundo de campo |
+| Família | `-1` | **Base** | `+1` | Onde |
+|---------|------|----------|------|------|
+| Primária | `#A858A9` | **`#F07EF2`** | `#DFB3F2` | Lado do **psicólogo** |
+| Secundária | `#5BA958` | **`#82F27E`** | `#D6F2C2` | Lado do **paciente** |
+| Danger | `#B24040` | **`#FF5C5C`** | `#FF8D8D` | Erro, recusa, ação destrutiva |
+| Success | `#5FA2B2` | **`#88E7FF`** | `#ACEEFF` | Confirmação, estado concluído |
+| Dark | `#141414` | **`#1C1C1C`** | `#606060` | Texto, ícone, contorno |
+| Light | `#989898` | **`#D9D9D9`** | `#E4E4E4` | Borda, divisória, fundo de campo |
+
+As regras que mais pegam em código:
+
+- **Texto sobre cor é sempre `Dark` (base), nunca branco.** Branco reprova o contraste de 4,5:1
+  (RNF-35) em todas as cores de lado.
+- Fundo majoritariamente branco, e **só tema claro**: a identidade não define paleta escura.
+- Primária e secundária entram em botão, linha e detalhe, nunca em grandes áreas de fundo.
+- **Telas anteriores ao login não escolhem lado** e usam o Gradiente Verde-Rosa.
 
 **Tipografia:** Quicksand SemiBold nos títulos (H1 40px, H2 34px, H3 28px, H4 24px, H5 18px),
 Poppins no texto de corpo. Quicksand cansa em texto corrido, e é por isso que ela não desce para o

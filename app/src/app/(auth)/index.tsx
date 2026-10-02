@@ -1,13 +1,8 @@
 import { Redirect } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ApiError, type FieldErrors } from '@/api';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { MinTouchTarget, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+import { Button, Screen, Text, TextField } from '@/design-system';
 import { useSession } from '@/session/session-context';
 
 const MOCK_ACTIVE = process.env.EXPO_PUBLIC_USE_MOCK === 'true';
@@ -16,7 +11,6 @@ const MOCK_ACTIVE = process.env.EXPO_PUBLIC_USE_MOCK === 'true';
 // O que fica é o fluxo: signIn chama a API, e o papel vem do /me.
 export default function EntryScreen() {
   const { role, signIn } = useSession();
-  const theme = useTheme();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -47,100 +41,50 @@ export default function EntryScreen() {
     }
   }
 
-  const inputStyle = [styles.input, { borderColor: theme.border, color: theme.text }];
-
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="title">Calmind</ThemedText>
+    <Screen scroll>
+      <Text variant="h1">Calmind</Text>
 
-        <TextInput
-          accessibilityLabel="E-mail"
-          placeholder="E-mail"
-          placeholderTextColor={theme.textSecondary}
-          autoCapitalize="none"
-          autoComplete="email"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
-          style={inputStyle}
-        />
-        {fieldErrors.email?.[0] ? (
-          <ThemedText type="small" themeColor="danger">
-            {fieldErrors.email[0]}
-          </ThemedText>
-        ) : null}
+      <TextField
+        label="E-mail"
+        placeholder="voce@exemplo.com"
+        autoCapitalize="none"
+        autoComplete="email"
+        keyboardType="email-address"
+        value={email}
+        onChangeText={setEmail}
+        error={fieldErrors.email?.[0]}
+      />
 
-        <TextInput
-          accessibilityLabel="Senha"
-          placeholder="Senha"
-          placeholderTextColor={theme.textSecondary}
-          autoCapitalize="none"
-          autoComplete="current-password"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-          style={inputStyle}
-        />
-        {fieldErrors.password?.[0] ? (
-          <ThemedText type="small" themeColor="danger">
-            {fieldErrors.password[0]}
-          </ThemedText>
-        ) : null}
+      <TextField
+        label="Senha"
+        placeholder="Sua senha"
+        autoCapitalize="none"
+        autoComplete="current-password"
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+        error={fieldErrors.password?.[0]}
+      />
 
-        {message ? (
-          <ThemedText type="small" themeColor="danger" accessibilityRole="alert">
-            {message}
-          </ThemedText>
-        ) : null}
+      {message ? (
+        <Text variant="small" color="error" accessibilityRole="alert">
+          {message}
+        </Text>
+      ) : null}
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Entrar"
-          accessibilityState={{ disabled: submitting }}
-          disabled={submitting}
-          onPress={submit}
-          style={[styles.button, { backgroundColor: theme.text, opacity: submitting ? 0.6 : 1 }]}>
-          <Text style={[styles.buttonText, { color: theme.background }]}>
-            {submitting ? 'Entrando...' : 'Entrar'}
-          </Text>
-        </Pressable>
+      <Button
+        label={submitting ? 'Entrando...' : 'Entrar'}
+        accessibilityLabel="Entrar"
+        disabled={submitting}
+        onPress={submit}
+      />
 
-        {__DEV__ && MOCK_ACTIVE ? (
-          <ThemedText type="small" themeColor="textSecondary">
-            Modo de teste: as contas de exemplo estão em src/api/mock.ts
-          </ThemedText>
-        ) : null}
-      </SafeAreaView>
-    </ThemedView>
+      {__DEV__ && MOCK_ACTIVE ? (
+        <Text variant="small" color="textSecondary">
+          Modo de teste: as contas de exemplo estão em src/api/mock.ts
+        </Text>
+      ) : null}
+    </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.three,
-  },
-  input: {
-    minHeight: MinTouchTarget,
-    borderWidth: 1,
-    borderRadius: Spacing.three,
-    paddingHorizontal: Spacing.three,
-    fontSize: 16,
-  },
-  button: {
-    minHeight: MinTouchTarget,
-    borderRadius: Spacing.three,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});

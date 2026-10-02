@@ -37,9 +37,11 @@ function publicUser({ password: _password, ...user }: StoredUser): User {
 
 export function createMockApi({ delayMs = 0 }: { delayMs?: number } = {}): Api {
   const users: StoredUser[] = SEED_USERS.map((user) => ({ ...user }));
-  const sessions = new Map<string, number>(); // token -> id do usuário
+  // O token é derivado do id (mock-token-<id>) e o logout só o marca como revogado. Assim um
+  // token guardado no aparelho continua valendo quando o app reabre, o que permite testar a
+  // restauração da sessão com o mock (a API real faz isso por token persistido no servidor).
+  const revokedTokens = new Set<string>();
   let nextUserId = users.length + 1;
-  let nextTokenNumber = 1;
 
   const wait = () => new Promise<void>((resolve) => setTimeout(resolve, delayMs));
   const normalizeEmail = (email: string) => email.trim().toLowerCase();
@@ -47,9 +49,9 @@ export function createMockApi({ delayMs = 0 }: { delayMs?: number } = {}): Api {
   // Contrato 2.3: 401 para sem token, token inválido ou expirado.
   function authenticate(): { token: string; user: StoredUser } {
     const token = getAuthToken();
-    const userId = token ? sessions.get(token) : undefined;
+    const userId = Number(token?.match(/^mock-token-(\d+)$/)?.[1]);
     const user = users.find((candidate) => candidate.id === userId);
-    if (!token || !user) {
+    if (!token || !user || revokedTokens.has(token)) {
       throw new ApiError(401, 'Sessão inválida ou expirada. Entre novamente.');
     }
     return { token, user };
@@ -89,14 +91,14 @@ export function createMockApi({ delayMs = 0 }: { delayMs?: number } = {}): Api {
         throw new ApiError(401, 'E-mail ou senha inválidos.');
       }
 
-      const token = `mock-token-${nextTokenNumber++}`;
-      sessions.set(token, user.id);
+      const token = `mock-token-${user.id}`;
+      revokedTokens.delete(token);
       return { token };
     },
 
     async logout() {
       await wait();
-      sessions.delete(authenticate().token);
+      revokedTokens.add(authenticate().token);
     },
 
     async me() {

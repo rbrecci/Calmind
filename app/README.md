@@ -2,7 +2,12 @@
 
 **React Native.** O aplicativo do paciente e do psicólogo, um app só, com telas por papel.
 
-Entra aqui na semana 1 da Sprint 2 (24/08), junto com o spike. Até lá esta pasta tem só este arquivo.
+Projeto **Expo** (SDK 57, TypeScript, `expo-router`), decisão FE-01 fechada em 02/10/2026. Código em `src/`, rotas em `src/app/`.
+
+```bash
+npm install
+npx expo start
+```
 
 ## O que este app é, e o que ele não é
 

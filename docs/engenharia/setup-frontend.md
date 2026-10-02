@@ -31,6 +31,10 @@ considerável — ambiente que sobe sem Android Studio, notificação local agen
 (RF-28, Sprint 3), armazenamento seguro pronto, e build de APK sem configurar Gradle. O CLI dá mais
 controle, que este projeto não precisa.
 
+**Decisão fechada em 02/10/2026: Expo.** Projeto em `app/`, SDK 57, TypeScript e `expo-router`
+(navegação por arquivos, que facilita separar as árvores de tela por papel). Comandos: `npm install`
+e `npx expo start` dentro de `app/`.
+
 Qualquer das duas, o que não muda são as quatro regras abaixo.
 
 ---

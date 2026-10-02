@@ -63,6 +63,7 @@ As seis que travavam a sprint, fechadas em 02/10/2026:
 | **RNF-02** cifra em repouso | Entra já nas migrations, cast `encrypted` | [`regras-inviolaveis.md`](regras-inviolaveis.md) item 10 |
 | Banco local | XAMPP, dois ambientes, senha fora do repositório | [`setup-backend.md`](setup-backend.md#2-os-dois-ambientes) |
 | Frontend começa em mock | Módulo único de API com chave liga/desliga | [`setup-frontend.md`](setup-frontend.md#4-a-camada-de-mock) |
+| **FE-01** Expo ou CLI | **Expo** (SDK 57, TypeScript, expo-router), fechada em 02/10/2026 | [`setup-frontend.md`](setup-frontend.md#2-a-decis%C3%A3o-fe-01-que-%C3%A9-a-primeira-desta-frente) |
 
 ## Decisões que continuam abertas
 
@@ -74,7 +75,6 @@ Não estão esquecidas, estão esperando a etapa que precisa delas:
 | **DA-02** | Identificador do pacote, `com.<grupo>.calmind` | O primeiro APK |
 | **DA-03** | Liberar tráfego sem TLS no build de desenvolvimento | O primeiro APK |
 | **DA-04** | Provedor e modelo de IA, e onde a chave fica | Sprint 3 |
-| **FE-01** | **Expo ou React Native CLI.** O `.gitignore` já prevê os dois. Decide quem funda o app, na primeira etapa | A fundação do app |
 
 Quando uma fechar, ela sai desta tabela e entra no arquivo que ela afeta. Decisão fechada que
 continua listada como aberta é ruído — mesma regra do

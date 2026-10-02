@@ -69,7 +69,7 @@ consolida o problema, a visão e as 18 decisões de produto com as respectivas j
 | Diagramas de modelagem (MER, DER e outros) | 1 | [`docs/diagramas/`](docs/diagramas/) | Pronto |
 | Prototipação da interface | 1 | [`docs/prototipo/`](docs/prototipo/) | Pronto, 16 telas |
 | Coleta e análise dos requisitos | 1 | [`docs/pesquisa/`](docs/pesquisa/) | Roteiro e formulário prontos, 2 das 4 entrevistas aplicadas e sintetizadas |
-| Backend e frontend, primeiras funcionalidades | 2 | ainda não iniciado | Pendente |
+| Backend e frontend, primeiras funcionalidades | 2 | [`docs/engenharia/`](docs/engenharia/) e [`docs/planejamento/etapas-sprint2.md`](docs/planejamento/etapas-sprint2.md) | Planejado, codificação iniciando |
 | Primeiros testes | 2 | [`docs/api/`](docs/api/) | Contrato e coleção de testes prontos |
 | Sistema completo | 3 | ainda não iniciado | Pendente |
 | Documentação técnica final em ABNT | 3 | ainda não iniciado | Pendente |
@@ -142,7 +142,8 @@ docs/
 ├── diagramas/                   MER, DER, DDL executável e provas do modelo
 ├── prototipo/                   wireframes, mapa de UX, telas em PDF, logo e scripts do Figma
 ├── api/                         contrato e coleção de testes do Postman
-├── planejamento/                cronograma, arranque do React Native e decisões abertas
+├── engenharia/                  setup, arquitetura, convenções e divisão de trabalho
+├── planejamento/                cronograma, etapas da sprint, arranque do RN e decisões abertas
 ├── manual/                      manual do usuário          · Sprint 3
 ├── testes/                      relatório de testes        · Sprint 3
 ├── documento-final/             documentação ABNT          · Sprint 3

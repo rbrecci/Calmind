@@ -2,7 +2,7 @@
   <img src="docs/prototipo/assets/callmind-logo-fullHD-sem-textura.png" alt="Logotipo Calmind" width="180">
 </p>
 
-# Calmind — Saúde Mental & Acolhimento
+# Calmind - Saúde Mental & Acolhimento
 
 **Trabalho de Conclusão de Curso · Técnico em Desenvolvimento de Sistemas · SENAI-SP · 4º termo · 2026**
 

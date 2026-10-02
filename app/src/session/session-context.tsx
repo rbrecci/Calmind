@@ -1,23 +1,46 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
-// Papéis que o app atende. O `admin` do schema.sql usa só o painel web.
-export type Role = 'patient' | 'psychologist';
+import { api, ApiError, setAuthToken, type LoginInput, type Role } from '@/api';
 
 type SessionValue = {
   role: Role | null;
-  signIn: (role: Role) => void;
-  signOut: () => void;
+  signIn: (credentials: LoginInput) => Promise<void>;
+  signOut: () => Promise<void>;
 };
 
 const SessionContext = createContext<SessionValue | null>(null);
 
-// Sessão mínima, só em memória: o papel virá do /me quando o módulo de API existir.
-// O token no armazenamento seguro (RNF-07) entra numa etapa própria, não aqui.
+// Sessão só em memória: o token no armazenamento seguro (RNF-07) entra numa etapa própria.
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<Role | null>(null);
 
-  const signIn = useCallback((next: Role) => setRole(next), []);
-  const signOut = useCallback(() => setRole(null), []);
+  const signIn = useCallback(async (credentials: LoginInput) => {
+    const { token } = await api.login(credentials);
+    setAuthToken(token);
+
+    try {
+      // O papel manda na navegação, e quem informa o papel é o /me, nunca a tela.
+      const user = await api.me();
+      if (user.role === 'admin') {
+        // O admin usa só o painel web; o app não tem árvore de telas para ele.
+        throw new ApiError(403, 'Este perfil acessa a plataforma pelo painel web.');
+      }
+      setRole(user.role);
+    } catch (error) {
+      setAuthToken(null);
+      throw error;
+    }
+  }, []);
+
+  const signOut = useCallback(async () => {
+    try {
+      await api.logout();
+    } catch {
+      // Se o servidor não confirmar, o aparelho sai do mesmo jeito: o token local some abaixo.
+    }
+    setAuthToken(null);
+    setRole(null);
+  }, []);
 
   const value = useMemo(() => ({ role, signIn, signOut }), [role, signIn, signOut]);
 

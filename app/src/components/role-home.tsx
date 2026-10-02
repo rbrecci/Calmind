@@ -1,10 +1,11 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import type { Role } from '@/api';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { MinTouchTarget, RoleColors, Spacing } from '@/constants/theme';
-import { useSession, type Role } from '@/session/session-context';
+import { useSession } from '@/session/session-context';
 
 type Props = {
   role: Role;

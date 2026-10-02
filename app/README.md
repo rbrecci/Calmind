@@ -6,7 +6,23 @@ Projeto **Expo** (SDK 57, TypeScript, `expo-router`), decisão FE-01 fechada em 
 
 ```bash
 npm install
+cp .env.example .env    # no PowerShell: Copy-Item .env.example .env
 npx expo start
+```
+
+## Mock ou API de verdade
+
+Toda chamada à API passa por `src/api/`. A variável `EXPO_PUBLIC_USE_MOCK` do `.env` escolhe a implementação:
+
+| Valor | O que acontece |
+|-------|----------------|
+| `true` | `src/api/mock.ts`: dados de mentira, no mesmo formato do contrato, sem backend |
+| `false` | `src/api/http.ts`: chamada HTTP real na `EXPO_PUBLIC_API_URL` |
+
+As telas importam `api` de `@/api` e nunca chamam `fetch()` direto. As contas de teste do mock estão no topo de `src/api/mock.ts`.
+
+```bash
+npm test    # testes do mock (node:test, sem dependência extra)
 ```
 
 ## O que este app é, e o que ele não é

@@ -1,42 +1,116 @@
 import { Redirect } from 'expo-router';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { useState } from 'react';
+import { Pressable, StyleSheet, Text, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ApiError, type FieldErrors } from '@/api';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { MinTouchTarget, RoleColors, Spacing } from '@/constants/theme';
-import { useSession, type Role } from '@/session/session-context';
+import { MinTouchTarget, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
+import { useSession } from '@/session/session-context';
 
-const OPTIONS: { role: Role; label: string }[] = [
-  { role: 'patient', label: 'Entrar como paciente' },
-  { role: 'psychologist', label: 'Entrar como psicólogo' },
-];
+const MOCK_ACTIVE = process.env.EXPO_PUBLIC_USE_MOCK === 'true';
 
-// Tela provisória: escolhe o papel direto. O login real (telas 01 a 03 do protótipo)
-// chama o /me pelo módulo de API e passa o papel devolvido para signIn.
+// Tela provisória de login: o visual definitivo (telas 01 a 03 do protótipo) substitui este.
+// O que fica é o fluxo: signIn chama a API, e o papel vem do /me.
 export default function EntryScreen() {
   const { role, signIn } = useSession();
+  const theme = useTheme();
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   // Rota de outro papel (link ou URL forçada) cai aqui; quem já está logado volta ao seu lado.
   if (role !== null) {
     return <Redirect href={role === 'patient' ? '/home' : '/dashboard'} />;
   }
 
+  async function submit() {
+    setSubmitting(true);
+    setMessage(null);
+    setFieldErrors({});
+    try {
+      await signIn({ email, password });
+    } catch (error) {
+      if (error instanceof ApiError) {
+        setMessage(error.message);
+        setFieldErrors(error.errors ?? {});
+      } else {
+        setMessage('Não foi possível entrar. Tente novamente.');
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  const inputStyle = [styles.input, { borderColor: theme.border, color: theme.text }];
+
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="title">Calmind</ThemedText>
 
-        {OPTIONS.map(({ role, label }) => (
-          <Pressable
-            key={role}
-            accessibilityRole="button"
-            accessibilityLabel={label}
-            onPress={() => signIn(role)}
-            style={[styles.button, { backgroundColor: RoleColors[role].background }]}>
-            <Text style={[styles.buttonText, { color: RoleColors[role].text }]}>{label}</Text>
-          </Pressable>
-        ))}
+        <TextInput
+          accessibilityLabel="E-mail"
+          placeholder="E-mail"
+          placeholderTextColor={theme.textSecondary}
+          autoCapitalize="none"
+          autoComplete="email"
+          keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
+          style={inputStyle}
+        />
+        {fieldErrors.email?.[0] ? (
+          <ThemedText type="small" themeColor="danger">
+            {fieldErrors.email[0]}
+          </ThemedText>
+        ) : null}
+
+        <TextInput
+          accessibilityLabel="Senha"
+          placeholder="Senha"
+          placeholderTextColor={theme.textSecondary}
+          autoCapitalize="none"
+          autoComplete="current-password"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+          style={inputStyle}
+        />
+        {fieldErrors.password?.[0] ? (
+          <ThemedText type="small" themeColor="danger">
+            {fieldErrors.password[0]}
+          </ThemedText>
+        ) : null}
+
+        {message ? (
+          <ThemedText type="small" themeColor="danger" accessibilityRole="alert">
+            {message}
+          </ThemedText>
+        ) : null}
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Entrar"
+          accessibilityState={{ disabled: submitting }}
+          disabled={submitting}
+          onPress={submit}
+          style={[styles.button, { backgroundColor: theme.text, opacity: submitting ? 0.6 : 1 }]}>
+          <Text style={[styles.buttonText, { color: theme.background }]}>
+            {submitting ? 'Entrando...' : 'Entrar'}
+          </Text>
+        </Pressable>
+
+        {__DEV__ && MOCK_ACTIVE ? (
+          <ThemedText type="small" themeColor="textSecondary">
+            Modo de teste: as contas de exemplo estão em src/api/mock.ts
+          </ThemedText>
+        ) : null}
       </SafeAreaView>
     </ThemedView>
   );
@@ -49,14 +123,18 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
     paddingHorizontal: Spacing.four,
     gap: Spacing.three,
   },
+  input: {
+    minHeight: MinTouchTarget,
+    borderWidth: 1,
+    borderRadius: Spacing.three,
+    paddingHorizontal: Spacing.three,
+    fontSize: 16,
+  },
   button: {
     minHeight: MinTouchTarget,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.four,
     borderRadius: Spacing.three,
     alignItems: 'center',
     justifyContent: 'center',

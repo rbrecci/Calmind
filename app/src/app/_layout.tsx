@@ -1,18 +1,36 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import { useColorScheme } from 'react-native';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+import { SessionProvider, useSession } from '@/session/session-context';
 
-SplashScreen.preventAutoHideAsync();
+// Cada papel vê só a sua árvore de telas: paciente e psicólogo são o mesmo app,
+// escolhido pelo papel, não telas com `if` no meio.
+function RootNavigator() {
+  const { role } = useSession();
 
-export default function TabLayout() {
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Protected guard={role === null}>
+        <Stack.Screen name="(auth)" />
+      </Stack.Protected>
+      <Stack.Protected guard={role === 'patient'}>
+        <Stack.Screen name="(patient)" />
+      </Stack.Protected>
+      <Stack.Protected guard={role === 'psychologist'}>
+        <Stack.Screen name="(psychologist)" />
+      </Stack.Protected>
+    </Stack>
+  );
+}
+
+export default function RootLayout() {
   const colorScheme = useColorScheme();
+
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
+      <SessionProvider>
+        <RootNavigator />
+      </SessionProvider>
     </ThemeProvider>
   );
 }

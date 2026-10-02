@@ -61,5 +61,14 @@ export const Spacing = {
   six: 64,
 } as const;
 
+// Cor de cada lado do app, de docs/identidade-visual.md. O texto sobre a cor muda por papel
+// para manter contraste mínimo de 4.5:1: branco no roxo, escuro no verde (branco no verde dá 2.9:1).
+export const RoleColors = {
+  patient: { background: '#5BA958', text: '#141414' },
+  psychologist: { background: '#A858A9', text: '#FFFFFF' },
+} as const;
+
+export const MinTouchTarget = 44; // RNF-35
+
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;

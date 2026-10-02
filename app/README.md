@@ -44,3 +44,5 @@ Estão em [`../docs/planejamento/arranque-react-native.md`](../docs/planejamento
 ## Token
 
 Guardado no armazenamento seguro do aparelho, Keystore no Android e Keychain no iOS. Nunca em `AsyncStorage`, que é texto puro e violaria o RNF-07.
+
+O código está em `src/session/`: `token-storage.ts` grava e lê com o `expo-secure-store`, e `restore-session.ts` restaura a sessão ao abrir o app (pergunta o papel ao `/me`; token expirado é apagado, falta de rede não). **Na web o `expo-secure-store` não existe**, então lá o token fica só em memória e a sessão some ao recarregar a página, de propósito.

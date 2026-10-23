@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
@@ -13,6 +14,7 @@ function displayDate(value: string | null): string | null {
 
 export default function PatientHome() {
   const { signOut } = useSession();
+  const router = useRouter();
   const [tasks, setTasks] = useState<PatientTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [workingId, setWorkingId] = useState<number | null>(null);
@@ -81,6 +83,7 @@ export default function PatientHome() {
           ) : null}
         </View>
       ))}
+      <Button tone="patient" label="Encontrar profissional" onPress={() => router.push('/catalog')} />
       <Button tone="patient" label="Atualizar tarefas" disabled={loading || workingId !== null}
         onPress={() => void loadTasks()} />
       <Button tone="patient" label="Sair" accessibilityLabel="Sair da conta" onPress={() => void signOut()} />

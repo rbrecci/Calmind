@@ -127,6 +127,46 @@ describe('mock da API', () => {
     });
   });
 
+  describe('catálogo de psicólogos', () => {
+    test('exige autenticação', async () => {
+      const error = await rejection(createMockApi().catalogPsychologists());
+      assert.equal(error.status, 401);
+    });
+
+    test('só o paciente acessa o catálogo', async () => {
+      const api = createMockApi();
+      setAuthToken((await api.login({ email: 'psicologo@calmind.test', password: 'senha-de-teste-123' })).token);
+      assert.equal((await rejection(api.catalogPsychologists())).status, 403);
+    });
+
+    test('lista nome, CRP, abordagem e modalidade, na ordem do nome', async () => {
+      const api = createMockApi();
+      setAuthToken((await api.login(PATIENT)).token);
+
+      const { data, meta } = await api.catalogPsychologists();
+
+      assert.ok(data.length > 0);
+      assert.equal(meta.total, data.length);
+      const names = data.map((p) => p.name);
+      assert.deepEqual(names, [...names].sort((a, b) => a.localeCompare(b)));
+      for (const item of data) {
+        assert.match(item.crp, /^\d{2}\/\d+$/);
+        assert.ok(item.approach);
+        assert.ok(['online', 'presencial', 'ambos'].includes(item.modality ?? ''));
+      }
+    });
+
+    // RNF-21 e RNF-23: o formato do contrato é fechado e não tem preço, nota nem ranking.
+    test('não expõe preço, nota, estrela nem ranking', async () => {
+      const api = createMockApi();
+      setAuthToken((await api.login(PATIENT)).token);
+
+      const text = JSON.stringify(await api.catalogPsychologists());
+
+      assert.doesNotMatch(text, /price|preco|preço|rating|nota|stars|estrela|rank/i);
+    });
+  });
+
   describe('tarefas do paciente', () => {
     test('exige autenticação para listar', async () => {
       const error = await rejection(createMockApi().patientTasks());

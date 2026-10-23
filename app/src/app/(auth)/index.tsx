@@ -4,26 +4,10 @@ import { StyleSheet, View } from 'react-native';
 
 import { api, ApiError, type FieldErrors, type Role } from '@/api';
 import { Button, Colors, Radius, Screen, Spacing, Text, TextField } from '@/design-system';
+import { authErrorMessage, buildRegisterInput, isMinor, validateRegisterForm } from '@/auth/register-form';
 import { useSession } from '@/session/session-context';
 
 type Step = 'login' | 'choice' | 'register';
-
-function toIsoDate(value: string): string {
-  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value.trim());
-  return match ? `${match[3]}-${match[2]}-${match[1]}` : value.trim();
-}
-
-function isMinor(value: string): boolean {
-  const iso = toIsoDate(value);
-  const date = /^\d{4}-\d{2}-\d{2}$/.test(iso) ? new Date(`${iso}T12:00:00Z`) : null;
-  if (!date || Number.isNaN(date.getTime())) return false;
-  const today = new Date();
-  const age = today.getFullYear() - date.getUTCFullYear() - (
-    today.getMonth() < date.getUTCMonth() ||
-    (today.getMonth() === date.getUTCMonth() && today.getDate() < date.getUTCDate()) ? 1 : 0
-  );
-  return age >= 12 && age < 18;
-}
 
 export default function EntryScreen() {
   const { role, signIn } = useSession();
@@ -57,12 +41,8 @@ export default function EntryScreen() {
     try {
       await signIn({ email, password });
     } catch (error) {
-      if (error instanceof ApiError) {
-        setMessage(error.status === 401 ? 'Não foi possível entrar. Confira o e-mail e a senha e tente de novo.' : error.message);
-        setFieldErrors(error.errors ?? {});
-      } else {
-        setMessage('Não foi possível entrar. Tente novamente.');
-      }
+      setMessage(authErrorMessage('login', error));
+      setFieldErrors(error instanceof ApiError ? error.errors ?? {} : {});
     } finally {
       setSubmitting(false);
     }
@@ -71,34 +51,23 @@ export default function EntryScreen() {
   async function submitRegister() {
     setMessage(null);
     setFieldErrors({});
-    if (password !== confirmPassword) {
-      setFieldErrors({ confirm_password: ['As senhas não conferem.'] });
+    const form = {
+      role: selectedRole, name, email, birthDate, password, confirmPassword,
+      guardianName, guardianPhone, guardianRelationship,
+    };
+    const errors = validateRegisterForm(form);
+    if (Object.keys(errors).length > 0) {
+      setMessage(authErrorMessage('register', new ApiError(422, '', errors)));
+      setFieldErrors(errors);
       return;
     }
     setSubmitting(true);
     try {
-      await api.register({
-        name,
-        email,
-        password,
-        role: selectedRole,
-        ...(selectedRole === 'patient' ? {
-          birth_date: toIsoDate(birthDate),
-          ...(isMinor(birthDate) ? {
-            guardian_name: guardianName,
-            guardian_phone: guardianPhone,
-            guardian_relationship: guardianRelationship,
-          } : {}),
-        } : {}),
-      });
+      await api.register(buildRegisterInput(form));
       await signIn({ email, password });
     } catch (error) {
-      if (error instanceof ApiError) {
-        setMessage(error.message);
-        setFieldErrors(error.errors ?? {});
-      } else {
-        setMessage('Não foi possível criar a conta. Tente novamente.');
-      }
+      setMessage(authErrorMessage('register', error));
+      setFieldErrors(error instanceof ApiError ? error.errors ?? {} : {});
     } finally {
       setSubmitting(false);
     }
@@ -130,14 +99,15 @@ export default function EntryScreen() {
           <Text variant="small" color="textSecondary">Essa escolha não muda depois: a conta fica presa ao perfil.</Text>
           <View style={styles.choice}>
             <Text variant="h5">Sou paciente</Text>
-            <Text variant="small" color="textSecondary">Quero acompanhar meu processo e receber tarefas.</Text>
+            <Text variant="small" color="textSecondary">Quero acompanhar meu processo, escrever relatos e falar com meu psicólogo.</Text>
             <Button label="Continuar como paciente" onPress={() => goTo('register', 'patient')} />
           </View>
           <View style={styles.choice}>
             <Text variant="h5">Sou psicólogo</Text>
-            <Text variant="small" color="textSecondary">Tenho registro no CRP e quero atender pela plataforma.</Text>
+            <Text variant="small" color="textSecondary">Tenho registro no CRP e quero atender pacientes pela plataforma.</Text>
             <Button label="Continuar como psicólogo" onPress={() => goTo('register', 'psychologist')} />
           </View>
+          <Text variant="small" color="textSecondary">O registro no CRP passa por conferência antes de o perfil ir ao ar.</Text>
           <Button label="Voltar para entrar" onPress={() => goTo('login')} />
         </>
       ) : (

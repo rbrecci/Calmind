@@ -39,6 +39,26 @@ export type PatientTaskList = {
   meta: { total: number; page: number; per_page: number };
 };
 
+export type Modality = 'online' | 'presencial' | 'ambos';
+
+// Contrato 3.4 (GET /catalog/psychologists). A lista de campos é fechada: sem preço, nota ou
+// ranking (RNF-21, RNF-23).
+export type CatalogPsychologist = {
+  id: number;
+  name: string;
+  crp: string;
+  approach: string | null;
+  specialty: string | null;
+  modality: Modality | null;
+  region: string | null;
+  bio: string | null;
+};
+
+export type CatalogList = {
+  data: CatalogPsychologist[];
+  meta: { total: number; page: number; per_page: number };
+};
+
 export type LoginInput = {
   email: string;
   password: string;
@@ -68,4 +88,5 @@ export type Api = {
   me(): Promise<User>; // GET /me
   patientTasks(): Promise<PatientTaskList>; // GET /patient/tasks
   completePatientTask(id: number): Promise<PatientTask>; // POST /patient/tasks/{id}/complete
+  catalogPsychologists(): Promise<CatalogList>; // GET /catalog/psychologists
 };

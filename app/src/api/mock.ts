@@ -1,5 +1,5 @@
 import { getAuthToken } from './auth-token.ts';
-import { ApiError, type Api, type FieldErrors, type PatientTask, type User } from './types.ts';
+import { ApiError, type Api, type CatalogPsychologist, type FieldErrors, type PatientTask, type User } from './types.ts';
 
 // Mock do contrato (docs/api/contrato-api.md): devolve o mesmo formato, os mesmos códigos e as
 // mesmas mensagens genéricas da API real. Só dado fictício, em qualquer ambiente (RNF-63).
@@ -15,6 +15,30 @@ const SEED_USERS: StoredUser[] = [
   { id: 1, name: 'Paciente de Teste', email: 'paciente@calmind.test', password: 'senha-de-teste-123', role: 'patient' },
   { id: 2, name: 'Psicóloga de Teste', email: 'psicologo@calmind.test', password: 'senha-de-teste-123', role: 'psychologist' },
   { id: 3, name: 'Administrador', email: 'admin@plataforma.local', password: 'admin-de-teste-123', role: 'admin' },
+];
+
+// Profissionais aprovados e publicados, já na ordem neutra do contrato (nome, depois id).
+const CATALOG: CatalogPsychologist[] = [
+  {
+    id: 2,
+    name: 'Atticus Finch',
+    crp: '06/000002',
+    approach: 'Psicanálise',
+    specialty: 'Luto e relacionamentos',
+    modality: 'ambos',
+    region: 'Campinas, SP',
+    bio: 'Escuta clínica para adultos em momentos de perda e mudança.',
+  },
+  {
+    id: 1,
+    name: 'Hermione Granger',
+    crp: '06/000001',
+    approach: 'Terapia cognitivo-comportamental',
+    specialty: 'Ansiedade e estresse',
+    modality: 'online',
+    region: 'São Paulo, SP',
+    bio: 'Atendo adolescentes e adultos com foco em ansiedade.',
+  },
 ];
 
 const REQUIRED = 'Este campo é obrigatório.';
@@ -160,6 +184,13 @@ export function createMockApi({ delayMs = 0 }: { delayMs?: number } = {}): Api {
         task.completed_at = new Date().toISOString();
       }
       return { ...task };
+    },
+
+    async catalogPsychologists() {
+      await wait();
+      const { user } = authenticate();
+      if (user.role !== 'patient') throw new ApiError(403, 'Este perfil não pode consultar o catálogo de profissionais.');
+      return { data: CATALOG.map((item) => ({ ...item })), meta: { total: CATALOG.length, page: 1, per_page: 20 } };
     },
   };
 }

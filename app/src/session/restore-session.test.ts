@@ -42,6 +42,9 @@ const offlineApi: Api = {
   completePatientTask: async () => {
     throw new ApiError(0, 'Sem conexão com o servidor.');
   },
+  catalogPsychologists: async () => {
+    throw new ApiError(0, 'Sem conexão com o servidor.');
+  },
 };
 
 describe('restoreSession', () => {

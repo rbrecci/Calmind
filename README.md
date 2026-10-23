@@ -28,7 +28,7 @@ Pesquisa de campo com três entrevistadas sem relação entre si, duas psicólog
 
 O produto completo prevê relatos, tarefas, chat, agenda, lembretes de medicação e resumos por IA. Esses recursos compõem a proposta e não descrevem o estado integral da Sprint 2.
 
-O MVP atual reúne API Laravel e MySQL, painel Blade e aplicativo React Native com Expo. A API implementa os blocos **A, C, D, E e F**: autenticação; cadastro e aprovação de psicólogos; catálogo, convite e vínculo; relatos com restrição de privacidade; e tarefas. O painel permite administrar cadastros e acompanhar tarefas. O aplicativo apresenta entrada e tarefas do paciente. O bloco **B**, referente ao fluxo completo de consentimento, ainda não foi entregue; a demonstração usa aceite fictício preparado no banco. Chat, agenda, medicação, IA e prontuário consolidado permanecem fora do MVP.
+O MVP atual reúne API Laravel e MySQL, painel Blade e aplicativo React Native com Expo. A API implementa os blocos **A, C, D, E e F**: autenticação; cadastro e aprovação de psicólogos; catálogo, convite e vínculo; relatos com restrição de privacidade; e tarefas. O painel permite administrar cadastros e acompanhar tarefas. O aplicativo apresenta entrada com tratamento de erro, escolha de perfil, cadastro do paciente, catálogo de psicólogos e tarefas do paciente. O bloco **B**, referente ao fluxo completo de consentimento, ainda não foi entregue; a demonstração usa aceite fictício preparado no banco. Chat, agenda, medicação, IA e prontuário consolidado permanecem fora do MVP.
 
 O ciclo compartilhado de tarefas foi demonstrado em 22/10/2026: tarefa criada na web, concluída pela API como paciente e exibida como concluída na web. A navegação por esse ciclo em um dispositivo físico ou emulador ainda não foi verificada. Ver [evidências da Sprint 2](docs/testes/2026-10-22-sprint2.txt).
 
@@ -52,14 +52,14 @@ cp .env.example .env
 npx expo start
 ```
 
-No `.env` do aplicativo, ajuste `EXPO_PUBLIC_API_URL` para o endereço do servidor acessível pelo dispositivo ou navegador e use `EXPO_PUBLIC_USE_MOCK=false` para acessar dados reais. A URL `localhost` do computador não funciona como endereço da API em um telefone. Para verificar o código, use `php artisan test` em `backend/` e `npm test`, `npm run lint` e `npx tsc --noEmit` em `app/`. Em 22/10/2026, a suíte integrada do backend passou com 195 testes e 3.545 asserções; o aplicativo passou 33 testes, lint, TypeScript e exportação web.
+No `.env` do aplicativo, ajuste `EXPO_PUBLIC_API_URL` para o endereço do servidor acessível pelo dispositivo ou navegador e use `EXPO_PUBLIC_USE_MOCK=false` para acessar dados reais. A URL `localhost` do computador não funciona como endereço da API em um telefone. Para verificar o código, use `php artisan test` em `backend/` e `npm test`, `npm run lint` e `npx tsc --noEmit` em `app/`. Em 23/10/2026, a suíte do backend passou com 197 testes e 3.556 asserções, o Newman passou nas pastas A, C, D, E e F com 55 requisições e 105 asserções, e o aplicativo passou 66 testes, lint e TypeScript. As saídas estão em [docs/testes](docs/testes/README.md).
 
 ## Os quatro compromissos que o produto não quebra
 
 Estes compromissos definem o produto planejado. Na Sprint 2, a privacidade dos relatos foi testada; os recursos de IA e medicação ainda não foram implementados.
 
 1. **A IA, quando implementada, dependerá de ação do profissional.** O requisito prevê revisão humana antes de qualquer registro.
-2. **Relatos privados devem permanecer restritos ao paciente.** O modelo documenta essa regra; a garantia ainda precisa ser implementada e testada no servidor.
+2. **Relatos privados devem permanecer restritos ao paciente.** A garantia está na camada de dados (view `shared_reports`) e é comprovada pelo `ReportPrivacyTest` e pela pasta E do Newman.
 3. **A plataforma não prescreverá medicação.** Essa é uma regra de produto prevista nos requisitos.
 4. **A escolha de tratamento não terá ranking comercial.** Essa é uma regra de produto prevista nos requisitos.
 
@@ -96,7 +96,7 @@ consolida o problema, a visão e as 18 decisões de produto com as respectivas j
 | Backend e frontend, primeiras funcionalidades | 2 | [`backend/`](backend/), [`app/`](app/) e [`docs/planejamento/etapas-sprint2.md`](docs/planejamento/etapas-sprint2.md) | MVP dos blocos A, C, D, E e F implementado; fluxo de consentimento B pendente |
 | Primeiros testes | 2 | [`docs/testes/`](docs/testes/) | Suíte integrada e roteiro web/API registrados em 22/10/2026 |
 | Sistema completo | 3 | ainda não iniciado | Pendente |
-| Documentação técnica final em ABNT | 3 | [`docs/documento-final/CALMIND_ABNT.docx`](docs/documento-final/CALMIND_ABNT.docx) | Rascunho versionado e atualizado com o MVP; revisão final na Sprint 3 |
+| Documentação técnica final em ABNT | 3 | [`docs/documento-final/CALMIND_ABNT.docx`](docs/documento-final/CALMIND_ABNT.docx) | Versionado e atualizado com o MVP da Sprint 2; revisão final na Sprint 3 |
 | Manual do usuário | 3 | ainda não iniciado | Pendente |
 | Relatório de testes | 3 | [`docs/testes/`](docs/testes/) | Primeiras evidências registradas; consolidação final na Sprint 3 |
 
@@ -188,11 +188,11 @@ docs/
 ├── planejamento/                cronograma, etapas da sprint, arranque do RN e decisões abertas
 ├── manual/                      manual do usuário          · Sprint 3
 ├── testes/                      evidências da Sprint 2 e relatório final na Sprint 3
-├── documento-final/             rascunho ABNT, revisão final na Sprint 3
+├── documento-final/             documento ABNT, revisão final na Sprint 3
 └── apresentacao/                slides e ensaios           · Sprint 3
 ```
 
-As pastas de código estão em uso na Sprint 2. O rascunho ABNT e as primeiras evidências de teste já estão versionados; a conclusão desses documentos pertence à Sprint 3.
+As pastas de código estão em uso na Sprint 2. O documento ABNT e as evidências de teste da Sprint 2 estão versionados; a revisão final deles pertence à Sprint 3.
 
 **Antes do seu primeiro commit, leia [`CONTRIBUTING.md`](CONTRIBUTING.md).** Ele traz o modelo de mensagem de commit, o passo a passo do branch ao merge e o que é um Pull Request, para quem nunca abriu um. Nada entra no `main` sem passar por PR.
 

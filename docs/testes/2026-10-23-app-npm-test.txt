@@ -1,0 +1,26 @@
+Data: 2026-10-23
+Comandos: npm test; npx tsc --noEmit; npm run lint (em app/)
+  ✔ sem token guardado, pede login e não deixa token na memória (3.0394ms)
+  ✔ com token válido, devolve o papel do /me e deixa o token ativo (12.2346ms)
+  ✔ com token expirado (401), apaga o token guardado e pede login (2.3061ms)
+  ✔ token revogado pelo logout também é apagado (29.8892ms)
+  ✔ sem rede, pede login mas mantém o token guardado (1.0699ms)
+  ✔ token de administrador não serve no app e é apagado (3.5078ms)
+✔ restoreSession (55.6124ms)
+ℹ tests 66
+ℹ suites 18
+ℹ pass 66
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 958.9161
+--- tsc
+tsc exit=0
+--- lint
+> calmind@1.0.0 lint
+> expo lint
+
+env: load .env
+env: export EXPO_PUBLIC_API_URL EXPO_PUBLIC_USE_MOCK
+lint exit=0

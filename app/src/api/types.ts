@@ -16,6 +16,27 @@ export type RegisterInput = {
   email: string;
   password: string;
   role: Role;
+  birth_date?: string;
+  phone?: string;
+  guardian_name?: string;
+  guardian_phone?: string;
+  guardian_relationship?: string;
+};
+
+export type PatientTask = {
+  id: number;
+  bond_id: number;
+  title: string;
+  description: string | null;
+  due_date: string | null;
+  status: 'pending' | 'completed';
+  completed_at: string | null;
+  created_at: string;
+};
+
+export type PatientTaskList = {
+  data: PatientTask[];
+  meta: { total: number; page: number; per_page: number };
 };
 
 export type LoginInput = {
@@ -45,4 +66,6 @@ export type Api = {
   login(input: LoginInput): Promise<{ token: string }>; // POST /auth/login
   logout(): Promise<void>; // POST /auth/logout
   me(): Promise<User>; // GET /me
+  patientTasks(): Promise<PatientTaskList>; // GET /patient/tasks
+  completePatientTask(id: number): Promise<PatientTask>; // POST /patient/tasks/{id}/complete
 };

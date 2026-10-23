@@ -2,7 +2,7 @@
 
 **Laravel + MySQL.** É o único lugar do projeto onde mora regra de negócio.
 
-O Laravel entra aqui na semana 1 da Sprint 2 (24/08). Até lá esta pasta tem só este arquivo.
+A fundação (etapa B0) está pronta: projeto Laravel 12, Sanctum, as 25 migrations e a view `shared_reports`, Model base, `ApiCollection`, handler de erro, um arquivo de rota por bloco e a massa fictícia. Para subir do zero, siga [`../docs/engenharia/setup-backend.md`](../docs/engenharia/setup-backend.md).
 
 ## Esta pasta tem duas caras, e é de propósito
 
@@ -17,7 +17,7 @@ As duas compartilham Models, banco, autenticação e regra de negócio. Muda só
 
 ## Antes de escrever o primeiro endpoint
 
-Leia [`../docs/api/contrato-api.md`](../docs/api/contrato-api.md). Ele já fixa formato de erro, de data, de lista e como o token viaja — e a coleção do Postman testa isso. Duas divergências entre o contrato e o padrão do Laravel estão registradas como DA-06 e DA-07 em [`../docs/planejamento/decisoes-abertas.md`](../docs/planejamento/decisoes-abertas.md) e precisam ser resolvidas antes, não depois.
+Leia [`../docs/api/contrato-api.md`](../docs/api/contrato-api.md). Ele já fixa formato de erro, de data, de lista e como o token viaja, e a coleção do Postman testa isso. As duas divergências entre o contrato e o padrão do Laravel (DA-06, data com offset, e DA-07, `meta` da lista) já estão resolvidas na fundação: `SerializesContractDates` cuida da data, `ApiCollection` do `meta` e `ApiErrorRenderer` do formato de erro. Estenda essas classes, não reescreva.
 
 ## A regra que não pode ser esquecida
 

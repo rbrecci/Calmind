@@ -1,29 +1,56 @@
 import { Redirect } from 'expo-router';
 import { useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 
-import { ApiError, type FieldErrors } from '@/api';
-import { Button, Screen, Text, TextField } from '@/design-system';
+import { api, ApiError, type FieldErrors, type Role } from '@/api';
+import { Button, Colors, Radius, Screen, Spacing, Text, TextField } from '@/design-system';
 import { useSession } from '@/session/session-context';
 
-const MOCK_ACTIVE = process.env.EXPO_PUBLIC_USE_MOCK === 'true';
+type Step = 'login' | 'choice' | 'register';
 
-// Tela provisória de login: o visual definitivo (telas 01 a 03 do protótipo) substitui este.
-// O que fica é o fluxo: signIn chama a API, e o papel vem do /me.
+function toIsoDate(value: string): string {
+  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value.trim());
+  return match ? `${match[3]}-${match[2]}-${match[1]}` : value.trim();
+}
+
+function isMinor(value: string): boolean {
+  const iso = toIsoDate(value);
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(iso) ? new Date(`${iso}T12:00:00Z`) : null;
+  if (!date || Number.isNaN(date.getTime())) return false;
+  const today = new Date();
+  const age = today.getFullYear() - date.getUTCFullYear() - (
+    today.getMonth() < date.getUTCMonth() ||
+    (today.getMonth() === date.getUTCMonth() && today.getDate() < date.getUTCDate()) ? 1 : 0
+  );
+  return age >= 12 && age < 18;
+}
+
 export default function EntryScreen() {
   const { role, signIn } = useSession();
-
+  const [step, setStep] = useState<Step>('login');
+  const [selectedRole, setSelectedRole] = useState<Role>('patient');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [birthDate, setBirthDate] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [guardianName, setGuardianName] = useState('');
+  const [guardianPhone, setGuardianPhone] = useState('');
+  const [guardianRelationship, setGuardianRelationship] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
-  // Rota de outro papel (link ou URL forçada) cai aqui; quem já está logado volta ao seu lado.
-  if (role !== null) {
-    return <Redirect href={role === 'patient' ? '/home' : '/dashboard'} />;
+  if (role !== null) return <Redirect href={role === 'patient' ? '/home' : '/dashboard'} />;
+
+  function goTo(next: Step, nextRole?: Role) {
+    if (nextRole) setSelectedRole(nextRole);
+    setMessage(null);
+    setFieldErrors({});
+    setStep(next);
   }
 
-  async function submit() {
+  async function submitLogin() {
     setSubmitting(true);
     setMessage(null);
     setFieldErrors({});
@@ -31,7 +58,7 @@ export default function EntryScreen() {
       await signIn({ email, password });
     } catch (error) {
       if (error instanceof ApiError) {
-        setMessage(error.message);
+        setMessage(error.status === 401 ? 'Não foi possível entrar. Confira o e-mail e a senha e tente de novo.' : error.message);
         setFieldErrors(error.errors ?? {});
       } else {
         setMessage('Não foi possível entrar. Tente novamente.');
@@ -41,50 +68,120 @@ export default function EntryScreen() {
     }
   }
 
+  async function submitRegister() {
+    setMessage(null);
+    setFieldErrors({});
+    if (password !== confirmPassword) {
+      setFieldErrors({ confirm_password: ['As senhas não conferem.'] });
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await api.register({
+        name,
+        email,
+        password,
+        role: selectedRole,
+        ...(selectedRole === 'patient' ? {
+          birth_date: toIsoDate(birthDate),
+          ...(isMinor(birthDate) ? {
+            guardian_name: guardianName,
+            guardian_phone: guardianPhone,
+            guardian_relationship: guardianRelationship,
+          } : {}),
+        } : {}),
+      });
+      await signIn({ email, password });
+    } catch (error) {
+      if (error instanceof ApiError) {
+        setMessage(error.message);
+        setFieldErrors(error.errors ?? {});
+      } else {
+        setMessage('Não foi possível criar a conta. Tente novamente.');
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <Screen scroll>
-      <Text variant="h1">Calmind</Text>
-
-      <TextField
-        label="E-mail"
-        placeholder="voce@exemplo.com"
-        autoCapitalize="none"
-        autoComplete="email"
-        keyboardType="email-address"
-        value={email}
-        onChangeText={setEmail}
-        error={fieldErrors.email?.[0]}
-      />
-
-      <TextField
-        label="Senha"
-        placeholder="Sua senha"
-        autoCapitalize="none"
-        autoComplete="current-password"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-        error={fieldErrors.password?.[0]}
-      />
-
-      {message ? (
-        <Text variant="small" color="error" accessibilityRole="alert">
-          {message}
-        </Text>
-      ) : null}
-
-      <Button
-        label={submitting ? 'Entrando...' : 'Entrar'}
-        accessibilityLabel="Entrar"
-        disabled={submitting}
-        onPress={submit}
-      />
-
-      {__DEV__ && MOCK_ACTIVE ? (
-        <Text variant="small" color="textSecondary">
-          Modo de teste: as contas de exemplo estão em src/api/mock.ts
-        </Text>
-      ) : null}
+      {step === 'login' ? (
+        <>
+          <View style={styles.brand}>
+            <Text variant="h1">Calmind</Text>
+            <Text variant="small" color="textSecondary">Saúde Mental & Acolhimento</Text>
+          </View>
+          {message ? <Text variant="small" color="error" accessibilityRole="alert">{message}</Text> : null}
+          <TextField label="E-mail" placeholder="seu@email.com" autoCapitalize="none" autoComplete="email"
+            keyboardType="email-address" value={email} onChangeText={setEmail} error={fieldErrors.email?.[0]} />
+          <TextField label="Senha" placeholder="Sua senha" autoCapitalize="none" autoComplete="current-password"
+            secureTextEntry value={password} onChangeText={setPassword} error={fieldErrors.password?.[0]} />
+          <Button label={submitting ? 'Entrando...' : 'Entrar'} disabled={submitting} onPress={submitLogin} />
+          <Button label="Criar conta" disabled={submitting} onPress={() => goTo('choice')} />
+          <Text variant="small" color="textSecondary" style={styles.center}>
+            No cadastro você escolhe se é paciente ou psicólogo.
+          </Text>
+        </>
+      ) : step === 'choice' ? (
+        <>
+          <Text variant="small" color="textSecondary">Criar conta</Text>
+          <Text variant="h4">Como você vai usar o Calmind?</Text>
+          <Text variant="small" color="textSecondary">Essa escolha não muda depois: a conta fica presa ao perfil.</Text>
+          <View style={styles.choice}>
+            <Text variant="h5">Sou paciente</Text>
+            <Text variant="small" color="textSecondary">Quero acompanhar meu processo e receber tarefas.</Text>
+            <Button label="Continuar como paciente" onPress={() => goTo('register', 'patient')} />
+          </View>
+          <View style={styles.choice}>
+            <Text variant="h5">Sou psicólogo</Text>
+            <Text variant="small" color="textSecondary">Tenho registro no CRP e quero atender pela plataforma.</Text>
+            <Button label="Continuar como psicólogo" onPress={() => goTo('register', 'psychologist')} />
+          </View>
+          <Button label="Voltar para entrar" onPress={() => goTo('login')} />
+        </>
+      ) : (
+        <>
+          <Text variant="small" color="textSecondary">Criar conta</Text>
+          <Text variant="h4">Cadastro</Text>
+          <Text variant="small">Perfil: {selectedRole === 'patient' ? 'Paciente' : 'Psicólogo'}</Text>
+          {message ? <Text variant="small" color="error" accessibilityRole="alert">{message}</Text> : null}
+          <TextField label="Nome completo" value={name} onChangeText={setName} autoComplete="name"
+            error={fieldErrors.name?.[0]} />
+          <TextField label="E-mail" value={email} onChangeText={setEmail} autoCapitalize="none"
+            autoComplete="email" keyboardType="email-address" error={fieldErrors.email?.[0]} />
+          {selectedRole === 'patient' ? (
+            <>
+              <TextField label="Data de nascimento" placeholder="DD/MM/AAAA" value={birthDate}
+                onChangeText={setBirthDate} keyboardType="numbers-and-punctuation" error={fieldErrors.birth_date?.[0]} />
+              {isMinor(birthDate) ? (
+                <>
+                  <Text variant="small" color="textSecondary">Para menores de 18 anos, informe o responsável.</Text>
+                  <TextField label="Nome do responsável" value={guardianName} onChangeText={setGuardianName}
+                    error={fieldErrors.guardian_name?.[0]} />
+                  <TextField label="Telefone do responsável" value={guardianPhone} onChangeText={setGuardianPhone}
+                    keyboardType="phone-pad" error={fieldErrors.guardian_phone?.[0]} />
+                  <TextField label="Parentesco do responsável" value={guardianRelationship}
+                    onChangeText={setGuardianRelationship} error={fieldErrors.guardian_relationship?.[0]} />
+                </>
+              ) : null}
+            </>
+          ) : null}
+          <TextField label="Senha" secureTextEntry autoComplete="new-password" value={password}
+            onChangeText={setPassword} error={fieldErrors.password?.[0]} />
+          <TextField label="Confirmar senha" secureTextEntry autoComplete="new-password" value={confirmPassword}
+            onChangeText={setConfirmPassword} error={fieldErrors.confirm_password?.[0]} />
+          <Text variant="small" color="textSecondary">Mínimo de 8 caracteres.</Text>
+          <Button label={submitting ? 'Criando conta...' : 'Criar conta'} disabled={submitting} onPress={submitRegister} />
+          <Button label="Voltar para escolher perfil" disabled={submitting} onPress={() => goTo('choice')} />
+        </>
+      )}
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  brand: { alignItems: 'center', gap: Spacing.one, marginBottom: Spacing.four },
+  center: { textAlign: 'center' },
+  choice: { borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.md, padding: Spacing.three, gap: Spacing.two },
+});

@@ -92,7 +92,7 @@ describe('mock da API', () => {
 
     test('a conta criada consegue entrar', async () => {
       const api = createMockApi();
-      await api.register({ name: 'Nova Pessoa', email: 'Nova@Calmind.test', password: 'abc12345', role: 'patient' });
+      await api.register({ name: 'Nova Pessoa', email: 'Nova@Calmind.test', password: 'abc12345', role: 'patient', birth_date: '1998-04-12' });
 
       const { token } = await api.login({ email: 'nova@calmind.test', password: 'abc12345' });
       assert.ok(token.length > 0);
@@ -100,12 +100,59 @@ describe('mock da API', () => {
 
     test('recusa e-mail repetido com 422 e sem vazar dado da conta existente', async () => {
       const error = await rejection(
-        createMockApi().register({ name: 'Outro', email: PATIENT.email, password: 'abc12345', role: 'patient' }),
+        createMockApi().register({ name: 'Outro', email: PATIENT.email, password: 'abc12345', role: 'patient', birth_date: '1998-04-12' }),
       );
 
       assert.equal(error.status, 422);
       assert.ok(error.errors?.email);
       assert.equal(JSON.stringify(error).includes('Paciente de Teste'), false);
+    });
+
+    test('exige data de nascimento de paciente', async () => {
+      const error = await rejection(createMockApi().register({
+        name: 'Nova Pessoa', email: 'nova@calmind.test', password: 'abc12345', role: 'patient', birth_date: '',
+      }));
+      assert.equal(error.status, 422);
+      assert.ok(error.errors?.birth_date);
+    });
+
+    test('exige dados do responsável para paciente menor de idade', async () => {
+      const error = await rejection(createMockApi().register({
+        name: 'Paciente Menor', email: 'menor@calmind.test', password: 'abc12345', role: 'patient', birth_date: '2011-04-12',
+      }));
+      assert.equal(error.status, 422);
+      assert.ok(error.errors?.guardian_name);
+      assert.ok(error.errors?.guardian_phone);
+      assert.ok(error.errors?.guardian_relationship);
+    });
+  });
+
+  describe('tarefas do paciente', () => {
+    test('exige autenticação para listar', async () => {
+      const error = await rejection(createMockApi().patientTasks());
+      assert.equal(error.status, 401);
+    });
+
+    test('lista e conclui uma tarefa mantendo a mesma data ao repetir', async () => {
+      const api = createMockApi();
+      setAuthToken((await api.login(PATIENT)).token);
+      const first = await api.patientTasks();
+      assert.ok(first.data.length > 0);
+      const task = first.data[0];
+      const completed = await api.completePatientTask(task.id);
+      assert.equal(completed.status, 'completed');
+      assert.ok(completed.completed_at);
+      const again = await api.completePatientTask(task.id);
+      assert.equal(again.completed_at, completed.completed_at);
+      assert.equal((await api.patientTasks()).data[0].status, 'completed');
+    });
+
+    test('não mostra tarefa de outro paciente', async () => {
+      const api = createMockApi();
+      await api.register({ name: 'Outra Pessoa', email: 'outra@calmind.test', password: 'abc12345', role: 'patient', birth_date: '1998-04-12' });
+      setAuthToken((await api.login({ email: 'outra@calmind.test', password: 'abc12345' })).token);
+      assert.equal((await api.patientTasks()).data.length, 0);
+      assert.equal((await rejection(api.completePatientTask(1))).status, 404);
     });
   });
 });

@@ -30,7 +30,7 @@ O produto completo prevê relatos, tarefas, chat, agenda, lembretes de medicaç�
 
 O MVP atual reúne API Laravel e MySQL, painel Blade e aplicativo React Native com Expo. A API implementa os blocos **A, C, D, E e F**: autenticação; cadastro e aprovação de psicólogos; catálogo, convite e vínculo; relatos com restrição de privacidade; e tarefas. O painel permite administrar cadastros e acompanhar tarefas. O aplicativo apresenta entrada com tratamento de erro, escolha de perfil, cadastro do paciente, catálogo de psicólogos e tarefas do paciente. O bloco **B**, referente ao fluxo completo de consentimento, ainda não foi entregue; a demonstração usa aceite fictício preparado no banco. Chat, agenda, medicação, IA e prontuário consolidado permanecem fora do MVP.
 
-O ciclo compartilhado de tarefas foi demonstrado em 22/10/2026: tarefa criada na web, concluída pela API como paciente e exibida como concluída na web. A navegação por esse ciclo em um dispositivo físico ou emulador ainda não foi verificada. Ver [evidências da Sprint 2](docs/testes/2026-10-22-sprint2.txt).
+Os dados compartilhados entre web e app foram demonstrados em 23/10/2026: o psicólogo aprovado no painel web aparece no catálogo do aplicativo. O ciclo de tarefas (criada na web, concluída pela API como paciente, exibida como concluída na web) foi demonstrado em 22/10/2026. Nada foi testado em celular físico, iOS ou Android; o app foi verificado no Expo web. Ver [roteiro da I2](docs/testes/2026-10-23-roteiro-i2.md) e [evidências](docs/testes/README.md).
 
 ### Executar o MVP
 

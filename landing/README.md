@@ -2,7 +2,7 @@
 
 Página de divulgação do Calmind. Aparece na tabela de stack do `README.md` da raiz e na semana 11 do cronograma.
 
-Entra na Sprint 3. Até lá esta pasta tem só este arquivo.
+A implementação em HTML e CSS está disponível em `index.html`, com estilos em `style.css` e imagens e fontes locais em `assets/`. Abra `index.html` no navegador para visualizar a página. Login e cadastro são demonstrativos.
 
 ## O que ela pode e o que ela não pode dizer
 

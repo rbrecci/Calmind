@@ -666,10 +666,6 @@
                 "value": "application/json"
               },
               {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
                 "key": "Authorization",
                 "value": "Bearer {{psyToken}}"
               }
@@ -686,13 +682,24 @@
             },
             "description": "RF-33. CRP em formato valido mais documento comprobatorio. Fica pendente.",
             "body": {
-              "mode": "raw",
-              "raw": "{\n  \"crp_number\": \"{{crpNumero}}\",\n  \"crp_region\": \"06\",\n  \"document_url\": \"comprovante-teste.pdf\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "crp_number",
+                  "value": "{{crpNumero}}",
+                  "type": "text"
+                },
+                {
+                  "key": "crp_region",
+                  "value": "06",
+                  "type": "text"
+                },
+                {
+                  "key": "document",
+                  "type": "file",
+                  "src": "docs/api/fixtures/comprovante-teste.pdf"
                 }
-              }
+              ]
             }
           },
           "response": [],
@@ -720,10 +727,6 @@
                 "value": "application/json"
               },
               {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
                 "key": "Authorization",
                 "value": "Bearer {{psyToken}}"
               }
@@ -740,13 +743,24 @@
             },
             "description": "CA-33.2. Formato invalido ou regiao inexistente e recusado.",
             "body": {
-              "mode": "raw",
-              "raw": "{\n  \"crp_number\": \"abc\",\n  \"crp_region\": \"99\",\n  \"document_url\": \"x.pdf\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "crp_number",
+                  "value": "abc",
+                  "type": "text"
+                },
+                {
+                  "key": "crp_region",
+                  "value": "99",
+                  "type": "text"
+                },
+                {
+                  "key": "document",
+                  "type": "file",
+                  "src": "docs/api/fixtures/comprovante-teste.pdf"
                 }
-              }
+              ]
             }
           },
           "response": [],
@@ -756,7 +770,8 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('responde 422', () => pm.response.to.have.status(422));"
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "pm.test('indica CRP e regiao invalidos', () => { const errors = pm.response.json().errors; pm.expect(errors).to.have.property('crp_number'); pm.expect(errors).to.have.property('crp_region'); });"
                 ]
               }
             }
@@ -923,7 +938,9 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('responde 200', () => pm.response.to.have.status(200));",
-                  "pm.test('fica aprovado', () => pm.expect(pm.response.json().approval_status).to.eql('approved'));"
+                  "pm.test('fica aprovado', () => pm.expect(pm.response.json().approval_status).to.eql('approved'));",
+                  "pm.test('documento cadastrado', () => pm.expect(pm.response.json().documents[0].id).to.be.a('number'));",
+                  "pm.collectionVariables.set('idDocumento', pm.response.json().documents[0].id);"
                 ]
               }
             }
@@ -998,14 +1015,14 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/psychologist/{{idPsicologo}}/document",
+              "raw": "{{baseUrl}}/psychologist/documents/{{idDocumento}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "psychologist",
-                "{{idPsicologo}}",
-                "document"
+                "documents",
+                "{{idDocumento}}"
               ]
             },
             "description": "RNF-11. So o administrador e o proprio dono alcancam o documento."
@@ -1024,7 +1041,7 @@
           ]
         },
         {
-          "name": "Editar e publicar perfil",
+          "name": "Editar perfil",
           "request": {
             "method": "PUT",
             "header": [
@@ -1054,7 +1071,7 @@
             "description": "RF-34. O texto e escrito pelo profissional, nunca gerado pela plataforma.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"approach\": \"Terapia cognitivo comportamental\",\n  \"specialty\": \"Ansiedade\",\n  \"modality\": \"online\",\n  \"region\": \"Sao Paulo\",\n  \"bio\": \"Atendimento a adultos. Texto escrito pela propria profissional.\"\n}",
+              "raw": "{\n  \"profile_approach\": \"Terapia cognitivo comportamental\",\n  \"profile_specialty\": \"Ansiedade\",\n  \"profile_modality\": \"online\",\n  \"profile_region\": \"Sao Paulo\",\n  \"profile_bio\": \"Atendimento a adultos. Texto escrito pela propria profissional.\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1069,14 +1086,15 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('responde 200', () => pm.response.to.have.status(200));"
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('preserva os campos do perfil', () => { const expected = JSON.parse(pm.request.body.raw); const actual = pm.response.json(); Object.keys(expected).forEach(key => pm.expect(actual[key]).to.eql(expected[key])); });"
                 ]
               }
             }
           ]
         },
         {
-          "name": "Perfil com honorario deve ser recusado",
+          "name": "Salvar rascunho com honorario",
           "request": {
             "method": "PUT",
             "header": [
@@ -1103,10 +1121,10 @@
                 "profile"
               ]
             },
-            "description": "CA-34.4. Valor e expressao promocional bloqueiam a publicacao, por restricao de divulgacao do CFP.",
+            "description": "O rascunho aceita texto do profissional; a publicacao seguinte deve recusar honorario.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"bio\": \"Sessao por R$ 100,00, promocao de primeira consulta.\"\n}",
+              "raw": "{\n  \"profile_bio\": \"Sessao por R$ 100,00, promocao de primeira consulta.\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1121,7 +1139,102 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('responde 422', () => pm.response.to.have.status(422));"
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('rascunho salvo sem publicar', () => { const body = pm.response.json(); pm.expect(body.profile_bio).to.eql(JSON.parse(pm.request.body.raw).profile_bio); pm.expect(body.profile_published_at).to.eql(null); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Perfil com honorario deve ser recusado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/profile/publish",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "profile",
+                "publish"
+              ]
+            },
+            "description": "CA-34.4. Valor e expressao promocional bloqueiam a publicacao, por restricao de divulgacao do CFP."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "pm.test('indica texto proibido', () => pm.expect(pm.response.json().errors).to.have.property('profile_bio'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Restaurar perfil sem honorario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "profile"
+              ]
+            },
+            "description": "Restaura o texto valido depois da tentativa de publicar honorario.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"profile_approach\": \"Terapia cognitivo comportamental\",\n  \"profile_specialty\": \"Ansiedade\",\n  \"profile_modality\": \"online\",\n  \"profile_region\": \"Sao Paulo\",\n  \"profile_bio\": \"Atendimento a adultos. Texto escrito pela propria profissional.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('preserva os campos do perfil', () => { const expected = JSON.parse(pm.request.body.raw); const actual = pm.response.json(); Object.keys(expected).forEach(key => pm.expect(actual[key]).to.eql(expected[key])); });"
                 ]
               }
             }
@@ -2766,6 +2879,10 @@
     },
     {
       "key": "idPsicologo",
+      "value": ""
+    },
+    {
+      "key": "idDocumento",
       "value": ""
     },
     {

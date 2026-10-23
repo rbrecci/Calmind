@@ -1,0 +1,585 @@
+(node:20036) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(Use `node --trace-deprecation ...` to show where the warning was created)
+newman
+
+Calmind - API da plataforma paciente e psicologo
+
+Folder 01 Conta e autenticacao
+Sub-folder Cadastrar paciente
+  -
+  | 'Execucao', '69067658'
+  -
+  POST http://127.0.0.1:8000/api/v1/auth/register [201 Created, 367B, 870ms]
+  Pass  responde 201
+  Pass  devolve id e papel
+  Pass  nunca devolve a senha
+
+Sub-folder Cadastrar com e-mail repetido deve falhar
+  POST http://127.0.0.1:8000/api/v1/auth/register [422 Unprocessable Content, 355B, 577ms]
+  Pass  responde 422
+  Pass  nao vaza dado da conta existente
+
+Sub-folder Cadastrar psicologo
+  POST http://127.0.0.1:8000/api/v1/auth/register [201 Created, 374B, 801ms]
+  Pass  responde 201
+
+Sub-folder Login do paciente
+  POST http://127.0.0.1:8000/api/v1/auth/login [200 OK, 282B, 814ms]
+  Pass  responde 200
+  Pass  devolve token
+
+Sub-folder Login com senha errada
+  POST http://127.0.0.1:8000/api/v1/auth/login [401 Unauthorized, 271B, 806ms]
+  Pass  responde 401
+  Pass  mensagem generica
+
+Sub-folder Login do psicologo
+  POST http://127.0.0.1:8000/api/v1/auth/login [200 OK, 282B, 832ms]
+  Pass  responde 200
+
+Sub-folder Login do administrador
+  POST http://127.0.0.1:8000/api/v1/auth/login [200 OK, 282B, 893ms]
+  Pass  responde 200
+
+Sub-folder Dados do usuario logado
+  GET http://127.0.0.1:8000/api/v1/me [200 OK, 353B, 473ms]
+  Pass  responde 200
+  Pass  papel paciente
+
+Sub-folder Area interna sem token deve ser negada
+  GET http://127.0.0.1:8000/api/v1/me [401 Unauthorized, 287B, 428ms]
+  Pass  responde 401
+
+Folder 02 Consentimento
+Sub-folder Termo geral vigente
+  GET http://127.0.0.1:8000/api/v1/consent-terms/current?type=general [404 Not Found, 269B, 351ms]
+  1. responde 200
+  2. tem versao e data
+
+Sub-folder Aceitar termo geral
+  POST http://127.0.0.1:8000/api/v1/consent-acceptances [404 Not Found, 269B, 413ms]
+  3. responde 201
+  4. registra a versao aceita
+
+Sub-folder Termo de IA vigente
+  GET http://127.0.0.1:8000/api/v1/consent-terms/current?type=ai_analysis [404 Not Found, 269B, 429ms]
+  5. responde 200
+
+Sub-folder Aceitar termo de IA
+  POST http://127.0.0.1:8000/api/v1/consent-acceptances [404 Not Found, 269B, 373ms]
+  6. responde 201
+
+Folder 03 Cadastro profissional e aprovacao
+Sub-folder Enviar registro profissional
+  POST http://127.0.0.1:8000/api/v1/psychologist/registration [422 Unprocessable Content, 357B, 550ms]
+  7. responde 201
+  8. nasce pendente
+
+Sub-folder CRP em formato invalido deve falhar
+  POST http://127.0.0.1:8000/api/v1/psychologist/registration [422 Unprocessable Content, 488B, 512ms]
+  Pass  responde 422
+
+Sub-folder Publicar perfil antes da aprovacao deve falhar
+  POST http://127.0.0.1:8000/api/v1/psychologist/profile/publish [403 Forbidden, 313B, 596ms]
+  Pass  responde 403
+
+Sub-folder Gerar convite antes da aprovacao deve falhar
+  POST http://127.0.0.1:8000/api/v1/psychologist/invitations [403 Forbidden, 295B, 561ms]
+  Pass  responde 403
+
+Sub-folder Fila de cadastros pendentes
+  GET http://127.0.0.1:8000/api/v1/admin/registrations?status=pending [200 OK, 460B, 574ms]
+  Pass  responde 200
+  Pass  e uma lista
+
+Sub-folder Aprovar cadastro
+  POST http://127.0.0.1:8000/api/v1/admin/registrations/null/approve [404 Not Found, 269B, 403ms]
+  9. responde 200
+ 10. fica aprovado
+
+Sub-folder Reprovar sem justificativa deve falhar
+  POST http://127.0.0.1:8000/api/v1/admin/registrations/null/reject [404 Not Found, 269B, 413ms]
+ 11. responde 422
+
+Sub-folder Documento comprobatorio nao e publico
+  GET http://127.0.0.1:8000/api/v1/psychologist/null/document [404 Not Found, 269B, 358ms]
+ 12. responde 403
+
+Sub-folder Editar e publicar perfil
+  PUT http://127.0.0.1:8000/api/v1/psychologist/profile [403 Forbidden, 313B, 635ms]
+ 13. responde 200
+
+Sub-folder Perfil com honorario deve ser recusado
+  PUT http://127.0.0.1:8000/api/v1/psychologist/profile [403 Forbidden, 313B, 573ms]
+ 14. responde 422
+
+Sub-folder Publicar perfil
+  POST http://127.0.0.1:8000/api/v1/psychologist/profile/publish [403 Forbidden, 313B, 819ms]
+ 15. responde 200
+  Pass  tem data de publicacao
+
+Folder 04 Convite e vinculo
+Sub-folder Gerar convite
+  POST http://127.0.0.1:8000/api/v1/psychologist/invitations [403 Forbidden, 295B, 540ms]
+ 16. responde 201
+  Pass  sem caracteres ambiguos
+ 17. tem expiracao
+
+Sub-folder Codigo inexistente deve falhar
+  POST http://127.0.0.1:8000/api/v1/patient/bonds/redeem-invitation [422 Unprocessable Content, 367B, 603ms]
+  Pass  responde 422
+  Pass  nao revela o profissional
+
+Sub-folder Entrar pelo convite
+  POST http://127.0.0.1:8000/api/v1/patient/bonds/redeem-invitation [422 Unprocessable Content, 367B, 544ms]
+ 18. responde 201
+ 19. vinculo nasce ativo
+
+Sub-folder Reusar o mesmo convite deve falhar
+  POST http://127.0.0.1:8000/api/v1/patient/bonds/redeem-invitation [422 Unprocessable Content, 367B, 530ms]
+  Pass  responde 422
+
+Sub-folder Catalogo com vinculo ativo deve ser negado
+  GET http://127.0.0.1:8000/api/v1/catalog/psychologists [200 OK, 852B, 416ms]
+ 20. responde 403
+
+Sub-folder Encerrar vinculo
+  POST http://127.0.0.1:8000/api/v1/bonds/null/end [404 Not Found, 269B, 364ms]
+ 21. responde 200
+ 22. fica encerrado
+
+Sub-folder Catalogo liberado apos encerrar
+  GET http://127.0.0.1:8000/api/v1/catalog/psychologists?modality=online [200 OK, 572B, 494ms]
+  Pass  responde 200
+  Pass  e uma lista
+  Pass  CA-09.3: sem preco, nota ou ranking
+  Pass  exibe nome completo e CRP
+
+Sub-folder Solicitar vinculo pelo catalogo
+  POST http://127.0.0.1:8000/api/v1/patient/bonds/requests [422 Unprocessable Content, 360B, 518ms]
+ 23. responde 201
+ 24. nasce pendente
+
+Sub-folder Aceitar solicitacao
+  POST http://127.0.0.1:8000/api/v1/psychologist/bond-requests/null/accept [404 Not Found, 269B, 371ms]
+ 25. responde 200
+ 26. fica ativo
+
+Sub-folder Segundo vinculo ativo deve falhar
+  POST http://127.0.0.1:8000/api/v1/patient/bonds/requests [422 Unprocessable Content, 360B, 541ms]
+  Pass  recusa com 409 ou 422, nunca 500
+  Pass  nao estourou erro de banco
+
+Folder 05 Relatos e a garantia de privacidade
+Sub-folder Relato compartilhado
+  POST http://127.0.0.1:8000/api/v1/patient/reports [403 Forbidden, 306B, 454ms]
+ 27. responde 201
+ 28. padrao e compartilhado
+
+Sub-folder Relato privado
+  POST http://127.0.0.1:8000/api/v1/patient/reports [403 Forbidden, 306B, 541ms]
+ 29. responde 201
+ 30. gravado como privado
+
+Sub-folder Promover privado para compartilhado deve falhar
+  PATCH http://127.0.0.1:8000/api/v1/patient/reports/null [404 Not Found, 269B, 431ms]
+ 31. recusa a promocao
+
+Sub-folder PROVA RNF-08: psicologo nao ve o relato privado
+  GET http://127.0.0.1:8000/api/v1/psychologist/patients/8/reports [404 Not Found, 269B, 482ms]
+ 32. responde 200
+  Pass  o conteudo privado nao aparece
+  Pass  o id do relato privado nao aparece
+  Pass  CA-23.2: a contagem so soma os compartilhados
+  Pass  nenhum campo denuncia a existencia de privados
+
+Sub-folder PROVA CA-23.5: acesso direto ao relato privado
+  GET http://127.0.0.1:8000/api/v1/psychologist/reports/null [404 Not Found, 269B, 473ms]
+  Pass  responde 404, nao 403
+  Pass  nao vaza o conteudo
+
+Sub-folder Despublicar relato compartilhado
+  POST http://127.0.0.1:8000/api/v1/patient/reports/null/unpublish [404 Not Found, 269B, 389ms]
+ 33. responde 200
+ 34. informa se ja foi usado em analise
+
+Sub-folder Relato despublicado some da visao do psicologo
+  GET http://127.0.0.1:8000/api/v1/psychologist/patients/8/reports [404 Not Found, 269B, 597ms]
+ 35. responde 200
+  Pass  o relato despublicado nao aparece
+  Pass  sem marca de removido
+
+Sub-folder Paciente ve os proprios relatos, inclusive os privados
+  GET http://127.0.0.1:8000/api/v1/patient/reports [200 OK, 273B, 666ms]
+  Pass  responde 200
+ 36. o proprio relato privado aparece para o dono
+
+Folder 06 Tarefas terapeuticas
+Sub-folder Criar tarefa com prazo passado deve falhar
+  POST http://127.0.0.1:8000/api/v1/psychologist/tasks [422 Unprocessable Content, 410B, 572ms]
+  Pass  responde 422
+  Pass  indica prazo
+
+Sub-folder Criar tarefa
+  POST http://127.0.0.1:8000/api/v1/psychologist/tasks [422 Unprocessable Content, 352B, 569ms]
+ 37. responde 201
+ 38. tarefa pendente no vinculo
+
+Sub-folder Listar tarefas do psicologo
+  GET http://127.0.0.1:8000/api/v1/psychologist/tasks?bond_id=null [422 Unprocessable Content, 352B, 581ms]
+ 39. responde 200
+ 40. lista contem tarefa
+ 41. meta paginada
+
+Sub-folder Ler tarefa do psicologo
+  GET http://127.0.0.1:8000/api/v1/psychologist/tasks/null [404 Not Found, 269B, 432ms]
+ 42. responde 200
+ 43. le a tarefa criada
+
+Sub-folder Editar tarefa pendente
+  PUT http://127.0.0.1:8000/api/v1/psychologist/tasks/null [404 Not Found, 269B, 433ms]
+ 44. responde 200
+ 45. titulo atualizado
+
+Sub-folder Paciente nao cria tarefa
+  POST http://127.0.0.1:8000/api/v1/psychologist/tasks [403 Forbidden, 313B, 539ms]
+  Pass  responde 403
+
+Sub-folder Listar tarefas do paciente
+  GET http://127.0.0.1:8000/api/v1/patient/tasks [200 OK, 273B, 535ms]
+  Pass  responde 200
+ 46. lista contem tarefa pendente
+
+Sub-folder Ler tarefa do paciente
+  GET http://127.0.0.1:8000/api/v1/patient/tasks/null [404 Not Found, 269B, 396ms]
+ 47. responde 200
+ 48. le tarefa propria
+
+Sub-folder Tarefa inexistente deve devolver 404
+  GET http://127.0.0.1:8000/api/v1/patient/tasks/999999999 [404 Not Found, 269B, 539ms]
+  Pass  responde 404
+
+Sub-folder Concluir tarefa
+  POST http://127.0.0.1:8000/api/v1/patient/tasks/null/complete [404 Not Found, 269B, 394ms]
+ 49. responde 200
+ 50. concluida com data
+
+Sub-folder Concluir novamente preserva a data
+  POST http://127.0.0.1:8000/api/v1/patient/tasks/null/complete [404 Not Found, 269B, 422ms]
+ 51. responde 200
+ 52. mesma data
+
+Sub-folder Editar tarefa concluida deve falhar
+  PUT http://127.0.0.1:8000/api/v1/psychologist/tasks/null [404 Not Found, 269B, 405ms]
+ 53. responde 409
+
+Sub-folder Arquivar tarefa concluida
+  DELETE http://127.0.0.1:8000/api/v1/psychologist/tasks/null [404 Not Found, 269B, 402ms]
+ 54. responde 200
+ 55. confirma arquivo
+
+Sub-folder Tarefa arquivada some da lista
+  GET http://127.0.0.1:8000/api/v1/patient/tasks [200 OK, 273B, 553ms]
+  Pass  responde 200
+  Pass  nao lista a tarefa
+
+Sub-folder Sem token deve falhar
+  GET http://127.0.0.1:8000/api/v1/patient/tasks [401 Unauthorized, 287B, 384ms]
+  Pass  responde 401
+
+----------------------------------------------------------------------
+|                         |            executed |             failed |
+--------------------------+---------------------+---------------------
+|              iterations |                   1 |                  0 |
+--------------------------+---------------------+---------------------
+|                requests |                  57 |                  0 |
+--------------------------+---------------------+---------------------
+|            test-scripts |                  57 |                  0 |
+--------------------------+---------------------+---------------------
+|      prerequest-scripts |                   1 |                  0 |
+--------------------------+---------------------+---------------------
+|              assertions |                 103 |                 55 |
+----------------------------------------------------------------------
+| total run duration: 35s                                            |
+----------------------------------------------------------------------
+| total data received: 5.3kB (approx)                                |
+----------------------------------------------------------------------
+| average response time: 529ms [min: 351ms, max: 893ms, s.d.: 138ms] |
+----------------------------------------------------------------------
+
+[31m   # [39m[31m failure        [39m[31m detail                                                                                                   [39m
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 01.  AssertionError  responde 200                                                                                             
+                      expected response to have status code 200 but got 404                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "02 Consentimento / Termo geral vigente"                                                          
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 02.  AssertionError  tem versao e data                                                                                        
+                      expected undefined to be a string                                                                        
+                      at assertion:1 in test-script                                                                            
+                      inside "02 Consentimento / Termo geral vigente"                                                          
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 03.  AssertionError  responde 201                                                                                             
+                      expected response to have status code 201 but got 404                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "02 Consentimento / Aceitar termo geral"                                                          
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 04.  AssertionError  registra a versao aceita                                                                                 
+                      expected undefined not to be undefined                                                                   
+                      at assertion:1 in test-script                                                                            
+                      inside "02 Consentimento / Aceitar termo geral"                                                          
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 05.  AssertionError  responde 200                                                                                             
+                      expected response to have status code 200 but got 404                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "02 Consentimento / Termo de IA vigente"                                                          
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 06.  AssertionError  responde 201                                                                                             
+                      expected response to have status code 201 but got 404                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "02 Consentimento / Aceitar termo de IA"                                                          
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 07.  AssertionError  responde 201                                                                                             
+                      expected response to have status code 201 but got 422                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "03 Cadastro profissional e aprovacao / Enviar registro profissional"                             
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 08.  AssertionError  nasce pendente                                                                                           
+                      expected undefined to deeply equal 'pending'                                                             
+                      at assertion:1 in test-script                                                                            
+                      inside "03 Cadastro profissional e aprovacao / Enviar registro profissional"                             
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 09.  AssertionError  responde 200                                                                                             
+                      expected response to have status code 200 but got 404                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "03 Cadastro profissional e aprovacao / Aprovar cadastro"                                         
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 10.  AssertionError  fica aprovado                                                                                            
+                      expected undefined to deeply equal 'approved'                                                            
+                      at assertion:1 in test-script                                                                            
+                      inside "03 Cadastro profissional e aprovacao / Aprovar cadastro"                                         
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 11.  AssertionError  responde 422                                                                                             
+                      expected response to have status code 422 but got 404                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "03 Cadastro profissional e aprovacao / Reprovar sem justificativa deve falhar"                   
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 12.  AssertionError  responde 403                                                                                             
+                      expected response to have status code 403 but got 404                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "03 Cadastro profissional e aprovacao / Documento comprobatorio nao e publico"                    
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 13.  AssertionError  responde 200                                                                                             
+                      expected response to have status code 200 but got 403                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "03 Cadastro profissional e aprovacao / Editar e publicar perfil"                                 
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 14.  AssertionError  responde 422                                                                                             
+                      expected response to have status code 422 but got 403                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "03 Cadastro profissional e aprovacao / Perfil com honorario deve ser recusado"                   
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 15.  AssertionError  responde 200                                                                                             
+                      expected response to have status code 200 but got 403                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "03 Cadastro profissional e aprovacao / Publicar perfil"                                          
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 16.  AssertionError  responde 201                                                                                             
+                      expected response to have status code 201 but got 403                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "04 Convite e vinculo / Gerar convite"                                                            
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 17.  AssertionError  tem expiracao                                                                                            
+                      expected undefined to be a string                                                                        
+                      at assertion:2 in test-script                                                                            
+                      inside "04 Convite e vinculo / Gerar convite"                                                            
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 18.  AssertionError  responde 201                                                                                             
+                      expected response to have status code 201 but got 422                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "04 Convite e vinculo / Entrar pelo convite"                                                      
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 19.  AssertionError  vinculo nasce ativo                                                                                      
+                      expected undefined to deeply equal 'active'                                                              
+                      at assertion:1 in test-script                                                                            
+                      inside "04 Convite e vinculo / Entrar pelo convite"                                                      
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 20.  AssertionError  responde 403                                                                                             
+                      expected response to have status code 403 but got 200                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "04 Convite e vinculo / Catalogo com vinculo ativo deve ser negado"                               
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 21.  AssertionError  responde 200                                                                                             
+                      expected response to have status code 200 but got 404                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "04 Convite e vinculo / Encerrar vinculo"                                                         
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 22.  AssertionError  fica encerrado                                                                                           
+                      expected undefined to deeply equal 'ended'                                                               
+                      at assertion:1 in test-script                                                                            
+                      inside "04 Convite e vinculo / Encerrar vinculo"                                                         
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 23.  AssertionError  responde 201                                                                                             
+                      expected response to have status code 201 but got 422                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "04 Convite e vinculo / Solicitar vinculo pelo catalogo"                                          
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 24.  AssertionError  nasce pendente                                                                                           
+                      expected undefined to deeply equal 'pending'                                                             
+                      at assertion:1 in test-script                                                                            
+                      inside "04 Convite e vinculo / Solicitar vinculo pelo catalogo"                                          
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 25.  AssertionError  responde 200                                                                                             
+                      expected response to have status code 200 but got 404                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "04 Convite e vinculo / Aceitar solicitacao"                                                      
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 26.  AssertionError  fica ativo                                                                                               
+                      expected undefined to deeply equal 'active'                                                              
+                      at assertion:1 in test-script                                                                            
+                      inside "04 Convite e vinculo / Aceitar solicitacao"                                                      
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 27.  AssertionError  responde 201                                                                                             
+                      expected response to have status code 201 but got 403                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "05 Relatos e a garantia de privacidade / Relato compartilhado"                                   
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 28.  AssertionError  padrao e compartilhado                                                                                   
+                      expected undefined to deeply equal 'shared'                                                              
+                      at assertion:1 in test-script                                                                            
+                      inside "05 Relatos e a garantia de privacidade / Relato compartilhado"                                   
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 29.  AssertionError  responde 201                                                                                             
+                      expected response to have status code 201 but got 403                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "05 Relatos e a garantia de privacidade / Relato privado"                                         
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 30.  AssertionError  gravado como privado                                                                                     
+                      expected undefined to deeply equal 'private'                                                             
+                      at assertion:1 in test-script                                                                            
+                      inside "05 Relatos e a garantia de privacidade / Relato privado"                                         
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 31.  AssertionError  recusa a promocao                                                                                        
+                      expected 404 to be one of [ 403, 422 ]                                                                   
+                      at assertion:0 in test-script                                                                            
+                      inside "05 Relatos e a garantia de privacidade / Promover privado para compartilhado deve falhar"        
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 32.  AssertionError  responde 200                                                                                             
+                      expected response to have status code 200 but got 404                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "05 Relatos e a garantia de privacidade / PROVA RNF-08: psicologo nao ve o relato privado"        
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 33.  AssertionError  responde 200                                                                                             
+                      expected response to have status code 200 but got 404                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "05 Relatos e a garantia de privacidade / Despublicar relato compartilhado"                       
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 34.  AssertionError  informa se ja foi usado em analise                                                                       
+                      expected { message: 'Recurso não encontrado.' } to have property 'used_in_analysis'                      
+                      at assertion:1 in test-script                                                                            
+                      inside "05 Relatos e a garantia de privacidade / Despublicar relato compartilhado"                       
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 35.  AssertionError  responde 200                                                                                             
+                      expected response to have status code 200 but got 404                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "05 Relatos e a garantia de privacidade / Relato despublicado some da visao do psicologo"         
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 36.  AssertionError  o proprio relato privado aparece para o dono                                                             
+                      expected '{"data":[],"meta":{"total":0,"page":1…' to include 'MARCADOR-PRIVADO-69067658'                 
+                      at assertion:1 in test-script                                                                            
+                      inside "05 Relatos e a garantia de privacidade / Paciente ve os proprios relatos, inclusive os privados" 
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 37.  AssertionError  responde 201                                                                                             
+                      expected response to have status code 201 but got 422                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "06 Tarefas terapeuticas / Criar tarefa"                                                          
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 38.  AssertionError  tarefa pendente no vinculo                                                                               
+                      expected undefined to deeply equal 'pending'                                                             
+                      at assertion:1 in test-script                                                                            
+                      inside "06 Tarefas terapeuticas / Criar tarefa"                                                          
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 39.  AssertionError  responde 200                                                                                             
+                      expected response to have status code 200 but got 422                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "06 Tarefas terapeuticas / Listar tarefas do psicologo"                                           
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 40.  TypeError       lista contem tarefa                                                                                      
+                      Cannot read properties of undefined (reading 'map')                                                      
+                      at assertion:1 in test-script                                                                            
+                      inside "06 Tarefas terapeuticas / Listar tarefas do psicologo"                                           
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 41.  TypeError       meta paginada                                                                                            
+                      Cannot convert undefined or null to object                                                               
+                      at assertion:2 in test-script                                                                            
+                      inside "06 Tarefas terapeuticas / Listar tarefas do psicologo"                                           
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 42.  AssertionError  responde 200                                                                                             
+                      expected response to have status code 200 but got 404                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "06 Tarefas terapeuticas / Ler tarefa do psicologo"                                               
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 43.  AssertionError  le a tarefa criada                                                                                       
+                      expected undefined to deeply equal +0                                                                    
+                      at assertion:1 in test-script                                                                            
+                      inside "06 Tarefas terapeuticas / Ler tarefa do psicologo"                                               
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 44.  AssertionError  responde 200                                                                                             
+                      expected response to have status code 200 but got 404                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "06 Tarefas terapeuticas / Editar tarefa pendente"                                                
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 45.  AssertionError  titulo atualizado                                                                                        
+                      expected undefined to deeply equal 'Respirar antes de dormir'                                            
+                      at assertion:1 in test-script                                                                            
+                      inside "06 Tarefas terapeuticas / Editar tarefa pendente"                                                
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 46.  TypeError       lista contem tarefa pendente                                                                             
+                      Cannot read properties of undefined (reading 'status')                                                   
+                      at assertion:1 in test-script                                                                            
+                      inside "06 Tarefas terapeuticas / Listar tarefas do paciente"                                            
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 47.  AssertionError  responde 200                                                                                             
+                      expected response to have status code 200 but got 404                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "06 Tarefas terapeuticas / Ler tarefa do paciente"                                                
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 48.  AssertionError  le tarefa propria                                                                                        
+                      expected undefined to deeply equal +0                                                                    
+                      at assertion:1 in test-script                                                                            
+                      inside "06 Tarefas terapeuticas / Ler tarefa do paciente"                                                
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 49.  AssertionError  responde 200                                                                                             
+                      expected response to have status code 200 but got 404                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "06 Tarefas terapeuticas / Concluir tarefa"                                                       
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 50.  AssertionError  concluida com data                                                                                       
+                      expected undefined to deeply equal 'completed'                                                           
+                      at assertion:1 in test-script                                                                            
+                      inside "06 Tarefas terapeuticas / Concluir tarefa"                                                       
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 51.  AssertionError  responde 200                                                                                             
+                      expected response to have status code 200 but got 404                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "06 Tarefas terapeuticas / Concluir novamente preserva a data"                                    
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 52.  AssertionError  mesma data                                                                                               
+                      expected undefined to deeply equal null                                                                  
+                      at assertion:1 in test-script                                                                            
+                      inside "06 Tarefas terapeuticas / Concluir novamente preserva a data"                                    
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 53.  AssertionError  responde 409                                                                                             
+                      expected response to have status code 409 but got 404                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "06 Tarefas terapeuticas / Editar tarefa concluida deve falhar"                                   
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 54.  AssertionError  responde 200                                                                                             
+                      expected response to have status code 200 but got 404                                                    
+                      at assertion:0 in test-script                                                                            
+                      inside "06 Tarefas terapeuticas / Arquivar tarefa concluida"                                             
+[90m     [39m[90m                [39m[90m                                                                                                          [39m
+ 55.  AssertionError  confirma arquivo                                                                                         
+                      expected 'Recurso não encontrado.' to deeply equal 'Tarefa arquivada.'                                   
+                      at assertion:1 in test-script                                                                            
+                      inside "06 Tarefas terapeuticas / Arquivar tarefa concluida"                                             

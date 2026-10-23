@@ -24,20 +24,23 @@ Pesquisa de campo com três entrevistadas sem relação entre si, duas psicólog
 
 **A hipótese central:** a qualidade do tratamento depende tanto do que acontece na sessão quanto do que acontece entre as sessões, e é justamente esse intervalo que não tem ferramenta nenhuma. O produto ataca o intervalo, não a sessão.
 
-## O que a plataforma faz
+## Estado atual do projeto
 
-Um aplicativo, dois lados. O paciente registra relatos livres ao longo da semana, cumpre as tarefas atribuídas, conversa por chat assíncrono, acompanha a agenda e recebe lembrete de adesão à medicação. O psicólogo atribui tarefas, acompanha o prontuário consolidado, agenda consultas e, antes da próxima sessão, solicita um resumo dos relatos compartilhados gerado por IA.
+A Calmind é um projeto acadêmico que propõe apoiar o acompanhamento psicológico entre sessões. No commit 222d275, o código implementado concentra-se na base do aplicativo móvel; requisitos e protótipos descrevem um escopo mais amplo.
 
-A entrada acontece por dois caminhos: quem já tem psicólogo entra por um código de convite; quem não tem procura no catálogo de profissionais e solicita o vínculo.
+- **Aplicativo:** Expo SDK 57, React Native 0.86 e TypeScript, com navegação inicial por perfil, sessão, autenticação simulada e design system.
+- **API:** cliente HTTP preparado, mas sem servidor Laravel executável neste checkout.
+- **Banco de dados:** modelo e esquema SQL documentados; não há banco integrado à aplicação.
+- **Funcionalidades planejadas:** chat, agenda, medicação, tarefas e inteligência artificial ainda não estão implementados como recursos funcionais nesta versão. As telas correspondentes são protótipos.
 
 ## Os quatro compromissos que o produto não quebra
 
-Estes não são detalhes de implementação. São o que define o produto, e cada um tem requisito verificável associado.
+Estes princípios orientam os requisitos do produto. Sua implementação e validação dependem das etapas de desenvolvimento ainda pendentes.
 
-1. **A IA nunca age sozinha.** A análise só roda quando o profissional pede, e nada é gravado no prontuário sem a confirmação dele.
-2. **O relato privado não sai do escopo do paciente.** Nem o conteúdo, nem a existência, nem a contagem. A garantia vive na camada de dados, não na interface.
-3. **A plataforma não prescreve.** O psicólogo registra medicação já prescrita por médico, com origem obrigatória, e o paciente confirma antes de qualquer lembrete valer.
-4. **A escolha de tratamento não vira ranking comercial.** Sem nota, sem estrela, sem preço e sem ordenação por reputação, conforme as restrições de divulgação do Conselho Federal de Psicologia.
+1. **A IA, quando implementada, dependerá de ação do profissional.** O requisito prevê revisão humana antes de qualquer registro.
+2. **Relatos privados devem permanecer restritos ao paciente.** O modelo documenta essa regra; a garantia ainda precisa ser implementada e testada no servidor.
+3. **A plataforma não prescreverá medicação.** Essa é uma regra de produto prevista nos requisitos.
+4. **A escolha de tratamento não terá ranking comercial.** Essa é uma regra de produto prevista nos requisitos.
 
 ---
 
@@ -69,12 +72,12 @@ consolida o problema, a visão e as 18 decisões de produto com as respectivas j
 | Diagramas de modelagem (MER, DER e outros) | 1 | [`docs/diagramas/`](docs/diagramas/) | Pronto |
 | Prototipação da interface | 1 | [`docs/prototipo/`](docs/prototipo/) | Pronto, 16 telas |
 | Coleta e análise dos requisitos | 1 | [`docs/pesquisa/`](docs/pesquisa/) | Roteiro e formulário prontos, 2 das 4 entrevistas aplicadas e sintetizadas |
-| Backend e frontend, primeiras funcionalidades | 2 | [`docs/engenharia/`](docs/engenharia/) e [`docs/planejamento/etapas-sprint2.md`](docs/planejamento/etapas-sprint2.md) | Planejado, codificação iniciando |
-| Primeiros testes | 2 | [`docs/api/`](docs/api/) | Contrato e coleção de testes prontos |
+| Backend e frontend, primeiras funcionalidades | 2 | app/, backend/ e docs/planejamento/etapas-sprint2.md | Aplicativo em base inicial com mock; back-end ausente deste checkout |
+| Primeiros testes | 2 | app/ e docs/api/ | Testes do app configurados; saídas brutas pendentes. A coleção Postman depende da API |
 | Sistema completo | 3 | ainda não iniciado | Pendente |
-| Documentação técnica final em ABNT | 3 | ainda não iniciado | Pendente |
-| Manual do usuário | 3 | ainda não iniciado | Pendente |
-| Relatório de testes | 3 | ainda não iniciado | Pendente |
+| Documentação técnica final em ABNT | 3 | docs/documento-final/CALMIND_ABNT.docx | Rascunho em revisão; escopo atual e evidências incompletos |
+| Manual do usuário | 3 | docs/manual/ | Pendente; protótipos não equivalem a manual de funções implementadas |
+| Relatório de testes | 3 | docs/testes/ | Estrutura presente; logs de execução pendentes |
 
 ## Como abrir cada artefato
 
@@ -100,19 +103,37 @@ As sínteses são anonimizadas por regra do projeto: nenhum nome, contato ou ide
 
 ---
 
-## Stack
+## Tecnologias e execução
 
-| Camada | Tecnologia |
-|--------|------------|
-| Aplicativo | React Native |
-| Backend | Laravel, PHP |
-| Banco de dados | MySQL |
-| Painel do administrador | Blade e Bootstrap, sobre o mesmo backend |
-| Divulgação | Landing page |
+| Camada | Tecnologia e estado |
+|--------|---------------------|
+| Aplicativo móvel | Expo SDK 57, React Native 0.86 e TypeScript. Base inicial em app/. |
+| Cliente de API | Adaptadores mock e HTTP em app/src/api/; integração real depende do servidor. |
+| Back-end | Laravel e PHP são a arquitetura prevista. Não há composer.json, artisan ou rotas executáveis em backend/ neste checkout. |
+| Banco de dados | MySQL está previsto. O esquema e os diagramas estão em docs/diagramas/, sem integração com o app. |
+| Interface web | Protótipos e landing page estão em docs/prototipo/ e landing/; não equivalem ao painel administrativo Laravel. |
 
-O aplicativo mobile e o painel web compartilham backend, banco, autenticação e contrato de API. Regra de negócio vive apenas no servidor, nunca duplicada nos clientes.
+### Executar o aplicativo móvel
 
-Identificadores de código, tabela, coluna e campo de API em inglês. Texto voltado ao usuário em português.
+Requisitos: Node.js 24 e npm 11. No PowerShell, a partir da raiz do repositório:
+
+```powershell
+Set-Location .\app
+npm install
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+```
+
+Confirme que EXPO_PUBLIC_USE_MOCK=true está definido em app/.env para usar as contas e os dados simulados. Depois inicie o Expo:
+
+```powershell
+npm start
+```
+
+O cliente HTTP exige EXPO_PUBLIC_API_URL e um servidor compatível. Sem back-end, mantenha o modo mock. O comando configurado para os testes do aplicativo é npm test; esta atualização não executou testes nem gerou logs.
+
+### Executar o back-end
+
+O back-end **não pode ser iniciado neste checkout**, porque a pasta backend/ ainda não contém o projeto Laravel. O roteiro previsto está em docs/engenharia/setup-backend.md; comandos de migração e artisan só serão aplicáveis quando os arquivos do servidor forem incorporados.
 
 ## Equipe
 
@@ -130,8 +151,8 @@ Identificadores de código, tabela, coluna e campo de API em inglês. Texto volt
 ```
 CONTRIBUTING.md   como commitar e abrir PR neste repositório — leia antes do primeiro commit
 CONTEXTO.md       diário das decisões de design: o que mudou, quando e por quê
-backend/       Laravel + MySQL: API /api/v1 e painel do admin em Blade
-app/           React Native: o aplicativo de paciente e psicólogo
+backend/       documentação da arquitetura prevista; aplicação Laravel ainda ausente
+app/           Expo + React Native: base móvel com navegação e autenticação mock
 landing/       página de divulgação
 docs/
 ├── identidade-visual.md         marca: propósito, público, logo, paleta e tipografia

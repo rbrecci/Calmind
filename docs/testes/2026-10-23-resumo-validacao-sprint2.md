@@ -89,7 +89,7 @@ O push de `b381ed6` foi confirmado comparando o hash local com `git ls-remote`: 
 ## Limites e pendências
 
 - O bloco B continua fora do escopo. A fixture de aceite permite testar relatos e tarefas, mas não valida o fluxo de consentimento pela API ou pela interface.
-- Foi executada a suíte Feature. A falha conhecida causada pela referência a `tests/Unit` inexistente em `phpunit.xml` não foi corrigida. O comando sem selecionar Feature não foi repetido nesta sessão.
+- A referência a `tests/Unit` inexistente em `phpunit.xml` foi removida em 23/10/2026. Depois disso, `php artisan test --no-ansi` sem filtro passou com 197 testes e 3556 asserções, em `calmind_test`.
 - O aceite visual foi informado pelo Saker antes do reset do banco. Não houve nova validação visual depois do reset e das rodadas Newman.
 - RNF-61 continua parcial: a validação da tarefa não comprova o ciclo de consulta exigido pelo requisito.
 - ABNT, README raiz, `docs/testes/README.md`, relatório de contribuição e log de etapas não foram alterados. Agenda, chat, medicação, IA, landing page, F2/F3 e bloco B completo não foram implementados.

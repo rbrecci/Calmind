@@ -28,7 +28,7 @@ Pesquisa de campo com três entrevistadas sem relação entre si, duas psicólog
 
 O produto completo prevê relatos, tarefas, chat, agenda, lembretes de medicação e resumos por IA. Esses recursos compõem a proposta e não descrevem o estado integral da Sprint 2.
 
-O MVP atual reúne API Laravel e MySQL, painel Blade e aplicativo React Native com Expo. A API implementa os blocos **A, C, D, E e F**: autenticação; cadastro e aprovação de psicólogos; catálogo, convite e vínculo; relatos com restrição de privacidade; e tarefas. O painel permite administrar cadastros e acompanhar tarefas. O aplicativo apresenta entrada, cadastro e tarefas do paciente. O bloco **B**, referente ao fluxo completo de consentimento, ainda não foi entregue; a demonstração usa aceite fictício preparado no banco. Chat, agenda, medicação, IA e prontuário consolidado permanecem fora do MVP.
+O MVP atual reúne API Laravel e MySQL, painel Blade e aplicativo React Native com Expo. A API implementa os blocos **A, C, D, E e F**: autenticação; cadastro e aprovação de psicólogos; catálogo, convite e vínculo; relatos com restrição de privacidade; e tarefas. O painel permite administrar cadastros e acompanhar tarefas. O aplicativo apresenta entrada e tarefas do paciente. O bloco **B**, referente ao fluxo completo de consentimento, ainda não foi entregue; a demonstração usa aceite fictício preparado no banco. Chat, agenda, medicação, IA e prontuário consolidado permanecem fora do MVP.
 
 O ciclo compartilhado de tarefas foi demonstrado em 22/10/2026: tarefa criada na web, concluída pela API como paciente e exibida como concluída na web. A navegação por esse ciclo em um dispositivo físico ou emulador ainda não foi verificada. Ver [evidências da Sprint 2](docs/testes/2026-10-22-sprint2.txt).
 
@@ -58,10 +58,10 @@ No `.env` do aplicativo, ajuste `EXPO_PUBLIC_API_URL` para o endereço do servid
 
 Estes compromissos definem o produto planejado. Na Sprint 2, a privacidade dos relatos foi testada; os recursos de IA e medicação ainda não foram implementados.
 
-1. **A IA nunca age sozinha.** A análise só roda quando o profissional pede, e nada é gravado no prontuário sem a confirmação dele.
-2. **O relato privado não sai do escopo do paciente.** Nem o conteúdo, nem a existência, nem a contagem. A garantia vive na camada de dados, não na interface.
-3. **A plataforma não prescreve.** O psicólogo registra medicação já prescrita por médico, com origem obrigatória, e o paciente confirma antes de qualquer lembrete valer.
-4. **A escolha de tratamento não vira ranking comercial.** Sem nota, sem estrela, sem preço e sem ordenação por reputação, conforme as restrições de divulgação do Conselho Federal de Psicologia.
+1. **A IA, quando implementada, dependerá de ação do profissional.** O requisito prevê revisão humana antes de qualquer registro.
+2. **Relatos privados devem permanecer restritos ao paciente.** O modelo documenta essa regra; a garantia ainda precisa ser implementada e testada no servidor.
+3. **A plataforma não prescreverá medicação.** Essa é uma regra de produto prevista nos requisitos.
+4. **A escolha de tratamento não terá ranking comercial.** Essa é uma regra de produto prevista nos requisitos.
 
 ---
 
@@ -124,7 +124,7 @@ As sínteses são anonimizadas por regra do projeto: nenhum nome, contato ou ide
 
 ---
 
-## Stack
+## Tecnologias e execução
 
 | Camada | Tecnologia |
 |--------|------------|
@@ -134,9 +134,27 @@ As sínteses são anonimizadas por regra do projeto: nenhum nome, contato ou ide
 | Painel do administrador | Blade e Bootstrap, sobre o mesmo backend |
 | Divulgação | Landing page |
 
-O aplicativo mobile e o painel web compartilham backend, banco, autenticação e contrato de API. Regra de negócio vive apenas no servidor, nunca duplicada nos clientes.
+### Executar o aplicativo móvel
 
-Identificadores de código, tabela, coluna e campo de API em inglês. Texto voltado ao usuário em português.
+Requisitos: Node.js 24 e npm 11. No PowerShell, a partir da raiz do repositório:
+
+```powershell
+Set-Location .\app
+npm install
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+```
+
+Confirme que EXPO_PUBLIC_USE_MOCK=true está definido em app/.env para usar as contas e os dados simulados. Depois inicie o Expo:
+
+```powershell
+npm start
+```
+
+O cliente HTTP exige EXPO_PUBLIC_API_URL e um servidor compatível. Sem back-end, mantenha o modo mock. O comando configurado para os testes do aplicativo é npm test; esta atualização não executou testes nem gerou logs.
+
+### Executar o back-end
+
+O back-end **não pode ser iniciado neste checkout**, porque a pasta backend/ ainda não contém o projeto Laravel. O roteiro previsto está em docs/engenharia/setup-backend.md; comandos de migração e artisan só serão aplicáveis quando os arquivos do servidor forem incorporados.
 
 ## Equipe
 
@@ -154,8 +172,8 @@ Identificadores de código, tabela, coluna e campo de API em inglês. Texto volt
 ```
 CONTRIBUTING.md   como commitar e abrir PR neste repositório; leia antes do primeiro commit
 CONTEXTO.md       diário das decisões de design: o que mudou, quando e por quê
-backend/       Laravel + MySQL: API /api/v1 e painel do admin em Blade
-app/           React Native: o aplicativo de paciente e psicólogo
+backend/       documentação da arquitetura prevista; aplicação Laravel ainda ausente
+app/           Expo + React Native: base móvel com navegação e autenticação mock
 landing/       página de divulgação
 docs/
 ├── identidade-visual.md         marca: propósito, público, logo, paleta e tipografia

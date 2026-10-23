@@ -1,7 +1,7 @@
 # Modelo de dados
 
 **TCC · Técnico em Desenvolvimento de Sistemas · SENAI-SP · 4º termo**
-**Calmind** — Saúde Mental & Acolhimento
+**Calmind**: Saúde Mental & Acolhimento
 Sprint 1, entregável de diagramação. Revisão de 19/08/2026.
 
 > **Rascunho para revisão de Rafael e Zanetti.** O modelo abaixo cobre todos os requisitos Must do `documento-requisitos.md`. Cada decisão de modelagem está justificada na seção 4, e o DDL executável está em `schema.sql`, testado contra o MariaDB da máquina do grupo.
@@ -63,6 +63,13 @@ erDiagram
     users ||--o{ complaints : denuncia
     users ||--o{ notifications : recebe
     users ||--o{ notification_preferences : configura
+
+    patients ||--o{ reports : escreve
+    users ||--o{ contract_acceptances : assina
+    users ||--o{ tasks : cria
+    users ||--o{ messages : envia
+    users ||--o{ analyses : solicita
+    patients ||--o{ audit_logs : "é alvo de"
 ```
 
 ### 2.1 Cardinalidades que carregam regra de negócio

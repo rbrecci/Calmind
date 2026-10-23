@@ -80,6 +80,28 @@ class AdminDashboardTest extends TestCase
         $this->assertSame('approved', $psychologist->fresh()->approval_status);
     }
 
+    public function test_admin_approval_without_document_shows_message_in_panel(): void
+    {
+        $psychologist = Psychologist::factory()->create();
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->post("/admin/registrations/{$psychologist->id}/approve")
+            ->assertRedirect('/admin/registrations')
+            ->assertSessionHasErrors(['registration' => 'O cadastro precisa de documento comprobatório.']);
+
+        $this->assertSame('pending', $psychologist->fresh()->approval_status);
+    }
+
+    public function test_admin_deciding_twice_shows_message_in_panel(): void
+    {
+        $psychologist = Psychologist::factory()->create(['approval_status' => 'approved']);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->post("/admin/registrations/{$psychologist->id}/approve")
+            ->assertRedirect('/admin/registrations')
+            ->assertSessionHasErrors(['registration' => 'Este cadastro não está pendente.']);
+    }
+
     public function test_admin_rejection_from_panel_requires_reason(): void
     {
         $psychologist = Psychologist::factory()->create();

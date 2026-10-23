@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RejectPsychologistRegistrationRequest;
 use App\Models\Psychologist;
@@ -29,16 +30,12 @@ class AdminRegistrationController extends Controller
 
     public function approve(Request $request, int $id): RedirectResponse
     {
-        $this->registrations->decide($request->user(), $id, 'approved');
-
-        return redirect()->route('admin.registrations.index')->with('status', 'Cadastro aprovado.');
+        return $this->decide($request, $id, 'approved', null, 'Cadastro aprovado.');
     }
 
     public function reject(RejectPsychologistRegistrationRequest $request, int $id): RedirectResponse
     {
-        $this->registrations->decide($request->user(), $id, 'rejected', $request->validated('reason'));
-
-        return redirect()->route('admin.registrations.index')->with('status', 'Cadastro reprovado.');
+        return $this->decide($request, $id, 'rejected', $request->validated('reason'), 'Cadastro reprovado.');
     }
 
     public function document(Request $request, int $id): StreamedResponse
@@ -46,5 +43,18 @@ class AdminRegistrationController extends Controller
         $document = $this->registrations->document($request->user(), $id);
 
         return Storage::disk('local')->download($document->file_path, $document->original_name);
+    }
+
+    private function decide(Request $request, int $id, string $decision, ?string $reason, string $status): RedirectResponse
+    {
+        $back = redirect()->route('admin.registrations.index');
+
+        try {
+            $this->registrations->decide($request->user(), $id, $decision, $reason);
+        } catch (ApiException $e) {
+            return $back->withErrors(['registration' => $e->getMessage()]);
+        }
+
+        return $back->with('status', $status);
     }
 }

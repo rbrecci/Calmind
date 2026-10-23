@@ -1,5 +1,5 @@
 import { getAuthToken } from './auth-token.ts';
-import { ApiError, type Api, type FieldErrors, type PatientTask, type PatientTaskList, type User } from './types.ts';
+import { ApiError, type Api, type CatalogList, type FieldErrors, type PatientTask, type PatientTaskList, type User } from './types.ts';
 
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
   // Lida aqui, e não no topo do arquivo, para o app abrir com USE_MOCK=true sem precisar de URL.
@@ -46,4 +46,5 @@ export const httpApi: Api = {
   me: () => request<User>('GET', '/me'),
   patientTasks: () => request<PatientTaskList>('GET', '/patient/tasks'),
   completePatientTask: (id) => request<PatientTask>('POST', `/patient/tasks/${id}/complete`),
+  catalogPsychologists: () => request<CatalogList>('GET', '/catalog/psychologists'),
 };

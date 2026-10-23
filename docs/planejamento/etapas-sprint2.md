@@ -1,16 +1,16 @@
 # Etapas da Sprint 2
 
 **TCC · Técnico em Desenvolvimento de Sistemas · SENAI-SP · 4º termo**
-**Calmind** — Saúde Mental & Acolhimento
+**Calmind**: Saúde Mental & Acolhimento
 Montado em 02/10/2026. Entrega em **23/10/2026**.
 
 > **Este plano não tem datas internas, e isso é de propósito.** Decisão do grupo em 02/10/2026:
 > planejar etapas, não dias. Quando uma etapa fecha, registra-se a data no log da seção 8 e passa-se
 > para a seguinte. O que sai disso é um histórico real do que aconteceu, em vez de um calendário que
-> se descola da realidade na primeira semana — foi exatamente o que aconteceu com o
+> se descola da realidade na primeira semana: foi exatamente o que aconteceu com o
 > [`cronograma.md`](cronograma.md), montado sobre uma entrega da Sprint 1 em 21/08 que virou 24/09.
 >
-> **O que o plano por etapas não muda:** o dia 23/10 é fixo. Por isso a coluna *mínimo* existe —
+> **O que o plano por etapas não muda:** o dia 23/10 é fixo. Por isso a coluna *mínimo* existe:
 > para que, se o tempo apertar, o corte seja escolha consciente e não descoberta de última hora.
 
 ---
@@ -51,8 +51,8 @@ O critério de pronto de cada tipo de etapa está em
 
 | Etapa | O que é | Dono | Pré-requisito | Pronto quando | Mínimo |
 |-------|---------|------|---------------|---------------|:------:|
-| **B0** | **Fundação.** Projeto Laravel, Sanctum, as 25 migrations, a view `shared_reports`, seeders, handler de erro, Model base com a data do contrato, Collection base com o `meta` do contrato, `api.php` | Rafael | — | `migrate --seed` roda limpo e a API sobe | **sim** |
-| **Z0** | **Contrato v2 e Postman do bloco F.** As requisições de tarefas não existem na coleção; sem elas o bloco F não tem critério de pronto | Zanetti | — | Contrato atualizado e requisições na coleção | **sim** |
+| **B0** | **Fundação.** Projeto Laravel, Sanctum, as 25 migrations, a view `shared_reports`, seeders, handler de erro, Model base com a data do contrato, Collection base com o `meta` do contrato, `api.php` | Rafael | - | `migrate --seed` roda limpo e a API sobe | **sim** |
+| **Z0** | **Contrato v2 e Postman do bloco F.** As requisições de tarefas não existem na coleção; sem elas o bloco F não tem critério de pronto | Zanetti | - | Contrato atualizado e requisições na coleção | **sim** |
 | **B1** | **Bloco A** · autenticação por token e `/me` | Rafael | B0 | Pasta `01 Conta e autenticacao` verde | **sim** |
 | **Z1** | **Bloco B** · consentimento versionado | Zanetti | B0 | Pasta `02 Consentimento` verde | não |
 | **Z2** | **Bloco C** · cadastro com CRP, aprovação e **painel admin em Blade** | Zanetti | B0 | Pasta `03 Cadastro profissional` verde e painel navegável | **sim** |
@@ -74,7 +74,7 @@ clínico ser gravado.
 
 | Etapa | O que é | Dono | Pré-requisito | Pronto quando | Mínimo |
 |-------|---------|------|---------------|---------------|:------:|
-| **F0** | **Fundação.** Decisão FE-01 (Expo ou CLI), projeto, navegação por papel, módulo de API com a chave de mock, armazenamento seguro do token, **design system** a partir da identidade visual | Caio | — | App abre, navega entre papéis, design system em arquivo | **sim** |
+| **F0** | **Fundação.** Decisão FE-01 (Expo ou CLI), projeto, navegação por papel, módulo de API com a chave de mock, armazenamento seguro do token, **design system** a partir da identidade visual | Caio | - | App abre, navega entre papéis, design system em arquivo | **sim** |
 | **F1** | Telas do **bloco A**: entrada, erro de login, escolha de perfil, cadastro do paciente (telas 01 a 04) | Caio | F0 | Telas batem com o PDF, rodando com mock | **sim** |
 | **F2** | Tela de **consentimento** (06) e telas do **bloco D**: como você chegou aqui, código de convite, catálogo, perfil e vínculo (07 a 10) | Caio | F0 | idem | não |
 | **F3** | **Novo relato** (14), tarefas (15) e início do paciente (12) | Caio | F0 | idem, com o marcador de privacidade visível sem rolagem | não |
@@ -84,7 +84,7 @@ mínimo do app é deliberadamente curto: fundação, as telas de entrada e a pri
 funcionando. O resto é ganho, não obrigação.
 
 Se F2 ou F3 caírem, o **painel admin em Blade** (Z2) continua provando interface responsiva e
-integração ponta a ponta — é o seguro desta sprint.
+integração ponta a ponta, é o seguro desta sprint.
 
 ---
 
@@ -96,7 +96,7 @@ integração ponta a ponta — é o seguro desta sprint.
 | **I1** | A partir daqui, **toda tela nova consome a API real**, não o mock | Caio | I0 | `USE_MOCK=false` é o padrão | não |
 | **I2** | **Demonstração cruzada do RNF-61:** o admin aprova um psicólogo no painel web e ele aparece no app, na mesma sessão | Todos | Z2, I0 | Roteiro executado de ponta a ponta | **sim** |
 
-A etapa I0 é onde aparecem os erros clássicos — token no cabeçalho, formato de erro, CORS, o celular
+A etapa I0 é onde aparecem os erros clássicos: token no cabeçalho, formato de erro, CORS, o celular
 não enxergando o `localhost`. É esperado que ela não passe de primeira: por isso ela é uma etapa
 própria, e não um detalhe de outra.
 
@@ -130,7 +130,7 @@ sprint. Registrado como decisão do grupo em 02/10/2026.
 | **D5** | **Relatório de evidências dos testes** | Nicoly e Isabela, com os devs | Saídas datadas do Runner do Postman em `docs/testes/` | **sim** |
 
 O documento ABNT hoje vive fora do repositório: `docs/documento-final/` tem só um README. **D2 é a
-etapa que corrige isso**, e ela é entregável obrigatório — ao contrário dos slides, que são da
+etapa que corrige isso**, e ela é entregável obrigatório, ao contrário dos slides, que são da
 Sprint 3.
 
 ---
@@ -151,21 +151,21 @@ Sprint 3.
 | B3 | Rafael | 23/10/2026 | #18 | Pasta E do Newman verde e `ReportPrivacyTest` passando (RNF-08) |
 | Z3 | Zanetti | 23/10/2026 | #18 | Pasta F do Newman verde |
 | F0 | Caio | 02/10/2026 | #13 a #17 | Navegação por papel, módulo de API com mock, token seguro e design system |
-| F1 | Caio | | #18 | Parcial: só a tela de login existe em `app/src/app/(auth)`. Faltam escolha de perfil e cadastro do paciente (telas 03 e 04) |
+| F1 | Caio | 23/10/2026 | #18 e #21 | Entrada com erro de login, escolha de perfil e cadastro do paciente com validação testada (66 testes no app). Verificado no Expo web |
 | F2 | Caio | | | Não feito (não é mínimo) |
 | F3 | Caio | | | Não feito (não é mínimo). Existe só a lista de tarefas do paciente |
 | I0 | Caio e Rafael | 23/10/2026 | #18 | Login real do app contra a API, conferido no Expo web com o paciente Frodo. Não testado em celular físico |
 | I1 | Caio | 23/10/2026 | #18 | `EXPO_PUBLIC_USE_MOCK=false` é o padrão em `app/.env.example` |
-| I2 | Todos | | | Parcial, ver [roteiro-i2](../testes/2026-10-23-roteiro-i2.md). Aprovação no painel e catálogo da API comprovados; o app não tem tela de catálogo, então "aparece no app" não foi comprovado |
-| L0 | Mariana | | | |
+| I2 | Todos | 23/10/2026 | #21 | [Roteiro](../testes/2026-10-23-roteiro-i2.md): a aprovação no painel web fez a Jane Marple aparecer no catálogo do app (Expo web), com capturas. Exige documento anexado, aprovação e perfil publicado. Não testado em celular físico |
+| L0 | Mariana | 23/10/2026 | #20 | Landing page em `landing/`. L1 e L2 não foram verificados nesta rodada |
 | L1 | Mariana | | | |
 | L2 | Mariana | | | |
 | D0 | Nicoly e Isabela | | | |
 | D1 | Nicoly e Isabela | | | |
-| D2 | Nicoly e Isabela | | | |
-| D3 | Nicoly e Isabela | | | |
-| D4 | Nicoly e Isabela | | | |
-| D5 | Nicoly e Isabela | | | |
+| D2 | Nicoly e Isabela | 23/10/2026 | #19 e #21 | ABNT versionado, com o Rafael incluído na folha de aprovação e sumário atualizado. Texto da Sprint 2 revisado no #21 |
+| D3 | Nicoly e Isabela | 23/10/2026 | #21 | MER, DER (4 blocos) e arquitetura como figuras numeradas e citadas no texto. Fonte em `docs/diagramas/img/` |
+| D4 | Nicoly e Isabela | 23/10/2026 | #21 | Capítulo 15 com as 34 rotas da API, as 13 rotas web e os módulos do back-end e do app |
+| D5 | Nicoly e Isabela | 23/10/2026 | #21 | Capítulo 20 com tabela de evidências e limites. Saídas brutas em `docs/testes/` |
 
 A coluna *observação* é para o que vale lembrar depois: o que foi cortado, o que deu trabalho
 inesperado, a decisão tomada no meio. É dali que sai metade do texto de "decisões técnicas" do
@@ -186,7 +186,7 @@ CRUD de tarefas; painel admin funcionando; app com fundação e telas de entrada
 verdade; e o documento ABNT com as evidências de teste.
 
 **Qualquer corte fora dessa lista é aceitável e vira "evolução futura" no documento final, com
-justificativa** — exatamente como foi feito com o limite de uso de aplicativos na Sprint 1.
+justificativa**, exatamente como foi feito com o limite de uso de aplicativos na Sprint 1.
 
 ---
 

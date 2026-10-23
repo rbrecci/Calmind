@@ -1,0 +1,26 @@
+Calmind | Evidências da Sprint 2 | 22/10/2026
+
+Ambiente: Windows 11, PHP do XAMPP em C:/xampp2/php/php.exe, Laravel, MySQL local e aplicativo Expo. A base de demonstração foi migrada e semeada com dados fictícios. Os comandos abaixo foram executados pelo integrador da Sprint 2; este registro resume as saídas comunicadas e os arquivos de prova relacionados.
+
+1. Backend integrado
+Comando, dentro de backend/: C:/xampp2/php/php.exe artisan test
+Resultado: exit 0; 195 testes; 3.545 asserções; duração 30,39 s.
+Cobertura observada: autenticação, cadastro e aprovação profissional, vínculos, relatos, tarefas e ReportPrivacyTest. O teste RNF-08 passou e as novas rotas de psicólogo e admin foram classificadas pelo teste de privacidade.
+
+2. Coleção Postman
+Comando: Newman, pasta 06 Tarefas terapeuticas.
+Resultado em 22/10: exit 0; 15 requisições; 27 asserções; 0 falhas.
+Saída completa: docs/testes/2026-10-22-newman-bloco-f.txt.
+Histórico anterior: docs/testes/2026-10-21-newman-blocos-a-d-e.txt registra 28 requisições e 56 asserções sem falha em 21/10. Essa execução anterior não substitui a verificação atual dos blocos C e F.
+
+3. Aplicativo
+Comandos, dentro de app/: npm test; npm run lint; npx tsc --noEmit; exportação web do Expo.
+Resultado comunicado: 33 testes aprovados; lint, checagem TypeScript e exportação web sem erro.
+Limite: não houve comprovação de navegação do aplicativo em dispositivo físico ou emulador nesta rodada.
+
+4. Integração web, API e banco
+Roteiro em 22/10: a psicóloga fictícia semeada criou pela página web a tarefa de identificador 4. O POST autenticado do formulário /psychologist/tasks retornou 200 e o título apareceu na página. A paciente fictícia Elizabeth recebeu a tarefa com status pending em GET /patient/tasks e a concluiu em POST /patient/tasks/4/complete, que retornou 200 com status completed. A nova página /psychologist/tasks exibiu 'Concluída em 22/10/2026 19:31'.
+Resultado: o mesmo registro foi escrito e lido nas camadas web, API e MySQL. O roteiro não prova que o comando de conclusão foi acionado pela interface móvel.
+
+5. Escopo ainda sem prova
+O RNF-61 integral também exige o fluxo de consulta criada na web e refletida no mobile. A agenda não foi implementada na Sprint 2, portanto o requisito está parcial. O bloco B não tem o fluxo completo de consentimento no aplicativo; a demonstração usa aceite fictício semeado. Chat, medicação, IA e prontuário consolidado são funcionalidades futuras. Nenhuma delas foi contabilizada como teste aprovado de funcionalidade entregue.

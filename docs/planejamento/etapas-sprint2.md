@@ -142,21 +142,21 @@ Sprint 3.
 
 | Etapa | Dono | Concluída em | PR | Observação |
 |-------|------|--------------|----|------------|
-| B0 | Rafael | | | |
-| Z0 | Zanetti | | | |
-| B1 | Rafael | | | |
-| Z1 | Zanetti | | | |
-| Z2 | Zanetti | | | |
-| B2 | Rafael | | | |
-| B3 | Rafael | | | |
-| Z3 | Zanetti | | | |
-| F0 | Caio | | | |
-| F1 | Caio | | | |
-| F2 | Caio | | | |
-| F3 | Caio | | | |
-| I0 | Caio e Rafael | | | |
-| I1 | Caio | | | |
-| I2 | Todos | | | |
+| B0 | Rafael | 23/10/2026 | #18 | 25 migrations, view `shared_reports`, seeders. Suíte Feature com 197 testes e 3556 asserções, em `calmind_test` |
+| Z0 | Zanetti | 23/10/2026 | #18 | Requisições do bloco F na coleção do Postman |
+| B1 | Rafael | 23/10/2026 | #18 | Pasta A do Newman verde (9 requisições, 15 asserções) |
+| Z1 | Zanetti | | | Não feito (não é mínimo). A demonstração usa aceite semeado e o runner grava o aceite como fixture local |
+| Z2 | Zanetti | 23/10/2026 | #18 | Pasta C do Newman verde e painel admin em Blade navegável. Aprovar exige documento anexado (a Jane do seed não tem) |
+| B2 | Rafael | 23/10/2026 | #18 | Pasta D do Newman verde |
+| B3 | Rafael | 23/10/2026 | #18 | Pasta E do Newman verde e `ReportPrivacyTest` passando (RNF-08) |
+| Z3 | Zanetti | 23/10/2026 | #18 | Pasta F do Newman verde |
+| F0 | Caio | 02/10/2026 | #13 a #17 | Navegação por papel, módulo de API com mock, token seguro e design system |
+| F1 | Caio | | #18 | Parcial: só a tela de login existe em `app/src/app/(auth)`. Faltam escolha de perfil e cadastro do paciente (telas 03 e 04) |
+| F2 | Caio | | | Não feito (não é mínimo) |
+| F3 | Caio | | | Não feito (não é mínimo). Existe só a lista de tarefas do paciente |
+| I0 | Caio e Rafael | 23/10/2026 | #18 | Login real do app contra a API, conferido no Expo web com o paciente Frodo. Não testado em celular físico |
+| I1 | Caio | 23/10/2026 | #18 | `EXPO_PUBLIC_USE_MOCK=false` é o padrão em `app/.env.example` |
+| I2 | Todos | | | Parcial, ver [roteiro-i2](../testes/2026-10-23-roteiro-i2.md). Aprovação no painel e catálogo da API comprovados; o app não tem tela de catálogo, então "aparece no app" não foi comprovado |
 | L0 | Mariana | | | |
 | L1 | Mariana | | | |
 | L2 | Mariana | | | |

@@ -36,6 +36,12 @@ const offlineApi: Api = {
   me: async () => {
     throw new ApiError(0, 'Sem conexão com o servidor.');
   },
+  patientTasks: async () => {
+    throw new ApiError(0, 'Sem conexão com o servidor.');
+  },
+  completePatientTask: async () => {
+    throw new ApiError(0, 'Sem conexão com o servidor.');
+  },
 };
 
 describe('restoreSession', () => {

@@ -27,7 +27,7 @@ npm test    # testes do mock (node:test, sem dependência extra)
 
 ## O que este app é, e o que ele não é
 
-Ele é uma casca: telas, navegação e chamadas HTTP. **Nenhuma regra de negócio vive aqui** — quem decide se um relato é privado, se um vínculo pode existir ou se a análise de IA pode rodar é o Laravel. O RNF-57 proíbe regra duplicada nos clientes, e o motivo é prático: regra em dois lugares vira regra diferente em dois lugares.
+Ele é uma casca: telas, navegação e chamadas HTTP. **Nenhuma regra de negócio vive aqui.** O Laravel decide se um relato é privado, se um vínculo pode existir ou se a análise de IA pode rodar. O RNF-57 proíbe regra duplicada nos clientes, e o motivo é prático: regra em dois lugares vira regra diferente em dois lugares.
 
 ## As quatro provas do spike, antes de qualquer tela
 

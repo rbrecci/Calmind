@@ -1,0 +1,76 @@
+Calmind Sprint 2: A/C/D/E/F. Bloco B nao testado; consentimento geral preparado como fixture local.
+Data: 2026-10-23T14:06:28-03:00
+Ambiente confirmado: local, mysql loopback, banco calmind. Nenhum reset executado.
+(node:21336) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(Use `node --trace-deprecation ...` to show where the warning was created)
+newman
+
+Calmind - API da plataforma paciente e psicologo
+
+Folder 01 Conta e autenticacao
+Sub-folder Cadastrar paciente
+  -
+  | 'Execucao', '75197468'
+  -
+  POST http://127.0.0.1:8000/api/v1/auth/register [201 Created, 368B, 1391ms]
+  Pass  responde 201
+  Pass  devolve id e papel
+  Pass  nunca devolve a senha
+
+Sub-folder Cadastrar com e-mail repetido deve falhar
+  POST http://127.0.0.1:8000/api/v1/auth/register [422 Unprocessable Content, 355B, 570ms]
+  Pass  responde 422
+  Pass  nao vaza dado da conta existente
+
+Sub-folder Cadastrar psicologo
+  POST http://127.0.0.1:8000/api/v1/auth/register [201 Created, 375B, 1010ms]
+  Pass  responde 201
+
+Sub-folder Login do paciente
+  POST http://127.0.0.1:8000/api/v1/auth/login [200 OK, 282B, 1215ms]
+  Pass  responde 200
+  Pass  devolve token
+
+Sub-folder Login com senha errada
+  POST http://127.0.0.1:8000/api/v1/auth/login [401 Unauthorized, 271B, 1038ms]
+  Pass  responde 401
+  Pass  mensagem generica
+
+Sub-folder Login do psicologo
+  POST http://127.0.0.1:8000/api/v1/auth/login [200 OK, 282B, 961ms]
+  Pass  responde 200
+
+Sub-folder Login do administrador
+  POST http://127.0.0.1:8000/api/v1/auth/login [200 OK, 282B, 936ms]
+  Pass  responde 200
+
+Sub-folder Dados do usuario logado
+  GET http://127.0.0.1:8000/api/v1/me [200 OK, 354B, 547ms]
+  Pass  responde 200
+  Pass  papel paciente
+
+Sub-folder Area interna sem token deve ser negada
+  GET http://127.0.0.1:8000/api/v1/me [401 Unauthorized, 287B, 400ms]
+  Pass  responde 401
+
+-----------------------------------------------------------------------
+|                         |            executed |              failed |
+--------------------------+---------------------+----------------------
+|              iterations |                   1 |                   0 |
+--------------------------+---------------------+----------------------
+|                requests |                   9 |                   0 |
+--------------------------+---------------------+----------------------
+|            test-scripts |                   9 |                   0 |
+--------------------------+---------------------+----------------------
+|      prerequest-scripts |                   1 |                   0 |
+--------------------------+---------------------+----------------------
+|              assertions |                  15 |                   0 |
+-----------------------------------------------------------------------
+| total run duration: 8.8s                                            |
+-----------------------------------------------------------------------
+| total data received: 827B (approx)                                  |
+-----------------------------------------------------------------------
+| average response time: 896ms [min: 400ms, max: 1391ms, s.d.: 309ms] |
+-----------------------------------------------------------------------
+Newman exit: 0
+As variaveis exportadas nao identificam o paciente ficticio desta rodada.

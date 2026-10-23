@@ -36,7 +36,7 @@
             "description": "RF-01. Cria conta de paciente. CA-01.1: a conta nasce presa a um unico perfil.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Paciente de Teste\",\n  \"email\": \"{{emailPaciente}}\",\n  \"password\": \"senha-de-teste-123\",\n  \"role\": \"patient\"\n}",
+              "raw": "{\n  \"name\": \"Paciente de Teste\",\n  \"email\": \"{{emailPaciente}}\",\n  \"password\": \"senha-de-teste-123\",\n  \"role\": \"patient\",\n  \"birth_date\": \"1995-04-12\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -104,7 +104,7 @@
             "description": "CA-01.2. O sistema recusa e nao revela dados da conta existente.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Outro\",\n  \"email\": \"{{emailPaciente}}\",\n  \"password\": \"senha-de-teste-123\",\n  \"role\": \"patient\"\n}",
+              "raw": "{\n  \"name\": \"Outro\",\n  \"email\": \"{{emailPaciente}}\",\n  \"password\": \"senha-de-teste-123\",\n  \"role\": \"patient\",\n  \"birth_date\": \"1995-04-12\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -666,10 +666,6 @@
                 "value": "application/json"
               },
               {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
                 "key": "Authorization",
                 "value": "Bearer {{psyToken}}"
               }
@@ -686,13 +682,24 @@
             },
             "description": "RF-33. CRP em formato valido mais documento comprobatorio. Fica pendente.",
             "body": {
-              "mode": "raw",
-              "raw": "{\n  \"crp_number\": \"{{crpNumero}}\",\n  \"crp_region\": \"06\",\n  \"document_url\": \"comprovante-teste.pdf\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "crp_number",
+                  "value": "{{crpNumero}}",
+                  "type": "text"
+                },
+                {
+                  "key": "crp_region",
+                  "value": "06",
+                  "type": "text"
+                },
+                {
+                  "key": "document",
+                  "type": "file",
+                  "src": "docs/api/fixtures/comprovante-teste.pdf"
                 }
-              }
+              ]
             }
           },
           "response": [],
@@ -720,10 +727,6 @@
                 "value": "application/json"
               },
               {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
                 "key": "Authorization",
                 "value": "Bearer {{psyToken}}"
               }
@@ -740,13 +743,24 @@
             },
             "description": "CA-33.2. Formato invalido ou regiao inexistente e recusado.",
             "body": {
-              "mode": "raw",
-              "raw": "{\n  \"crp_number\": \"abc\",\n  \"crp_region\": \"99\",\n  \"document_url\": \"x.pdf\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "crp_number",
+                  "value": "abc",
+                  "type": "text"
+                },
+                {
+                  "key": "crp_region",
+                  "value": "99",
+                  "type": "text"
+                },
+                {
+                  "key": "document",
+                  "type": "file",
+                  "src": "docs/api/fixtures/comprovante-teste.pdf"
                 }
-              }
+              ]
             }
           },
           "response": [],
@@ -756,7 +770,8 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('responde 422', () => pm.response.to.have.status(422));"
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "pm.test('indica CRP e regiao invalidos', () => { const errors = pm.response.json().errors; pm.expect(errors).to.have.property('crp_number'); pm.expect(errors).to.have.property('crp_region'); });"
                 ]
               }
             }
@@ -923,7 +938,9 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('responde 200', () => pm.response.to.have.status(200));",
-                  "pm.test('fica aprovado', () => pm.expect(pm.response.json().approval_status).to.eql('approved'));"
+                  "pm.test('fica aprovado', () => pm.expect(pm.response.json().approval_status).to.eql('approved'));",
+                  "pm.test('documento cadastrado', () => pm.expect(pm.response.json().documents[0].id).to.be.a('number'));",
+                  "pm.collectionVariables.set('idDocumento', pm.response.json().documents[0].id);"
                 ]
               }
             }
@@ -998,14 +1015,14 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/psychologist/{{idPsicologo}}/document",
+              "raw": "{{baseUrl}}/psychologist/documents/{{idDocumento}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "psychologist",
-                "{{idPsicologo}}",
-                "document"
+                "documents",
+                "{{idDocumento}}"
               ]
             },
             "description": "RNF-11. So o administrador e o proprio dono alcancam o documento."
@@ -1024,7 +1041,7 @@
           ]
         },
         {
-          "name": "Editar e publicar perfil",
+          "name": "Editar perfil",
           "request": {
             "method": "PUT",
             "header": [
@@ -1054,7 +1071,7 @@
             "description": "RF-34. O texto e escrito pelo profissional, nunca gerado pela plataforma.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"approach\": \"Terapia cognitivo comportamental\",\n  \"specialty\": \"Ansiedade\",\n  \"modality\": \"online\",\n  \"region\": \"Sao Paulo\",\n  \"bio\": \"Atendimento a adultos. Texto escrito pela propria profissional.\"\n}",
+              "raw": "{\n  \"profile_approach\": \"Terapia cognitivo comportamental\",\n  \"profile_specialty\": \"Ansiedade\",\n  \"profile_modality\": \"online\",\n  \"profile_region\": \"Sao Paulo\",\n  \"profile_bio\": \"Atendimento a adultos. Texto escrito pela propria profissional.\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1069,14 +1086,15 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('responde 200', () => pm.response.to.have.status(200));"
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('preserva os campos do perfil', () => { const expected = JSON.parse(pm.request.body.raw); const actual = pm.response.json(); Object.keys(expected).forEach(key => pm.expect(actual[key]).to.eql(expected[key])); });"
                 ]
               }
             }
           ]
         },
         {
-          "name": "Perfil com honorario deve ser recusado",
+          "name": "Salvar rascunho com honorario",
           "request": {
             "method": "PUT",
             "header": [
@@ -1103,10 +1121,10 @@
                 "profile"
               ]
             },
-            "description": "CA-34.4. Valor e expressao promocional bloqueiam a publicacao, por restricao de divulgacao do CFP.",
+            "description": "O rascunho aceita texto do profissional; a publicacao seguinte deve recusar honorario.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"bio\": \"Sessao por R$ 100,00, promocao de primeira consulta.\"\n}",
+              "raw": "{\n  \"profile_bio\": \"Sessao por R$ 100,00, promocao de primeira consulta.\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1121,7 +1139,102 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('responde 422', () => pm.response.to.have.status(422));"
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('rascunho salvo sem publicar', () => { const body = pm.response.json(); pm.expect(body.profile_bio).to.eql(JSON.parse(pm.request.body.raw).profile_bio); pm.expect(body.profile_published_at).to.eql(null); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Perfil com honorario deve ser recusado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/profile/publish",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "profile",
+                "publish"
+              ]
+            },
+            "description": "CA-34.4. Valor e expressao promocional bloqueiam a publicacao, por restricao de divulgacao do CFP."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "pm.test('indica texto proibido', () => pm.expect(pm.response.json().errors).to.have.property('profile_bio'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Restaurar perfil sem honorario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "profile"
+              ]
+            },
+            "description": "Restaura o texto valido depois da tentativa de publicar honorario.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"profile_approach\": \"Terapia cognitivo comportamental\",\n  \"profile_specialty\": \"Ansiedade\",\n  \"profile_modality\": \"online\",\n  \"profile_region\": \"Sao Paulo\",\n  \"profile_bio\": \"Atendimento a adultos. Texto escrito pela propria profissional.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('preserva os campos do perfil', () => { const expected = JSON.parse(pm.request.body.raw); const actual = pm.response.json(); Object.keys(expected).forEach(key => pm.expect(actual[key]).to.eql(expected[key])); });"
                 ]
               }
             }
@@ -2047,6 +2160,669 @@
           ]
         }
       ]
+    },
+    {
+      "name": "06 Tarefas terapeuticas",
+      "description": "RF-25, RF-37. Usa o vinculo ativo da pasta 04.",
+      "item": [
+        {
+          "name": "Criar tarefa com prazo passado deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/tasks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "tasks"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": \"{{idVinculo}}\",\n  \"title\": \"Respirar\",\n  \"due_date\": \"2020-01-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "pm.test('indica prazo', () => pm.expect(pm.response.json().errors).to.have.property('due_date'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Criar tarefa",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/tasks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "tasks"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": \"{{idVinculo}}\",\n  \"title\": \"Respirar por cinco minutos\",\n  \"description\": \"Ao fim da tarde\",\n  \"due_date\": \"2030-12-31\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "const b = pm.response.json();",
+                  "pm.test('tarefa pendente no vinculo', () => { pm.expect(b.status).to.eql('pending'); pm.expect(b.bond_id).to.eql(Number(pm.variables.get('idVinculo'))); });",
+                  "pm.collectionVariables.set('idTarefa', b.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar tarefas do psicologo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/tasks?bond_id={{idVinculo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "tasks?bond_id={{idVinculo}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('lista contem tarefa', () => pm.expect(pm.response.json().data.map(x => x.id)).to.include(Number(pm.collectionVariables.get('idTarefa'))));",
+                  "pm.test('meta paginada', () => pm.expect(pm.response.json().meta).to.have.all.keys('total', 'page', 'per_page'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ler tarefa do psicologo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/tasks/{{idTarefa}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "tasks",
+                "{{idTarefa}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('le a tarefa criada', () => pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get('idTarefa'))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar tarefa pendente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/tasks/{{idTarefa}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "tasks",
+                "{{idTarefa}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Respirar antes de dormir\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('titulo atualizado', () => pm.expect(pm.response.json().title).to.eql('Respirar antes de dormir'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Paciente nao cria tarefa",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/tasks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "tasks"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": \"{{idVinculo}}\",\n  \"title\": \"Invalida\",\n  \"due_date\": \"2030-12-31\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar tarefas do paciente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/tasks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "tasks"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('lista contem tarefa pendente', () => pm.expect(pm.response.json().data.find(x => x.id === Number(pm.collectionVariables.get('idTarefa'))).status).to.eql('pending'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ler tarefa do paciente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/tasks/{{idTarefa}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "tasks",
+                "{{idTarefa}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('le tarefa propria', () => pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get('idTarefa'))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Tarefa inexistente deve devolver 404",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/tasks/999999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "tasks",
+                "999999999"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Concluir tarefa",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/tasks/{{idTarefa}}/complete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "tasks",
+                "{{idTarefa}}",
+                "complete"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.test('concluida com data', () => { pm.expect(b.status).to.eql('completed'); pm.expect(b.completed_at).to.be.a('string'); });",
+                  "pm.collectionVariables.set('conclusaoTarefa', b.completed_at);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Concluir novamente preserva a data",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/tasks/{{idTarefa}}/complete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "tasks",
+                "{{idTarefa}}",
+                "complete"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('mesma data', () => pm.expect(pm.response.json().completed_at).to.eql(pm.collectionVariables.get('conclusaoTarefa')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar tarefa concluida deve falhar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/tasks/{{idTarefa}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "tasks",
+                "{{idTarefa}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Nao editar\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Arquivar tarefa concluida",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/tasks/{{idTarefa}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "tasks",
+                "{{idTarefa}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('confirma arquivo', () => pm.expect(pm.response.json().message).to.eql('Tarefa arquivada.'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Tarefa arquivada some da lista",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/tasks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "tasks"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('nao lista a tarefa', () => pm.expect(pm.response.json().data.map(x => x.id)).to.not.include(Number(pm.collectionVariables.get('idTarefa'))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Sem token deve falhar",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/tasks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "tasks"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
   ],
   "variable": [
@@ -2106,6 +2882,10 @@
       "value": ""
     },
     {
+      "key": "idDocumento",
+      "value": ""
+    },
+    {
       "key": "idTermoGeral",
       "value": ""
     },
@@ -2139,6 +2919,14 @@
     },
     {
       "key": "idRelatoPrivado",
+      "value": ""
+    },
+    {
+      "key": "idTarefa",
+      "value": ""
+    },
+    {
+      "key": "conclusaoTarefa",
       "value": ""
     }
   ]

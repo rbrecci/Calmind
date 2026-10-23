@@ -1,7 +1,7 @@
 # Contrato da API
 
 **TCC · Técnico em Desenvolvimento de Sistemas · SENAI-SP · 4º termo**
-**Calmind** — Saúde Mental & Acolhimento
+**Calmind**: Saúde Mental & Acolhimento
 Versão 1, de 19/08/2026. Cobre os blocos que as semanas 1 a 4 da Sprint 2 implementam.
 
 > A versão executável deste contrato é a coleção `Calmind.postman_collection.json`, na mesma pasta. Este documento traz o que a coleção não expressa bem: as convenções que valem para **todos** os endpoints.
@@ -134,7 +134,43 @@ Cada linha tem os testes correspondentes na coleção do Postman.
 
 ---
 
-### 3.6 Uma observação sobre o responsável legal
+### 3.6 Tarefas terapêuticas
+
+Todas as rotas abaixo usam token Sanctum. Tarefas pertencem ao vínculo (`bond_id`), nunca diretamente ao paciente. A leitura inclui vínculos ativos e encerrados, mas omite tarefas arquivadas. O vínculo encerrado fica em modo somente leitura.
+
+| Método | Rota | Papel | Resultado |
+|--------|------|-------|-----------|
+| GET | `/patient/tasks?page=1&per_page=20` | paciente | lista das próprias tarefas, pendentes antes das concluídas |
+| GET | `/patient/tasks/{id}` | paciente | uma tarefa própria |
+| POST | `/patient/tasks/{id}/complete` | paciente | conclusão idempotente |
+| GET | `/psychologist/tasks?bond_id={id}&page=1&per_page=20` | psicólogo | tarefas de vínculo próprio |
+| POST | `/psychologist/tasks` | psicólogo | cria tarefa em vínculo ativo |
+| GET | `/psychologist/tasks/{id}` | psicólogo | uma tarefa de vínculo próprio |
+| PUT | `/psychologist/tasks/{id}` | psicólogo | altera título, descrição ou prazo de tarefa pendente em vínculo ativo |
+| DELETE | `/psychologist/tasks/{id}` | psicólogo | arquiva a tarefa sem removê-la do banco |
+
+Criação exige `bond_id` inteiro, `title` entre 1 e 150 caracteres e `due_date` no formato `YYYY-MM-DD`, igual ou posterior à data atual. `description` é opcional. O paciente do vínculo precisa ter aceitado a versão vigente do termo geral. Atualização aceita um ou mais campos `title`, `description` e `due_date` com as mesmas regras. `bond_id` e `completed_at` não podem ser alterados por payload. A resposta 201 de criação e as respostas 200 de leitura, atualização e conclusão devolvem o objeto abaixo sem envelope:
+
+```json
+{
+  "id": 12,
+  "bond_id": 8,
+  "title": "Respirar por cinco minutos",
+  "description": "Ao fim da tarde",
+  "due_date": "2026-10-23",
+  "status": "pending",
+  "completed_at": null,
+  "created_at": "2026-10-22T19:30:00-03:00"
+}
+```
+
+`status` vale `pending` ou `completed`, derivado de `completed_at`. A conclusão devolve `completed` e a primeira data de conclusão; repetir a chamada não altera essa data. Listas seguem `{ "data": [ ... ], "meta": { "total": 1, "page": 1, "per_page": 20 } }`. `per_page` vai de 1 a 50. O `DELETE` devolve 200 com `{ "message": "Tarefa arquivada." }`. Arquivar uma tarefa concluída preserva sua conclusão no banco.
+
+Sem token: 401. Papel errado, profissional sem aprovação ou aceite geral do paciente ausente ou desatualizado na criação: 403. Identificador inexistente ou de outro vínculo: 404. Vínculo encerrado ou tarefa já concluída ao tentar editar: 409. Campos inválidos: 422. Criar em vínculo alheio responde 404. Criar em vínculo próprio encerrado responde 409. Nenhuma dessas rotas consulta relatos.
+
+---
+
+### 3.7 Uma observação sobre o responsável legal
 
 Não existe rota sob `/guardian`, e isso é decisão de produto, não esquecimento. O responsável legal de paciente menor de idade não autentica na plataforma (DEC-17). Ele aparece em dois lugares e só neles: como contato no cadastro do paciente, devolvido ao psicólogo em `/psychologist/patients/{id}` conforme CA-36.5, e como sujeito do registro de consentimento acima, que **quem cria é o psicólogo**, nunca ele próprio.
 
@@ -156,7 +192,7 @@ Entra nas próximas versões, junto das semanas que os implementam:
 
 | Bloco | Semana | Requisitos |
 |-------|--------|------------|
-| Tarefas e chat | 5 | RF-15, RF-25, RF-37 |
+| Chat | 5 | RF-15 |
 | Agenda e notificações | 6 | RF-16, RF-26, RF-40 |
 | Medicação | 7 | RF-27 a RF-29, RF-38, RF-39 |
 | Análise por IA | 8 e 9 | RF-41, RF-42 |

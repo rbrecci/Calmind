@@ -1,0 +1,96 @@
+newman
+
+Calmind - API da plataforma paciente e psicologo
+
+□ 06 Tarefas terapeuticas
+└ Criar tarefa com prazo passado deve falhar
+  POST http://127.0.0.1:8000/api/v1/psychologist/tasks [422 Unprocessable Content, 365B, 645ms]
+  √  responde 422
+  √  indica prazo
+
+└ Criar tarefa
+  POST http://127.0.0.1:8000/api/v1/psychologist/tasks [201 Created, 419B, 475ms]
+  √  responde 201
+  √  tarefa pendente no vinculo
+
+└ Listar tarefas do psicologo
+  GET http://127.0.0.1:8000/api/v1/psychologist/tasks?bond_id=1 [200 OK, 692B, 407ms]
+  √  responde 200
+  √  lista contem tarefa
+  √  meta paginada
+
+└ Ler tarefa do psicologo
+  GET http://127.0.0.1:8000/api/v1/psychologist/tasks/3 [200 OK, 414B, 209ms]
+  √  responde 200
+  √  le a tarefa criada
+
+└ Editar tarefa pendente
+  PUT http://127.0.0.1:8000/api/v1/psychologist/tasks/3 [200 OK, 412B, 187ms]
+  √  responde 200
+  √  titulo atualizado
+
+└ Paciente nao cria tarefa
+  POST http://127.0.0.1:8000/api/v1/psychologist/tasks [403 Forbidden, 314B, 182ms]
+  √  responde 403
+
+└ Listar tarefas do paciente
+  GET http://127.0.0.1:8000/api/v1/patient/tasks [200 OK, 690B, 185ms]
+  √  responde 200
+  √  lista contem tarefa pendente
+
+└ Ler tarefa do paciente
+  GET http://127.0.0.1:8000/api/v1/patient/tasks/3 [200 OK, 412B, 167ms]
+  √  responde 200
+  √  le tarefa propria
+
+└ Tarefa inexistente deve devolver 404
+  GET http://127.0.0.1:8000/api/v1/patient/tasks/999999999 [404 Not Found, 270B, 182ms]
+  √  responde 404
+
+└ Concluir tarefa
+  POST http://127.0.0.1:8000/api/v1/patient/tasks/3/complete [200 OK, 437B, 187ms]
+  √  responde 200
+  √  concluida com data
+
+└ Concluir novamente preserva a data
+  POST http://127.0.0.1:8000/api/v1/patient/tasks/3/complete [200 OK, 437B, 174ms]
+  √  responde 200
+  √  mesma data
+
+└ Editar tarefa concluida deve falhar
+  PUT http://127.0.0.1:8000/api/v1/psychologist/tasks/3 [409 Conflict, 293B, 250ms]
+  √  responde 409
+
+└ Arquivar tarefa concluida
+  DELETE http://127.0.0.1:8000/api/v1/psychologist/tasks/3 [200 OK, 252B, 162ms]
+  √  responde 200
+  √  confirma arquivo
+
+└ Tarefa arquivada some da lista
+  GET http://127.0.0.1:8000/api/v1/patient/tasks [200 OK, 498B, 199ms]
+  √  responde 200
+  √  nao lista a tarefa
+
+└ Sem token deve falhar
+  GET http://127.0.0.1:8000/api/v1/patient/tasks [401 Unauthorized, 288B, 142ms]
+  √  responde 401
+
+┌─────────────────────────┬─────────────────────┬────────────────────┐
+│                         │            executed │             failed │
+├─────────────────────────┼─────────────────────┼────────────────────┤
+│              iterations │                   1 │                  0 │
+├─────────────────────────┼─────────────────────┼────────────────────┤
+│                requests │                  15 │                  0 │
+├─────────────────────────┼─────────────────────┼────────────────────┤
+│            test-scripts │                  15 │                  0 │
+├─────────────────────────┼─────────────────────┼────────────────────┤
+│      prerequest-scripts │                   0 │                  0 │
+├─────────────────────────┼─────────────────────┼────────────────────┤
+│              assertions │                  27 │                  0 │
+├─────────────────────────┴─────────────────────┴────────────────────┤
+│ total run duration: 4s                                             │
+├────────────────────────────────────────────────────────────────────┤
+│ total data received: 2.82kB (approx)                               │
+├────────────────────────────────────────────────────────────────────┤
+│ average response time: 250ms [min: 142ms, max: 645ms, s.d.: 138ms] │
+└────────────────────────────────────────────────────────────────────┘

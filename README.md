@@ -8,7 +8,7 @@
 
 Aplicativo mobile que atua no intervalo entre uma sessão de terapia e a seguinte.
 
-> **Nome e slogan fechados:** Calmind, com o slogan **Saúde Mental & Acolhimento**. Vale para o APK, a landing page, a capa do documento final e os slides. A identidade completa — propósito, público-alvo, logotipo, paleta e tipografia — está em [`docs/identidade-visual.md`](docs/identidade-visual.md). Segue em aberto apenas o identificador do pacote do aplicativo, no formato `com.<grupo>.calmind`. Ver `docs/planejamento/arranque-react-native.md`.
+> **Nome e slogan fechados:** Calmind, com o slogan **Saúde Mental & Acolhimento**. Vale para o aplicativo, a landing page, a capa do documento final e os slides. A identidade completa, incluindo propósito, público-alvo, logotipo, paleta e tipografia, está em [`docs/identidade-visual.md`](docs/identidade-visual.md). O identificador do pacote do aplicativo segue em aberto no formato `com.<grupo>.calmind`. Ver `docs/planejamento/arranque-react-native.md`.
 
 ---
 
@@ -24,15 +24,39 @@ Pesquisa de campo com três entrevistadas sem relação entre si, duas psicólog
 
 **A hipótese central:** a qualidade do tratamento depende tanto do que acontece na sessão quanto do que acontece entre as sessões, e é justamente esse intervalo que não tem ferramenta nenhuma. O produto ataca o intervalo, não a sessão.
 
-## O que a plataforma faz
+## Produto proposto e MVP da Sprint 2
 
-Um aplicativo, dois lados. O paciente registra relatos livres ao longo da semana, cumpre as tarefas atribuídas, conversa por chat assíncrono, acompanha a agenda e recebe lembrete de adesão à medicação. O psicólogo atribui tarefas, acompanha o prontuário consolidado, agenda consultas e, antes da próxima sessão, solicita um resumo dos relatos compartilhados gerado por IA.
+O produto completo prevê relatos, tarefas, chat, agenda, lembretes de medicação e resumos por IA. Esses recursos compõem a proposta e não descrevem o estado integral da Sprint 2.
 
-A entrada acontece por dois caminhos: quem já tem psicólogo entra por um código de convite; quem não tem procura no catálogo de profissionais e solicita o vínculo.
+O MVP atual reúne API Laravel e MySQL, painel Blade e aplicativo React Native com Expo. A API implementa os blocos **A, C, D, E e F**: autenticação; cadastro e aprovação de psicólogos; catálogo, convite e vínculo; relatos com restrição de privacidade; e tarefas. O painel permite administrar cadastros e acompanhar tarefas. O aplicativo apresenta entrada, cadastro e tarefas do paciente. O bloco **B**, referente ao fluxo completo de consentimento, ainda não foi entregue; a demonstração usa aceite fictício preparado no banco. Chat, agenda, medicação, IA e prontuário consolidado permanecem fora do MVP.
+
+O ciclo compartilhado de tarefas foi demonstrado em 22/10/2026: tarefa criada na web, concluída pela API como paciente e exibida como concluída na web. A navegação por esse ciclo em um dispositivo físico ou emulador ainda não foi verificada. Ver [evidências da Sprint 2](docs/testes/2026-10-22-sprint2.txt).
+
+### Executar o MVP
+
+O preparo do MySQL, a configuração do `.env` e os dados fictícios estão descritos em [backend/README.md](backend/README.md) e no [setup do backend](docs/engenharia/setup-backend.md). Com PHP e Composer instalados, dentro de `backend/`:
+
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+php artisan serve
+```
+
+Configure a conexão MySQL no `.env` antes da migração. Em outra janela, dentro de `app/`, siga [app/README.md](app/README.md) e execute:
+
+```bash
+npm ci
+cp .env.example .env
+npx expo start
+```
+
+No `.env` do aplicativo, ajuste `EXPO_PUBLIC_API_URL` para o endereço do servidor acessível pelo dispositivo ou navegador e use `EXPO_PUBLIC_USE_MOCK=false` para acessar dados reais. A URL `localhost` do computador não funciona como endereço da API em um telefone. Para verificar o código, use `php artisan test` em `backend/` e `npm test`, `npm run lint` e `npx tsc --noEmit` em `app/`. Em 22/10/2026, a suíte integrada do backend passou com 195 testes e 3.545 asserções; o aplicativo passou 33 testes, lint, TypeScript e exportação web.
 
 ## Os quatro compromissos que o produto não quebra
 
-Estes não são detalhes de implementação. São o que define o produto, e cada um tem requisito verificável associado.
+Estes compromissos definem o produto planejado. Na Sprint 2, a privacidade dos relatos foi testada; os recursos de IA e medicação ainda não foram implementados.
 
 1. **A IA nunca age sozinha.** A análise só roda quando o profissional pede, e nada é gravado no prontuário sem a confirmação dele.
 2. **O relato privado não sai do escopo do paciente.** Nem o conteúdo, nem a existência, nem a contagem. A garantia vive na camada de dados, não na interface.
@@ -69,18 +93,18 @@ consolida o problema, a visão e as 18 decisões de produto com as respectivas j
 | Diagramas de modelagem (MER, DER e outros) | 1 | [`docs/diagramas/`](docs/diagramas/) | Pronto |
 | Prototipação da interface | 1 | [`docs/prototipo/`](docs/prototipo/) | Pronto, 16 telas |
 | Coleta e análise dos requisitos | 1 | [`docs/pesquisa/`](docs/pesquisa/) | Roteiro e formulário prontos, 2 das 4 entrevistas aplicadas e sintetizadas |
-| Backend e frontend, primeiras funcionalidades | 2 | [`docs/engenharia/`](docs/engenharia/) e [`docs/planejamento/etapas-sprint2.md`](docs/planejamento/etapas-sprint2.md) | Planejado, codificação iniciando |
-| Primeiros testes | 2 | [`docs/api/`](docs/api/) | Contrato e coleção de testes prontos |
+| Backend e frontend, primeiras funcionalidades | 2 | [`backend/`](backend/), [`app/`](app/) e [`docs/planejamento/etapas-sprint2.md`](docs/planejamento/etapas-sprint2.md) | MVP dos blocos A, C, D, E e F implementado; fluxo de consentimento B pendente |
+| Primeiros testes | 2 | [`docs/testes/`](docs/testes/) | Suíte integrada e roteiro web/API registrados em 22/10/2026 |
 | Sistema completo | 3 | ainda não iniciado | Pendente |
-| Documentação técnica final em ABNT | 3 | ainda não iniciado | Pendente |
+| Documentação técnica final em ABNT | 3 | [`docs/documento-final/CALMIND_ABNT.docx`](docs/documento-final/CALMIND_ABNT.docx) | Rascunho versionado e atualizado com o MVP; revisão final na Sprint 3 |
 | Manual do usuário | 3 | ainda não iniciado | Pendente |
-| Relatório de testes | 3 | ainda não iniciado | Pendente |
+| Relatório de testes | 3 | [`docs/testes/`](docs/testes/) | Primeiras evidências registradas; consolidação final na Sprint 3 |
 
 ## Como abrir cada artefato
 
 **Identidade visual.** [`docs/identidade-visual.md`](docs/identidade-visual.md) renderiza direto no GitHub, com o logotipo, os códigos hexadecimais da paleta e a escala tipográfica. O histórico de por que cada decisão de design foi tomada, e quando mudou, está em [`CONTEXTO.md`](CONTEXTO.md).
 
-**Wireframes.** Abra `docs/prototipo/wireframes.html` em qualquer navegador — são as 16 telas em uma página só. Para ver como elas se conectam, abra `docs/prototipo/fluxo-ux.html`, que é o mapa de UX e exporta em PNG e PDF. As telas montadas no Figma estão exportadas uma a uma em `docs/prototipo/telas-pdf/`. Nada disso precisa de servidor nem de conta em ferramenta de design.
+**Wireframes.** Abra `docs/prototipo/wireframes.html` em qualquer navegador para ver as 16 telas em uma página. O mapa de UX em `docs/prototipo/fluxo-ux.html` mostra como elas se conectam e exporta em PNG e PDF. As telas montadas no Figma estão em `docs/prototipo/telas-pdf/`. Os protótipos representam o produto planejado e não comprovam que cada tela foi implementada no MVP.
 
 **Modelo de dados.** O MER e os diagramas de estado estão em `docs/diagramas/modelo-de-dados.md`, e o DER com atributos, chaves e tipos está em `docs/diagramas/der.md`. Os dois renderizam direto nesta página do GitHub. O DER também é executável:
 
@@ -96,7 +120,7 @@ As quatro provas verificam que o banco, e não o código da aplicação, garante
 
 As sínteses são anonimizadas por regra do projeto: nenhum nome, contato ou identificador aparece nelas, e o áudio das entrevistas nunca entra no repositório.
 
-**Contrato da API.** Importe `docs/api/Calmind.postman_collection.json` no Postman e rode pelo Runner. São 42 requisições com 104 asserções. Enquanto o backend não existir, tudo fica vermelho: cada endpoint entregue acende um verde, e a coleção serve de critério de pronto da Sprint 2.
+**Contrato da API.** Importe `docs/api/Calmind.postman_collection.json` no Postman e rode pelo Runner. A coleção cobre os blocos disponíveis e serve como critério de teste. Consulte `docs/testes/` para distinguir execuções datadas de requisições apenas preparadas.
 
 ---
 
@@ -104,7 +128,7 @@ As sínteses são anonimizadas por regra do projeto: nenhum nome, contato ou ide
 
 | Camada | Tecnologia |
 |--------|------------|
-| Aplicativo | React Native |
+| Aplicativo | React Native com Expo |
 | Backend | Laravel, PHP |
 | Banco de dados | MySQL |
 | Painel do administrador | Blade e Bootstrap, sobre o mesmo backend |
@@ -128,7 +152,7 @@ Identificadores de código, tabela, coluna e campo de API em inglês. Texto volt
 ## Estrutura do repositório
 
 ```
-CONTRIBUTING.md   como commitar e abrir PR neste repositório — leia antes do primeiro commit
+CONTRIBUTING.md   como commitar e abrir PR neste repositório; leia antes do primeiro commit
 CONTEXTO.md       diário das decisões de design: o que mudou, quando e por quê
 backend/       Laravel + MySQL: API /api/v1 e painel do admin em Blade
 app/           React Native: o aplicativo de paciente e psicólogo
@@ -145,12 +169,12 @@ docs/
 ├── engenharia/                  setup, arquitetura, convenções e divisão de trabalho
 ├── planejamento/                cronograma, etapas da sprint, arranque do RN e decisões abertas
 ├── manual/                      manual do usuário          · Sprint 3
-├── testes/                      relatório de testes        · Sprint 3
-├── documento-final/             documentação ABNT          · Sprint 3
+├── testes/                      evidências da Sprint 2 e relatório final na Sprint 3
+├── documento-final/             rascunho ABNT, revisão final na Sprint 3
 └── apresentacao/                slides e ensaios           · Sprint 3
 ```
 
-As pastas de código entram na Sprint 2 e as quatro últimas de `docs/` na Sprint 3. Cada uma tem um `README.md` dizendo o que vai lá dentro, quando, e qual entregável da regulamentação ela atende.
+As pastas de código estão em uso na Sprint 2. O rascunho ABNT e as primeiras evidências de teste já estão versionados; a conclusão desses documentos pertence à Sprint 3.
 
 **Antes do seu primeiro commit, leia [`CONTRIBUTING.md`](CONTRIBUTING.md).** Ele traz o modelo de mensagem de commit, o passo a passo do branch ao merge e o que é um Pull Request, para quem nunca abriu um. Nada entra no `main` sem passar por PR.
 
@@ -161,7 +185,7 @@ As pastas de código entram na Sprint 2 e as quatro últimas de `docs/` na Sprin
 | Sprint | Período | Foco |
 |--------|---------|------|
 | 1 | entrega em **24/09/2026, 16:45** | Identidade da marca, requisitos, modelagem e protótipo |
-| 2 | a recalcular | Backend, aplicativo e primeiros testes |
+| 2 | entrega em **23/10/2026** | Backend, aplicativo e primeiros testes |
 | 3 | a recalcular, com apresentação entre meados de novembro e começo de dezembro | Sistema completo, testes, documentação final e apresentação |
 
 > As datas das Sprints 2 e 3 em `docs/planejamento/cronograma.md` foram montadas a partir de uma

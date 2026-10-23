@@ -1,0 +1,178 @@
+Execucao: 2026-10-21, newman 6.2.3, backend local /api/v1, banco calmind_test_b3 recem migrado e semeado.
+Pastas executadas, sem alteracao de requisicao ou asserção: 01 Conta e autenticacao, 04 Convite e vinculo, 05 Relatos e a garantia de privacidade.
+Ressalva: as pastas 02 (Consentimento) e 03 (Cadastro profissional e aprovacao) pertencem a blocos ainda nao implementados.
+No lugar delas entrou UMA requisicao de preparo, que aprova e publica o psicologo e registra o aceite do termo geral do paciente direto no banco.
+Esta execucao prova os blocos A, D e E. Nao prova os blocos B e C.
+
+(node:12752) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(Use `node --trace-deprecation ...` to show where the warning was created)
+newman
+
+Calmind - API da plataforma paciente e psicologo
+
+□ 01 Conta e autenticacao
+└ Cadastrar paciente
+  ┌
+  │ 'Execucao', '25417307'
+  └
+  POST http://localhost:8000/api/v1/auth/register [201 Created, 369B, 695ms]
+  √  responde 201
+  √  devolve id e papel
+  √  nunca devolve a senha
+
+└ Cadastrar com e-mail repetido deve falhar
+  POST http://localhost:8000/api/v1/auth/register [422 Unprocessable Content, 356B, 442ms]
+  √  responde 422
+  √  nao vaza dado da conta existente
+
+└ Cadastrar psicologo
+  POST http://localhost:8000/api/v1/auth/register [201 Created, 376B, 872ms]
+  √  responde 201
+
+└ Login do paciente
+  POST http://localhost:8000/api/v1/auth/login [200 OK, 284B, 719ms]
+  √  responde 200
+  √  devolve token
+
+└ Login com senha errada
+  POST http://localhost:8000/api/v1/auth/login [401 Unauthorized, 272B, 531ms]
+  √  responde 401
+  √  mensagem generica
+
+└ Login do psicologo
+  POST http://localhost:8000/api/v1/auth/login [200 OK, 284B, 769ms]
+  √  responde 200
+
+└ Login do administrador
+  POST http://localhost:8000/api/v1/auth/login [200 OK, 284B, 743ms]
+  √  responde 200
+
+└ Dados do usuario logado
+  GET http://localhost:8000/api/v1/me [200 OK, 355B, 366ms]
+  √  responde 200
+  √  papel paciente
+
+└ Area interna sem token deve ser negada
+  GET http://localhost:8000/api/v1/me [401 Unauthorized, 288B, 261ms]
+  √  responde 401
+
+□ 02 e 03 simulados por SQL
+└ Preparar psicologo aprovado e aceite do termo
+  GET http://127.0.0.1:8999/?psy=15&pat=14&crp=417307 [200 OK, 183B, 16ms]
+  √  preparo ok
+
+□ 04 Convite e vinculo
+└ Gerar convite
+  POST http://localhost:8000/api/v1/psychologist/invitations [201 Created, 334B, 309ms]
+  √  responde 201
+  √  sem caracteres ambiguos
+  √  tem expiracao
+
+└ Codigo inexistente deve falhar
+  POST http://localhost:8000/api/v1/patient/bonds/redeem-invitation [422 Unprocessable Content, 368B, 388ms]
+  √  responde 422
+  √  nao revela o profissional
+
+└ Entrar pelo convite
+  POST http://localhost:8000/api/v1/patient/bonds/redeem-invitation [201 Created, 417B, 425ms]
+  √  responde 201
+  √  vinculo nasce ativo
+
+└ Reusar o mesmo convite deve falhar
+  POST http://localhost:8000/api/v1/patient/bonds/redeem-invitation [422 Unprocessable Content, 368B, 515ms]
+  √  responde 422
+
+└ Catalogo com vinculo ativo deve ser negado
+  GET http://localhost:8000/api/v1/catalog/psychologists [403 Forbidden, 330B, 365ms]
+  √  responde 403
+
+└ Encerrar vinculo
+  POST http://localhost:8000/api/v1/bonds/4/end [200 OK, 434B, 391ms]
+  √  responde 200
+  √  fica encerrado
+
+└ Catalogo liberado apos encerrar
+  GET http://localhost:8000/api/v1/catalog/psychologists?modality=online [200 OK, 917B, 421ms]
+  √  responde 200
+  √  e uma lista
+  √  CA-09.3: sem preco, nota ou ranking
+  √  exibe nome completo e CRP
+
+└ Solicitar vinculo pelo catalogo
+  POST http://localhost:8000/api/v1/patient/bonds/requests [201 Created, 392B, 409ms]
+  √  responde 201
+  √  nasce pendente
+
+└ Aceitar solicitacao
+  POST http://localhost:8000/api/v1/psychologist/bond-requests/5/accept [200 OK, 409B, 344ms]
+  √  responde 200
+  √  fica ativo
+
+└ Segundo vinculo ativo deve falhar
+  POST http://localhost:8000/api/v1/patient/bonds/requests [409 Conflict, 349B, 441ms]
+  √  recusa com 409 ou 422, nunca 500
+  √  nao estourou erro de banco
+
+□ 05 Relatos e a garantia de privacidade
+└ Relato compartilhado
+  POST http://localhost:8000/api/v1/patient/reports [201 Created, 396B, 399ms]
+  √  responde 201
+  √  padrao e compartilhado
+
+└ Relato privado
+  POST http://localhost:8000/api/v1/patient/reports [201 Created, 423B, 366ms]
+  √  responde 201
+  √  gravado como privado
+
+└ Promover privado para compartilhado deve falhar
+  PATCH http://localhost:8000/api/v1/patient/reports/9 [422 Unprocessable Content, 417B, 337ms]
+  √  recusa a promocao
+
+└ PROVA RNF-08: psicologo nao ve o relato privado
+  GET http://localhost:8000/api/v1/psychologist/patients/14/reports [200 OK, 375B, 360ms]
+  √  responde 200
+  √  o conteudo privado nao aparece
+  √  o id do relato privado nao aparece
+  √  CA-23.2: a contagem so soma os compartilhados
+  √  nenhum campo denuncia a existencia de privados
+
+└ PROVA CA-23.5: acesso direto ao relato privado
+  GET http://localhost:8000/api/v1/psychologist/reports/9 [404 Not Found, 270B, 348ms]
+  √  responde 404, nao 403
+  √  nao vaza o conteudo
+
+└ Despublicar relato compartilhado
+  POST http://localhost:8000/api/v1/patient/reports/8/unpublish [200 OK, 414B, 315ms]
+  √  responde 200
+  √  informa se ja foi usado em analise
+
+└ Relato despublicado some da visao do psicologo
+  GET http://localhost:8000/api/v1/psychologist/patients/14/reports [200 OK, 274B, 347ms]
+  √  responde 200
+  √  o relato despublicado nao aparece
+  √  sem marca de removido
+
+└ Paciente ve os proprios relatos, inclusive os privados
+  GET http://localhost:8000/api/v1/patient/reports [200 OK, 665B, 349ms]
+  √  responde 200
+  √  o proprio relato privado aparece para o dono
+
+┌─────────────────────────┬────────────────────┬────────────────────┐
+│                         │           executed │             failed │
+├─────────────────────────┼────────────────────┼────────────────────┤
+│              iterations │                  1 │                  0 │
+├─────────────────────────┼────────────────────┼────────────────────┤
+│                requests │                 28 │                  0 │
+├─────────────────────────┼────────────────────┼────────────────────┤
+│            test-scripts │                 28 │                  0 │
+├─────────────────────────┼────────────────────┼────────────────────┤
+│      prerequest-scripts │                  1 │                  0 │
+├─────────────────────────┼────────────────────┼────────────────────┤
+│              assertions │                 56 │                  0 │
+├─────────────────────────┴────────────────────┴────────────────────┤
+│ total run duration: 13s                                           │
+├───────────────────────────────────────────────────────────────────┤
+│ total data received: 4.33kB (approx)                              │
+├───────────────────────────────────────────────────────────────────┤
+│ average response time: 437ms [min: 16ms, max: 872ms, s.d.: 175ms] │
+└───────────────────────────────────────────────────────────────────┘

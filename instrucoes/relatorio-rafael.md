@@ -1,7 +1,7 @@
 # Relatório da frente Rafael
 
 ## Estado final
-Branch: codex/rafael-backend. Último commit anterior: 4cbbffc. Atualização: 29/10/2026, 08:50, America/Sao_Paulo.
+Branch: codex/rafael-backend. Último commit anterior: 05c959e. R8 integra o commit desta atualização. Todos os itens R1 a R8 foram implementados e testados em 29/10/2026.
 
 ## Itens
 | Item | Situação | Commit | Evidência |
@@ -12,8 +12,8 @@ Branch: codex/rafael-backend. Último commit anterior: 4cbbffc. Atualização: 2
 | R4 | feito | d16e470 | Agenda com conflitos configuráveis |
 | R5 | feito | 6a14d71 e 4cbbffc | Notificações privadas e geração nos oito eventos |
 | R6 | feito | 1131350 | Seed completo testado e pacientes sem vínculo preservados |
-| R7 | feito | commit desta atualização | Newman: 119 requisições e 228 asserções, zero falhas |
-| R8 | feito | próximo commit | 3 testes e 38 asserções passaram |
+| R7 | feito | 05c959e | Newman: 119 requisições e 228 asserções, zero falhas |
+| R8 | feito | commit desta atualização | 3 testes e 38 asserções passaram |
 | R9 | não feito | nenhum | Auditoria de leitura fora do fechamento conforme instruções gerais e contrato 3.8.6 |
 
 ## Evidência colada

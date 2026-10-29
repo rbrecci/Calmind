@@ -10,7 +10,7 @@ if ($apiUri.Scheme -ne 'http' -or $apiUri.Host -notin @('127.0.0.1', 'localhost'
     throw 'Use somente a API HTTP local em /api/v1.'
 }
 if (-not $OutputPath) {
-    $OutputPath = Join-Path $repositoryPath ('docs/testes/{0}-newman-blocos-a-c-d-e-f.txt' -f (Get-Date -Format 'yyyy-MM-dd'))
+    $OutputPath = Join-Path $repositoryPath ('docs/testes/{0}-newman-fechamento.txt' -f (Get-Date -Format 'yyyy-MM-dd'))
 }
 $OutputPath = [IO.Path]::GetFullPath($OutputPath)
 if (Test-Path -LiteralPath $OutputPath) {
@@ -59,7 +59,7 @@ if (!$app->environment('local') || $connection !== 'mysql' || $config['database'
 
 try {
     New-Item -ItemType Directory -Path $temporaryPath | Out-Null
-    Write-Evidence 'Calmind Sprint 2: A/C/D/E/F. Bloco B nao testado; consentimento geral preparado como fixture local.'
+    Write-Evidence 'Calmind fechamento: pastas 01 a 10. Consentimento registrado pela API, sem fixture de aceite.'
     Write-Evidence ('Data: ' + (Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz'))
     Push-Location (Join-Path $repositoryPath 'backend')
     try {
@@ -86,23 +86,17 @@ try {
     }
     foreach ($variable in $collection.variable) { $variable.value = $state.PSObject.Properties[$variable.key].Value }
     [IO.File]::WriteAllText($exportPath, ($collection | ConvertTo-Json -Depth 100), $utf8)
-    $inputData = @{ id = [int]$patientId; email = $email } | ConvertTo-Json -Compress
-    $encodedInput = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($inputData))
-    $fixture = @'
-$input = json_decode(base64_decode('__INPUT__'), true, 512, JSON_THROW_ON_ERROR);
-$user = App\Models\User::whereKey($input['id'])->where('email', $input['email'])->where('role', 'patient')->firstOrFail();
-$term = App\Models\ConsentTerm::where('type', 'general')->where('effective_from', '<=', now())->orderByDesc('effective_from')->orderByDesc('id')->firstOrFail();
-App\Models\ConsentAcceptance::firstOrCreate(['user_id' => $user->id, 'consent_term_id' => $term->id, 'revoked_at' => null]);
-echo "Fixture: aceite geral registrado para o paciente ficticio da rodada.\n";
-'@
-    Push-Location (Join-Path $repositoryPath 'backend')
-    try {
-        $fixtureOutput = ($bootstrap + "`n" + $fixture.Replace('__INPUT__', $encodedInput)) | & php
-        if ($LASTEXITCODE -ne 0) { $exitCode = 1; throw 'Falha ao preparar o aceite geral.' }
-        foreach ($line in $fixtureOutput) { Write-Evidence $line }
-    } finally { Pop-Location }
-
-    $exitCode = Invoke-Newman $exportPath @('03 Cadastro profissional e aprovacao', '04 Convite e vinculo', '05 Relatos e a garantia de privacidade', '06 Tarefas terapeuticas')
+    $exitCode = Invoke-Newman $exportPath @(
+        '02 Consentimento',
+        '03 Cadastro profissional e aprovacao',
+        '04 Convite e vinculo',
+        '05 Relatos e a garantia de privacidade',
+        '06 Tarefas terapeuticas',
+        '07 Perfil e pacientes',
+        '08 Chat',
+        '09 Agenda',
+        '10 Notificacoes'
+    )
 } catch {
     if ($exitCode -eq 0) { $exitCode = 1 }
     Write-Evidence $_.Exception.Message

@@ -11,8 +11,8 @@ Branch: codex/rafael-backend. Último commit anterior: 4cbbffc. Atualização: 2
 | R3 | feito | 6a14d71 | Chat cifrado e avisos ao destinatário |
 | R4 | feito | d16e470 | Agenda com conflitos configuráveis |
 | R5 | feito | 6a14d71 e 4cbbffc | Notificações privadas e geração nos oito eventos |
-| R6 | feito | commit desta atualização | Seed completo testado e pacientes sem vínculo preservados |
-| R7 | feito | próximo commit | Newman: 119 requisições e 228 asserções, zero falhas |
+| R6 | feito | 1131350 | Seed completo testado e pacientes sem vínculo preservados |
+| R7 | feito | commit desta atualização | Newman: 119 requisições e 228 asserções, zero falhas |
 | R8 | feito | próximo commit | 3 testes e 38 asserções passaram |
 | R9 | não feito | nenhum | Auditoria de leitura fora do fechamento conforme instruções gerais e contrato 3.8.6 |
 
@@ -29,6 +29,7 @@ O envio pelo psicólogo também exige aceite geral vigente do paciente, conforme
 
 ## Dependências abertas
 Integração com os aplicativos será conferida pela sessão de integração.
+Contas fictícias de demonstração: hermione.granger@example.com tem Elizabeth vinculada e Samwise pendente; elizabeth.bennet@example.com tem duas mensagens, duas consultas futuras e uma passada; samwise.gamgee@example.com tem solicitação pendente. Hermione e Elizabeth têm uma notificação não lida cada. A senha é a constante já existente UserSeeder::PASSWORD. Os seeders foram executados e conferidos no banco de teste; não apliquei seed nem reset ao banco de desenvolvimento.
 
 ## Não verificado
 Suíte final com R8 e seeder: 220 testes e 3.835 asserções passaram em 55,15 segundos. Pint completo passou.
@@ -37,6 +38,7 @@ Não verificados: aplicativos contra o backend, celular físico e concorrência 
 
 ## Arquivos que você criou ou alterou fora da sua pasta
 A saída bruta da suíte será salva em docs/testes conforme solicitação específica da frente.
+Também foi salva a execução Newman em docs/testes/2026-10-29-newman-fechamento.txt. O runner criou contas fictícias pelo HTTP local no banco de desenvolvimento, sem reset.
 ### calmind-r1-r2-red.txt
 
 ```text

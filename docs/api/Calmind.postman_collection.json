@@ -450,7 +450,7 @@
     },
     {
       "name": "02 Consentimento",
-      "description": "RF-03, RF-04, RNF-13. Consentimento versionado, e o de IA e separado.",
+      "description": "RF-03, RF-04, RNF-13. Aceite versionado, revogacao e idempotencia. Executar depois da pasta 01.",
       "item": [
         {
           "name": "Termo geral vigente",
@@ -481,8 +481,7 @@
                   "value": "general"
                 }
               ]
-            },
-            "description": "RF-03. Devolve a versao vigente do termo de tratamento de dados de saude."
+            }
           },
           "response": [],
           "event": [
@@ -492,9 +491,105 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('responde 200', () => pm.response.to.have.status(200));",
-                  "const b = pm.response.json();",
-                  "pm.test('tem versao e data', () => { pm.expect(b.version).to.be.a('string'); pm.expect(b.effective_from).to.be.a('string'); });",
-                  "pm.collectionVariables.set('idTermoGeral', b.id);"
+                  "pm.test('campos do contrato', () => pm.expect(pm.response.json()).to.have.all.keys([\"id\",\"type\",\"version\",\"body\",\"effective_from\",\"accepted\"]));",
+                  "pm.collectionVariables.set('idTermoGeral', pm.response.json().id);",
+                  "pm.test('data com offset e aceite booleano', () => { const b = pm.response.json(); pm.expect(b.effective_from).to.match(/-03:00$/); pm.expect(b.accepted).to.be.a('boolean'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Tipo invalido deve falhar",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/consent-terms/current?type=invalido",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "consent-terms",
+                "current"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "invalido"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "pm.test('erro em type', () => pm.expect(pm.response.json().errors).to.have.property('type'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Termo inexistente deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/consent-acceptances",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "consent-acceptances"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consent_term_id\": 999999999\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "pm.test('erro no termo', () => pm.expect(pm.response.json().errors).to.have.property('consent_term_id'));"
                 ]
               }
             }
@@ -510,12 +605,12 @@
                 "value": "application/json"
               },
               {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
                 "key": "Authorization",
                 "value": "Bearer {{patientToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
               }
             ],
             "url": {
@@ -527,7 +622,6 @@
                 "consent-acceptances"
               ]
             },
-            "description": "RF-03, RNF-13. Grava data, hora e versao aceita.",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"consent_term_id\": \"{{idTermoGeral}}\"\n}",
@@ -546,7 +640,270 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('responde 201', () => pm.response.to.have.status(201));",
-                  "pm.test('registra a versao aceita', () => pm.expect(pm.response.json().consent_term_id).to.not.be.undefined);"
+                  "pm.test('campos do contrato', () => pm.expect(pm.response.json()).to.have.all.keys([\"id\",\"consent_term_id\",\"type\",\"version\",\"accepted_at\",\"revoked_at\"]));",
+                  "pm.collectionVariables.set('idAceiteGeral', pm.response.json().id);",
+                  "pm.collectionVariables.set('aceiteGeralEm', pm.response.json().accepted_at);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Aceite geral repetido preserva registro",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/consent-acceptances",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "consent-acceptances"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consent_term_id\": \"{{idTermoGeral}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('mesmo aceite e instante', () => { const b = pm.response.json(); pm.expect(b.id).to.eql(Number(pm.variables.get('idAceiteGeral'))); pm.expect(b.accepted_at).to.eql(pm.variables.get('aceiteGeralEm')); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Outro usuario nao revoga aceite",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/consent-acceptances/{{idAceiteGeral}}/revoke",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "consent-acceptances",
+                "{{idAceiteGeral}}",
+                "revoke"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Revogar termo geral",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/consent-acceptances/{{idAceiteGeral}}/revoke",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "consent-acceptances",
+                "{{idAceiteGeral}}",
+                "revoke"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('revogacao registrada', () => pm.expect(pm.response.json().revoked_at).to.be.a('string'));",
+                  "pm.collectionVariables.set('revogadoEm', pm.response.json().revoked_at);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Revogar novamente preserva data",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/consent-acceptances/{{idAceiteGeral}}/revoke",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "consent-acceptances",
+                "{{idAceiteGeral}}",
+                "revoke"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('revogacao idempotente', () => pm.expect(pm.response.json().revoked_at).to.eql(pm.variables.get('revogadoEm')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reaceitar termo geral",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/consent-acceptances",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "consent-acceptances"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consent_term_id\": \"{{idTermoGeral}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('reativa mesmo aceite', () => { const b = pm.response.json(); pm.expect(b.revoked_at).to.eql(null); pm.expect(b.id).to.eql(Number(pm.variables.get('idAceiteGeral'))); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Termo atual confirma aceite",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/consent-terms/current",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "consent-terms",
+                "current"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('accepted verdadeiro', () => pm.expect(pm.response.json().accepted).to.eql(true));"
                 ]
               }
             }
@@ -581,8 +938,7 @@
                   "value": "ai_analysis"
                 }
               ]
-            },
-            "description": "RF-04. O consentimento de envio de relatos ao servico de IA e separado e destacado."
+            }
           },
           "response": [],
           "event": [
@@ -599,7 +955,7 @@
           ]
         },
         {
-          "name": "Aceitar termo de IA",
+          "name": "Psicologo nao aceita IA",
           "request": {
             "method": "POST",
             "header": [
@@ -608,12 +964,12 @@
                 "value": "application/json"
               },
               {
-                "key": "Content-Type",
-                "value": "application/json"
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
               },
               {
-                "key": "Authorization",
-                "value": "Bearer {{patientToken}}"
+                "key": "Content-Type",
+                "value": "application/json"
               }
             ],
             "url": {
@@ -625,7 +981,56 @@
                 "consent-acceptances"
               ]
             },
-            "description": "RF-04. Sem este aceite, a analise semanal do RF-41 tem que ser recusada.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consent_term_id\": \"{{idTermoIA}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Aceitar termo de IA",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/consent-acceptances",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "consent-acceptances"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"consent_term_id\": \"{{idTermoIA}}\"\n}",
@@ -644,7 +1049,42 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.test('campos do contrato', () => pm.expect(pm.response.json()).to.have.all.keys([\"id\",\"consent_term_id\",\"type\",\"version\",\"accepted_at\",\"revoked_at\"]));",
                   "pm.collectionVariables.set('idAceiteIA', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consentimento sem token deve falhar",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/consent-terms/current",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "consent-terms",
+                "current"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 401', () => pm.response.to.have.status(401));"
                 ]
               }
             }
@@ -2823,6 +3263,2268 @@
           ]
         }
       ]
+    },
+    {
+      "name": "07 Perfil e pacientes",
+      "description": "Contrato 3.8.2. Executar apos pastas 01 a 06, com vinculo ativo em idVinculo.",
+      "item": [
+        {
+          "name": "Perfil do psicologo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "profile"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('campos do contrato', () => pm.expect(pm.response.json()).to.have.all.keys([\"id\",\"crp\",\"approval_status\",\"approval_note\",\"profile_approach\",\"profile_specialty\",\"profile_modality\",\"profile_region\",\"profile_bio\",\"profile_published_at\"]));",
+                  "pm.test('aprovado com CRP', () => { const b = pm.response.json(); pm.expect(b.approval_status).to.eql('approved'); pm.expect(b.crp).to.match(new RegExp('^[0-9]{2}/[0-9]{6}$')); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Paciente nao le perfil profissional",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "profile"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Vinculos do paciente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/bonds",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "bonds"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('lista com meta do contrato', () => { const b = pm.response.json(); pm.expect(b).to.have.all.keys('data', 'meta'); pm.expect(b.data).to.be.an('array'); pm.expect(b.meta).to.have.all.keys('total', 'page', 'per_page'); });",
+                  "pm.test('inclui vinculo ativo', () => pm.expect(pm.response.json().data.some(b => b.id === Number(pm.variables.get('idVinculo')) && b.status === 'active')).to.eql(true));",
+                  "const ended = pm.response.json().data.find(b => b.status === 'ended'); pm.collectionVariables.set('idVinculoEncerrado', ended ? ended.id : '');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Solicitacoes pendentes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/bond-requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "bond-requests"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('lista com meta do contrato', () => { const b = pm.response.json(); pm.expect(b).to.have.all.keys('data', 'meta'); pm.expect(b.data).to.be.an('array'); pm.expect(b.meta).to.have.all.keys('total', 'page', 'per_page'); });",
+                  "pm.test('somente pendentes', () => pm.response.json().data.forEach(b => pm.expect(b.status).to.eql('pending')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pacientes ativos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/patients",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "patients"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('lista com meta do contrato', () => { const b = pm.response.json(); pm.expect(b).to.have.all.keys('data', 'meta'); pm.expect(b.data).to.be.an('array'); pm.expect(b.meta).to.have.all.keys('total', 'page', 'per_page'); });",
+                  "pm.test('campos sem dado de relato', () => pm.response.json().data.forEach(p => pm.expect(p).to.have.all.keys([\"bond_id\",\"status\",\"since\",\"ended_at\",\"patient\",\"unread_messages\",\"overdue_tasks\",\"next_appointment_at\"])));",
+                  "pm.test('paciente usa users.id', () => pm.expect(pm.response.json().data.some(p => p.patient.id === Number(pm.variables.get('idUsuarioPaciente')))).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pacientes encerrados sem contadores",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/patients?status=ended",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "patients"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "ended"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('lista com meta do contrato', () => { const b = pm.response.json(); pm.expect(b).to.have.all.keys('data', 'meta'); pm.expect(b.data).to.be.an('array'); pm.expect(b.meta).to.have.all.keys('total', 'page', 'per_page'); });",
+                  "pm.test('encerrados sem contadores clinicos', () => pm.response.json().data.forEach(p => { pm.expect(p.status).to.eql('ended'); pm.expect(p.unread_messages).to.eql(0); pm.expect(p.overdue_tasks).to.eql(0); pm.expect(p.next_appointment_at).to.eql(null); }));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Detalhe do paciente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/patients/{{idUsuarioPaciente}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "patients",
+                "{{idUsuarioPaciente}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('campos do contrato', () => pm.expect(pm.response.json()).to.have.all.keys([\"bond_id\",\"bond_status\",\"since\",\"patient\",\"is_minor\",\"guardian\"]));",
+                  "pm.test('adulto sem responsavel', () => { const b = pm.response.json(); pm.expect(b.is_minor).to.eql(false); pm.expect(b.guardian).to.eql(null); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Paciente inexistente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/patients/999999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "patients",
+                "999999999"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Status invalido",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/patients?status=pending",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "patients"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Lista sem token",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/patients",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "patients"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "08 Chat",
+      "description": "Contrato 3.8.3. Mensagens em vinculo ativo, polling e historico encerrado. Executar apos 07.",
+      "item": [
+        {
+          "name": "Enviar mensagem do paciente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bonds/{{idVinculo}}/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bonds",
+                "{{idVinculo}}",
+                "messages"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"Mensagem fictícia da coleção.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.test('campos do contrato', () => pm.expect(pm.response.json()).to.have.all.keys([\"id\",\"bond_id\",\"sender_user_id\",\"mine\",\"body\",\"sent_at\",\"read_at\"]));",
+                  "pm.collectionVariables.set('idMensagem', pm.response.json().id);",
+                  "pm.test('mensagem propria', () => { const b = pm.response.json(); pm.expect(b.mine).to.eql(true); pm.expect(b.body).to.eql('Mensagem fictícia da coleção.'); pm.expect(b.sent_at).to.match(/-03:00$/); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Enviar resposta do psicologo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bonds/{{idVinculo}}/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bonds",
+                "{{idVinculo}}",
+                "messages"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"Resposta fictícia da coleção.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('idResposta', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar mensagens",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bonds/{{idVinculo}}/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bonds",
+                "{{idVinculo}}",
+                "messages"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('lista com meta do contrato', () => { const b = pm.response.json(); pm.expect(b).to.have.all.keys('data', 'meta'); pm.expect(b.data).to.be.an('array'); pm.expect(b.meta).to.have.all.keys('total', 'page', 'per_page'); });",
+                  "pm.test('ordem crescente e autoria', () => { const d = pm.response.json().data; pm.expect(d.map(m => m.id)).to.eql(d.map(m => m.id).sort((a,b)=>a-b)); pm.expect(d.find(m => m.id === Number(pm.variables.get('idResposta'))).mine).to.eql(false); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Polling apenas mensagens novas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bonds/{{idVinculo}}/messages?after_id={{idMensagem}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bonds",
+                "{{idVinculo}}",
+                "messages"
+              ],
+              "query": [
+                {
+                  "key": "after_id",
+                  "value": "{{idMensagem}}"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('lista com meta do contrato', () => { const b = pm.response.json(); pm.expect(b).to.have.all.keys('data', 'meta'); pm.expect(b.data).to.be.an('array'); pm.expect(b.meta).to.have.all.keys('total', 'page', 'per_page'); });",
+                  "pm.test('ids depois do cursor', () => pm.response.json().data.forEach(m => pm.expect(m.id).to.be.above(Number(pm.variables.get('idMensagem')))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Marcar mensagens recebidas",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bonds/{{idVinculo}}/messages/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bonds",
+                "{{idVinculo}}",
+                "messages",
+                "read"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('uma resposta lida', () => pm.expect(pm.response.json().read).to.eql(1));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Marcar novamente nao altera",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bonds/{{idVinculo}}/messages/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bonds",
+                "{{idVinculo}}",
+                "messages",
+                "read"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('nenhuma nova leitura', () => pm.expect(pm.response.json().read).to.eql(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Leitura nao marca mensagem propria",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bonds/{{idVinculo}}/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bonds",
+                "{{idVinculo}}",
+                "messages"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('so marca a outra parte', () => { const d = pm.response.json().data; pm.expect(d.find(m => m.id === Number(pm.variables.get('idMensagem'))).read_at).to.eql(null); pm.expect(d.find(m => m.id === Number(pm.variables.get('idResposta'))).read_at).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mensagem vazia deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bonds/{{idVinculo}}/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bonds",
+                "{{idVinculo}}",
+                "messages"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"   \"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "pm.test('erro no corpo', () => pm.expect(pm.response.json().errors).to.have.property('body'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mensagem longa deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bonds/{{idVinculo}}/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bonds",
+                "{{idVinculo}}",
+                "messages"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"{{mensagemLonga}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('mensagemLonga', 'a'.repeat(2001));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Vinculo inexistente nao revela mensagens",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bonds/999999999/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bonds",
+                "999999999",
+                "messages"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Historico encerrado permanece legivel",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bonds/{{idVinculoEncerrado}}/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bonds",
+                "{{idVinculoEncerrado}}",
+                "messages"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('lista com meta do contrato', () => { const b = pm.response.json(); pm.expect(b).to.have.all.keys('data', 'meta'); pm.expect(b.data).to.be.an('array'); pm.expect(b.meta).to.have.all.keys('total', 'page', 'per_page'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Nao envia em vinculo encerrado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bonds/{{idVinculoEncerrado}}/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bonds",
+                "{{idVinculoEncerrado}}",
+                "messages"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"Tentativa em histórico.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Revogar consentimento antes de enviar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/consent-acceptances/{{idAceiteGeral}}/revoke",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "consent-acceptances",
+                "{{idAceiteGeral}}",
+                "revoke"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mensagem sem aceite deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bonds/{{idVinculo}}/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bonds",
+                "{{idVinculo}}",
+                "messages"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"Tentativa sem aceite.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 403', () => pm.response.to.have.status(403));",
+                  "pm.test('mensagem de consentimento', () => pm.expect(pm.response.json().message).to.eql('É preciso aceitar o termo de uso antes de enviar mensagens.'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Relato sem aceite deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/reports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "reports"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"Tentativa sem aceite.\",\n  \"visibility\": \"shared\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Restaurar consentimento para as proximas pastas",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/consent-acceptances",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "consent-acceptances"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consent_term_id\": \"{{idTermoGeral}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Chat sem token",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bonds/{{idVinculo}}/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bonds",
+                "{{idVinculo}}",
+                "messages"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "09 Agenda",
+      "description": "Contrato 3.8.4. Consultas, conflito confirmado, reagendamento e cancelamento. Executar apos 08.",
+      "item": [
+        {
+          "name": "Consulta no passado deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/appointments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "appointments"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": \"{{idVinculo}}\",\n  \"scheduled_at\": \"2000-01-01T15:00:00-03:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "pm.test('erro na data', () => pm.expect(pm.response.json().errors).to.have.property('scheduled_at'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Paciente nao cria consulta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/appointments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "appointments"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": \"{{idVinculo}}\",\n  \"scheduled_at\": \"{{consultaEm}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const base = new Date(Date.now() + 7 * 86400000); base.setUTCHours(15, 0, 0, 0);",
+                  "pm.collectionVariables.set('consultaEm', base.toISOString().replace('Z', '+00:00'));",
+                  "pm.collectionVariables.set('consultaConflitoEm', new Date(base.getTime() + 30 * 60000).toISOString().replace('Z', '+00:00'));",
+                  "pm.collectionVariables.set('consultaRemarcadaEm', new Date(base.getTime() + 86400000).toISOString().replace('Z', '+00:00'));",
+                  "pm.collectionVariables.set('consultaDia', base.toISOString().slice(0, 10));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Criar consulta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/appointments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "appointments"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": \"{{idVinculo}}\",\n  \"scheduled_at\": \"{{consultaEm}}\",\n  \"modality\": \"online\",\n  \"notes\": \"Consulta fictícia da coleção.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.test('campos do contrato', () => pm.expect(pm.response.json()).to.have.all.keys([\"id\",\"bond_id\",\"scheduled_at\",\"status\",\"modality\",\"notes\",\"created_at\",\"patient\"]));",
+                  "pm.collectionVariables.set('idConsulta', pm.response.json().id);",
+                  "pm.test('consulta agendada com paciente', () => { const b = pm.response.json(); pm.expect(b.status).to.eql('scheduled'); pm.expect(b.patient.id).to.eql(Number(pm.variables.get('idUsuarioPaciente'))); pm.expect(b.scheduled_at).to.match(/-03:00$/); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Conflito exige confirmacao",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/appointments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "appointments"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": \"{{idVinculo}}\",\n  \"scheduled_at\": \"{{consultaConflitoEm}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "pm.test('erro de confirmacao exato', () => pm.expect(pm.response.json().errors.confirm_conflict).to.eql(['Este horário conflita com outra consulta. Confirme para agendar mesmo assim.']));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Conflito confirmado permite criar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/appointments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "appointments"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": \"{{idVinculo}}\",\n  \"scheduled_at\": \"{{consultaConflitoEm}}\",\n  \"confirm_conflict\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('idConsultaConflito', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Agenda do psicologo por dia e vinculo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/appointments?bond_id={{idVinculo}}&from={{consultaDia}}&to={{consultaDia}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "appointments"
+              ],
+              "query": [
+                {
+                  "key": "bond_id",
+                  "value": "{{idVinculo}}"
+                },
+                {
+                  "key": "from",
+                  "value": "{{consultaDia}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{consultaDia}}"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('lista com meta do contrato', () => { const b = pm.response.json(); pm.expect(b).to.have.all.keys('data', 'meta'); pm.expect(b.data).to.be.an('array'); pm.expect(b.meta).to.have.all.keys('total', 'page', 'per_page'); });",
+                  "pm.test('inclui as duas consultas', () => { const ids = pm.response.json().data.map(a => a.id); pm.expect(ids).to.include(Number(pm.variables.get('idConsulta'))); pm.expect(ids).to.include(Number(pm.variables.get('idConsultaConflito'))); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Paciente le propria agenda",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/appointments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "appointments"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('lista com meta do contrato', () => { const b = pm.response.json(); pm.expect(b).to.have.all.keys('data', 'meta'); pm.expect(b.data).to.be.an('array'); pm.expect(b.meta).to.have.all.keys('total', 'page', 'per_page'); });",
+                  "pm.test('psicologo no lugar de paciente', () => pm.response.json().data.forEach(a => { pm.expect(a).to.have.property('psychologist'); pm.expect(a).to.not.have.property('patient'); pm.expect(a.psychologist.id).to.eql(Number(pm.variables.get('idPsicologo'))); }));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reagendar consulta",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/appointments/{{idConsulta}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "appointments",
+                "{{idConsulta}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduled_at\": \"{{consultaRemarcadaEm}}\",\n  \"notes\": \"Novo horário fictício.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('status reagendada', () => pm.expect(pm.response.json().status).to.eql('rescheduled'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cancelar consulta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/appointments/{{idConsulta}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "appointments",
+                "{{idConsulta}}",
+                "cancel"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('status cancelada', () => pm.expect(pm.response.json().status).to.eql('cancelled'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cancelar novamente e idempotente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/appointments/{{idConsulta}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "appointments",
+                "{{idConsulta}}",
+                "cancel"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('permanece cancelada', () => pm.expect(pm.response.json().status).to.eql('cancelled'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consulta cancelada nao reagenda",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/appointments/{{idConsulta}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "appointments",
+                "{{idConsulta}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduled_at\": \"{{consultaRemarcadaEm}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consulta alheia ou inexistente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/appointments/999999999/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "appointments",
+                "999999999",
+                "cancel"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Nao cria em vinculo encerrado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/appointments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "appointments"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": \"{{idVinculoEncerrado}}\",\n  \"scheduled_at\": \"{{consultaEm}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Agenda sem token",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/appointments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "appointments"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "10 Notificacoes",
+      "description": "Contrato 3.8.5. Eventos sem conteudo clinico, leitura individual e em lote. Executar apos 09.",
+      "item": [
+        {
+          "name": "Notificacoes nao lidas do paciente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications?unread=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications"
+              ],
+              "query": [
+                {
+                  "key": "unread",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('lista com meta do contrato', () => { const b = pm.response.json(); pm.expect(b).to.have.all.keys('data', 'meta'); pm.expect(b.data).to.be.an('array'); pm.expect(b.meta).to.have.all.keys('total', 'page', 'per_page'); });",
+                  "pm.test('somente campos seguros', () => pm.response.json().data.forEach(n => { pm.expect(n).to.have.all.keys([\"id\",\"type\",\"resource_id\",\"created_at\",\"read_at\"]); pm.expect(n.read_at).to.eql(null); }));",
+                  "pm.test('eventos de tarefa mensagem agenda e vinculo', () => { const types = pm.response.json().data.map(n => n.type); ['task.assigned', 'message.received', 'appointment.scheduled', 'appointment.rescheduled', 'appointment.cancelled', 'bond.accepted'].forEach(t => pm.expect(types).to.include(t)); });",
+                  "pm.collectionVariables.set('idNotificacao', pm.response.json().data[0].id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Psicologo nao le notificacao do paciente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/{{idNotificacao}}/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "{{idNotificacao}}",
+                "read"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ler notificacao propria",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/{{idNotificacao}}/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "{{idNotificacao}}",
+                "read"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('campos do contrato', () => pm.expect(pm.response.json()).to.have.all.keys([\"id\",\"type\",\"resource_id\",\"created_at\",\"read_at\"]));",
+                  "pm.test('leitura registrada', () => pm.expect(pm.response.json().read_at).to.be.a('string'));",
+                  "pm.collectionVariables.set('notificacaoLidaEm', pm.response.json().read_at);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Leitura repetida preserva data",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/{{idNotificacao}}/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "{{idNotificacao}}",
+                "read"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('leitura idempotente', () => pm.expect(pm.response.json().read_at).to.eql(pm.variables.get('notificacaoLidaEm')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ler todas notificacoes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/read-all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "read-all"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('contagem de leitura', () => pm.expect(pm.response.json().read).to.be.a('number'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Nao restam notificacoes nao lidas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications?unread=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications"
+              ],
+              "query": [
+                {
+                  "key": "unread",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('lista com meta do contrato', () => { const b = pm.response.json(); pm.expect(b).to.have.all.keys('data', 'meta'); pm.expect(b.data).to.be.an('array'); pm.expect(b.meta).to.have.all.keys('total', 'page', 'per_page'); });",
+                  "pm.test('lista vazia', () => { const b = pm.response.json(); pm.expect(b.data).to.eql([]); pm.expect(b.meta.total).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ler todas novamente nao altera",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/read-all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "read-all"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('nenhuma leitura adicional', () => pm.expect(pm.response.json().read).to.eql(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Psicologo recebe pedido e mensagem",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('lista com meta do contrato', () => { const b = pm.response.json(); pm.expect(b).to.have.all.keys('data', 'meta'); pm.expect(b.data).to.be.an('array'); pm.expect(b.meta).to.have.all.keys('total', 'page', 'per_page'); });",
+                  "pm.test('eventos dirigidos ao psicologo', () => { const types = pm.response.json().data.map(n => n.type); pm.expect(types).to.include('bond.requested'); pm.expect(types).to.include('message.received'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Notificacoes sem token",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
   ],
   "variable": [
@@ -2927,6 +5629,66 @@
     },
     {
       "key": "conclusaoTarefa",
+      "value": ""
+    },
+    {
+      "key": "idAceiteGeral",
+      "value": ""
+    },
+    {
+      "key": "aceiteGeralEm",
+      "value": ""
+    },
+    {
+      "key": "revogadoEm",
+      "value": ""
+    },
+    {
+      "key": "idVinculoEncerrado",
+      "value": ""
+    },
+    {
+      "key": "idMensagem",
+      "value": ""
+    },
+    {
+      "key": "idResposta",
+      "value": ""
+    },
+    {
+      "key": "mensagemLonga",
+      "value": ""
+    },
+    {
+      "key": "consultaEm",
+      "value": ""
+    },
+    {
+      "key": "consultaConflitoEm",
+      "value": ""
+    },
+    {
+      "key": "consultaRemarcadaEm",
+      "value": ""
+    },
+    {
+      "key": "consultaDia",
+      "value": ""
+    },
+    {
+      "key": "idConsulta",
+      "value": ""
+    },
+    {
+      "key": "idConsultaConflito",
+      "value": ""
+    },
+    {
+      "key": "idNotificacao",
+      "value": ""
+    },
+    {
+      "key": "notificacaoLidaEm",
       "value": ""
     }
   ]

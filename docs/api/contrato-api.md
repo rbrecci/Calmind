@@ -353,7 +353,7 @@ Objeto:
 
 `GET`: ordem crescente de `id`. Parâmetros `after_id` (devolve só `id` maior), `page` e `per_page` (padrão 50, máximo 100). O app faz *polling* com `after_id`; não há websocket. Vínculo encerrado continua legível. Quem não participa do vínculo recebe 404.
 
-`POST`, corpo `{ "body": "texto" }`, `body` obrigatório, de 1 a 2000 caracteres após `trim`. 201 com o objeto. Vínculo não ativo: 409 (CA-15.2). Paciente sem aceite vigente do termo geral: 403 com mensagem `É preciso aceitar o termo de uso antes de enviar mensagens.` Psicólogo não aprovado: 403. A falha de envio não pode devolver o objeto como entregue (CA-15.3).
+`POST`, corpo `{ "body": "texto" }`, `body` obrigatório, de 1 a 2000 caracteres após `trim`. 201 com o objeto. Vínculo não ativo: 409 (CA-15.2). Sem aceite vigente do termo geral pelo paciente do vínculo, o envio por qualquer uma das partes responde 403 com mensagem `É preciso aceitar o termo de uso antes de enviar mensagens.`, conforme a regra inviolável de consentimento antes de dado clínico. Psicólogo não aprovado: 403. A falha de envio não pode devolver o objeto como entregue (CA-15.3).
 
 `POST .../read`: marca como lidas (`read_at = agora`) as mensagens **da outra parte** ainda sem leitura. 200 `{ "read": 3 }`. Idempotente.
 

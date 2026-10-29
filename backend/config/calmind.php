@@ -2,6 +2,10 @@
 
 return [
 
+    'appointment' => [
+        'conflict_minutes' => 60,
+    ],
+
     'auth' => [
         // RNF-09: sessao expira por inatividade (meta de projeto: 30 minutos)
         'inactivity_minutes' => (int) env('AUTH_INACTIVITY_MINUTES', 30),

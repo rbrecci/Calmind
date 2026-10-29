@@ -13,7 +13,8 @@ Push pendente por autenticação do Git do terminal, veja dependências abertas.
 | M3 | feito | bec3654 | convite selecionável e revogável, confirmação de solicitações |
 | M4 | feito | entrega m4-m5 | prontuário com erros separados e apenas relatos compartilhados |
 | M5 | feito | entrega m4-m5 | criar, editar pendentes e arquivar com confirmação |
-| M6 a M8 | parcial | em desenvolvimento | telas em conferência |
+| M6 | feito | entrega m6 | polling em foco, leitura e reenvio sem entrega falsa |
+| M7 e M8 | parcial | em desenvolvimento | telas em conferência |
 | M9 | feito | b1bdce2 | cadastro multipart e perfil, seletor compatível SDK 57 |
 | M10 | feito | b1bdce2 | consentimento antes do perfil e de dados clínicos |
 | M11 | parcial | em desenvolvimento | mock e formulário, falta inserir no prontuário |
@@ -96,6 +97,25 @@ test -> exit 0
 ℹ skipped 0
 ℹ todo 0
 ℹ duration_ms 825.0987
+lint -> exit 0
+> calmind@1.0.0 lint
+> expo lint
+types -> exit 0
+
+```
+
+### Entrega m6 (2026-10-29 09:01:57 -03:00, anterior de37697)
+```text
+test -> exit 0
+✔ restoreSession (46.2388ms)
+ℹ tests 130
+ℹ suites 28
+ℹ pass 130
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 820.3657
 lint -> exit 0
 > calmind@1.0.0 lint
 > expo lint

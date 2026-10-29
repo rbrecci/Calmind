@@ -23,6 +23,7 @@ Push pendente por autenticação do Git do terminal, veja dependências abertas.
 | M13 | parcial | em conferência | tokens e rótulos, teste com leitor de tela pendente |
 
 ## Evidência colada
+Correção final do mock, após teste vermelho: atualização de perfil contendo somente campos extras estava retirando a publicação, diferente de `PsychologistRegistrationService::updateProfile` que compara somente campos validados. Resultado inicial: `profile_published_at: null` diferente da data original esperada. Após limitar a comparação à lista permitida: 29 testes de API passaram.
 ```text
 node --no-warnings --test app/src/api/psychologist/mock.test.ts app/src/api/psychologist/http.test.ts
 tests 28 / pass 28 / fail 0 / exit 0
@@ -177,6 +178,28 @@ test -> exit 0
 lint -> exit 0
 > calmind@1.0.0 lint
 > expo lint
+types -> exit 0
+
+```
+
+### Entrega ajuste-mock (2026-10-29 09:03:53 -03:00, anterior 227134c)
+```text
+test -> exit 0
+✔ restoreSession (32.9782ms)
+ℹ tests 130
+ℹ suites 28
+ℹ pass 130
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 956.1187
+lint -> exit 0
+> calmind@1.0.0 lint
+> expo lint
+
+env: load .env
+env: export EXPO_PUBLIC_MOCK_SCENARIO EXPO_PUBLIC_USE_MOCK
 types -> exit 0
 
 ```

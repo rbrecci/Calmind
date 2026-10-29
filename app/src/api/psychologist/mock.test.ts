@@ -289,3 +289,21 @@ test('atualização de tarefa ignora campos que não fazem parte do formulário 
   assert.equal(updated.status, 'pending');
   assert.equal(updated.title, 'Título revisado');
 });
+
+test('campos extras não alteram aprovação, publicação ou identidade dos recursos', async () => {
+  const api = createPsychologistMock(options);
+  const original = await api.profile();
+  assert.deepEqual(await api.updateProfile({ id: 999, approval_status: 'rejected', profile_published_at: null } as never), original);
+  const appointment = (await api.appointments()).data.find((item) => item.id === 1)!;
+  assert.deepEqual(await api.updateAppointment(1, { id: 999, bond_id: 9, status: 'done' } as never), appointment);
+
+  const unsubmitted = createPsychologistMock({ scenario: 'cadastro-nao-enviado', now });
+  const profile = await unsubmitted.submitRegistration({
+    crp_region: '06', crp_number: '123456',
+    document: { uri: 'file:///comprovante.pdf', name: 'comprovante.pdf', mimeType: 'application/pdf', size: 1024 },
+    id: 999, approval_status: 'approved', profile_published_at: now().toISOString(),
+  } as never);
+  assert.equal(profile.id, 1);
+  assert.equal(profile.approval_status, 'pending');
+  assert.equal(profile.profile_published_at, null);
+});

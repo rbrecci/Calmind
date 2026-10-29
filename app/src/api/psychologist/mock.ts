@@ -217,9 +217,11 @@ export function createPsychologistMock({ scenario = 'com-pacientes', now = () =>
     async updateProfile(input) {
       approved();
       validateProfile(input);
-      if (Object.entries(input).some(([key, value]) => profile[key as keyof Profile] !== value)) profile.profile_published_at = null;
       for (const key of ['profile_approach', 'profile_specialty', 'profile_modality', 'profile_region', 'profile_bio'] as const) {
-        if (input[key] !== undefined) Object.assign(profile, { [key]: input[key] });
+        if (input[key] !== undefined && input[key] !== profile[key]) {
+          Object.assign(profile, { [key]: input[key] });
+          profile.profile_published_at = null;
+        }
       }
       return copy(profile);
     },

@@ -1,60 +1,46 @@
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useState } from 'react';
 
-import { api } from '@/api';
-import { Button, Colors, Radius, Screen, Spacing, Text } from '@/design-system';
-import { loadCatalog, modalityLabel, type CatalogState } from '@/catalog/load-catalog';
+import type { CatalogPsychologist } from '@/api';
+import { patientApi } from '@/api/patient';
+import { modalityLabel } from '@/catalog/load-catalog';
+import { Button, Text } from '@/design-system';
+import { loadPatientPages } from '@/patient/load-pages';
+import { errorMessage } from '@/patient/presentation';
+import { Card, Confirmation, Feedback, PatientPage } from '@/patient/ui';
+import { usePatientData } from '@/patient/use-patient-data';
+
+const loadCatalog = () => loadPatientPages(patientApi.catalogPsychologists);
 
 export default function PatientCatalog() {
   const router = useRouter();
-  const [state, setState] = useState<CatalogState | null>(null);
-
-  const retry = useCallback(() => {
-    setState(null);
-    void loadCatalog(api).then(setState);
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    void loadCatalog(api).then((next) => {
-      if (!cancelled) setState(next);
-    });
-    return () => { cancelled = true; };
-  }, []);
-
-  return (
-    <Screen scroll>
-      <Text variant="small" color="textSecondary">Calmind</Text>
-      <Text variant="h3">Encontrar profissional</Text>
-      <Text variant="small" color="textSecondary">Psicólogos com registro conferido no CRP.</Text>
-      {state === null ? <Text>Carregando profissionais...</Text> : null}
-      {state?.status === 'error' ? (
-        <>
-          <Text variant="small" color="error" accessibilityRole="alert">{state.message}</Text>
-          <Button tone="patient" label="Tentar de novo" onPress={retry} />
-        </>
-      ) : null}
-      {state?.status === 'empty' ? <Text>Nenhum profissional disponível por enquanto.</Text> : null}
-      {state?.status === 'ready' ? state.psychologists.map((psychologist) => {
-        const modality = modalityLabel(psychologist.modality);
-        return (
-          <View key={psychologist.id} style={styles.card}>
-            <Text variant="h5">{psychologist.name}</Text>
-            <Text variant="small" color="textSecondary">CRP {psychologist.crp}</Text>
-            {psychologist.approach ? <Text variant="small">{psychologist.approach}</Text> : null}
-            {modality ? <Text variant="small" color="textSecondary">{modality}</Text> : null}
-          </View>
-        );
-      }) : null}
-      <Text variant="small" color="textSecondary">
-        Sem preço, sem nota, sem estrela e sem ordenação por reputação (art. 20 do Código de Ética).
-      </Text>
-      <Button tone="patient" label="Voltar" onPress={() => router.back()} />
-    </Screen>
-  );
+  const { data, loading, error, reload } = usePatientData(loadCatalog);
+  const [selected, setSelected] = useState<CatalogPsychologist | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+  async function requestBond() {
+    if (!selected) return;
+    setBusy(true); setActionError(null);
+    try { await patientApi.requestBond(selected.id); router.dismissTo('/home'); }
+    catch (e) { setActionError(errorMessage(e)); } finally { setBusy(false); }
+  }
+  return <PatientPage title="Encontrar profissional">
+    <Text color="textSecondary">Psicólogos com registro conferido no CRP.</Text>
+    <Feedback loading={loading} error={error} retry={() => void reload()} />
+    {actionError ? <Text color="error" accessibilityRole="alert">{actionError}</Text> : null}
+    {selected ? <Confirmation message={`Solicitar vínculo com ${selected.name}? Você poderá acompanhar a resposta no início.`}
+      busy={busy} confirm={() => void requestBond()} cancel={() => { setSelected(null); setActionError(null); }} /> : null}
+    {data?.length === 0 && !loading && !error ? <Text>Nenhum profissional disponível por enquanto.</Text> : null}
+    {!error ? data?.map((p) => <Card key={p.id}>
+      <Text variant="h5">{p.name}</Text>
+      <Text color="textSecondary">CRP {p.crp}</Text>
+      {p.approach ? <Text>{p.approach}</Text> : null}
+      {p.specialty ? <Text>{p.specialty}</Text> : null}
+      {p.modality ? <Text color="textSecondary">{modalityLabel(p.modality)}</Text> : null}
+      {p.region ? <Text color="textSecondary">{p.region}</Text> : null}
+      {p.bio ? <Text>{p.bio}</Text> : null}
+      <Button tone="patient" label="Solicitar vínculo" accessibilityLabel={`Solicitar vínculo com ${p.name}`}
+        disabled={busy} onPress={() => { setSelected(p); setActionError(null); }} />
+    </Card>) : null}
+  </PatientPage>;
 }
-
-const styles = StyleSheet.create({
-  card: { borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.md, padding: Spacing.three, gap: Spacing.one },
-});

@@ -1,96 +1,63 @@
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useState } from 'react';
 
-import { api, ApiError, type PatientTask } from '@/api';
-import { Button, Colors, Radius, Screen, Spacing, Text } from '@/design-system';
+import { patientApi } from '@/api/patient';
+import { Button, Text } from '@/design-system';
+import { selectBond } from '@/patient/bonds';
+import { loadPatientPages } from '@/patient/load-pages';
+import { errorMessage } from '@/patient/presentation';
+import { Card, Confirmation, Feedback, PatientPage, TextAction } from '@/patient/ui';
+import { usePatientData } from '@/patient/use-patient-data';
 import { useSession } from '@/session/session-context';
 
-function displayDate(value: string | null): string | null {
-  if (!value) return null;
-  const [year, month, day] = value.split('-');
-  return `${day}/${month}/${year}`;
+async function loadHome() {
+  const [bonds, unread] = await Promise.all([loadPatientPages(patientApi.bonds), patientApi.notifications({ unread: true, per_page: 1 })]);
+  return { bonds, unread: unread.meta.total };
 }
 
 export default function PatientHome() {
-  const { signOut } = useSession();
   const router = useRouter();
-  const [tasks, setTasks] = useState<PatientTask[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [workingId, setWorkingId] = useState<number | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
-
-  const loadTasks = useCallback(async () => {
-    setLoading(true);
-    setMessage(null);
-    try {
-      const result = await api.patientTasks();
-      setTasks(result.data);
-    } catch (error) {
-      setMessage(error instanceof ApiError ? error.message : 'Não foi possível carregar as tarefas.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    api.patientTasks()
-      .then((result) => {
-        if (!cancelled) setTasks(result.data);
-      })
-      .catch((error) => {
-        if (!cancelled) setMessage(error instanceof ApiError ? error.message : 'Não foi possível carregar as tarefas.');
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => { cancelled = true; };
-  }, []);
-
-  async function completeTask(id: number) {
-    setWorkingId(id);
-    setMessage(null);
-    try {
-      const updated = await api.completePatientTask(id);
-      setTasks((current) => current.map((task) => task.id === id ? updated : task));
-    } catch (error) {
-      setMessage(error instanceof ApiError ? error.message : 'Não foi possível concluir a tarefa.');
-    } finally {
-      setWorkingId(null);
-    }
+  const { signOut } = useSession();
+  const { data, loading, error, reload } = usePatientData(loadHome);
+  const [ending, setEnding] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const bond = selectBond(data?.bonds ?? []);
+  async function endBond() {
+    if (!bond) return;
+    setBusy(true); setActionError(null);
+    try { await patientApi.endBond(bond.id); setEnding(false); await reload(); }
+    catch (e) { setActionError(errorMessage(e)); } finally { setBusy(false); }
   }
-
-  return (
-    <Screen scroll>
-      <Text variant="small" color="textSecondary">Calmind</Text>
-      <Text variant="h3">Minhas tarefas</Text>
-      <Text variant="small" color="textSecondary">Atividades combinadas com seu psicólogo.</Text>
-      {message ? <Text variant="small" color="error" accessibilityRole="alert">{message}</Text> : null}
-      {loading ? <Text>Carregando tarefas...</Text> : tasks.length === 0 ? (
-        <Text>Nenhuma tarefa por enquanto.</Text>
-      ) : tasks.map((task) => (
-        <View key={task.id} style={styles.card}>
-          <Text variant="h5">{task.title}</Text>
-          {task.description ? <Text variant="small">{task.description}</Text> : null}
-          {task.due_date ? <Text variant="small" color="textSecondary">Prazo: {displayDate(task.due_date)}</Text> : null}
-          <Text variant="small" color={task.status === 'completed' ? 'success' : 'textSecondary'}>
-            {task.status === 'completed' ? 'Concluída' : 'Pendente'}
-          </Text>
-          {task.status === 'pending' ? (
-            <Button tone="patient" label={workingId === task.id ? 'Concluindo...' : 'Marcar como concluída'}
-              disabled={workingId !== null} onPress={() => void completeTask(task.id)} />
-          ) : null}
-        </View>
-      ))}
-      <Button tone="patient" label="Encontrar profissional" onPress={() => router.push('/catalog')} />
-      <Button tone="patient" label="Atualizar tarefas" disabled={loading || workingId !== null}
-        onPress={() => void loadTasks()} />
-      <Button tone="patient" label="Sair" accessibilityLabel="Sair da conta" onPress={() => void signOut()} />
-    </Screen>
-  );
+  return <PatientPage title="Seu espaço de cuidado" home>
+    <Feedback loading={loading} error={error} retry={() => void reload()} />
+    {data && !error ? <>
+      <TextAction label={`Notificações (${data.unread} não lidas)`} onPress={() => router.push('/notifications')} />
+      {bond ? <Card>
+        <Text variant="h5">{bond.psychologist.name}</Text>
+        <Text color="textSecondary">CRP {bond.psychologist.crp}</Text>
+        <Text>{bond.status === 'active' ? 'Seu acompanhamento está ativo.' : bond.status === 'pending'
+          ? 'Aguardando resposta do profissional' : 'Vínculo encerrado. O histórico está disponível somente para leitura.'}</Text>
+        {bond.status === 'active' ? <TextAction label="Encerrar vínculo" onPress={() => setEnding(true)} disabled={busy} /> : null}
+      </Card> : null}
+      {actionError ? <Text accessibilityRole="alert" color="error">{actionError}</Text> : null}
+      {ending ? <Confirmation message="Encerrar este vínculo? O histórico ficará disponível para leitura e novas trocas serão bloqueadas."
+        confirm={() => void endBond()} cancel={() => setEnding(false)} busy={busy} /> : null}
+      {!bond || bond.status === 'ended' ? <>
+        <Text variant="h5">Como você chegou aqui?</Text>
+        <Button tone="patient" label="Tenho um código de convite" onPress={() => router.push('/invitation')} />
+        <TextAction label="Quero encontrar um profissional" onPress={() => router.push('/catalog')} />
+      </> : null}
+      {bond?.status === 'active' ? <Button tone="patient" label="Novo relato" onPress={() => router.push('/new-report')} /> : null}
+      <Text variant="h5">Seu acompanhamento</Text>
+      <TextAction label="Meus relatos" onPress={() => router.push('/reports')} />
+      <TextAction label="Minhas tarefas" onPress={() => router.push('/tasks')} />
+      {data.bonds.filter((b) => b.status !== 'pending').map((b) => <TextAction key={b.id}
+        label={b.status === 'active' ? `Conversa (${b.unread_messages} não lidas)` : `Conversa anterior com ${b.psychologist.name}, ${new Date(b.requested_at).toLocaleString('pt-BR')}`}
+        onPress={() => router.push({ pathname: '/chat', params: { bondId: b.id } })} />)}
+      <TextAction label="Minha agenda" onPress={() => router.push('/agenda')} />
+      <TextAction label="Atualizar início" onPress={() => void reload()} disabled={loading || busy} />
+    </> : null}
+    <TextAction label="Sair da conta" onPress={() => void signOut()} />
+  </PatientPage>;
 }
-
-const styles = StyleSheet.create({
-  card: { borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.md, padding: Spacing.three, gap: Spacing.two },
-});

@@ -10,11 +10,15 @@ Push pendente por autenticação do Git do terminal, veja dependências abertas.
 | --- | --- | --- | --- |
 | M1 | feito | cb99bc4 | 28 testes de API passaram |
 | M2 | feito | b1bdce2 | portão fechado em erro, estados de aprovação e pacientes |
-| M3 | feito | entrega m3 | convite selecionável e revogável, confirmação de solicitações |
-| M4 a M8 | parcial | em desenvolvimento | telas em conferência |
+| M3 | feito | bec3654 | convite selecionável e revogável, confirmação de solicitações |
+| M4 | feito | entrega m4-m5 | prontuário com erros separados e apenas relatos compartilhados |
+| M5 | feito | entrega m4-m5 | criar, editar pendentes e arquivar com confirmação |
+| M6 a M8 | parcial | em desenvolvimento | telas em conferência |
 | M9 | feito | b1bdce2 | cadastro multipart e perfil, seletor compatível SDK 57 |
 | M10 | feito | b1bdce2 | consentimento antes do perfil e de dados clínicos |
-| M11 a M13 | não feito | | |
+| M11 | parcial | em desenvolvimento | mock e formulário, falta inserir no prontuário |
+| M12 | feito | entrega m4-m5 | encerrar vínculo com confirmação no prontuário |
+| M13 | parcial | em conferência | tokens e rótulos, teste com leitor de tela pendente |
 
 ## Evidência colada
 ```text
@@ -80,7 +84,27 @@ types -> exit 0
 
 ```
 
+### Entrega m4-m5 (2026-10-29 09:00:32 -03:00, anterior bec3654)
+```text
+test -> exit 0
+✔ restoreSession (25.2113ms)
+ℹ tests 129
+ℹ suites 28
+ℹ pass 129
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 825.0987
+lint -> exit 0
+> calmind@1.0.0 lint
+> expo lint
+types -> exit 0
+
+```
+
 ## Suposições
+- M4 e M5 entregues juntos porque o formulário de tarefas é uma seção do prontuário. Detalhe do paciente é carregado antes para obter bond_id; relatos, tarefas e consultas são carregados em paralelo em seguida, cada seção com seu próprio erro e nova tentativa.
 - M2, M9 e M10 entregues juntos porque o portão precisa de telas reais para consentimento, cadastro e reenvio. Isso evita redirecionar para uma rota ausente.
 - O mock usa a conta demonstrativa já existente. Cadastro de uma nova conta de autenticação não compartilha o estado deste módulo e precisa ser conferido na integração.
 - As instruções de fechamento prevalecem sobre o aviso antigo de não iniciar telas antes do spike físico.

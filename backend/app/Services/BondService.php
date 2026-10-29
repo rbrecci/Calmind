@@ -68,13 +68,16 @@ class BondService
                 throw new ApiException(409, 'Você já tem uma solicitação pendente.');
             }
 
-            return Bond::create([
+            $bond = Bond::create([
                 'patient_id' => $patient->id,
                 'psychologist_id' => $psychologist->id,
                 'status' => 'pending',
                 'origin' => 'catalog',
                 'requested_at' => now(),
             ])->load('patient');
+            app(NotificationService::class)->create($psychologist->user_id, 'bond.requested', $bond->id);
+
+            return $bond;
         });
     }
 
@@ -87,6 +90,8 @@ class BondService
 
                 // Se o paciente ja ganhou outro vinculo ativo, este UPDATE estoura no indice unico
                 $bond->update(['status' => 'active', 'responded_at' => now()]);
+
+                app(NotificationService::class)->create($bond->patient->user_id, 'bond.accepted', $bond->id);
 
                 return $bond->load('patient');
             }),
@@ -106,6 +111,8 @@ class BondService
                 'ended_at' => now(),
                 'ended_by_user_id' => $user->id,
             ]);
+
+            app(NotificationService::class)->create($bond->patient->user_id, 'bond.rejected', $bond->id);
 
             return $bond->load('patient');
         });

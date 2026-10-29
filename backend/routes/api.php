@@ -9,3 +9,6 @@ require __DIR__.'/api/psychologist.php';
 require __DIR__.'/api/bonds.php';
 require __DIR__.'/api/reports.php';
 require __DIR__.'/api/tasks.php';
+require __DIR__.'/api/notifications.php';
+require __DIR__.'/api/messages.php';
+

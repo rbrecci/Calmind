@@ -7,7 +7,7 @@ Branch: codex/rafael-backend. Implementação em andamento em 29/10/2026.
 | Item | Situação | Commit | Evidência |
 |------|----------|--------|-----------|
 | R1 | feito | commit desta atualiza??o | Consentimento, idempot?ncia, revoga??o e bloqueio cl?nico |
-| R2 | feito | pr?ximo commit | Perfil, v?nculos e diret?rio com contadores |
+| R2 | feito | commit desta atualiza??o | Perfil, v?nculos e diret?rio com contadores |
 | R3/R4 | em andamento | pendente | Testes escritos antes da implementação |
 | R5 | em andamento | pendente | Testes escritos antes da implementação |
 | R6/R7 | em andamento | pendente | Preparação de seed e coleção |
@@ -34,19 +34,19 @@ A saída bruta da suíte será salva em docs/testes conforme solicitação espec
 ### calmind-r1-r2-red.txt
 
 ```text
-﻿
+
    FAIL  Tests\Feature\ConsentApiTest
-  ⨯ current term accept revoke and reaccept are idempotent                                                      27.80s  
-  ⨯ current selection and invalid terms and roles                                                                0.10s  
-  ⨯ revoking general consent blocks new report                                                                   0.43s  
+  ⨯ current term accept revoke and reaccept are idempotent                                                      27.80s
+  ⨯ current selection and invalid terms and roles                                                                0.10s
+  ⨯ revoking general consent blocks new report                                                                   0.43s
 
    FAIL  Tests\Feature\PatientDirectoryTest
-  ⨯ profiles include not submitted and existing registration                                                     0.13s  
-  ⨯ patient lists own bonds and unread messages                                                                  0.46s  
-  ⨯ directory counts only relevant tasks messages and appointments                                               0.16s  
-  ⨯ detail is scoped to own active or ended bonds and shows guardian for minors                                  0.11s  
-  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Feature\ConsentApiTest > current term accept revoke and reaccept are idempotent                        
+  ⨯ profiles include not submitted and existing registration                                                     0.13s
+  ⨯ patient lists own bonds and unread messages                                                                  0.46s
+  ⨯ directory counts only relevant tasks messages and appointments                                               0.16s
+  ⨯ detail is scoped to own active or ended bonds and shows guardian for minors                                  0.11s
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Feature\ConsentApiTest > current term accept revoke and reaccept are idempotent
   Expected response status code [200] but received 404.
 Failed asserting that 404 is identical to 200.
 
@@ -61,8 +61,8 @@ Failed asserting that 404 is identical to 200.
      28▕         $this->travel(1)->minutes();
      29▕         $this->postJson('/api/v1/consent-acceptances', ['consent_term_id' => $term->id])->assertOk()->assertJsonPath('accepted_at', $first->json('accepted_at'));
 
-  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Feature\ConsentApiTest > current selection and invalid terms and roles                                 
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Feature\ConsentApiTest > current selection and invalid terms and roles
   Expected response status code [200] but received 404.
 Failed asserting that 404 is identical to 200.
 
@@ -77,8 +77,8 @@ Failed asserting that 404 is identical to 200.
      48▕         $this->getJson('/api/v1/consent-terms/current?type=ai_analysis')->assertNotFound();
      49▕         $ai = ConsentTerm::factory()->create(['type' => 'ai_analysis']);
 
-  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Feature\ConsentApiTest > revoking general consent blocks new report                                    
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Feature\ConsentApiTest > revoking general consent blocks new report
   Expected response status code [201] but received 404.
 Failed asserting that 404 is identical to 201.
 
@@ -93,14 +93,14 @@ Failed asserting that 404 is identical to 201.
      60▕     }
      61▕ }
 
-  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Feature\PatientDirectoryTest > profiles include not submitted and existing registration                
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Feature\PatientDirectoryTest > profiles include not submitted and existing registration
   Expected response status code [200] but received 405.
 Failed asserting that 405 is identical to 200.
 
   at tests\Feature\PatientDirectoryTest.php:28
      24▕     }
-     25▕ 
+     25▕
      26▕     public function test_profiles_include_not_submitted_and_existing_registration(): void
      27▕     {
   ➜  28▕         $this->as(User::factory()->psychologist()->create())->getJson('/api/v1/psychologist/profile')->assertOk()->assertJsonPath('approval_status', 'not_submitted')->assertJsonPath('id', null)->assertJsonPath('crp', null);
@@ -109,8 +109,8 @@ Failed asserting that 405 is identical to 200.
      31▕     }
      32▕
 
-  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Feature\PatientDirectoryTest > patient lists own bonds and unread messages                             
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Feature\PatientDirectoryTest > patient lists own bonds and unread messages
   Expected response status code [200] but received 404.
 Failed asserting that 404 is identical to 200.
 
@@ -121,12 +121,12 @@ Failed asserting that 404 is identical to 200.
      40▕         Message::create(['bond_id' => $bond->id, 'sender_user_id' => $bond->patient->user_id, 'body' => 'Resposta fictícia']);
   ➜  41▕         $this->as($bond->patient->user)->getJson('/api/v1/patient/bonds')->assertOk()->assertJsonPath('meta.total', 3)->assertJsonPath('data.0.status', 'active')->assertJsonPath('data.0.unread_messages', 1)->assertJsonPath('data.1.status', 'pending')->assertJsonPath('data.2.status', 'ended');
      42▕     }
-     43▕ 
+     43▕
      44▕     public function test_directory_counts_only_relevant_tasks_messages_and_appointments(): void
      45▕     {
 
-  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Feature\PatientDirectoryTest > directory counts only relevant tasks messages and appointments          
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Feature\PatientDirectoryTest > directory counts only relevant tasks messages and appointments
   Expected response status code [200] but received 404.
 Failed asserting that 404 is identical to 200.
 
@@ -141,8 +141,8 @@ Failed asserting that 404 is identical to 200.
      57▕         $this->getJson('/api/v1/psychologist/bond-requests')->assertOk()->assertJsonPath('meta.total', 1)->assertJsonPath('data.0.id', $pending->id);
      58▕     }
 
-  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Feature\PatientDirectoryTest > detail is scoped to own active or ended bonds and shows guardian for…   
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Feature\PatientDirectoryTest > detail is scoped to own active or ended bonds and shows guardian for…
   Expected response status code [200] but received 404.
 Failed asserting that 404 is identical to 200.
 
@@ -167,19 +167,19 @@ Failed asserting that 404 is identical to 200.
 ### calmind-chat-agenda-red.txt
 
 ```text
-﻿
+
    FAIL  Tests\Feature\AppointmentTest
-  ⨯ schedule conflict confirmation reschedule and cancel                                                         7.18s  
-  ⨯ patient listing is scoped and dates are inclusive                                                            0.09s  
-  ⨯ permissions inactive bonds past dates and foreign resources                                                  0.11s  
-  ⨯ conflict window is configurable and excludes cancelled and self                                              0.11s  
+  ⨯ schedule conflict confirmation reschedule and cancel                                                         7.18s
+  ⨯ patient listing is scoped and dates are inclusive                                                            0.09s
+  ⨯ permissions inactive bonds past dates and foreign resources                                                  0.11s
+  ⨯ conflict window is configurable and excludes cancelled and self                                              0.11s
 
    FAIL  Tests\Feature\MessageTest
-  ⨯ send poll read and encryption                                                                                0.16s  
-  ⨯ membership and ended or pending bonds                                                                        0.13s  
-  ⨯ consent approval validation and authentication                                                               0.12s  
-  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Feature\AppointmentTest > schedule conflict confirmation reschedule and cancel                         
+  ⨯ send poll read and encryption                                                                                0.16s
+  ⨯ membership and ended or pending bonds                                                                        0.13s
+  ⨯ consent approval validation and authentication                                                               0.12s
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Feature\AppointmentTest > schedule conflict confirmation reschedule and cancel
   Expected response status code [201] but received 404.
 Failed asserting that 404 is identical to 201.
 
@@ -194,8 +194,8 @@ Failed asserting that 404 is identical to 201.
      35▕         $this->as($bond->psychologist->user)->postJson($url, $data)->assertUnprocessable()->assertJsonValidationErrors('confirm_conflict');
      36▕         $this->as($bond->psychologist->user)->postJson($url, [...$data, 'confirm_conflict' => true])->assertCreated();
 
-  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Feature\AppointmentTest > patient listing is scoped and dates are inclusive                            
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Feature\AppointmentTest > patient listing is scoped and dates are inclusive
   Expected response status code [201] but received 404.
 Failed asserting that 404 is identical to 201.
 
@@ -210,8 +210,8 @@ Failed asserting that 404 is identical to 201.
      55▕         $bond->update(['status' => 'ended']);
      56▕         $this->as($bond->patient->user)->getJson("/api/v1/patient/appointments?from={$day}&to={$day}")->assertOk()
 
-  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Feature\AppointmentTest > permissions inactive bonds past dates and foreign resources                  
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Feature\AppointmentTest > permissions inactive bonds past dates and foreign resources
   Expected response status code [401] but received 404.
 Failed asserting that 404 is identical to 401.
 
@@ -226,8 +226,8 @@ Failed asserting that 404 is identical to 401.
      71▕         $this->as($bond->psychologist->user)->postJson($url, [...$data, 'scheduled_at' => now()->subDay()->toIso8601String()])->assertUnprocessable()->assertJsonValidationErrors('scheduled_at');
      72▕         $id = $this->as($bond->psychologist->user)->postJson($url, $data)->assertCreated()->json('id');
 
-  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Feature\AppointmentTest > conflict window is configurable and excludes cancelled and self              
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Feature\AppointmentTest > conflict window is configurable and excludes cancelled and self
   Expected response status code [201] but received 404.
 Failed asserting that 404 is identical to 201.
 
@@ -242,8 +242,8 @@ Failed asserting that 404 is identical to 201.
      93▕         $this->as($bond->psychologist->user)->postJson($url, $data)->assertUnprocessable()->assertJsonValidationErrors('confirm_conflict');
      94▕         $this->as($bond->psychologist->user)->postJson("{$url}/{$id}/cancel")->assertOk();
 
-  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Feature\MessageTest > send poll read and encryption                                                    
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Feature\MessageTest > send poll read and encryption
   Expected response status code [201] but received 404.
 Failed asserting that 404 is identical to 201.
 
@@ -258,8 +258,8 @@ Failed asserting that 404 is identical to 201.
      42▕         $reply = $this->as($bond->psychologist->user)->postJson($url, ['body' => 'Olá'])->assertCreated();
      43▕         $this->as($bond->patient->user)->getJson($url."?after_id={$id}")->assertOk()
 
-  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Feature\MessageTest > membership and ended or pending bonds                                            
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Feature\MessageTest > membership and ended or pending bonds
   Expected response status code [409] but received 404.
 Failed asserting that 404 is identical to 409.
 
@@ -274,8 +274,8 @@ Failed asserting that 404 is identical to 409.
      65▕         $this->as($bond->psychologist->user)->getJson($url)->assertOk();
      66▕     }
 
-  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Feature\MessageTest > consent approval validation and authentication                                   
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Feature\MessageTest > consent approval validation and authentication
   Expected response status code [401] but received 404.
 Failed asserting that 404 is identical to 401.
 
@@ -300,13 +300,13 @@ Failed asserting that 404 is identical to 401.
 ### calmind-r5-red.txt
 
 ```text
-﻿
+
    FAIL  Tests\Feature\NotificationTest
-  ⨯ notifications are private paginated and read idempotently                                                    8.18s  
-  ⨯ bond request acceptance and rejection notify only recipient                                                  0.35s  
-  ⨯ task assignment notifies without task content                                                                0.15s  
-  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Feature\NotificationTest > notifications are private paginated and read idempotently                   
+  ⨯ notifications are private paginated and read idempotently                                                    8.18s
+  ⨯ bond request acceptance and rejection notify only recipient                                                  0.35s
+  ⨯ task assignment notifies without task content                                                                0.15s
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Feature\NotificationTest > notifications are private paginated and read idempotently
   Expected response status code [200] but received 404.
 Failed asserting that 404 is identical to 200.
 
@@ -321,8 +321,8 @@ Failed asserting that 404 is identical to 200.
      35▕         $this->travel(1)->minutes();
      36▕         $this->as($owner)->postJson("/api/v1/notifications/{$first->id}/read")->assertOk()->assertJsonPath('read_at', $read->json('read_at'));
 
-  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Feature\NotificationTest > bond request acceptance and rejection notify only recipient                 
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Feature\NotificationTest > bond request acceptance and rejection notify only recipient
   Failed asserting that a row in the table [notifications] matches the attributes {
     "user_id": 4,
     "type": "bond.requested",
@@ -342,8 +342,8 @@ The table is empty.
      56▕         }
      57▕         $this->assertDatabaseCount('notifications', 4);
 
-  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
-   FAILED  Tests\Feature\NotificationTest > task assignment notifies without task content                               
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Feature\NotificationTest > task assignment notifies without task content
   Failed asserting that a row in the table [notifications] matches the attributes {
     "user_id": 5,
     "type": "task.assigned",

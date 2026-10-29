@@ -49,6 +49,13 @@ class ReportPrivacyTest extends TestCase
     // 'no_reports' e uma afirmacao que a varredura estatica (c) confere; 'reads_shared_reports'
     // exige um exercicio em exercisers().
     private const ROUTES = [
+        'GET psychologist/profile' => self::NONE,
+        'GET psychologist/bond-requests' => self::NONE,
+        'GET psychologist/patients' => self::NONE,
+        'GET psychologist/appointments' => self::NONE,
+        'POST psychologist/appointments' => self::NONE,
+        'PUT psychologist/appointments/{}' => self::NONE,
+        'POST psychologist/appointments/{}/cancel' => self::NONE,
         'GET psychologist/patients/{}/reports' => self::READS,
         'GET psychologist/reports/{}' => self::READS,
         'POST psychologist/registration' => self::NONE,

@@ -9,10 +9,11 @@ Push pendente por autenticação do Git do terminal, veja dependências abertas.
 | Item | Situação | Commit | Evidência |
 | --- | --- | --- | --- |
 | M1 | feito | cb99bc4 | 28 testes de API passaram |
-| M2 | feito | entrega m2-m9-m10 | portão fechado em erro, estados de aprovação e pacientes |
-| M3 a M8 | parcial | em desenvolvimento | telas em conferência |
-| M9 | feito | entrega m2-m9-m10 | cadastro multipart e perfil, seletor compatível SDK 57 |
-| M10 | feito | entrega m2-m9-m10 | consentimento antes do perfil e de dados clínicos |
+| M2 | feito | b1bdce2 | portão fechado em erro, estados de aprovação e pacientes |
+| M3 | feito | entrega m3 | convite selecionável e revogável, confirmação de solicitações |
+| M4 a M8 | parcial | em desenvolvimento | telas em conferência |
+| M9 | feito | b1bdce2 | cadastro multipart e perfil, seletor compatível SDK 57 |
+| M10 | feito | b1bdce2 | consentimento antes do perfil e de dados clínicos |
 | M11 a M13 | não feito | | |
 
 ## Evidência colada
@@ -58,6 +59,25 @@ tests 1 / pass 0 / fail 1 / exit 1
 node --no-warnings --test app/src/psychologist/resource.test.ts
 ERR_MODULE_NOT_FOUND resource.ts
 tests 1 / pass 0 / fail 1 / exit 1
+```
+
+### Entrega m3 (2026-10-29 08:59:42 -03:00, anterior b1bdce2)
+```text
+test -> exit 0
+✔ restoreSession (26.6657ms)
+ℹ tests 129
+ℹ suites 28
+ℹ pass 129
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 822.1113
+lint -> exit 0
+> calmind@1.0.0 lint
+> expo lint
+types -> exit 0
+
 ```
 
 ## Suposições

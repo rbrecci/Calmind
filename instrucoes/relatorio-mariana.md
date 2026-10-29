@@ -18,7 +18,7 @@ Push pendente por autenticação do Git do terminal, veja dependências abertas.
 | M8 | feito | entrega m8 | leitura individual e geral, navegação sem conteúdo clínico |
 | M9 | feito | b1bdce2 | cadastro multipart e perfil, seletor compatível SDK 57 |
 | M10 | feito | b1bdce2 | consentimento antes do perfil e de dados clínicos |
-| M11 | parcial | em desenvolvimento | mock e formulário, falta inserir no prontuário |
+| M11 | feito | entrega m11 | registros do responsável em menor com vínculo ativo, somente inclusão |
 | M12 | feito | entrega m4-m5 | encerrar vínculo com confirmação no prontuário |
 | M13 | parcial | em conferência | tokens e rótulos, teste com leitor de tela pendente |
 
@@ -162,7 +162,27 @@ types -> exit 0
 
 ```
 
+### Entrega m11 (2026-10-29 09:03:15 -03:00, anterior 1680446)
+```text
+test -> exit 0
+✔ restoreSession (48.2824ms)
+ℹ tests 130
+ℹ suites 28
+ℹ pass 130
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 800.4126
+lint -> exit 0
+> calmind@1.0.0 lint
+> expo lint
+types -> exit 0
+
+```
+
 ## Suposições
+- A seção de consentimento do responsável é apresentada para menores com vínculo ativo. O contrato exige vínculo ativo também para GET, por isso não se chama essa rota em vínculo encerrado.
 - M4 e M5 entregues juntos porque o formulário de tarefas é uma seção do prontuário. Detalhe do paciente é carregado antes para obter bond_id; relatos, tarefas e consultas são carregados em paralelo em seguida, cada seção com seu próprio erro e nova tentativa.
 - M2, M9 e M10 entregues juntos porque o portão precisa de telas reais para consentimento, cadastro e reenvio. Isso evita redirecionar para uma rota ausente.
 - O mock usa a conta demonstrativa já existente. Cadastro de uma nova conta de autenticação não compartilha o estado deste módulo e precisa ser conferido na integração.

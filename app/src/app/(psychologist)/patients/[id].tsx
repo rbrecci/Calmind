@@ -4,6 +4,7 @@ import { psychologistApi } from '@/api/psychologist';
 import type { PatientDetail } from '@/api/psychologist/types';
 import { Text } from '@/design-system';
 import { composeRecord } from '@/psychologist/domain';
+import { GuardianConsentSection } from '@/psychologist/guardian-consent';
 import { collectPages } from '@/psychologist/resource';
 import { TaskForm } from '@/psychologist/task-form';
 import { Action, Card, displayDate, ErrorNotice, Page, useConfirmation, useResource } from '@/psychologist/ui';
@@ -43,6 +44,7 @@ function RecordSections({ patient }: { patient: PatientDetail }) {
       <Text>{appointment.modality === 'presencial' ? 'Presencial' : appointment.modality === 'online' ? 'Online' : 'Modalidade não informada'}</Text>
       {appointment.notes ? <Text>{appointment.notes}</Text> : null}
     </Card>)}
+    {patient.is_minor && !record.readOnly ? <GuardianConsentSection patientId={patient.patient.id} guardianName={patient.guardian?.name ?? ''} /> : null}
   </>;
 }
 

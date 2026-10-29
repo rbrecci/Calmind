@@ -2,13 +2,17 @@
 
 ## Estado final
 Branch: `codex/mariana-app-psicologo`. Base: `cc13e3c`. Desenvolvimento iniciado em 29/10/2026.
-Último commit: base acima; atualização e evidências serão acrescentadas a cada entrega.
+Último commit anterior a esta atualização: `cb99bc4` (M1). Evidências serão acrescentadas a cada entrega.
+Push pendente por autenticação do Git do terminal, veja dependências abertas.
 
 ## Itens
 | Item | Situação | Commit | Evidência |
 | --- | --- | --- | --- |
-| M1 | feito | commit desta entrega | 28 testes de API passaram |
-| M2 a M10 | não feito | | |
+| M1 | feito | cb99bc4 | 28 testes de API passaram |
+| M2 | feito | entrega m2-m9-m10 | portão fechado em erro, estados de aprovação e pacientes |
+| M3 a M8 | parcial | em desenvolvimento | telas em conferência |
+| M9 | feito | entrega m2-m9-m10 | cadastro multipart e perfil, seletor compatível SDK 57 |
+| M10 | feito | entrega m2-m9-m10 | consentimento antes do perfil e de dados clínicos |
 | M11 a M13 | não feito | | |
 
 ## Evidência colada
@@ -57,6 +61,8 @@ tests 1 / pass 0 / fail 1 / exit 1
 ```
 
 ## Suposições
+- M2, M9 e M10 entregues juntos porque o portão precisa de telas reais para consentimento, cadastro e reenvio. Isso evita redirecionar para uma rota ausente.
+- O mock usa a conta demonstrativa já existente. Cadastro de uma nova conta de autenticação não compartilha o estado deste módulo e precisa ser conferido na integração.
 - As instruções de fechamento prevalecem sobre o aviso antigo de não iniciar telas antes do spike físico.
 - PDFs não baixados nesta sessão. Identidade visual e instruções da frente orientam as telas.
 
@@ -64,6 +70,7 @@ tests 1 / pass 0 / fail 1 / exit 1
 Nenhum registrado até esta atualização.
 
 ## Dependências abertas
+- Push: primeira tentativa ficou aguardando o gerenciador de credenciais e foi interrompida. Segunda tentativa com `GIT_TERMINAL_PROMPT=0`, `GCM_INTERACTIVE=never` e `credential.interactive=false` retornou `fatal: Cannot prompt because user interactivity has been disabled.` e `fatal: unable to get password from user` (exit 1). Não foram realizadas novas tentativas. Os commits ficam locais para autenticação e envio pelo operador.
 - Integração com o backend das rotas novas e validação em celular físico.
 - Notificações de mensagem trazem apenas message id; não existe rota de consulta individual para resolver diretamente o paciente. A resolução terá de percorrer mensagens dos vínculos próprios, sem inventar endpoint.
 

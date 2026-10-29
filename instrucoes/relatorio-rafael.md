@@ -1,17 +1,19 @@
 # Relatório da frente Rafael
 
 ## Estado final
-Branch: codex/rafael-backend. Implementação em andamento em 29/10/2026.
+Branch: codex/rafael-backend. Último commit anterior: 4cbbffc. Atualização: 29/10/2026, 08:50, America/Sao_Paulo.
 
 ## Itens
 | Item | Situação | Commit | Evidência |
 |------|----------|--------|-----------|
-| R1 | feito | commit desta atualiza??o | Consentimento, idempot?ncia, revoga??o e bloqueio cl?nico |
-| R2 | feito | commit desta atualiza??o | Perfil, v?nculos e diret?rio com contadores |
-| R3/R4 | em andamento | pendente | Testes escritos antes da implementação |
-| R5 | em andamento | pendente | Testes escritos antes da implementação |
-| R6/R7 | em andamento | pendente | Preparação de seed e coleção |
-| R8 | não feito | nenhum | Prioridade baixa |
+| R1 | feito | bb18026 | Consentimento, idempotência, revogação e bloqueio clínico |
+| R2 | feito | 1a3a618 | Perfil, vínculos e diretório com contadores |
+| R3 | feito | 6a14d71 | Chat cifrado e avisos ao destinatário |
+| R4 | feito | d16e470 | Agenda com conflitos configuráveis |
+| R5 | feito | 6a14d71 e 4cbbffc | Notificações privadas e geração nos oito eventos |
+| R6 | feito | commit desta atualização | Seed completo testado e pacientes sem vínculo preservados |
+| R7 | feito | próximo commit | Newman: 119 requisições e 228 asserções, zero falhas |
+| R8 | feito | próximo commit | 3 testes e 38 asserções passaram |
 | R9 | não feito | nenhum | Auditoria de leitura fora do fechamento conforme instruções gerais e contrato 3.8.6 |
 
 ## Evidência colada
@@ -19,15 +21,19 @@ Execução inicial encontrou BOM em teste recém-criado durante a descoberta da 
 
 ## Suposições
 Execuções de testes serializadas para preservar o banco compartilhado calmind_test.
+Sem termo geral vigente, registrar consentimento do responsável retorna 404 e não grava. O contrato não define esse caso.
+R9 omitido porque as instruções gerais e o contrato 3.8.6 excluem auditoria de leitura.
 
 ## Desvios do contrato
-Nenhum registrado até o momento.
+O envio pelo psicólogo também exige aceite geral vigente do paciente, conforme regra inviolável 5. A regra preserva consentimento antes de gravar qualquer mensagem.
 
 ## Dependências abertas
 Integração com os aplicativos será conferida pela sessão de integração.
 
 ## Não verificado
-Suíte final, Pint e Newman ainda não executados sobre a implementação final.
+Suíte final com R8 e seeder: 220 testes e 3.835 asserções passaram em 55,15 segundos. Pint completo passou.
+Newman executado contra Laravel e MySQL locais: 9 requisições e 15 asserções na autenticação, mais 110 requisições e 213 asserções nas pastas 02 a 10. Ambas as etapas terminaram com exit 0.
+Não verificados: aplicativos contra o backend, celular físico e concorrência entre agendamentos simultâneos.
 
 ## Arquivos que você criou ou alterou fora da sua pasta
 A saída bruta da suíte será salva em docs/testes conforme solicitação específica da frente.
@@ -367,4 +373,345 @@ The table is empty.
   Duration: 9.15s
 
 
+```
+
+### R8: vermelho antes da implementacao
+
+```text
+
+   FAIL  Tests\Feature\GuardianConsentTest
+  ⨯ minor consent is append only and server sets term and author                                                 8.01s
+  ⨯ consent requires own active bond approval and minor patient                                                  0.11s
+  ⨯ invalid fields and missing current term do not create records                                                0.11s
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Feature\GuardianConsentTest > minor consent is append only and server sets term and author
+  Expected response status code [200] but received 404.
+Failed asserting that 404 is identical to 200.
+
+  at tests\Feature\GuardianConsentTest.php:34
+     30▕     {
+     31▕         $term = ConsentTerm::factory()->create();
+     32▕         $bond = Bond::factory()->active()->create(['patient_id' => Patient::factory()->minor()]);
+     33▕         $url = '/api/v1/psychologist/patients/'.$bond->patient->user_id.'/guardian-consent';
+  ➜  34▕         $this->as($bond->psychologist->user)->getJson($url)->assertOk()->assertJsonPath('meta.total', 0);
+     35▕         $payload = array_merge($this->payload(), ['consent_term_id' => 9999, 'registered_by_user_id' => 9999]);
+     36▕         $first = $this->postJson($url, $payload)->assertCreated()->assertJsonPath('consent_term_id', $term->id)->assertJsonPath('registered_by_user_id', $bond->psychologist->user_id)->assertJsonPath('obtained_at', today()->toDateString());
+     37▕         $second = $this->postJson($url, array_merge($this->payload(), ['method' => 'telefone']))->assertCreated();
+     38▕         $this->assertNotSame($first->json('id'), $second->json('id'));
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Feature\GuardianConsentTest > consent requires own active bond approval and minor patient
+  Expected response status code [401] but received 404.
+Failed asserting that 404 is identical to 401.
+
+  at tests\Feature\GuardianConsentTest.php:50
+     46▕     {
+     47▕         ConsentTerm::factory()->create();
+     48▕         $bond = Bond::factory()->active()->create(['patient_id' => Patient::factory()->minor()]);
+     49▕         $url = '/api/v1/psychologist/patients/'.$bond->patient->user_id.'/guardian-consent';
+  ➜  50▕         $this->getJson($url)->assertUnauthorized();
+     51▕         $this->as($bond->patient->user)->postJson($url, $this->payload())->assertForbidden();
+     52▕         $this->as(Psychologist::factory()->approved()->create()->user)->getJson($url)->assertNotFound();
+     53▕         $this->postJson($url, $this->payload())->assertNotFound();
+     54▕         $bond->update(['status' => 'ended', 'ended_at' => now()]);
+
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   FAILED  Tests\Feature\GuardianConsentTest > invalid fields and missing current term do not create records
+  Expected response status code [422] but received 404.
+Failed asserting that 404 is identical to 422.
+
+  at tests\Feature\GuardianConsentTest.php:69
+     65▕     public function test_invalid_fields_and_missing_current_term_do_not_create_records(): void
+     66▕     {
+     67▕         $bond = Bond::factory()->active()->create(['patient_id' => Patient::factory()->minor()]);
+     68▕         $url = '/api/v1/psychologist/patients/'.$bond->patient->user_id.'/guardian-consent';
+  ➜  69▕         $this->as($bond->psychologist->user)->postJson($url, ['guardian_name' => str_repeat('a', 151), 'obtained_at' => today()->addDay()->toDateString(), 'method' => 'invalido'])->assertUnprocessable()->assertJsonValidationErrors(['guardian_name', 'obtained_at', 'method']);
+     70▕         $this->postJson($url, $this->payload())->assertNotFound();
+     71▕         $this->assertDatabaseCount('guardian_consents', 0);
+     72▕     }
+     73▕ }
+
+
+  Tests:    3 failed (6 assertions)
+  Duration: 8.67s
+
+
+```
+
+### Suite final completa
+
+```text
+
+   PASS  Tests\Feature\AdminDashboardTest
+  ✓ admin logs in with web session                                                                              13.49s
+  ✓ patient cannot log in to admin panel                                                                         0.37s
+  ✓ admin queue shows registration and document                                                                  0.19s
+  ✓ patient cannot open admin queue or approve                                                                   0.11s
+  ✓ admin approves from panel                                                                                    0.26s
+  ✓ admin approval without document shows message in panel                                                       0.11s
+  ✓ admin deciding twice shows message in panel                                                                  0.09s
+  ✓ admin rejection from panel requires reason                                                                   0.14s
+
+   PASS  Tests\Feature\ApiExceptionTest
+  ✓ 403 keeps the message written by the service                                                                 0.09s
+  ✓ 409 keeps the message                                                                                        0.08s
+  ✓ 5xx never leaks the message                                                                                  0.08s
+
+   PASS  Tests\Feature\AppointmentTest
+  ✓ schedule conflict confirmation reschedule and cancel                                                         0.48s
+  ✓ patient listing is scoped and dates are inclusive                                                            0.35s
+  ✓ permissions inactive bonds past dates and foreign resources                                                  0.38s
+  ✓ conflict window is configurable and excludes cancelled and self                                              0.26s
+  ✓ default conflict window allows exactly sixty minutes and validates offset                                    0.44s
+
+   PASS  Tests\Feature\AuditLogAppendOnlyTest
+  ✓ insert is allowed                                                                                            0.12s
+  ✓ update is refused and row is unchanged                                                                       0.12s
+  ✓ delete is refused and row stays                                                                              0.09s
+
+   PASS  Tests\Feature\AuthTest
+  ✓ adult patient registers with patient row and hashed password                                                 0.14s
+  ✓ register response has only the contract fields and no secret                                                 0.11s
+  ✓ patient under 12 is refused and nothing is saved                                                             0.11s
+  ✓ age limit is by completed years                                                                              0.16s
+  ✓ patient between 12 and 17 without guardian points each field                                                 0.09s
+  ✓ patient between 12 and 17 with guardian is saved                                                             0.10s
+  ✓ adult with partial guardian is refused before the database                                                   0.10s
+  ✓ adult with full guardian is accepted                                                                         0.11s
+  ✓ patient needs a valid past birth date                                                                        0.13s
+  ✓ duplicate email is refused without leaking the existing account                                              0.23s
+  ✓ email is trimmed and lowercased before saving                                                                0.10s
+  ✓ admin cannot be created by registration                                                                      0.10s
+  ✓ psychologist registers without a psychologist row                                                            0.10s
+  ✓ register validation error uses the contract format                                                           0.10s
+  ✓ register rejects short password bad email and long fields                                                    0.12s
+  ✓ login returns only a token and it works on me                                                                0.14s
+  ✓ each login creates a new token and both work                                                                 0.14s
+  ✓ login ignores email case                                                                                     0.12s
+  ✓ wrong password and unknown email give the same 401                                                           0.12s
+  ✓ suspended user cannot login and gets the generic 401                                                         0.36s
+  ✓ login validates presence and email format                                                                    0.09s
+  ✓ me without token is 401                                                                                      0.08s
+  ✓ me with invalid token is 401                                                                                 0.07s
+  ✓ me returns the flat user with role and offset date                                                           0.12s
+  ✓ logout without token is 401                                                                                  0.09s
+  ✓ logout revokes every token of the user                                                                       0.16s
+  ✓ token idle for 29 minutes still works and renews the window                                                  0.12s
+  ✓ token idle for 31 minutes is 401                                                                             0.11s
+  ✓ token used at 29 minutes expires 31 minutes after that use                                                   0.15s
+
+   PASS  Tests\Feature\BondTest
+  ✓ approved psychologist generates invitation with seven day expiry                                             0.17s
+  ✓ three hundred codes are distinct unambiguous and eight chars                                                 0.77s
+  ✓ psychologist with pending or rejected approval cannot generate                                               0.33s
+  ✓ psychologist account without psychologist row cannot generate                                                0.41s
+  ✓ patient cannot generate invitation                                                                           0.32s
+  ✓ psychologist revokes own invitation                                                                          0.33s
+  ✓ revoking twice is idempotent and keeps the first revoked at                                                  0.32s
+  ✓ cannot revoke invitation of another psychologist or missing one                                              0.41s
+  ✓ cannot revoke consumed invitation                                                                            0.45s
+  ✓ patient redeems valid code and gets active bond                                                              0.43s
+  ✓ code is normalized before lookup                                                                             0.33s
+  ✓ invalid codes all get the same 422 without naming the psychologist                                           0.31s
+  ✓ reusing a consumed code is 422 even for who now has an active bond                                           0.40s
+  ✓ patient with active bond and valid code gets 409 and code stays usable                                       0.31s
+  ✓ unique index violation on redeem becomes 409 without partial effect                                          0.13s
+  ✓ psychologist cannot redeem                                                                                   0.33s
+  ✓ sixth call after five failures is 429 with audit and recovers after window                                   0.34s
+  ✓ block of one user does not block another user                                                                0.35s
+  ✓ successful redeem resets the failure counter                                                                 0.32s
+  ✓ redeem with active bond does not count as failed attempt                                                     0.22s
+  ✓ patient requests bond with published psychologist                                                            0.14s
+  ✓ unavailable psychologists get the same 422                                                                   0.21s
+  ✓ request requires psychologist id                                                                             0.11s
+  ✓ patient with active bond cannot request another                                                              0.13s
+  ✓ patient with pending request cannot request any psychologist                                                 0.16s
+  ✓ patient with ended bond can request again                                                                    0.14s
+  ✓ psychologist accepts pending request                                                                         0.14s
+  ✓ psychologist accepts without ceiling of patients                                                             0.17s
+  ✓ cannot answer request of another psychologist or missing one                                                 0.23s
+  ✓ cannot answer a request that is not pending                                                                  0.18s
+  ✓ accepting twice the second is 409                                                                            0.15s
+  ✓ accept when patient got another active bond meanwhile is 409 without partial effect                          0.14s
+  ✓ psychologist rejects pending request                                                                         0.19s
+  ✓ patient cannot answer requests                                                                               0.15s
+  ✓ patient ends active bond and catalog opens again                                                             0.18s
+  ✓ psychologist ends active bond                                                                                0.12s
+  ✓ third parties and missing ids get 404 when ending                                                            0.18s
+  ✓ admin cannot end a bond                                                                                      0.14s
+  ✓ cannot end a bond that is pending or already ended                                                           0.15s
+  ✓ catalog lists only approved published and active users                                                       0.15s
+  ✓ catalog item has only the public profile fields                                                              0.13s
+  ✓ catalog json has no price rating or ranking keys                                                             0.11s
+  ✓ catalog is denied with active bond                                                                           0.14s
+  ✓ catalog stays open with pending or ended bonds                                                               0.14s
+  ✓ catalog is ordered by name and never by anything else                                                        0.16s
+  ✓ catalog filters by modality exactly                                                                          0.13s
+  ✓ catalog rejects invalid modality with 422                                                                    0.14s
+  ✓ catalog filters by approach specialty and region with contains                                               0.19s
+  ✓ catalog like wildcards in filters are literal                                                                0.17s
+  ✓ catalog meta is exactly total page per page and paginates                                                    0.19s
+  ✓ catalog caps per page at fifty                                                                               0.12s
+  ✓ psychologist cannot open the catalog                                                                         0.12s
+  ✓ database refuses a second active bond for the same patient                                                   0.13s
+  ✓ every block route answers 401 without token                                                                  0.12s
+
+   PASS  Tests\Feature\ClosingDemoSeederTest
+  ✓ full seed preserves existing accounts and adds the closing demo                                              0.36s
+
+   PASS  Tests\Feature\ConsentApiTest
+  ✓ current term accept revoke and reaccept are idempotent                                                       0.23s
+  ✓ current selection and invalid terms and roles                                                                0.17s
+  ✓ revoking general consent blocks new report                                                                   0.19s
+
+   PASS  Tests\Feature\FoundationTest
+  ✓ serialize date uses app timezone offset and never z                                                          0.08s
+  ✓ serialize date converts utc input to app timezone                                                            0.08s
+  ✓ date columns serialize without time                                                                          0.07s
+  ✓ user hides password hash and uses it for authentication                                                      0.08s
+  ✓ clinical text is encrypted at rest                                                                           0.08s
+  ✓ shared reports view model is read only                                                                       0.07s
+  ✓ api collection meta has only total page and per page                                                         0.08s
+  ✓ validation error is 422 with errors                                                                          0.08s
+  ✓ unauthenticated is 401                                                                                       0.07s
+  ✓ authorization failure is 403                                                                                 0.07s
+  ✓ missing model is 404 without leaking the model name                                                          0.07s
+  ✓ throttle is 429 and keeps retry after                                                                        0.08s
+  ✓ state conflict keeps status and message written by us                                                        0.08s
+  ✓ unexpected exception is generic 500 even with debug on                                                       0.12s
+  ✓ unknown route under v1 is 404 in contract format                                                             0.09s
+  ✓ path without v1 prefix is 404 in contract format                                                             0.08s
+  ✓ web requests keep the default html error                                                                     0.07s
+
+   PASS  Tests\Feature\GuardianConsentTest
+  ✓ minor consent is append only and server sets term and author                                                 0.21s
+  ✓ consent requires own active bond approval and minor patient                                                  0.21s
+  ✓ invalid fields and missing current term do not create records                                                0.15s
+
+   PASS  Tests\Feature\MessageTest
+  ✓ send poll read and encryption                                                                                0.30s
+  ✓ membership and ended or pending bonds                                                                        0.29s
+  ✓ consent approval validation and authentication                                                               0.25s
+  ✓ revoked or outdated consent blocks sending and pagination is validated                                       0.20s
+
+   PASS  Tests\Feature\NotificationTest
+  ✓ notifications are private paginated and read idempotently                                                    0.28s
+  ✓ bond request acceptance and rejection notify only recipient                                                  0.17s
+  ✓ task assignment notifies without task content                                                                0.15s
+
+   PASS  Tests\Feature\PatientDirectoryTest
+  ✓ profiles include not submitted and existing registration                                                     0.14s
+  ✓ patient lists own bonds and unread messages                                                                  0.15s
+  ✓ directory counts only relevant tasks messages and appointments                                               0.17s
+  ✓ detail is scoped to own active or ended bonds and shows guardian for minors                                  0.22s
+
+   PASS  Tests\Feature\PsychologistApprovalReportTest
+  ✓ rejected professional with old bond cannot read shared reports                                               0.19s
+
+   PASS  Tests\Feature\PsychologistRegistrationTest
+  ✓ registration requires valid crp and document                                                                 0.21s
+  ✓ registration stores private document and starts pending                                                      0.13s
+  ✓ crp cannot be claimed twice                                                                                  0.18s
+  ✓ non admin cannot approve                                                                                     0.14s
+  ✓ admin approval allows publication and catalog listing                                                        0.22s
+  ✓ admin cannot approve registration without document                                                           0.13s
+  ✓ pending professional cannot publish                                                                          0.13s
+  ✓ profile cannot publish honorarium written in reais                                                           0.12s
+  ✓ rejection requires reason and allows resubmission                                                            0.20s
+  ✓ only owner and admin can download document                                                                   0.22s
+
+   PASS  Tests\Feature\PsychologistTaskWebTest
+  ✓ psychologist logs in and creates task from web form                                                          0.27s
+  ✓ patient and bad password cannot enter psychologist web                                                       0.54s
+  ✓ web task creation refuses other psychologist bond                                                            0.12s
+  ✓ unapproved psychologist cannot open task page                                                                0.11s
+
+   PASS  Tests\Feature\ReportPrivacyTest
+  ✓ list returns exactly the shared reports and counts only them                                                 0.27s
+  ✓ list items carry only id body and created at                                                                 0.26s
+  ✓ pagination never leaks through total or other pages                                                          0.33s
+  ✓ second page with default size matches the shared set                                                         0.26s
+  ✓ psychologist sees history of his own ended bond but never another psychologists                              0.23s
+  ✓ ended bond of the same psychologist is merged in the listing                                                 0.25s
+  ✓ show returns each visible report with only id body and created at                                            0.34s
+  ✓ every hidden or unreachable report answers the same 404 as a missing one                                     0.49s
+  ✓ huge and non numeric ids are just 404                                                                        0.25s
+  ✓ without an active or ended bond the listing is 404 and audited                                               0.27s
+  ✓ listing a user that is not a patient is 404 with the same body                                               0.28s
+  ✓ allowed reads are audited with actor and target patient                                                      0.27s
+  ✓ patient and admin cannot use the psychologist routes                                                         0.27s
+  ✓ unpublished report vanishes without a trace and new private one changes nothing                              0.32s
+  ✓ every psychologist and admin route is classified                                                             0.21s
+  ✓ every route that reads reports passes the privacy exercise                                                   0.37s
+  ✓ only patient side classes reference the reports model or table                                               0.32s
+  ✓ the allowlist has no typos                                                                                   0.24s
+  ✓ psychologist side classes read through the view                                                              0.26s
+  ✓ the static scan itself catches what it should                                                                0.21s
+  ✓ report body is encrypted at rest in table and view but readable through the api                              0.22s
+  ✓ no report in the massa is readable at rest                                                                   0.22s
+  ✓ the view hides private and unpublished even when read raw                                                    0.20s
+
+   PASS  Tests\Feature\ReportTest
+  ✓ report defaults to shared and binds to the active bond                                                       0.18s
+  ✓ report can be created as private                                                                             0.15s
+  ✓ report goes to the active bond even with an older ended one                                                  0.15s
+  ✓ patient without acceptance gets 403 and nothing is saved                                                     0.12s
+  ✓ revoked acceptance gets 403                                                                                  0.12s
+  ✓ no published term at all means 403                                                                           0.14s
+  ✓ acceptance of another user does not count                                                                    0.16s
+  ✓ newer general term without acceptance blocks again                                                           0.17s
+  ✓ term not yet effective and ai term are ignored                                                               0.13s
+  ✓ patient without bond gets 409                                                                                0.11s
+  ✓ ended and pending bonds do not allow reports                                                                 0.17s
+  ✓ consent guard comes before bond guard                                                                        0.12s
+  ✓ invalid input gets 422 and nothing is saved                                                                  0.15s
+  ✓ body at the limit is accepted                                                                                0.15s
+  ✓ psychologist and admin cannot post reports                                                                   0.15s
+  ✓ list returns all own reports newest first                                                                    0.14s
+  ✓ list paginates and limits per page                                                                           0.16s
+  ✓ list does not include other patients reports                                                                 0.15s
+  ✓ list keeps reports of ended bonds for the owner                                                              0.15s
+  ✓ list flags reports used in analysis without n plus one                                                       0.23s
+  ✓ patient cannot see edit or unpublish another patients report                                                 0.19s
+  ✓ unknown report id gets 404                                                                                   0.16s
+  ✓ private report cannot become shared                                                                          0.13s
+  ✓ shared report cannot be made private by patch                                                                0.15s
+  ✓ patch with the current value changes nothing                                                                 0.13s
+  ✓ patch validates visibility                                                                                   0.13s
+  ✓ unpublish marks the report and keeps the shape                                                               0.14s
+  ✓ unpublish is idempotent and keeps the first timestamp                                                        0.14s
+  ✓ private report cannot be unpublished                                                                         0.15s
+  ✓ unpublish reports when the report was used in analysis                                                       0.13s
+  ✓ every report route requires a token                                                                          0.11s
+
+   PASS  Tests\Feature\RoleMiddlewareTest
+  ✓ allowed role passes                                                                                          0.18s
+  ✓ several roles can be listed                                                                                  0.10s
+  ✓ other role gets 403 in contract format                                                                       0.11s
+  ✓ patient cannot reach staff route                                                                             0.11s
+  ✓ without token it is 401 not 403                                                                              0.09s
+
+   PASS  Tests\Feature\SuspendedRoleAccessTest
+  ✓ suspended admin with old token cannot open api queue                                                         0.11s
+  ✓ suspended admin with existing web session cannot open panel                                                  0.09s
+
+   PASS  Tests\Feature\TaskTest
+  ✓ psychologist creates and updates task only for own active bond                                               0.25s
+  ✓ task creation rejects past due date and missing title                                                        0.12s
+  ✓ patient lists own tasks and completion is idempotent                                                         0.24s
+  ✓ ended bond is read only and archived tasks are hidden                                                        0.22s
+  ✓ role and authentication gates all task routes                                                                0.15s
+  ✓ unapproved psychologist cannot use tasks even with old active bond                                           0.22s
+  ✓ creation requires patients current general consent                                                           0.17s
+
+  Tests:    220 passed (3835 assertions)
+  Duration: 55.15s
+
+
+```
+
+### Formatacao final
+
+```json
+{"tool":"pint","result":"passed"}
 ```

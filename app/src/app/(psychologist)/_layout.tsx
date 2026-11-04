@@ -6,6 +6,9 @@ import { AccessContext } from '@/psychologist/access';
 import { accessDestination } from '@/psychologist/domain';
 import { Action, ErrorNotice, useResource } from '@/psychologist/ui';
 
+// Sem âncora, o grupo abre pela primeira rota em ordem alfabética, e não pelo início.
+export const unstable_settings = { anchor: 'dashboard' };
+
 export default function PsychologistLayout() {
   const pathname = usePathname();
   const { signOut } = useSession();

@@ -5,6 +5,9 @@ import { ConsentProvider, useConsent } from '@/patient/consent-context';
 import { decideConsentGate } from '@/patient/consent-gate';
 import { useSession } from '@/session/session-context';
 
+// Sem âncora, o grupo abre pela primeira rota em ordem alfabética, e não pelo início.
+export const unstable_settings = { anchor: 'home' };
+
 function ConsentNavigator() {
   const { state, reload } = useConsent();
   const { signOut } = useSession();

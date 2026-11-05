@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 
 import { patientApi } from '@/api/patient';
-import type { PatientReport, Visibility } from '@/api/patient/types';
+import type { PatientReport } from '@/api/patient/types';
 import { Button, Text } from '@/design-system';
 import { loadPatientPages } from '@/patient/load-pages';
 import { errorMessage } from '@/patient/presentation';
@@ -21,11 +21,6 @@ export default function Reports() {
   const [selected, setSelected] = useState<PatientReport | null>(null);
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
-  async function changeVisibility(id: number, visibility: Visibility) {
-    setBusy(true); setActionError(null);
-    try { await patientApi.changeVisibility(id, visibility); await reload(); }
-    catch (e) { setActionError(errorMessage(e)); } finally { setBusy(false); }
-  }
   async function unpublish() {
     if (!selected) return;
     setBusy(true); setActionError(null);
@@ -44,11 +39,8 @@ export default function Reports() {
       <Text variant="h5">{report.unpublished_at ? 'Despublicado' : report.visibility === 'shared' ? 'Compartilhado' : 'Privado'}</Text>
       <Text variant="small" color="textSecondary">{new Date(report.created_at).toLocaleString('pt-BR')}</Text>
       <Text>{report.body}</Text>
-      {data.active ? <>
-        {!report.unpublished_at ? <TextAction label={report.visibility === 'private' ? 'Solicitar mudança para Compartilhado' : 'Solicitar mudança para Privado'}
-          disabled={busy} onPress={() => void changeVisibility(report.id, report.visibility === 'private' ? 'shared' : 'private')} /> : null}
-        {report.visibility === 'shared' && !report.unpublished_at ? <TextAction label="Despublicar" disabled={busy} onPress={() => setSelected(report)} /> : null}
-      </> : null}
+      {data.active && report.visibility === 'shared' && !report.unpublished_at
+        ? <TextAction label="Despublicar" disabled={busy} onPress={() => setSelected(report)} /> : null}
     </Card>) : null}
   </PatientPage>;
 }

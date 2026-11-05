@@ -139,6 +139,7 @@ export default function Agenda() {
         </View>
         <Field label="Observação (opcional)" value={notes} onChangeText={setNotes} maxLength={255} multiline
           editable={!busy && conflict === null} error={errors?.notes?.join(' ')} />
+        <Text variant="small" color="textSecondary">O paciente vê esta observação no app. Não use para anotação clínica.</Text>
         {conflict ? <>
           <Text color="error" accessibilityRole="alert">{errors?.confirm_conflict?.join(' ')}</Text>
           <Action label="Agendar mesmo assim" disabled={busy} onPress={() => {

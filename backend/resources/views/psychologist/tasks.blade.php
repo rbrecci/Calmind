@@ -29,6 +29,7 @@
         .task-list p { margin: .3rem 0; }
         .status { display: inline-block; font-weight: 700; }
         .muted { color: #435e55; }
+        .section-link { display: inline-flex; align-items: center; min-height: 2.75rem; color: #176559; font-weight: 700; }
         @media (max-width: 47rem) { .layout { grid-template-columns: 1fr; } main { padding: 1rem; } }
     </style>
 </head>
@@ -37,6 +38,7 @@
 <main>
     <h1>Tarefas terapêuticas</h1>
     <p>Acompanhe as tarefas dos seus pacientes. Vínculos encerrados aparecem para consulta.</p>
+    <nav aria-label="Seções do painel"><a class="section-link" href="{{ route('psychologist.appointments.index') }}">Ir para a agenda</a></nav>
 
     @if (session('status'))
         <p class="notice" role="status">{{ session('status') }}</p>

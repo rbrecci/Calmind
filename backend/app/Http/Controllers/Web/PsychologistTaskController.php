@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TaskWriteRequest;
 use App\Models\Bond;
@@ -31,7 +32,13 @@ class PsychologistTaskController extends Controller
 
     public function store(TaskWriteRequest $request): RedirectResponse
     {
-        $this->tasks->create($request->user(), $request->validated());
+        try {
+            $this->tasks->create($request->user(), $request->validated());
+        } catch (ApiException $e) {
+            // Vinculo inativo ou paciente sem aceite: sem isto o psicologo cairia em pagina crua de erro
+            return redirect()->route('psychologist.tasks.index')
+                ->withInput()->withErrors(['bond_id' => $e->getMessage()]);
+        }
 
         return redirect()->route('psychologist.tasks.index')->with('status', 'Tarefa criada.');
     }

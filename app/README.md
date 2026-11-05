@@ -38,7 +38,7 @@ Estão em [`../docs/planejamento/arranque-react-native.md`](../docs/planejamento
 ## Três coisas que custam um dia se descobertas tarde
 
 1. **O celular não enxerga o `localhost` do notebook.** Decisão DA-01 em [`../docs/planejamento/decisoes-abertas.md`](../docs/planejamento/decisoes-abertas.md).
-2. **Android 9+ bloqueia `http://` sem TLS.** O sintoma é erro de rede genérico, que parece bug de código. Decisão DA-03.
+2. **Android 9+ bloqueia `http://` sem TLS.** O sintoma é erro de rede genérico, que parece bug de código. A decisão DA-03 está fechada: liberado em `app.json` só para demonstração, sai com HTTPS.
 3. **A URL da API não pode ser fixa no código.** APK apontando para o IP do notebook de alguém funciona na casa dessa pessoa e morre no dia da apresentação. Use variável de ambiente.
 
 ## Token

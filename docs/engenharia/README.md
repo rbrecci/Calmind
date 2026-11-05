@@ -71,10 +71,10 @@ Não estão esquecidas, estão esperando a etapa que precisa delas:
 
 | # | Decisão | Espera por |
 |---|---------|------------|
-| **DA-01** | Onde o app encontra o backend: IP da LAN, túnel ou emulador | A etapa de primeira conexão |
-| **DA-02** | Identificador do pacote, `com.<grupo>.calmind` | O primeiro APK |
-| **DA-03** | Liberar tráfego sem TLS no build de desenvolvimento | O primeiro APK |
+| **DA-01** | Onde o app encontra o backend: LAN com IP fixo nos testes, servidor público na apresentação (Railway recomendada, sem publicação) | A publicação da API e o APK final |
 | **DA-04** | Provedor e modelo de IA, e onde a chave fica | Sprint 3 |
+
+Fechadas em 04/11/2026, registradas em [`../planejamento/decisoes-abertas.md`](../planejamento/decisoes-abertas.md): **DA-02**, identificador do pacote `com.tccsenai.calmind`; **DA-03**, HTTP liberado só para demonstração com dados fictícios, precisa sair com HTTPS antes de uso real.
 
 Quando uma fechar, ela sai desta tabela e entra no arquivo que ela afeta. Decisão fechada que
 continua listada como aberta é ruído — mesma regra do

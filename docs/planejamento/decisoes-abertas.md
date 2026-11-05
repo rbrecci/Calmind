@@ -2,7 +2,7 @@
 
 **TCC · Técnico em Desenvolvimento de Sistemas · SENAI-SP · 4º termo**
 **Calmind** — Saúde Mental & Acolhimento
-Revisão de 20/08/2026.
+Revisão de 04/11/2026.
 
 > Substitui o antigo `decisoes-pendentes.md`, que foi removido na limpeza de 20/08/2026 porque estava 85% resolvido e dizia que MER e wireframes ainda não tinham começado. Este arquivo carrega só o que continua em aberto de verdade.
 >
@@ -14,9 +14,7 @@ Revisão de 20/08/2026.
 
 | # | Decisão | Quem decide | Consequência de não decidir |
 |---|---------|-------------|------------------------------|
-| DA-01 | **Onde o app encontra o backend em desenvolvimento** — LAN com IP fixo, servidor de teste ou túnel. Era a D6 do `arranque-react-native.md` | Grupo, na segunda | O celular físico não enxerga o `localhost` do notebook. Sem isso, a prova 2 do spike não roda e a semana 1 não anda |
-| DA-02 | **Identificador do pacote do app**, no formato `com.<grupo>.calmind` | Grupo | Trava o primeiro APK assinado, que é a prova 4 do spike |
-| DA-03 | **Liberar tráfego sem TLS no build de desenvolvimento** | Quem montar o app | Android 9+ bloqueia `http://` por padrão. O sintoma é erro de rede genérico, que parece bug de código e come um dia |
+| DA-01 | **Onde o app encontra o backend, em desenvolvimento e na apresentação.** Era a D6 do `arranque-react-native.md`. Estado em 04/11/2026: testes em LAN com IP fixo; para a apresentação, a recomendação é a Railway (Laravel, MySQL e volume), ainda sem conta criada, sem publicação e sem prova. Descartados: Supabase, porque não executa PHP e exigiria trocar MySQL por Postgres; InfinityFree, porque a verificação em JavaScript do plano grátis barra cliente que não é navegador e os termos vedam uso do servidor como application server | Grupo | O celular físico não enxerga o `localhost` do notebook. O APK final precisa ser gerado de novo com o endereço definitivo |
 
 ## 2. Trava a Sprint 2
 
@@ -75,3 +73,5 @@ Estas não são decisões de mesa: já têm pergunta no `../pesquisa/roteiro-ent
 | Formalização da pesquisa de campo | 20/08/2026 | `../pesquisa/roteiro-entrevistas.md` |
 | Papéis do Scrum e divisão de trabalho | 19/08/2026 | `README.md`, seção Equipe |
 | Datas reais das três sprints | 18/08/2026 | `cronograma.md` |
+| DA-02: identificador do pacote do app, `com.tccsenai.calmind` | 04/11/2026 | `../../app/app.json` (`android.package`) |
+| DA-03: tráfego sem TLS liberado (`usesCleartextTraffic` via `expo-build-properties`) apenas para demonstração com dados fictícios. Limite de segurança: token e dados trafegam abertos na rede; precisa sair, com HTTPS na API, antes de qualquer uso real | 04/11/2026 | `../../app/app.json` (plugin `expo-build-properties`) |

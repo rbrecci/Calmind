@@ -8,7 +8,7 @@
 
 Aplicativo mobile que atua no intervalo entre uma sessão de terapia e a seguinte.
 
-> **Nome e slogan fechados:** Calmind, com o slogan **Saúde Mental & Acolhimento**. Vale para o aplicativo, a landing page, a capa do documento final e os slides. A identidade completa, incluindo propósito, público-alvo, logotipo, paleta e tipografia, está em [`docs/identidade-visual.md`](docs/identidade-visual.md). O identificador do pacote do aplicativo segue em aberto no formato `com.<grupo>.calmind`. Ver `docs/planejamento/arranque-react-native.md`.
+> **Nome e slogan fechados:** Calmind, com o slogan **Saúde Mental & Acolhimento**. Vale para o aplicativo, a landing page, a capa do documento final e os slides. A identidade completa, incluindo propósito, público-alvo, logotipo, paleta e tipografia, está em [`docs/identidade-visual.md`](docs/identidade-visual.md). O identificador do pacote do aplicativo é `com.tccsenai.calmind`.
 
 ---
 
@@ -24,13 +24,15 @@ Pesquisa de campo com três entrevistadas sem relação entre si, duas psicólog
 
 **A hipótese central:** a qualidade do tratamento depende tanto do que acontece na sessão quanto do que acontece entre as sessões, e é justamente esse intervalo que não tem ferramenta nenhuma. O produto ataca o intervalo, não a sessão.
 
-## Produto proposto e MVP da Sprint 2
+## Produto proposto e estado atual
 
 O produto completo prevê relatos, tarefas, chat, agenda, lembretes de medicação e resumos por IA. Esses recursos compõem a proposta e não descrevem o estado integral da Sprint 2.
 
-O MVP atual reúne API Laravel e MySQL, painel Blade e aplicativo React Native com Expo. A API implementa os blocos **A, C, D, E e F**: autenticação; cadastro e aprovação de psicólogos; catálogo, convite e vínculo; relatos com restrição de privacidade; e tarefas. O painel permite administrar cadastros e acompanhar tarefas. O aplicativo apresenta entrada com tratamento de erro, escolha de perfil, cadastro do paciente, catálogo de psicólogos e tarefas do paciente. O bloco **B**, referente ao fluxo completo de consentimento, ainda não foi entregue; a demonstração usa aceite fictício preparado no banco. Chat, agenda, medicação, IA e prontuário consolidado permanecem fora do MVP.
+**Estado em 04/11/2026, na branch `integracao/fechamento-30-10`, ainda fora do `main`.** O sistema reúne API Laravel e MySQL, painel Blade para administrador e psicólogo, e aplicativo React Native com Expo para paciente e psicólogo. O ciclo implementado cobre autenticação, cadastro e aprovação de psicólogos, consentimento, catálogo, convite e vínculo, relatos com restrição de privacidade, tarefas, chat, agenda e notificações dentro do app. Ficaram fora do fechamento: medicação, análise por IA, auditoria de leitura (RF-17), notificação push e chat em tempo real.
 
-Os dados compartilhados entre web e app foram demonstrados em 23/10/2026: o psicólogo aprovado no painel web aparece no catálogo do aplicativo. O ciclo de tarefas (criada na web, concluída pela API como paciente, exibida como concluída na web) foi demonstrado em 22/10/2026. Nada foi testado em celular físico, iOS ou Android; o app foi verificado no Expo web. Ver [roteiro da I2](docs/testes/2026-10-23-roteiro-i2.md) e [evidências](docs/testes/README.md).
+**O que está provado:** 242 testes do backend e 161 do aplicativo passando, e o roteiro cruzado do RNF-61 contra a API real, com o app na versão web do Expo em viewport de 390 px. Ver [roteiro do RNF-61](docs/testes/2026-11-04-roteiro-rnf-61.md) e [evidências](docs/testes/README.md).
+
+**O que falta provar:** o aplicativo em celular físico e a publicação em servidor. O APK de teste foi gerado, mas ainda não rodou em aparelho, e a hospedagem da apresentação é a decisão DA-01 em [decisões abertas](docs/planejamento/decisoes-abertas.md). A entrega da Sprint 2, em 23/10/2026, segue registrada em [Sprint2.md](Sprint2.md).
 
 ### Executar o MVP
 
@@ -95,10 +97,10 @@ consolida o problema, a visão e as 18 decisões de produto com as respectivas j
 | Coleta e análise dos requisitos | 1 | [`docs/pesquisa/`](docs/pesquisa/) | Roteiro e formulário prontos, 2 das 4 entrevistas aplicadas e sintetizadas |
 | Backend e frontend, primeiras funcionalidades | 2 | [`backend/`](backend/), [`app/`](app/) e [`docs/planejamento/etapas-sprint2.md`](docs/planejamento/etapas-sprint2.md) | MVP dos blocos A, C, D, E e F implementado; fluxo de consentimento B pendente |
 | Primeiros testes | 2 | [`docs/testes/`](docs/testes/) | Suíte integrada e roteiro web/API registrados em 22/10/2026 |
-| Sistema completo | 3 | ainda não iniciado | Pendente |
+| Sistema completo | 3 | [`backend/`](backend/) e [`app/`](app/) | Ciclo integrado contra a API real no navegador; faltam celular físico e publicação |
 | Documentação técnica final em ABNT | 3 | [`docs/documento-final/CALMIND_ABNT.docx`](docs/documento-final/CALMIND_ABNT.docx) | Versionado e atualizado com o MVP da Sprint 2; revisão final na Sprint 3 |
 | Manual do usuário | 3 | ainda não iniciado | Pendente |
-| Relatório de testes | 3 | [`docs/testes/`](docs/testes/) | Primeiras evidências registradas; consolidação final na Sprint 3 |
+| Relatório de testes | 3 | [`docs/testes/`](docs/testes/) | Evidências registradas até 04/11/2026; consolidação final pendente |
 
 ## Como abrir cada artefato
 
@@ -131,7 +133,7 @@ As sínteses são anonimizadas por regra do projeto: nenhum nome, contato ou ide
 | Aplicativo | React Native com Expo |
 | Backend | Laravel, PHP |
 | Banco de dados | MySQL |
-| Painel do administrador | Blade e Bootstrap, sobre o mesmo backend |
+| Painel do administrador e do psicólogo | Blade e Bootstrap, sobre o mesmo backend |
 | Divulgação | Landing page |
 
 ### Executar o aplicativo móvel
@@ -150,11 +152,11 @@ Confirme que EXPO_PUBLIC_USE_MOCK=true está definido em app/.env para usar as c
 npm start
 ```
 
-O cliente HTTP exige EXPO_PUBLIC_API_URL e um servidor compatível. Sem back-end, mantenha o modo mock. O comando configurado para os testes do aplicativo é npm test; esta atualização não executou testes nem gerou logs.
+Para usar a API real, defina EXPO_PUBLIC_USE_MOCK=false e EXPO_PUBLIC_API_URL com o endereço do servidor. Os testes do aplicativo rodam com npm test. O build do APK no Windows está na seção 8 do [setup do frontend](docs/engenharia/setup-frontend.md).
 
 ### Executar o back-end
 
-O back-end **não pode ser iniciado neste checkout**, porque a pasta backend/ ainda não contém o projeto Laravel. O roteiro previsto está em docs/engenharia/setup-backend.md; comandos de migração e artisan só serão aplicáveis quando os arquivos do servidor forem incorporados.
+Siga [backend/README.md](backend/README.md) e o [setup do backend](docs/engenharia/setup-backend.md). Os comandos estão resumidos em "Executar o MVP", acima.
 
 ## Equipe
 
@@ -172,8 +174,8 @@ O back-end **não pode ser iniciado neste checkout**, porque a pasta backend/ ai
 ```
 CONTRIBUTING.md   como commitar e abrir PR neste repositório; leia antes do primeiro commit
 CONTEXTO.md       diário das decisões de design: o que mudou, quando e por quê
-backend/       documentação da arquitetura prevista; aplicação Laravel ainda ausente
-app/           Expo + React Native: base móvel com navegação e autenticação mock
+backend/       API Laravel e painel Blade
+app/           Expo + React Native: app do paciente e do psicólogo, com modo mock e API real
 landing/       página de divulgação
 docs/
 ├── identidade-visual.md         marca: propósito, público, logo, paleta e tipografia

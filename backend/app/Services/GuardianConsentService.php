@@ -24,14 +24,14 @@ class GuardianConsentService
             'patient_id' => $patient->id,
             'consent_term_id' => $term->id,
             'registered_by_user_id' => $user->id,
-        ]))->refresh();
+        ]))->refresh()->load('registeredBy.psychologist');
     }
 
     public function paginate(User $user, int $patientUserId, int $page, int $perPage): LengthAwarePaginator
     {
         $patient = $this->patient($user, $patientUserId);
 
-        return GuardianConsent::where('patient_id', $patient->id)->orderByDesc('id')->paginate($perPage, page: $page);
+        return GuardianConsent::where('patient_id', $patient->id)->with('registeredBy.psychologist')->orderByDesc('id')->paginate($perPage, page: $page);
     }
 
     private function patient(User $user, int $patientUserId): Patient

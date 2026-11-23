@@ -21,6 +21,11 @@ class GuardianConsentResource extends JsonResource
             'note' => $this->note,
             'consent_term_id' => $this->consent_term_id,
             'registered_by_user_id' => $this->registered_by_user_id,
+            'registered_by' => [
+                'id' => $this->registeredBy->id,
+                'name' => $this->registeredBy->name,
+                'crp' => $this->registeredBy->psychologist->crp_region.'/'.$this->registeredBy->psychologist->crp_number,
+            ],
             'created_at' => $attributes['created_at'],
         ];
     }

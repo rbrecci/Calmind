@@ -34,7 +34,7 @@ export function GuardianConsentSection({ patientId, guardianName }: { patientId:
     {list.data?.length === 0 ? <Text>Nenhum registro de consentimento do responsável.</Text> : null}
     {list.data?.map((item) => <Card key={item.id}><Text>{item.guardian_name}</Text>
       <Text>Obtido em {displayDate(item.obtained_at)}</Text><Text>{methods[item.method]}</Text>
-      {item.note ? <Text>{item.note}</Text> : null}<Text>Registrado em {displayDate(item.created_at)}</Text>
+      {item.note ? <Text>{item.note}</Text> : null}<Text>Registrado por {item.registered_by.name} (CRP {item.registered_by.crp}) em {displayDate(item.created_at)}</Text>
     </Card>)}
     <Card><Text>Acrescente um novo registro. Os registros anteriores são preservados.</Text>
       <Field label="Nome do responsável" value={name} onChangeText={setName} maxLength={150} editable={!busy} error={errors?.guardian_name?.join(' ')} />

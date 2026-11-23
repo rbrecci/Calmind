@@ -210,8 +210,12 @@ test('consentimento do responsável só acrescenta em menor com vínculo ativo',
   const api = createPsychologistMock(options);
   const input = { guardian_name: 'Maria de Teste', obtained_at: '2026-10-29', method: 'telefone' as const };
   const initial = await api.guardianConsents(22);
-  await api.createGuardianConsent(22, input);
-  assert.equal((await api.guardianConsents(22)).meta.total, initial.meta.total + 1);
+  const created = await api.createGuardianConsent(22, input);
+  assert.deepEqual(created.registered_by, { id: 2, name: 'Psicóloga de Teste', crp: '06/000001' });
+  assert.equal(created.registered_by_user_id, 2);
+  const listed = await api.guardianConsents(22);
+  assert.equal(listed.meta.total, initial.meta.total + 1);
+  assert.deepEqual(listed.data.at(-1)?.registered_by, created.registered_by);
   await assert.rejects(api.createGuardianConsent(21, input), status(422, 'patient'));
   await assert.rejects(api.createGuardianConsent(22, { ...input, obtained_at: '2026-10-30' }), status(422, 'obtained_at'));
   await assert.rejects(api.createGuardianConsent(24, input), status(404));

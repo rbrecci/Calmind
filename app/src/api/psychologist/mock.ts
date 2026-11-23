@@ -430,7 +430,7 @@ export function createPsychologistMock({ scenario = 'com-pacientes', now = () =>
       if (!validDate(input.obtained_at) || input.obtained_at > today()) errors.obtained_at = ['Informe uma data válida que não seja futura.'];
       if (!['presencial', 'telefone', 'videochamada', 'mensagem_escrita'].includes(input.method)) errors.method = ['Escolha um meio válido.'];
       if (Object.keys(errors).length) invalid(errors);
-      const consent: GuardianConsent = { guardian_name: input.guardian_name, obtained_at: input.obtained_at, method: input.method, id: nextId++, note: input.note ?? null, consent_term_id: term.id, registered_by_user_id: 2, created_at: stamp() };
+      const consent: GuardianConsent = { guardian_name: input.guardian_name, obtained_at: input.obtained_at, method: input.method, id: nextId++, note: input.note ?? null, consent_term_id: term.id, registered_by_user_id: 2, registered_by: { id: 2, name: 'Psicóloga de Teste', crp: profile.crp ?? '' }, created_at: stamp() };
       guardianConsents.set(id, [...(guardianConsents.get(id) ?? []), consent]);
       return copy(consent);
     },

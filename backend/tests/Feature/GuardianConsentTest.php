@@ -8,6 +8,7 @@ use App\Models\Patient;
 use App\Models\Psychologist;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class GuardianConsentTest extends TestCase
@@ -40,6 +41,33 @@ class GuardianConsentTest extends TestCase
         $this->getJson($url.'?per_page=1')->assertOk()->assertJsonPath('meta.total', 2)->assertJsonPath('meta.per_page', 1)->assertJsonCount(1, 'data');
         $this->putJson($url, $this->payload())->assertStatus(405);
         $this->deleteJson($url)->assertStatus(405);
+    }
+
+    public function test_consent_shows_who_registered_it_without_extra_queries_per_record(): void
+    {
+        ConsentTerm::factory()->create();
+        $bond = Bond::factory()->active()->create(['patient_id' => Patient::factory()->minor()]);
+        $psychologist = $bond->psychologist;
+        $author = ['id' => $psychologist->user_id, 'name' => $psychologist->user->name, 'crp' => $psychologist->crp_region.'/'.$psychologist->crp_number];
+        $url = '/api/v1/psychologist/patients/'.$bond->patient->user_id.'/guardian-consent';
+
+        // CA-49.3: quem registrou e quando
+        $this->as($psychologist->user)->postJson($url, $this->payload())->assertCreated()
+            ->assertJsonPath('registered_by', $author)->assertJsonPath('registered_by_user_id', $psychologist->user_id);
+        $this->getJson($url)->assertOk()->assertJsonPath('data.0.registered_by', $author)->assertJsonPath('data.0.created_at', fn ($value) => is_string($value));
+
+        $queries = function () use ($url): int {
+            DB::flushQueryLog();
+            DB::enableQueryLog();
+            $this->getJson($url)->assertOk();
+
+            return count(DB::getQueryLog());
+        };
+        $few = $queries();
+        foreach (range(1, 3) as $ignored) {
+            $this->postJson($url, $this->payload())->assertCreated();
+        }
+        $this->assertSame($few, $queries());
     }
 
     public function test_consent_requires_own_active_bond_approval_and_minor_patient(): void

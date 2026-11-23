@@ -84,6 +84,22 @@ describe('restoreSession', () => {
     assert.equal(state.clearCalls, 1);
   });
 
+  // O backend responde 403 no /me quando a conta foi suspensa: o token não volta a valer.
+  test('conta suspensa (403 no /me), apaga o token guardado e pede login', async () => {
+    const suspendedApi: Api = {
+      ...offlineApi,
+      me: async () => {
+        throw new ApiError(403, 'Conta suspensa.');
+      },
+    };
+    const { storage, state } = fakeStorage('mock-token-1');
+
+    assert.equal(await restoreSession(storage, suspendedApi), null);
+    assert.equal(getAuthToken(), null);
+    assert.equal(state.token, null);
+    assert.equal(state.clearCalls, 1);
+  });
+
   // Sem rede não dá para saber se o token vale: apagar deslogaria quem só está offline.
   test('sem rede, pede login mas mantém o token guardado', async () => {
     const { storage, state } = fakeStorage('mock-token-1');

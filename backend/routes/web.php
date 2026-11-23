@@ -7,9 +7,7 @@ use App\Http\Controllers\Web\PsychologistSessionController;
 use App\Http\Controllers\Web\PsychologistTaskController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', fn () => redirect()->route('psychologist.login'));
 
 Route::prefix('admin')->name('admin.')->group(function (): void {
     Route::get('login', [AdminSessionController::class, 'create'])->name('login');

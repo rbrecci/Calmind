@@ -23,13 +23,14 @@ export async function restoreSession(storage: TokenStorage, api: Api): Promise<R
   } catch (error) {
     // Sem rede ou erro do servidor: não dá para saber se o token ainda vale. Ele continua
     // guardado e o app pede login agora; na próxima abertura tenta de novo.
-    if (!(error instanceof ApiError) || error.status !== 401) {
+    // O 403 do /me é conta suspensa: o token não volta a valer e cai no apagar abaixo.
+    if (!(error instanceof ApiError) || (error.status !== 401 && error.status !== 403)) {
       setAuthToken(null);
       return null;
     }
   }
 
-  // Token expirado, revogado ou de perfil que o app não atende: apagar.
+  // Token expirado, revogado, de conta suspensa ou de perfil que o app não atende: apagar.
   setAuthToken(null);
   await storage.clear();
   return null;

@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Route;
 Route::post('auth/register', [AuthController::class, 'register']);
 Route::post('auth/login', [AuthController::class, 'login']);
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('auth/logout', [AuthController::class, 'logout']);
-    Route::get('me', [AuthController::class, 'me']);
-});
+// Logout fica fora da barreira de conta ativa: a conta suspensa precisa conseguir sair
+Route::middleware('auth:sanctum')->post('auth/logout', [AuthController::class, 'logout']);
+Route::middleware(['auth:sanctum', 'active'])->get('me', [AuthController::class, 'me']);

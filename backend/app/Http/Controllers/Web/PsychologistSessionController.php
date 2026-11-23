@@ -22,10 +22,23 @@ class PsychologistSessionController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        if (! Auth::attempt($credentials + ['role' => 'psychologist', 'status' => 'active'])) {
+        if (! Auth::validate($credentials + ['role' => 'psychologist', 'status' => 'active'])) {
             return back()->withErrors(['email' => 'E-mail ou senha inválidos.'])->onlyInput('email');
         }
 
+        // So depois da senha certa diz que o cadastro nao foi aprovado; sem aprovacao nao abre sessao
+        $user = Auth::getLastAttempted();
+        $approval = $user->psychologist?->approval_status;
+
+        if ($approval !== 'approved') {
+            $message = $approval === 'rejected'
+                ? 'Seu cadastro profissional não foi aprovado. Veja o motivo e envie um novo cadastro pelo aplicativo.'
+                : 'Seu cadastro profissional ainda está em análise. O acesso ao painel é liberado após a aprovação.';
+
+            return back()->withErrors(['email' => $message])->onlyInput('email');
+        }
+
+        Auth::login($user);
         $request->session()->regenerate();
 
         return redirect()->route('psychologist.tasks.index');

@@ -16,6 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // A hospedagem termina o HTTPS no proxy dela, que muda de IP; por isso '*'.
+        $middleware->trustProxies(at: '*');
         $middleware->alias(['role' => EnsureUserRole::class]);
         $middleware->redirectGuestsTo(fn (Request $request): string => $request->is('psychologist/*')
             ? route('psychologist.login')

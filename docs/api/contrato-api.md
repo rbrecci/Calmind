@@ -57,6 +57,8 @@ O token é devolvido pelo login e guardado no armazenamento seguro do aparelho. 
 | 409 | Conflito de estado, por exemplo tentar um segundo vínculo ativo |
 | 422 | Dados inválidos |
 
+**Conta não ativa recebe 403 (RN-51).** Conta com `status` diferente de `active` (suspensa, por exemplo) continua com token válido, mas recebe 403 em `GET /me`, nas rotas do chat (`/bonds/{id}/messages`) e nas rotas de consentimento (`/consent-terms/current`, `/consent-acceptances` e o consentimento do responsável). As rotas com papel fixo já barram pelo middleware de papel, com o mesmo 403. `POST /auth/logout` continua liberado, para que a conta suspensa consiga sair.
+
 **A linha do 404 é regra de privacidade, não de estilo.** Quando o psicólogo pede um relato privado pelo identificador, a resposta é 404 e não 403. O 403 confirmaria que existe alguma coisa ali, e o CA-23.5 exige que nem a existência seja perceptível.
 
 ### 2.4 Datas
@@ -119,9 +121,16 @@ Cada linha tem os testes correspondentes na coleção do Postman.
 | POST | `/patient/bonds/redeem-invitation` | RF-07 |
 | GET | `/catalog/psychologists` | RF-09 |
 | POST | `/patient/bonds/requests` | RF-10 |
+| DELETE | `/patient/bonds/requests/{id}` | RF-10 (CA-10.3) |
 | POST | `/psychologist/bond-requests/{id}/accept` | RF-11 |
 | POST | `/psychologist/bond-requests/{id}/reject` | RF-11 |
 | POST | `/bonds/{id}/end` | RF-13 |
+
+Campos do vínculo devolvidos por estas rotas: `id`, `status` (`pending`, `active` ou `ended`), `origin` (`catalog` ou `invitation`), `psychologist_id`, `patient_user_id`, `requested_at`, `responded_at`, `accepted_at` e `ended_at`. `accepted_at` é o momento em que o vínculo ficou ativo: preenchido no aceite do psicólogo e no resgate do convite, mantido quando o vínculo ativo é encerrado, e `null` enquanto pendente, na recusa e no cancelamento. Assim, `ended` com `accepted_at` `null` é solicitação que nunca virou vínculo: recusada se `responded_at` estiver preenchido, cancelada pelo paciente se também for `null`.
+
+`GET /catalog/psychologists` aceita os filtros opcionais `approach`, `specialty` e `region` (texto de até 120 caracteres, casam por trecho, sem diferenciar maiúscula nem acento) e `modality` (`online`, `presencial` ou `ambos`, comparação exata), além de `page` e `per_page` (máximo 50).
+
+`DELETE /patient/bonds/requests/{id}`: o paciente cancela a própria solicitação pendente. 200 com o mesmo objeto de `POST /patient/bonds/requests`, agora com `status` `ended`, `ended_at` preenchido e `responded_at` `null` (não há status novo: segue o caminho da recusa). Solicitação de outro paciente ou inexistente, 404. Vínculo que não está `pending`, 409 "Esta solicitação não está mais pendente.". Depois do cancelamento o paciente pode solicitar de novo. `POST /bonds/{id}/end` notifica a outra parte com `bond.ended`.
 
 ### 3.5 Relatos
 
@@ -233,6 +242,8 @@ Regras: o termo precisa ser o **vigente do seu tipo**, senão 422 com `errors.co
 
 Corpo do POST: `guardian_name` (obrigatório, até 150), `obtained_at` (`YYYY-MM-DD`, não futura), `method` (`presencial`, `telefone`, `videochamada` ou `mensagem_escrita`), `note` (opcional). O servidor preenche `consent_term_id` com o termo geral vigente e `registered_by_user_id` com o psicólogo. Objeto devolvido: `{ id, guardian_name, obtained_at, method, note, consent_term_id, registered_by_user_id, created_at }`. Exige vínculo ativo do psicólogo com o paciente (senão 404) e paciente menor de 18 anos (senão 422 em `errors.patient`), conforme CA-49.1 e CA-49.4.
 
+Cada registro (no POST e em cada item do GET) traz também o autor, para o psicólogo ver quem registrou e quando (CA-49.3): `registered_by: { id, name, crp }`, com `id` igual a `registered_by_user_id` (mantido por compatibilidade), `name` o nome do psicólogo e `crp` no formato `região/número`, como no catálogo. O "quando" é o `created_at`. Exemplo: `"registered_by": { "id": 2, "name": "Psicóloga de Teste", "crp": "06/000001" }`.
+
 ### 3.8.2 Perfil do psicólogo, vínculos e lista de pacientes
 
 | Método | Rota | Papel |
@@ -271,6 +282,7 @@ Corpo do POST: `guardian_name` (obrigatório, até 150), `obtained_at` (`YYYY-MM
   "origin": "catalog",
   "requested_at": "2026-10-20T09:00:00-03:00",
   "responded_at": "2026-10-20T10:00:00-03:00",
+  "accepted_at": "2026-10-20T10:00:00-03:00",
   "ended_at": null,
   "psychologist": { "id": 1, "name": "Hermione Granger", "crp": "06/000001" },
   "unread_messages": 2
@@ -410,7 +422,7 @@ Evento visível no app, sem push (CA-16.3). A notificação carrega **tipo e ide
 
 Objeto: `{ "id": 5, "type": "message.received", "resource_id": 40, "created_at": "2026-10-29T08:15:00-03:00", "read_at": null }`. `GET` devolve `{data, meta}`, mais novas primeiro; `unread=1` filtra as não lidas. `POST .../read` devolve o objeto (200); de outro usuário, 404. `read-all` devolve `{ "read": n }`.
 
-Tipos e quem recebe (o servidor grava a linha no momento do evento):
+Tipos e quem recebe. Os tipos de evento são gravados pelo servidor no momento do evento. Os dois lembretes (`task.due_soon` e `appointment.upcoming`) não têm evento: como o sistema não tem agendador nem push, eles são gerados quando o usuário lista as notificações (só na primeira página), uma vez por recurso e por alteração. Consulta remarcada depois do lembrete gera um lembrete novo; listar de novo sem alteração não repete.
 
 | `type` | Destinatário | `resource_id` |
 |--------|--------------|---------------|
@@ -422,6 +434,9 @@ Tipos e quem recebe (o servidor grava a linha no momento do evento):
 | `bond.requested` | psicólogo | id do vínculo |
 | `bond.accepted` | paciente | id do vínculo |
 | `bond.rejected` | paciente | id do vínculo |
+| `bond.ended` | a outra parte do vínculo (quem não encerrou) | id do vínculo |
+| `task.due_soon` | paciente | id da tarefa (tarefa não concluída com prazo hoje) |
+| `appointment.upcoming` | paciente e psicólogo | id da consulta (consulta agendada ou remarcada nas próximas 24 horas) |
 
 Preferências de notificação (CA-16.2) e push ficam fora desta versão.
 

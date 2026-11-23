@@ -2119,6 +2119,103 @@
           ]
         },
         {
+          "name": "Cancelar solicitacao pendente",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/bonds/requests/{{idSolicitacao}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "bonds",
+                "requests",
+                "{{idSolicitacao}}"
+              ]
+            },
+            "description": "RF-10 (CA-10.3). O paciente cancela a propria solicitacao pendente, que segue o caminho da recusa e fica encerrada."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('fica encerrada', () => pm.expect(pm.response.json().status).to.eql('ended'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Solicitar de novo apos cancelar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/bonds/requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "bonds",
+                "requests"
+              ]
+            },
+            "description": "CA-10.3. Depois do cancelamento o paciente pode solicitar de novo; esta solicitacao e a que o psicologo aceita a seguir.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"psychologist_id\": \"{{idPsicologo}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.test('nasce pendente', () => pm.expect(pm.response.json().status).to.eql('pending'));",
+                  "pm.collectionVariables.set('idSolicitacao', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "Aceitar solicitacao",
           "request": {
             "method": "POST",

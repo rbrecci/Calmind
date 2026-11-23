@@ -1,6 +1,9 @@
-import type { CatalogPsychologist, PatientTask } from '../types.ts';
+import type { CatalogPsychologist, Modality, PatientTask } from '../types.ts';
 
 export type PageQuery = { page?: number; per_page?: number };
+// Os mesmos filtros do CatalogIndexRequest. Nada de preço, nota ou ranking (CA-09.3).
+export type CatalogFilters = { approach?: string; specialty?: string; region?: string; modality?: Modality };
+export type CatalogQuery = PageQuery & CatalogFilters;
 export type Page<T> = { data: T[]; meta: { total: number; page: number; per_page: number } };
 export type ConsentTerm = {
   id: number; type: 'general'; version: string; body: string;
@@ -15,6 +18,8 @@ export type BondResult = {
   id: number; status: BondStatus; origin: 'catalog' | 'invitation';
   psychologist_id: number; patient_user_id: number;
   requested_at: string; responded_at: string | null; ended_at: string | null;
+  // Opcional só para não quebrar objeto de teste antigo; o backend sempre envia (nulo se nunca ficou ativo).
+  accepted_at?: string | null;
 };
 export type PatientBond = Omit<BondResult, 'psychologist_id' | 'patient_user_id'> & {
   psychologist: { id: number; name: string; crp: string }; unread_messages: number;
@@ -45,7 +50,8 @@ export type PatientApi = {
   redeemInvitation(code: string): Promise<BondResult>;
   requestBond(psychologistId: number): Promise<BondResult>;
   endBond(id: number): Promise<BondResult>;
-  catalogPsychologists(query?: PageQuery): Promise<Page<CatalogPsychologist>>;
+  cancelBondRequest(id: number): Promise<BondResult>;
+  catalogPsychologists(query?: CatalogQuery): Promise<Page<CatalogPsychologist>>;
   reports(query?: PageQuery): Promise<Page<PatientReport>>;
   createReport(input: { body: string; visibility?: Visibility }): Promise<PatientReport>;
   changeVisibility(id: number, visibility: Visibility): Promise<PatientReport>;

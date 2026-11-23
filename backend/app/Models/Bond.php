@@ -20,6 +20,7 @@ class Bond extends BaseModel
         'invitation_id',
         'requested_at',
         'responded_at',
+        'accepted_at',
         'ended_at',
         'ended_by_user_id',
     ];
@@ -29,6 +30,7 @@ class Bond extends BaseModel
         return [
             'requested_at' => 'datetime',
             'responded_at' => 'datetime',
+            'accepted_at' => 'datetime',
             'ended_at' => 'datetime',
         ];
     }

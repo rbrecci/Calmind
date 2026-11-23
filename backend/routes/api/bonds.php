@@ -22,6 +22,7 @@ Route::middleware(['auth:sanctum', 'role:patient'])->group(function () {
     Route::get('patient/bonds', [PatientDirectoryController::class, 'bonds']);
     Route::post('patient/bonds/redeem-invitation', [InvitationController::class, 'redeem']);
     Route::post('patient/bonds/requests', [BondController::class, 'request']);
+    Route::delete('patient/bonds/requests/{id}', [BondController::class, 'cancel'])->whereNumber('id');
     Route::get('catalog/psychologists', [CatalogController::class, 'index']);
 });
 

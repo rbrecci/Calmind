@@ -27,7 +27,7 @@ class BondFactory extends Factory
 
     public function active(): static
     {
-        return $this->state(['status' => 'active', 'responded_at' => now()]);
+        return $this->state(['status' => 'active', 'responded_at' => now(), 'accepted_at' => now()]);
     }
 
     public function ended(): static

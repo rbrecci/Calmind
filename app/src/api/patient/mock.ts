@@ -1,7 +1,7 @@
 import { getAuthToken } from '../auth-token.ts';
 import { ApiError, type CatalogPsychologist, type FieldErrors, type PatientTask } from '../types.ts';
 import type {
-  Appointment, BondResult, ConsentAcceptance, ConsentTerm, Message, Page, PageQuery,
+  Appointment, BondResult, CatalogFilters, CatalogQuery, ConsentAcceptance, ConsentTerm, Message, Page, PageQuery,
   PatientApi, PatientBond, PatientNotification, PatientReport, PatientScenario,
 } from './types.ts';
 
@@ -33,6 +33,20 @@ function find<T extends { id: number }>(items: T[], id: number): T {
   return item;
 }
 
+const CATALOG_TEXT_FILTERS = ['approach', 'specialty', 'region'] as const;
+
+// Imita o LIKE do MySQL com utf8mb4_unicode_ci: ignora caixa e acento.
+function fold(value: string): string {
+  return value.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase('pt-BR');
+}
+
+function matchesCatalogFilters(psychologist: CatalogPsychologist, filters: CatalogFilters): boolean {
+  return CATALOG_TEXT_FILTERS.every((key) => {
+    const value = filters[key]?.trim();
+    return !value || fold(psychologist[key] ?? '').includes(fold(value));
+  }) && (!filters.modality || psychologist.modality === filters.modality);
+}
+
 function bondResult(bond: PatientBond, userId: number): BondResult {
   const { psychologist, unread_messages: _unread, ...fields } = bond;
   return { ...fields, psychologist_id: psychologist.id, patient_user_id: userId };
@@ -43,7 +57,7 @@ function seed(scenario: PatientScenario, userId: number) {
   const active = scenario === 'com-vinculo';
   const bonds: PatientBond[] = hasBond ? [{
     id: 8, status: active ? 'active' : 'pending', origin: 'catalog', requested_at: CREATED,
-    responded_at: active ? CREATED : null, ended_at: null,
+    responded_at: active ? CREATED : null, accepted_at: active ? CREATED : null, ended_at: null,
     psychologist: { id: 1, name: 'Hermione Granger', crp: '06/000001' }, unread_messages: active ? 1 : 0,
   }] : [];
   const reports: PatientReport[] = active ? [
@@ -88,7 +102,7 @@ export function createPatientMock({ scenario = 'com-vinculo' }: { scenario?: Pat
     const bond: PatientBond = {
       id: Math.max(8, ...s.bonds.map((b) => b.id)) + 1, status: invitation ? 'active' : 'pending',
       origin: invitation ? 'invitation' : 'catalog', requested_at: now(), responded_at: invitation ? now() : null,
-      ended_at: null, psychologist: { id: professional.id, name: professional.name, crp: professional.crp }, unread_messages: 0,
+      accepted_at: invitation ? now() : null, ended_at: null, psychologist: { id: professional.id, name: professional.name, crp: professional.crp }, unread_messages: 0,
     };
     s.bonds.unshift(bond);
     return bondResult(bond, s.userId);
@@ -138,10 +152,18 @@ export function createPatientMock({ scenario = 'com-vinculo' }: { scenario?: Pat
       bond.status = 'ended'; bond.ended_at = now();
       return bondResult(bond, s.userId);
     },
-    async catalogPsychologists(query) {
+    async cancelBondRequest(id) {
+      const s = state();
+      const bond = find(s.bonds, id);
+      if (bond.status !== 'pending') throw new ApiError(409, 'Esta solicitação não está mais pendente.');
+      bond.status = 'ended'; bond.ended_at = now();
+      return bondResult(bond, s.userId);
+    },
+    async catalogPsychologists(query: CatalogQuery = {}) {
       const s = state();
       if (s.bonds.some((b) => b.status === 'active')) throw new ApiError(403, 'A busca por profissionais é liberada depois que o vínculo atual for encerrado.');
-      return page(PROFESSIONALS, query);
+      if (query.modality && !['online', 'presencial', 'ambos'].includes(query.modality)) validation({ modality: ['O valor escolhido é inválido.'] });
+      return page(PROFESSIONALS.filter((p) => matchesCatalogFilters(p, query)), query);
     },
     async reports(query) { return page(state().reports, query); },
     async createReport(input) {

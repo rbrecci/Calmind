@@ -4,6 +4,7 @@ import { beforeEach, test } from 'node:test';
 import { ApiError } from '../types.ts';
 import { setAuthToken } from '../auth-token.ts';
 import { createPatientMock } from './mock.ts';
+import type { CatalogQuery } from './types.ts';
 
 beforeEach(() => setAuthToken('mock-token-1'));
 
@@ -75,7 +76,9 @@ test('leitura de mensagens só marca a outra parte e não repete contagem', asyn
 test('encerrar vínculo preserva histórico e bloqueia escrita', async () => {
   const api = createPatientMock();
   await api.acceptConsent(1);
-  await api.endBond(8);
+  const accepted = (await api.bonds()).data[0].accepted_at;
+  assert.ok(accepted);
+  assert.equal((await api.endBond(8)).accepted_at, accepted);
   assert.equal((await api.bonds()).data[0].status, 'ended');
   assert.ok((await api.messages(8)).data.length);
   await assert.rejects(api.sendMessage(8, 'Olá'), (e: unknown) => e instanceof ApiError && e.status === 409);
@@ -85,12 +88,31 @@ test('encerrar vínculo preserva histórico e bloqueia escrita', async () => {
 
 test('solicitação fica pendente e convite ativa o vínculo sem duplicar', async () => {
   const api = createPatientMock({ scenario: 'sem-vinculo' });
-  assert.equal((await api.requestBond(1)).status, 'pending');
+  const requested = await api.requestBond(1);
+  assert.equal(requested.status, 'pending');
+  assert.equal(requested.accepted_at, null);
   await assert.rejects(api.requestBond(1), (e: unknown) => e instanceof ApiError && e.status === 409);
   const invited = createPatientMock({ scenario: 'sem-vinculo' });
   await assert.rejects(invited.redeemInvitation('INVALIDO'), (e: unknown) => e instanceof ApiError && e.status === 422 && !!e.errors?.code);
-  assert.equal((await invited.redeemInvitation('ABCD2345')).status, 'active');
+  const redeemed = await invited.redeemInvitation('ABCD2345');
+  assert.equal(redeemed.status, 'active');
+  assert.ok(redeemed.accepted_at);
+  assert.equal((await invited.bonds()).data[0].accepted_at, redeemed.accepted_at);
   await assert.rejects(invited.redeemInvitation('ABCD2345'), (e: unknown) => e instanceof ApiError && e.status === 422);
+});
+
+test('paciente cancela só a solicitação pendente e pode pedir de novo', async () => {
+  const api = createPatientMock({ scenario: 'vinculo-pendente' });
+  const cancelled = await api.cancelBondRequest(8);
+  assert.equal(cancelled.status, 'ended');
+  assert.equal(cancelled.responded_at, null);
+  assert.equal(cancelled.accepted_at, null);
+  assert.ok(cancelled.ended_at);
+  await assert.rejects(api.cancelBondRequest(8), (e: unknown) => e instanceof ApiError && e.status === 409);
+  await assert.rejects(api.cancelBondRequest(999), (e: unknown) => e instanceof ApiError && e.status === 404);
+  assert.equal((await api.requestBond(2)).status, 'pending');
+  const withBond = createPatientMock();
+  await assert.rejects(withBond.cancelBondRequest(8), (e: unknown) => e instanceof ApiError && e.status === 409 && e.message === 'Esta solicitação não está mais pendente.');
 });
 
 test('relatos mantêm privacidade e despublicação idempotente conforme o backend', async () => {
@@ -130,4 +152,25 @@ test('paginação informa o total e não vaza mutações da tela para o mock', a
   list.data[0].body = 'alteração externa';
   assert.notEqual((await api.reports()).data[0].body, 'alteração externa');
   await assert.rejects(api.messages(8, { per_page: 101 }), (e: unknown) => e instanceof ApiError && e.status === 422);
+});
+
+// RF-09: o mock filtra como o BondService (contém, sem diferenciar caixa e acento; modalidade exata)
+test('catálogo filtra por abordagem, especialidade, região e modalidade como a API', async () => {
+  const api = createPatientMock({ scenario: 'sem-vinculo' });
+  const names = async (filters: CatalogQuery) => (await api.catalogPsychologists(filters)).data.map((p) => p.name);
+  assert.deepEqual(await names({ approach: 'psicanalise' }), ['Atticus Finch']);
+  assert.deepEqual(await names({ specialty: 'ESTRESSE' }), ['Hermione Granger']);
+  assert.deepEqual(await names({ region: 'sao paulo' }), ['Hermione Granger']);
+  assert.deepEqual(await names({ modality: 'online' }), ['Hermione Granger']);
+  assert.deepEqual(await names({ modality: 'ambos' }), ['Atticus Finch']);
+  assert.deepEqual(await names({ approach: 'cognitivo', region: 'Campinas' }), []);
+  assert.deepEqual(await names({ approach: '', region: '  ' }), ['Atticus Finch', 'Hermione Granger']);
+});
+
+test('catálogo sem resultado devolve lista vazia e modalidade desconhecida é recusada', async () => {
+  const api = createPatientMock({ scenario: 'sem-vinculo' });
+  const none: CatalogQuery = { approach: 'Gestalt' };
+  assert.deepEqual(await api.catalogPsychologists(none), { data: [], meta: { total: 0, page: 1, per_page: 20 } });
+  const invalid = { modality: 'hibrido' } as unknown as CatalogQuery;
+  await assert.rejects(api.catalogPsychologists(invalid), (e: unknown) => e instanceof ApiError && e.status === 422 && !!e.errors?.modality);
 });

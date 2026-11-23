@@ -211,7 +211,7 @@ class BondTest extends TestCase
         $response = $this->as($patient->user)->postJson(self::REDEEM, ['code' => $invitation->code])->assertCreated();
 
         $this->assertSame(
-            ['id', 'status', 'origin', 'psychologist_id', 'patient_user_id', 'requested_at', 'responded_at', 'ended_at'],
+            ['id', 'status', 'origin', 'psychologist_id', 'patient_user_id', 'requested_at', 'responded_at', 'accepted_at', 'ended_at'],
             array_keys($response->json())
         );
         $response->assertJsonPath('status', 'active')
@@ -220,6 +220,7 @@ class BondTest extends TestCase
             ->assertJsonPath('patient_user_id', $patient->user_id)
             ->assertJsonPath('requested_at', '2026-10-21T10:00:00-03:00')
             ->assertJsonPath('responded_at', '2026-10-21T10:00:00-03:00')
+            ->assertJsonPath('accepted_at', '2026-10-21T10:00:00-03:00')
             ->assertJsonPath('ended_at', null);
         $this->assertDatabaseHas('bonds', [
             'id' => $response->json('id'),
@@ -486,6 +487,68 @@ class BondTest extends TestCase
             ->assertCreated();
     }
 
+    // -------------------------------------- cancelar solicitacao (RF-10, CA-10.3)
+
+    public function test_patient_cancels_own_pending_request_and_can_request_again(): void
+    {
+        $this->travelTo(Carbon::parse('2026-10-21 10:00:00'));
+        $patient = $this->patient();
+        $psychologist = $this->psychologist();
+        $bond = $this->pendingBond($patient, $psychologist);
+
+        $this->as($patient->user)->deleteJson(self::REQUEST_BOND."/{$bond->id}")
+            ->assertOk()
+            ->assertJsonPath('id', $bond->id)
+            ->assertJsonPath('status', 'ended')
+            ->assertJsonPath('responded_at', null)
+            ->assertJsonPath('accepted_at', null)
+            ->assertJsonPath('ended_at', '2026-10-21T10:00:00-03:00');
+        $this->assertDatabaseHas('bonds', ['id' => $bond->id, 'status' => 'ended', 'ended_by_user_id' => $patient->user_id, 'accepted_at' => null]);
+
+        // CA-11.3: a solicitacao cancelada nao pode mais ser respondida
+        $this->as($psychologist->user)->postJson("/api/v1/psychologist/bond-requests/{$bond->id}/accept")
+            ->assertStatus(409)
+            ->assertExactJson(['message' => self::NOT_PENDING]);
+
+        $this->as($patient->user)->postJson(self::REQUEST_BOND, ['psychologist_id' => $this->psychologist()->id])
+            ->assertCreated();
+    }
+
+    public function test_cannot_cancel_request_of_another_patient_or_missing_one(): void
+    {
+        $bond = $this->pendingBond($this->patient(), $this->psychologist());
+        $other = $this->patient();
+
+        $this->as($other->user)->deleteJson(self::REQUEST_BOND."/{$bond->id}")->assertNotFound();
+        $this->as($other->user)->deleteJson(self::REQUEST_BOND.'/999999')->assertNotFound();
+        $this->assertSame('pending', $bond->fresh()->status);
+
+        // controle positivo: o dono cancela, entao o 404 acima veio da regra e nao de rota ausente
+        $this->as($bond->patient->user)->deleteJson(self::REQUEST_BOND."/{$bond->id}")->assertOk();
+    }
+
+    public function test_cannot_cancel_a_bond_that_is_not_pending(): void
+    {
+        $patient = $this->patient();
+        $active = $this->activeBond($patient);
+        $ended = Bond::factory()->ended()->create(['patient_id' => $patient->id]);
+
+        foreach ([$active, $ended] as $bond) {
+            $this->as($patient->user)->deleteJson(self::REQUEST_BOND."/{$bond->id}")
+                ->assertStatus(409)
+                ->assertExactJson(['message' => self::NOT_PENDING]);
+        }
+        $this->assertSame('active', $active->fresh()->status);
+    }
+
+    public function test_psychologist_cannot_cancel_a_patient_request(): void
+    {
+        $bond = $this->pendingBond($this->patient(), $this->psychologist());
+
+        $this->as($bond->psychologist->user)->deleteJson(self::REQUEST_BOND."/{$bond->id}")->assertForbidden();
+        $this->assertSame('pending', $bond->fresh()->status);
+    }
+
     // ---------------------------------------------- aceitar e recusar (RF-11)
 
     public function test_psychologist_accepts_pending_request(): void
@@ -500,10 +563,12 @@ class BondTest extends TestCase
             ->assertOk()
             ->assertJsonPath('id', $bond->id)
             ->assertJsonPath('status', 'active')
-            ->assertJsonPath('responded_at', '2026-10-21T12:00:00-03:00');
+            ->assertJsonPath('responded_at', '2026-10-21T12:00:00-03:00')
+            ->assertJsonPath('accepted_at', '2026-10-21T12:00:00-03:00');
 
         $this->assertDatabaseHas('bonds', ['id' => $bond->id, 'status' => 'active']);
         $this->assertNotNull($bond->fresh()->responded_at);
+        $this->assertSame('2026-10-21 12:00:00', $bond->fresh()->accepted_at?->format('Y-m-d H:i:s'));
     }
 
     public function test_psychologist_accepts_without_ceiling_of_patients(): void
@@ -585,9 +650,11 @@ class BondTest extends TestCase
             ->assertOk()
             ->assertJsonPath('status', 'ended')
             ->assertJsonPath('responded_at', '2026-10-21T10:00:00-03:00')
+            ->assertJsonPath('accepted_at', null)
             ->assertJsonPath('ended_at', '2026-10-21T10:00:00-03:00');
 
-        $this->assertDatabaseHas('bonds', ['id' => $bond->id, 'status' => 'ended', 'ended_by_user_id' => $psychologist->user_id]);
+        // A recusa responde e encerra, mas o vinculo nunca ficou ativo
+        $this->assertDatabaseHas('bonds', ['id' => $bond->id, 'status' => 'ended', 'ended_by_user_id' => $psychologist->user_id, 'accepted_at' => null]);
 
         // CA-11.2: o catalogo segue acessivel e o paciente pode pedir de novo
         $this->as($patient->user)->getJson(self::CATALOG)->assertOk();
@@ -620,6 +687,44 @@ class BondTest extends TestCase
         $this->as($patient->user)->getJson(self::CATALOG)->assertOk();
     }
 
+    public function test_ending_an_active_bond_keeps_accepted_at(): void
+    {
+        $this->travelTo(Carbon::parse('2026-10-21 10:00:00'));
+        $psychologist = $this->psychologist();
+        $bond = $this->pendingBond($this->patient(), $psychologist);
+        $this->as($psychologist->user)->postJson("/api/v1/psychologist/bond-requests/{$bond->id}/accept")->assertOk();
+
+        $this->travel(3)->days();
+        $this->as($bond->patient->user)->postJson("/api/v1/bonds/{$bond->id}/end")
+            ->assertOk()
+            ->assertJsonPath('status', 'ended')
+            ->assertJsonPath('accepted_at', '2026-10-21T10:00:00-03:00')
+            ->assertJsonPath('ended_at', '2026-10-24T10:00:00-03:00');
+        $this->assertSame('2026-10-21 10:00:00', $bond->fresh()->accepted_at?->format('Y-m-d H:i:s'));
+    }
+
+    public function test_patient_bond_list_separates_rejected_request_from_ended_bond(): void
+    {
+        $this->travelTo(Carbon::parse('2026-10-21 10:00:00'));
+        $patient = $this->patient();
+        $psychologist = $this->psychologist();
+        $rejected = $this->pendingBond($patient, $psychologist);
+        $this->as($psychologist->user)->postJson("/api/v1/psychologist/bond-requests/{$rejected->id}/reject")->assertOk();
+        $accepted = $this->pendingBond($patient, $psychologist);
+        $this->as($psychologist->user)->postJson("/api/v1/psychologist/bond-requests/{$accepted->id}/accept")->assertOk();
+
+        $response = $this->as($patient->user)->getJson('/api/v1/patient/bonds')->assertOk()
+            ->assertJsonPath('data.0.id', $accepted->id)
+            ->assertJsonPath('data.0.accepted_at', '2026-10-21T10:00:00-03:00')
+            ->assertJsonPath('data.1.id', $rejected->id)
+            ->assertJsonPath('data.1.responded_at', '2026-10-21T10:00:00-03:00')
+            ->assertJsonPath('data.1.accepted_at', null);
+        $this->assertSame(
+            ['id', 'status', 'origin', 'requested_at', 'responded_at', 'accepted_at', 'ended_at', 'psychologist', 'unread_messages'],
+            array_keys($response->json('data.0'))
+        );
+    }
+
     public function test_psychologist_ends_active_bond(): void
     {
         $psychologist = $this->psychologist();
@@ -629,6 +734,23 @@ class BondTest extends TestCase
             ->assertOk()
             ->assertJsonPath('status', 'ended');
         $this->assertDatabaseHas('bonds', ['id' => $bond->id, 'ended_by_user_id' => $psychologist->user_id]);
+    }
+
+    // CA-13.1: a outra parte e notificada; quem encerrou nao recebe
+    public function test_ending_notifies_only_the_other_party_in_both_directions(): void
+    {
+        $byPatient = $this->activeBond();
+        $this->as($byPatient->patient->user)->postJson("/api/v1/bonds/{$byPatient->id}/end")->assertOk();
+
+        $this->assertDatabaseHas('notifications', ['user_id' => $byPatient->psychologist->user_id, 'type' => 'bond.ended', 'resource_id' => $byPatient->id]);
+        $this->assertDatabaseMissing('notifications', ['user_id' => $byPatient->patient->user_id, 'type' => 'bond.ended']);
+
+        $byPsychologist = $this->activeBond();
+        $this->as($byPsychologist->psychologist->user)->postJson("/api/v1/bonds/{$byPsychologist->id}/end")->assertOk();
+
+        $this->assertDatabaseHas('notifications', ['user_id' => $byPsychologist->patient->user_id, 'type' => 'bond.ended', 'resource_id' => $byPsychologist->id]);
+        $this->assertDatabaseMissing('notifications', ['user_id' => $byPsychologist->psychologist->user_id, 'type' => 'bond.ended']);
+        $this->assertDatabaseCount('notifications', 2);
     }
 
     public function test_third_parties_and_missing_ids_get_404_when_ending(): void
@@ -854,6 +976,7 @@ class BondTest extends TestCase
             ['POST', 'psychologist/bond-requests/1/reject'],
             ['POST', 'patient/bonds/redeem-invitation'],
             ['POST', 'patient/bonds/requests'],
+            ['DELETE', 'patient/bonds/requests/1'],
             ['GET', 'catalog/psychologists'],
             ['POST', 'bonds/1/end'],
         ];

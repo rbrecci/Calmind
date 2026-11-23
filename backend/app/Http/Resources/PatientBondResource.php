@@ -19,6 +19,7 @@ class PatientBondResource extends JsonResource
             'origin' => $this->origin,
             'requested_at' => $attributes['requested_at'],
             'responded_at' => $attributes['responded_at'] ?? null,
+            'accepted_at' => $attributes['accepted_at'] ?? null,
             'ended_at' => $attributes['ended_at'] ?? null,
             'psychologist' => [
                 'id' => $this->psychologist->id,

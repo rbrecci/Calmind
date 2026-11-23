@@ -17,6 +17,7 @@ export function createPatientHttp(request: PatientRequest): PatientApi {
     redeemInvitation: (code) => request('POST', '/patient/bonds/redeem-invitation', { code }),
     requestBond: (id) => request('POST', '/patient/bonds/requests', { psychologist_id: id }),
     endBond: (id) => request('POST', `/bonds/${id}/end`),
+    cancelBondRequest: (id) => request('DELETE', `/patient/bonds/requests/${id}`),
     catalogPsychologists: (query) => request('GET', queryPath('/catalog/psychologists', query)),
     reports: (query) => request('GET', queryPath('/patient/reports', query)),
     createReport: (input) => request('POST', '/patient/reports', input),

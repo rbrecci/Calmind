@@ -14,6 +14,7 @@ test('adaptador envia métodos, rotas, filtros e corpos do contrato', async () =
   await api.redeemInvitation('ABCD2345');
   await api.requestBond(7);
   await api.endBond(8);
+  await api.cancelBondRequest(9);
   await api.catalogPsychologists();
   await api.reports();
   await api.createReport({ body: 'Hoje', visibility: 'private' });
@@ -35,6 +36,7 @@ test('adaptador envia métodos, rotas, filtros e corpos do contrato', async () =
     ['POST', '/patient/bonds/redeem-invitation', { code: 'ABCD2345' }],
     ['POST', '/patient/bonds/requests', { psychologist_id: 7 }],
     ['POST', '/bonds/8/end', undefined],
+    ['DELETE', '/patient/bonds/requests/9', undefined],
     ['GET', '/catalog/psychologists', undefined],
     ['GET', '/patient/reports', undefined],
     ['POST', '/patient/reports', { body: 'Hoje', visibility: 'private' }],

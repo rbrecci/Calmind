@@ -5,11 +5,14 @@ import { loadPatientPages } from './load-pages.ts';
 const NOTIFICATIONS = {
   'message.received': { text: 'Você recebeu uma mensagem', destination: '/chat' },
   'task.assigned': { text: 'Você tem uma nova tarefa', destination: '/tasks' },
+  'task.due_soon': { text: 'Uma tarefa vence hoje', destination: '/tasks' },
   'appointment.scheduled': { text: 'Uma consulta foi agendada', destination: '/agenda' },
+  'appointment.upcoming': { text: 'Você tem uma consulta nas próximas 24 horas', destination: '/agenda' },
   'appointment.rescheduled': { text: 'Uma consulta foi reagendada', destination: '/agenda' },
   'appointment.cancelled': { text: 'Uma consulta foi cancelada', destination: '/agenda' },
   'bond.accepted': { text: 'Seu pedido de vínculo foi aceito', destination: '/home' },
   'bond.rejected': { text: 'Seu pedido de vínculo não foi aceito', destination: '/home' },
+  'bond.ended': { text: 'Um vínculo foi encerrado', destination: '/home' },
 } as const;
 
 function known(type: string) {

@@ -187,6 +187,8 @@ describe('notificationText', () => {
   test('usa somente textos estáticos e tipo desconhecido recebe texto genérico', () => {
     assert.equal(notificationText('message.received'), 'Você recebeu uma mensagem');
     assert.equal(notificationText('bond.requested'), 'Um paciente pediu vínculo com você');
+    assert.equal(notificationText('appointment.upcoming'), 'Você tem uma consulta nas próximas 24 horas');
+    assert.equal(notificationText('bond.ended'), 'Um vínculo foi encerrado');
     assert.equal(notificationText('tipo.novo'), 'Você recebeu uma notificação');
   });
 });

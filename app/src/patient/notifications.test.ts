@@ -10,6 +10,12 @@ test('notificações mostram somente tipo e destino, sem conteúdo clínico', ()
   assert.equal(notificationDestination('task.assigned'), '/tasks');
   assert.equal(notificationDestination('appointment.cancelled'), '/agenda');
   assert.equal(notificationDestination('bond.accepted'), '/home');
+  assert.equal(notificationText('task.due_soon'), 'Uma tarefa vence hoje');
+  assert.equal(notificationDestination('task.due_soon'), '/tasks');
+  assert.equal(notificationText('appointment.upcoming'), 'Você tem uma consulta nas próximas 24 horas');
+  assert.equal(notificationDestination('appointment.upcoming'), '/agenda');
+  assert.equal(notificationText('bond.ended'), 'Um vínculo foi encerrado');
+  assert.equal(notificationDestination('bond.ended'), '/home');
   assert.equal(notificationDestination('appointment.future_unknown'), '/notifications');
   assert.equal(notificationText('segredo clínico'), 'Você tem uma nova notificação');
   assert.equal(notificationDestination('segredo clínico'), '/notifications');

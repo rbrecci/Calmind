@@ -79,6 +79,8 @@ export function composeRecord(
 export function notificationText(type: string): string {
   if (type === 'message.received') return 'Você recebeu uma mensagem';
   if (type === 'bond.requested') return 'Um paciente pediu vínculo com você';
+  if (type === 'appointment.upcoming') return 'Você tem uma consulta nas próximas 24 horas';
+  if (type === 'bond.ended') return 'Um vínculo foi encerrado';
   return 'Você recebeu uma notificação';
 }
 

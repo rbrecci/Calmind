@@ -47,7 +47,6 @@ Estas não são decisões de mesa: já têm pergunta no `../pesquisa/roteiro-ent
 
 | # | Pergunta | Situação |
 |---|----------|----------|
-| DA-15 | Data exata da apresentação final | Perguntar em aula |
 | DA-16 | Existe versão 2026 do escopo, com pesos de nota? O rodapé do PDF diz 2024 | Perguntar em aula |
 | DA-17 | **Data e formato da entrega da Sprint 1.** Em 20/08/2026 o grupo soube que não é mais 21/08, e não há data nova. Sem ela o `cronograma.md` inteiro fica sem âncora | Perguntar em aula, é a mais urgente das três |
 
@@ -75,3 +74,4 @@ Estas não são decisões de mesa: já têm pergunta no `../pesquisa/roteiro-ent
 | Datas reais das três sprints | 18/08/2026 | `cronograma.md` |
 | DA-02: identificador do pacote do app, `com.tccsenai.calmind` | 04/11/2026 | `../../app/app.json` (`android.package`) |
 | DA-03: tráfego sem TLS liberado (`usesCleartextTraffic` via `expo-build-properties`) apenas para demonstração com dados fictícios. Limite de segurança: token e dados trafegam abertos na rede; precisa sair, com HTTPS na API, antes de qualquer uso real | 04/11/2026 | `../../app/app.json` (plugin `expo-build-properties`) |
+| DA-15: apresentação final na sexta 04/12/2026 | 23/11/2026 | `cronograma.md` §0.2 e `../../FinalSprint3.md` |

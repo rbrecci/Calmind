@@ -28,14 +28,14 @@ Montado em 18/08/2026 (terça). **Datas revisadas em 20/08/2026: ver o aviso aba
 
 ### 0.2 Calendário
 
-Aulas em período integral às **quintas e sextas**. Sprint 1 entrega **sexta 21/08, fim da tarde**. Apresentação final entre meados de novembro e começo de dezembro.
+Aulas em período integral às **quintas e sextas**. Sprint 1 entrega **sexta 21/08, fim da tarde**. Apresentação final na **sexta 04/12**, confirmada em 23/11.
 
 | Sprint | Início | Entrega | Semanas | Dias de aula |
 |--------|--------|---------|---------|--------------|
 | Sprint 1 | já em curso | **sexta 21/08** | esta semana | 2 (20 e 21/08) |
 | Sprint 2 | segunda 24/08 | **sexta 02/10** | 6 | 12 |
 | Sprint 3 | segunda 05/10 | **sexta 13/11** | 6 | 12 |
-| Preparação e apresentação | 16/11 em diante | a confirmar | folga | |
+| Preparação e apresentação | 16/11 em diante | **sexta 04/12** | 3 | 4 (26 e 27/11, 03 e 04/12) |
 
 **Por que fechar a Sprint 3 em 13/11 e não em 20/11:** 20/11 é sexta e feriado nacional (Consciência Negra), ou seja, não há aula nem entrega possível nesse dia. E se a apresentação cair em meados de novembro, terminar em 13/11 é o que salva. Se a apresentação for só em dezembro, a folga vira ensaio, que nenhum grupo tem.
 

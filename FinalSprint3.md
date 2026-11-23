@@ -1,6 +1,8 @@
 # Calmind: fechamento da Sprint 3
 
-Estado em 04/11/2026, para a reunião de 05/11.
+Estado em 04/11/2026, para a reunião de 05/11. Calendário revisado em 23/11/2026.
+
+**Apresentação: sexta 04/12/2026.**
 
 ## Resumo
 
@@ -35,7 +37,7 @@ Estado em 04/11/2026, para a reunião de 05/11.
 4. Abrir o PR para o `main`.
 
 ### Caio
-1. Perguntar ao professor: data da apresentação, se existe escopo de 2026 com pesos de nota e como entregar.
+1. Perguntar ao professor se existe escopo de 2026 com pesos de nota e como entregar os documentos. A data já está confirmada: 04/12.
 2. Com o APK final, testar o fluxo do paciente no celular e corrigir o que falhar.
 3. Deixar o board e as atas prontos para mostrar à banca.
 
@@ -69,13 +71,26 @@ Dois ensaios com o APK final no celular.
 | Sete requisitos Must cortados (medicação e IA) | Manter o corte e justificar por escrito, porque o congelamento foi em 30/10 |
 | Quem paga o servidor, se passar dos 30 dias | Definir hoje |
 
-## Ordem do trabalho
+## Calendário até 04/12
 
-1. Professor confirma a data.
-2. Servidor no ar e APK final.
-3. Testes no celular e correções.
-4. Relatório, ABNT e slides fechados.
-5. Ensaios.
+Montado de trás para frente a partir da apresentação. Dias de aula em negrito.
+
+| Data | Marco | Quem |
+|---|---|---|
+| seg 23/11 | APK atual testado no celular, em casa. Conta na Railway criada | Rafael |
+| ter 24/11 | API no ar na Railway, com HTTPS. Newman rodado contra o servidor | Rafael e Zanetti |
+| qua 25/11 | APK final v1 com o endereço da Railway, enviado ao grupo à noite | Rafael |
+| **qui 26/11** | Teste no celular: paciente (Caio) e psicólogo (Mariana), numa lista única de bugs. Roteiro da demonstração fechado. Prints para os manuais | Caio, Mariana, Rafael, Nicoly, Isabela |
+| **sex 27/11** | Ensaio 1 completo, com cronômetro, mesmo com slides crus | Todos |
+| sáb 28 a seg 30/11 | Correção dos bugs da lista. **Código congela na segunda 30/11 à noite**, com APK final v2 e PR para o `main` | Rafael, Caio, Mariana |
+| ter 01/12 | ABNT, manuais e relatório de testes fechados. Vídeo da demonstração gravado como plano B | Isabela, Nicoly, Zanetti |
+| qua 02/12 | Slides fechados. Revisão cruzada: quem não escreveu lê | Todos |
+| **qui 03/12** | Ensaio 2 na escola: Wi-Fi da escola contra a Railway, projetor, celular espelhado | Todos |
+| **sex 04/12** | Apresentação | Todos |
+
+**Regra do congelamento:** depois de 30/11, código só muda se quebrar a demonstração, e cada mudança exige APK novo e o roteiro rodado de novo. Refinamento depois dessa data vai para slide e documento, não para código.
+
+**Plano B da demonstração:** se o Wi-Fi da escola falhar, o celular usa o 4G. Se o servidor cair, entra o vídeo gravado em 01/12.
 
 **O manual começa já:** não depende do servidor.
 

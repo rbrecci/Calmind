@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { patientApi } from '@/api/patient';
 import type { Message } from '@/api/patient/types';
-import { Button, Colors, formatDate, formatDateTime, formatUnread, ListItem, Radius, RoleColors, Spacing, Text, TextField } from '@/design-system';
+import { Button, Colors, formatDate, formatDateTime, formatUnread, ListItem, MessageComposer, Radius, RoleColors, Spacing, Text } from '@/design-system';
 import { bondsWithConversation, selectBond } from '@/patient/bonds';
 import { deliverMessage, lastOwnMessageId, mergeMessages, watchConversation } from '@/patient/conversation';
 import { loadPatientPages } from '@/patient/load-pages';
@@ -60,11 +60,8 @@ export default function Chat() {
     <Text>{failed}</Text>
     <Button tone="patient" label="Reenviar" disabled={sending} onPress={() => void send(failed)} />
     <Button tone="patient" variant="secondary" label="Editar mensagem" disabled={sending} onPress={() => { setDraft(failed); setFailed(null); setSendError(null); }} />
-  </Card> : <>
-    <TextField label="Mensagem" accessibilityLabel="Texto da mensagem" value={draft} onChangeText={setDraft}
-      multiline maxLength={2000} editable={!sending} />
-    <Button tone="patient" label={sending ? 'Enviando...' : 'Enviar mensagem'} disabled={sending || !draft.trim()} onPress={() => void send(draft)} />
-  </> : undefined;
+  </Card> : <MessageComposer tone="patient" value={draft} onChangeText={setDraft} sending={sending}
+    onSend={() => void send(draft)} /> : undefined;
   return <PatientPage title="Conversa" footer={composer} stickToEnd>
     <Feedback loading={bonds.loading} error={bonds.error} retry={() => void bonds.reload()} />
     {!bonds.loading && !bonds.error && !bond ? <Text>Nenhum vínculo disponível para esta conversa.</Text> : null}

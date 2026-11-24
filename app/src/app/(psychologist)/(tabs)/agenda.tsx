@@ -5,7 +5,7 @@ import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { ApiError } from '@/api';
 import { psychologistApi } from '@/api/psychologist';
 import type { Appointment, AppointmentInput } from '@/api/psychologist/types';
-import { formatDateTime, Spacing, Text } from '@/design-system';
+import { ChoiceGroup, formatDateTime, Spacing, Text } from '@/design-system';
 import { isAppointmentConflict, localAppointmentIso, splitAppointments } from '@/psychologist/domain';
 import { collectPages } from '@/psychologist/resource';
 import { Action, Card, ErrorNotice, Field, Page, useConfirmation, useResource } from '@/psychologist/ui';
@@ -119,37 +119,34 @@ export default function Agenda() {
         <Text variant="h4" accessibilityRole="header">{title}</Text>
         {items.map((appointment) => <Card key={appointment.id}>
           <Text variant="h5">{appointment.patient.name}</Text>
-          <Text>{formatDateTime(appointment.scheduled_at)}</Text>
-          <Text>{statusText[appointment.status]}</Text>
-          <Text>Modalidade: {appointment.modality === 'online' ? 'Online' : appointment.modality === 'presencial' ? 'Presencial' : 'Não informada'}</Text>
+          <Text>{formatDateTime(appointment.scheduled_at)} · {statusText[appointment.status]}</Text>
+          {appointment.modality ? <Text color="textSecondary">{appointment.modality === 'online' ? 'Online' : 'Presencial'}</Text> : null}
           {appointment.notes ? <Text>{appointment.notes}</Text> : null}
-          {activeBonds.has(appointment.bond_id) && (appointment.status === 'scheduled' || appointment.status === 'rescheduled') ? <>
+          {activeBonds.has(appointment.bond_id) && (appointment.status === 'scheduled' || appointment.status === 'rescheduled') ? <View style={{ flexDirection: 'row', gap: Spacing.two }}>
             <Action variant="secondary" label="Reagendar" accessibilityLabel={`Reagendar consulta de ${appointment.patient.name}`}
-              disabled={busy || conflict !== null} onPress={() => edit(appointment)} />
-            <Action variant="destructive" label="Cancelar consulta" accessibilityLabel={`Cancelar consulta de ${appointment.patient.name}`}
-              disabled={busy || conflict !== null} onPress={() => {
+              disabled={busy || conflict !== null} onPress={() => edit(appointment)} style={{ flex: 1 }} />
+            <Action variant="destructive" label="Cancelar" accessibilityLabel={`Cancelar consulta de ${appointment.patient.name}`}
+              disabled={busy || conflict !== null} style={{ flex: 1 }} onPress={() => {
                 ask('Cancelar consulta?', `Consulta de ${appointment.patient.name}, ${formatDateTime(appointment.scheduled_at)}.`,
                   () => { void cancel(appointment.id); }, 'destructive');
               }} />
-          </> : null}
+          </View> : null}
           {!activeBonds.has(appointment.bond_id) ? <Text>Vínculo encerrado. Somente leitura.</Text> : null}
         </Card>)}
       </Fragment> : null)}
       {resource.data.patients.length === 0 ? <Text>É preciso ter um vínculo ativo para agendar uma consulta.</Text> : <Card>
         <Text variant="h4">{editing === null ? 'Agendar consulta' : 'Reagendar consulta'}</Text>
-        <Text>Paciente</Text>
-        {resource.data.patients.map((item) => <Action key={item.bond_id} variant="secondary"
-          label={`${bondId === item.bond_id ? 'Selecionado: ' : 'Selecionar: '}${item.patient.name}`}
-          disabled={busy || conflict !== null || editing !== null} onPress={() => setBondId(item.bond_id)} />)}
+        <ChoiceGroup tone="psychologist" label="Paciente" value={bondId} onChange={setBondId}
+          options={resource.data.patients.map((item) => ({ value: item.bond_id, label: item.patient.name }))}
+          disabled={busy || conflict !== null || editing !== null} />
         {errors?.bond_id ? <Text color="error" accessibilityRole="alert">{errors.bond_id.join(' ')}</Text> : null}
         <Field label="Data da consulta (DD/MM/AAAA)" value={date} onChangeText={setDate} placeholder="DD/MM/AAAA" maxLength={10}
           editable={!busy && conflict === null} error={dateError ?? errors?.scheduled_at?.join(' ')} />
         <Field label="Hora da consulta (HH:MM)" value={time} onChangeText={setTime} placeholder="HH:MM" maxLength={5} editable={!busy && conflict === null} />
         <View style={{ gap: Spacing.two }}>
-          <Text>Modalidade: {modality === 'online' ? 'Online' : modality === 'presencial' ? 'Presencial' : 'Não informada'}</Text>
-          <Action variant="secondary" label="Atendimento online" disabled={busy || conflict !== null} onPress={() => setModality('online')} />
-          <Action variant="secondary" label="Atendimento presencial" disabled={busy || conflict !== null} onPress={() => setModality('presencial')} />
-          <Action variant="secondary" label="Deixar modalidade sem informar" disabled={busy || conflict !== null} onPress={() => setModality(null)} />
+          <ChoiceGroup tone="psychologist" label="Modalidade" value={modality} onChange={setModality}
+            options={[{ value: 'online', label: 'Online' }, { value: 'presencial', label: 'Presencial' }, { value: null, label: 'Não informar' }]}
+            disabled={busy || conflict !== null} />
           {errors?.modality ? <Text color="error" accessibilityRole="alert">{errors.modality.join(' ')}</Text> : null}
         </View>
         <Field label="Observação (opcional)" value={notes} onChangeText={setNotes} maxLength={255} multiline

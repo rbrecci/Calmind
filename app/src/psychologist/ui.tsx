@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
-import { Modal, StyleSheet, View } from 'react-native';
+import { Modal, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { ApiError } from '@/api';
 import { Button, Colors, confirmationVariants, Radius, Screen, Spacing, Text, TextField, type ButtonVariant, type ConfirmationKind } from '@/design-system';
 import type { TextFieldProps } from '@/design-system/text-field';
@@ -16,11 +16,12 @@ export function Card({ children }: { children: ReactNode }) {
   return <View style={styles.card}>{children}</View>;
 }
 
-export function Action({ label, onPress, disabled = false, loading = false, variant, accessibilityLabel }: {
+export function Action({ label, onPress, disabled = false, loading = false, variant, accessibilityLabel, style }: {
   label: string; onPress: () => void; disabled?: boolean; loading?: boolean; variant?: ButtonVariant; accessibilityLabel?: string;
+  style?: StyleProp<ViewStyle>;
 }) {
   return <Button tone="psychologist" variant={variant} label={loading ? 'Aguarde...' : label}
-    accessibilityLabel={accessibilityLabel ?? label} onPress={onPress} disabled={disabled || loading} />;
+    accessibilityLabel={accessibilityLabel ?? label} onPress={onPress} disabled={disabled || loading} style={style} />;
 }
 
 export function Field(props: TextFieldProps) {

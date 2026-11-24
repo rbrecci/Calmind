@@ -78,16 +78,16 @@ export function TaskForm({ bondId, readonly, tasks, onChanged }: TaskFormProps) 
       <Text>{task.status === 'completed' ? 'Concluída' : 'Pendente'}</Text>
       {task.due_date ? <Text>Prazo: {formatDate(task.due_date)}</Text> : null}
       {task.completed_at ? <Text>Concluída em {formatDateTime(task.completed_at)}</Text> : null}
-      {!readonly && task.status === 'pending' ? <>
-        <Action variant="secondary" label="Editar tarefa" accessibilityLabel={`Editar tarefa: ${task.title}`} disabled={busy} onPress={() => {
+      {!readonly && task.status === 'pending' ? <View style={{ flexDirection: 'row', gap: Spacing.two }}>
+        <Action variant="secondary" label="Editar" accessibilityLabel={`Editar tarefa: ${task.title}`} disabled={busy} style={{ flex: 1 }} onPress={() => {
           setEditing(task.id); setTitle(task.title); setDescription(task.description ?? '');
           setDueDate(task.due_date?.split('-').reverse().join('/') ?? '');
           setError(null); setDateError(undefined);
         }} />
-        <Action variant="destructive" label="Arquivar tarefa" accessibilityLabel={`Arquivar tarefa: ${task.title}`} disabled={busy} onPress={() => {
+        <Action variant="destructive" label="Arquivar" accessibilityLabel={`Arquivar tarefa: ${task.title}`} disabled={busy} style={{ flex: 1 }} onPress={() => {
           ask('Arquivar tarefa?', `A tarefa "${task.title}" sairá da lista.`, () => archive(task), 'destructive');
         }} />
-      </> : null}
+      </View> : null}
     </Card>)}
     <ErrorNotice error={error} />
     {!readonly ? <Card>

@@ -10,6 +10,8 @@ Fonte de verdade: [`docs/identidade-visual.md`](../../../docs/identidade-visual.
 | `typography.ts` | Escala H1 a H5, parágrafo e small, com Quicksand SemiBold e Poppins |
 | `fonts.ts` | Carrega as fontes empacotadas no app |
 | `text.tsx`, `button.tsx`, `text-field.tsx`, `screen.tsx`, `list-item.tsx` | Componentes base |
+| `choice-group.tsx` | Escolha de uma opção entre poucas, em chips; a escolhida fica cheia na cor do lado |
+| `message-composer.tsx` | Rodapé das conversas: campo e botão "Enviar" na mesma linha |
 | `format-date.ts` | Formatação de data e hora para tela, na hora local do aparelho |
 | `counts.ts` | Contagem de não lidas em texto (`formatUnread`) e contador de aba (`tabBadge`) |
 | `confirmation.ts` | Variante dos botões de uma confirmação, comum ou destrutiva |
@@ -29,7 +31,7 @@ As outras props valem com `scroll`:
 | `stickToEnd` | Rolagem abre no fim e volta para ele quando o conteúdo cresce ou o teclado abre | As duas conversas |
 
 ```tsx
-<Screen scroll stickToEnd footer={<Button label="Enviar mensagem" onPress={send} />}>{mensagens}</Screen>
+<Screen scroll stickToEnd footer={<MessageComposer tone="patient" value={draft} onChangeText={setDraft} onSend={send} />}>{mensagens}</Screen>
 ```
 
 ## Qual botão usar
@@ -54,6 +56,15 @@ As outras props valem com `scroll`:
 ```
 
 O leitor de tela lê a linha inteira como um botão, com o contador no nome ("Notificações, 2").
+
+## Escolha entre opções
+
+`ChoiceGroup` substitui a fila de botões iguais com uma linha "Modalidade: X" em cima: a opção escolhida fica cheia na cor do lado e o estado se vê sem ler texto. Cada chip é um `radio` com `checked` para o leitor de tela.
+
+```tsx
+<ChoiceGroup tone="psychologist" label="Modalidade" value={modality} onChange={setModality}
+  options={[{ value: 'online', label: 'Online' }, { value: 'presencial', label: 'Presencial' }]} />
+```
 
 ## Datas
 

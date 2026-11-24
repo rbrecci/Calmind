@@ -1,10 +1,12 @@
 // Todo componente visual do app mora aqui, e as telas importam só deste arquivo (RNF-34).
 // Componente criado fora do design system é divergência a corrigir antes de fechar a sprint.
 export { Button, type ButtonProps, type ButtonTone, type ButtonVariant } from './button';
+export { ChoiceGroup, type ChoiceGroupProps, type ChoiceOption } from './choice-group';
 export { confirmationVariants, type ConfirmationKind } from './confirmation';
 export { formatUnread, tabBadge } from './counts';
 export { formatDate, formatDateTime, formatTime, formatWeekdayDate } from './format-date';
 export { ListItem, type ListItemProps } from './list-item';
+export { MessageComposer, type MessageComposerProps } from './message-composer';
 export { Screen } from './screen';
 export { Text, type TextColor, type TextProps } from './text';
 export { TextField, type TextFieldProps } from './text-field';

@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { ApiError } from '@/api';
 import { psychologistApi } from '@/api/psychologist';
 import type { Profile, ProfileInput } from '@/api/psychologist/types';
-import { Text } from '@/design-system';
+import { ChoiceGroup, Text } from '@/design-system';
 import { usePsychologistAccess } from '@/psychologist/access';
 import { useSession } from '@/session/session-context';
 import { Action, ErrorNotice, Field, FieldErrorsDisplay, Page } from '@/psychologist/ui';
@@ -34,10 +34,9 @@ export default function ProfileScreen() {
     <Text>Escreva sua apresentação para as pessoas que consultam o catálogo.</Text>
     <Field label="Abordagem" value={form.profile_approach ?? ''} onChangeText={(value) => setForm({ ...form, profile_approach: value })} error={fieldError('profile_approach')} />
     <Field label="Especialidade" value={form.profile_specialty ?? ''} onChangeText={(value) => setForm({ ...form, profile_specialty: value })} error={fieldError('profile_specialty')} />
-    <Text>Modalidade: {form.profile_modality === 'ambos' ? 'Online e presencial' : form.profile_modality === 'online' ? 'Online' : 'Presencial'}</Text>
-    {(['online', 'presencial', 'ambos'] as const).map((modality) => <Action key={modality} variant="secondary"
-      label={({ online: 'Atender online', presencial: 'Atender presencialmente', ambos: 'Atender online e presencialmente' })[modality]}
-      disabled={busy} onPress={() => setForm({ ...form, profile_modality: modality })} />)}
+    <ChoiceGroup tone="psychologist" label="Modalidade" value={form.profile_modality ?? null}
+      onChange={(modality) => setForm({ ...form, profile_modality: modality })} disabled={busy}
+      options={[{ value: 'online', label: 'Online' }, { value: 'presencial', label: 'Presencial' }, { value: 'ambos', label: 'Online e presencial' }]} />
     <Field label="Região de atendimento" value={form.profile_region ?? ''} onChangeText={(value) => setForm({ ...form, profile_region: value })} error={fieldError('profile_region')} />
     <Field label="Sobre você (até 3000 caracteres)" multiline maxLength={3000} value={form.profile_bio ?? ''} onChangeText={(value) => setForm({ ...form, profile_bio: value })} error={fieldError('profile_bio')} />
     <ErrorNotice error={error} /><FieldErrorsDisplay error={error} />

@@ -34,6 +34,8 @@ function RootNavigator() {
       <Stack.Protected guard={role === 'psychologist'}>
         <Stack.Screen name="(psychologist)" />
       </Stack.Protected>
+      {/* Fora dos guards: o atalho de teste precisa abrir com e sem sessão. */}
+      <Stack.Screen name="demo-login" />
     </Stack>
   );
 }

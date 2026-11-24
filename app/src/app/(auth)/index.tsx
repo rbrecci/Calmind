@@ -2,8 +2,9 @@ import { Redirect } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { api, ApiError, type FieldErrors, type Role } from '@/api';
+import { api, ApiError, type FieldErrors, type LoginInput, type Role } from '@/api';
 import { Button, Colors, Radius, Screen, Spacing, Text, TextField } from '@/design-system';
+import { DEMO_ACCOUNTS, demoCredentials, demoEnv, isDemoLoginEnabled } from '@/auth/demo-accounts';
 import { authErrorMessage, buildRegisterInput, isMinor, validateRegisterForm } from '@/auth/register-form';
 import { useSession } from '@/session/session-context';
 
@@ -34,12 +35,12 @@ export default function EntryScreen() {
     setStep(next);
   }
 
-  async function submitLogin() {
+  async function submitLogin(credentials: LoginInput) {
     setSubmitting(true);
     setMessage(null);
     setFieldErrors({});
     try {
-      await signIn({ email, password });
+      await signIn(credentials);
     } catch (error) {
       setMessage(authErrorMessage('login', error));
       setFieldErrors(error instanceof ApiError ? error.errors ?? {} : {});
@@ -74,7 +75,7 @@ export default function EntryScreen() {
   }
 
   return (
-    <Screen scroll>
+    <Screen scroll center={step === 'login'}>
       {step === 'login' ? (
         <>
           <View style={styles.brand}>
@@ -86,11 +87,24 @@ export default function EntryScreen() {
             keyboardType="email-address" value={email} onChangeText={setEmail} error={fieldErrors.email?.[0]} />
           <TextField label="Senha" placeholder="Sua senha" autoCapitalize="none" autoComplete="current-password"
             secureTextEntry value={password} onChangeText={setPassword} error={fieldErrors.password?.[0]} />
-          <Button label={submitting ? 'Entrando...' : 'Entrar'} disabled={submitting} onPress={submitLogin} />
-          <Button label="Criar conta" disabled={submitting} onPress={() => goTo('choice')} />
+          <Button label={submitting ? 'Entrando...' : 'Entrar'} disabled={submitting}
+            onPress={() => submitLogin({ email, password })} />
+          <Button variant="secondary" label="Criar conta" disabled={submitting} onPress={() => goTo('choice')} />
           <Text variant="small" color="textSecondary" style={styles.center}>
             No cadastro você escolhe se é paciente ou psicólogo.
           </Text>
+          {isDemoLoginEnabled(demoEnv) ? (
+            <>
+              <Text variant="small" color="textSecondary" style={styles.center}>Entrar como (versão de teste)</Text>
+              {DEMO_ACCOUNTS.map((account) => {
+                const credentials = demoCredentials(demoEnv, account.key);
+                return credentials ? (
+                  <Button key={account.key} variant="secondary" label={account.label} disabled={submitting}
+                    onPress={() => submitLogin(credentials)} />
+                ) : null;
+              })}
+            </>
+          ) : null}
         </>
       ) : step === 'choice' ? (
         <>
@@ -108,7 +122,7 @@ export default function EntryScreen() {
             <Button label="Continuar como psicólogo" onPress={() => goTo('register', 'psychologist')} />
           </View>
           <Text variant="small" color="textSecondary">O registro no CRP passa por conferência antes de o perfil ir ao ar.</Text>
-          <Button label="Voltar para entrar" onPress={() => goTo('login')} />
+          <Button variant="secondary" label="Voltar para entrar" onPress={() => goTo('login')} />
         </>
       ) : (
         <>
@@ -143,7 +157,7 @@ export default function EntryScreen() {
             onChangeText={setConfirmPassword} error={fieldErrors.confirm_password?.[0]} />
           <Text variant="small" color="textSecondary">Mínimo de 8 caracteres.</Text>
           <Button label={submitting ? 'Criando conta...' : 'Criar conta'} disabled={submitting} onPress={submitRegister} />
-          <Button label="Voltar para escolher perfil" disabled={submitting} onPress={() => goTo('choice')} />
+          <Button variant="secondary" label="Voltar para escolher perfil" disabled={submitting} onPress={() => goTo('choice')} />
         </>
       )}
     </Screen>

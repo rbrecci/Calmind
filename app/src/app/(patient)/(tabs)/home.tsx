@@ -45,20 +45,24 @@ export default function PatientHome() {
         <Text variant="h5">{bond.psychologist.name}</Text>
         <Text color="textSecondary">CRP {bond.psychologist.crp}</Text>
         <Text>{bondStatusText(bond)}</Text>
-        {bond.status === 'active' ? <Button tone="patient" variant="destructive" label="Encerrar vínculo" onPress={() => setEnding(true)} disabled={busy} /> : null}
-        {bond.status === 'pending' ? <Button tone="patient" variant="destructive" label="Cancelar solicitação" onPress={() => setCancelling(true)} disabled={busy} /> : null}
       </Card> : null}
-      {actionError ? <Text accessibilityRole="alert" color="error">{actionError}</Text> : null}
-      {ending ? <Confirmation message="Encerrar este vínculo? O histórico ficará disponível para leitura e novas trocas serão bloqueadas."
-        kind="destructive" confirm={() => void endBond()} cancel={() => setEnding(false)} busy={busy} /> : null}
-      {cancelling ? <Confirmation message="Retirar esta solicitação? Você poderá escolher outro profissional depois."
-        kind="destructive" confirm={() => void cancelRequest()} cancel={() => setCancelling(false)} busy={busy} /> : null}
       {!bond || bond.status === 'ended' ? <>
         <Text variant="h5">Como você chegou aqui?</Text>
         <ListItem tone="patient" title="Tenho um código de convite" onPress={() => router.push('/invitation')} />
         <ListItem tone="patient" title="Quero encontrar um profissional" onPress={() => router.push('/catalog')} />
       </> : null}
       {bond?.status === 'active' ? <Button tone="patient" label="Novo relato" onPress={() => router.push('/new-report')} /> : null}
+    </> : null}
+    {/* Ações da conta no fim: a destrutiva não é a primeira coisa que se vê ao abrir o app. A
+        confirmação aparece logo acima de quem a pediu. */}
+    {data && !error ? <>
+      {bond?.status === 'active' ? <Button tone="patient" variant="destructive" label="Encerrar vínculo" onPress={() => setEnding(true)} disabled={busy} /> : null}
+      {bond?.status === 'pending' ? <Button tone="patient" variant="destructive" label="Cancelar solicitação" onPress={() => setCancelling(true)} disabled={busy} /> : null}
+      {actionError ? <Text accessibilityRole="alert" color="error">{actionError}</Text> : null}
+      {ending ? <Confirmation message="Encerrar este vínculo? O histórico ficará disponível para leitura e novas trocas serão bloqueadas."
+        kind="destructive" confirm={() => void endBond()} cancel={() => setEnding(false)} busy={busy} /> : null}
+      {cancelling ? <Confirmation message="Retirar esta solicitação? Você poderá escolher outro profissional depois."
+        kind="destructive" confirm={() => void cancelRequest()} cancel={() => setCancelling(false)} busy={busy} /> : null}
     </> : null}
     <Button tone="patient" variant="secondary" label="Sair da conta" onPress={() => void signOut()} />
   </PatientPage>;

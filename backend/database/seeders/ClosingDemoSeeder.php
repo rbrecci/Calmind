@@ -7,6 +7,7 @@ use App\Models\Bond;
 use App\Models\Message;
 use App\Models\Notification;
 use App\Models\Patient;
+use App\Models\Task;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -64,6 +65,27 @@ class ClosingDemoSeeder extends Seeder
                 'notes' => 'Consulta fictícia para demonstração.',
                 'created_by_user_id' => $psychologist->id,
             ]);
+        }
+
+        // Atribuidas depois da consulta concluida. due_date e obrigatorio, entao nao ha tarefa sem prazo;
+        // a de prazo hoje gera o lembrete task.due_soon (RF-16) quando a Elizabeth abre as notificacoes
+        $assignedAt = now()->subDays(5)->setTime(16, 0);
+        foreach ([
+            ['Registrar o humor três vezes nesta semana', 'Use os relatos para anotar como você se sentiu em três dias diferentes, com uma frase sobre o que aconteceu.', today(), null],
+            ['Praticar a respiração 4-7-8 antes de dormir', 'Inspire contando até 4, segure até 7 e solte o ar contando até 8. Repita quatro vezes, por pelo menos três noites.', today()->addDays(4), null],
+            ['Anotar um pensamento automático e uma resposta alternativa', 'Quando perceber um pensamento que pesa, escreva o que pensou, o que sentiu e uma forma mais equilibrada de ver a situação. Traga para a próxima sessão.', today()->addDays(10), null],
+            ['Escrever três coisas que deram certo no dia', 'Antes de dormir, liste três coisas pequenas que correram bem.', today()->subDay(), now()->subDays(2)->setTime(21, 30)],
+        ] as [$title, $description, $dueDate, $completedAt]) {
+            $task = new Task([
+                'bond_id' => $bond->id,
+                'title' => $title,
+                'description' => $description,
+                'due_date' => $dueDate,
+                'created_by_user_id' => $psychologist->id,
+                'completed_at' => $completedAt,
+            ]);
+            $task->created_at = $assignedAt;
+            $task->save();
         }
 
         Notification::create([

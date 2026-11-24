@@ -5,9 +5,12 @@ namespace Tests\Feature;
 use App\Models\Appointment;
 use App\Models\Bond;
 use App\Models\ConsentAcceptance;
+use App\Models\ConsentTerm;
 use App\Models\Message;
 use App\Models\Notification;
+use App\Models\Task;
 use App\Models\User;
+use Database\Seeders\ConsentTermSeeder;
 use Database\Seeders\UserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -64,5 +67,36 @@ class ClosingDemoSeederTest extends TestCase
         $psychologistNotice = Notification::where('user_id', $psychologist->id)->whereNull('read_at')->sole();
         $this->assertSame('bond.requested', $psychologistNotice->type);
         $this->assertSame($pending->id, $psychologistNotice->resource_id);
+    }
+
+    public function test_full_seed_gives_the_demo_patient_tasks_and_presentable_terms(): void
+    {
+        $this->seed();
+
+        $psychologist = User::where('email', UserSeeder::PSYCHOLOGIST_EMAIL)->firstOrFail();
+        $patient = User::where('email', UserSeeder::BONDED_PATIENT_EMAIL)->firstOrFail();
+
+        $tasks = Task::whereHas('bond', fn ($bond) => $bond->where('patient_id', $patient->patient->id))->get();
+        $this->assertCount(4, $tasks);
+        $this->assertSame([$psychologist->id], $tasks->pluck('created_by_user_id')->unique()->values()->all());
+        $open = $tasks->whereNull('completed_at');
+        $this->assertCount(1, $open->filter(fn (Task $task) => $task->due_date->isToday()));
+        $this->assertCount(2, $open->filter(fn (Task $task) => $task->due_date->isFuture()));
+        $this->assertCount(1, $tasks->whereNotNull('completed_at'));
+
+        $this->withToken($patient->createToken('mobile')->plainTextToken);
+        $this->getJson('/api/v1/patient/tasks')->assertOk()->assertJsonPath('meta.total', 4);
+        $dueToday = $open->first(fn (Task $task) => $task->due_date->isToday());
+        $this->getJson('/api/v1/notifications')->assertOk()
+            ->assertJsonFragment(['type' => 'task.due_soon', 'resource_id' => $dueToday->id]);
+
+        foreach (ConsentTerm::all() as $term) {
+            $this->assertStringNotContainsString('fictício para desenvolvimento', $term->body);
+            $this->assertStringEndsWith(ConsentTermSeeder::ACADEMIC_NOTICE, $term->body);
+        }
+        $general = ConsentTerm::where('type', 'general')->sole()->body;
+        foreach (['CVV no 188', 'SAMU no 192', 'Lei 13.709/2018', 'Resolução CFP 010/2005', 'CRP'] as $expected) {
+            $this->assertStringContainsString($expected, $general);
+        }
     }
 }

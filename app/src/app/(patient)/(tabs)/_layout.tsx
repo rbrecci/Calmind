@@ -3,6 +3,7 @@ import { Tabs } from 'expo-router/js-tabs';
 import { SymbolView, type AndroidSymbol, type SFSymbol } from 'expo-symbols';
 import { useEffect, useState } from 'react';
 import type { ColorValue } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { patientApi } from '@/api/patient';
 import { Colors, formatUnread, RoleColors, tabBadge, Typography } from '@/design-system';
@@ -19,8 +20,14 @@ function tabIcon({ ios, android }: { ios: SFSymbol; android: AndroidSymbol }) {
   };
 }
 
+// A altura padrão da barra é 49, e o rótulo em 14 (lineHeight 21) perde a metade de baixo:
+// 5 de respiro + ícone 28 + rótulo 21 + 5 dão 59. Com altura própria a barra não soma a área
+// segura sozinha, só a usa de recuo por dentro, então ela entra na conta aqui.
+const TAB_BAR_HEIGHT = 64;
+
 export default function PatientTabsLayout() {
   const pathname = usePathname();
+  const insets = useSafeAreaInsets();
   const [unread, setUnread] = useState<number>();
   // Busca de novo a cada troca de tela, inclusive ao voltar de uma tela empilhada: assim o
   // contador acompanha o que foi lido sem canal próprio. Falha só mantém o último número,
@@ -37,19 +44,19 @@ export default function PatientTabsLayout() {
     tabBarActiveBackgroundColor: RoleColors.patient.accent,
     tabBarActiveTintColor: RoleColors.patient.onAccent,
     tabBarInactiveTintColor: Colors.textSecondary,
-    tabBarLabelStyle: { fontFamily: Typography.small.fontFamily, fontSize: Typography.small.fontSize },
-    tabBarStyle: { backgroundColor: Colors.background, borderTopColor: Colors.border },
+    tabBarLabelStyle: { fontFamily: Typography.small.fontFamily, fontSize: Typography.small.fontSize, lineHeight: Typography.small.lineHeight },
+    tabBarStyle: { backgroundColor: Colors.background, borderTopColor: Colors.border, height: TAB_BAR_HEIGHT + insets.bottom },
     // O contador padrão é vermelho com texto branco, que reprova o contraste; vai na cor do lado.
     tabBarBadgeStyle: { backgroundColor: RoleColors.patient.accent, color: RoleColors.patient.onAccent },
   }}>
-    <Tabs.Screen name="home" options={{ title: 'Início', tabBarIcon: tabIcon({ ios: 'house.fill', android: 'home' }) }} />
+    <Tabs.Screen name="home" options={{ title: 'Início', tabBarAccessibilityLabel: 'Início', tabBarIcon: tabIcon({ ios: 'house.fill', android: 'home' }) }} />
     <Tabs.Screen name="chat" options={{
       title: 'Conversa', tabBarIcon: tabIcon({ ios: 'bubble.left.and.bubble.right.fill', android: 'chat' }),
       tabBarBadge: tabBadge(unread, pathname === '/chat'),
-      tabBarAccessibilityLabel: unread ? `Conversa, ${formatUnread(unread)}` : undefined,
+      tabBarAccessibilityLabel: unread ? `Conversa, ${formatUnread(unread)}` : 'Conversa',
     }} />
-    <Tabs.Screen name="tasks" options={{ title: 'Tarefas', tabBarIcon: tabIcon({ ios: 'checklist', android: 'checklist' }) }} />
-    <Tabs.Screen name="agenda" options={{ title: 'Agenda', tabBarIcon: tabIcon({ ios: 'calendar', android: 'calendar_month' }) }} />
-    <Tabs.Screen name="reports" options={{ title: 'Relatos', tabBarIcon: tabIcon({ ios: 'square.and.pencil', android: 'edit_note' }) }} />
+    <Tabs.Screen name="tasks" options={{ title: 'Tarefas', tabBarAccessibilityLabel: 'Tarefas', tabBarIcon: tabIcon({ ios: 'checklist', android: 'checklist' }) }} />
+    <Tabs.Screen name="agenda" options={{ title: 'Agenda', tabBarAccessibilityLabel: 'Agenda', tabBarIcon: tabIcon({ ios: 'calendar', android: 'calendar_month' }) }} />
+    <Tabs.Screen name="reports" options={{ title: 'Relatos', tabBarAccessibilityLabel: 'Relatos', tabBarIcon: tabIcon({ ios: 'square.and.pencil', android: 'edit_note' }) }} />
   </Tabs>;
 }

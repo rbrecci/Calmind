@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { Fragment, useCallback, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 
@@ -6,7 +6,7 @@ import { ApiError } from '@/api';
 import { psychologistApi } from '@/api/psychologist';
 import type { Appointment, AppointmentInput } from '@/api/psychologist/types';
 import { formatDateTime, Spacing, Text } from '@/design-system';
-import { isAppointmentConflict, localAppointmentIso, sortAppointments } from '@/psychologist/domain';
+import { isAppointmentConflict, localAppointmentIso, splitAppointments } from '@/psychologist/domain';
 import { collectPages } from '@/psychologist/resource';
 import { Action, Card, ErrorNotice, Field, Page, useConfirmation, useResource } from '@/psychologist/ui';
 
@@ -107,31 +107,34 @@ export default function Agenda() {
     }
   }
 
-  const appointments = sortAppointments(resource.data?.appointments ?? []);
+  const appointments = splitAppointments(resource.data?.appointments ?? []);
 
   return <Page title="Agenda">
     {resource.loading ? <Text>Carregando agenda...</Text> : null}
     <ErrorNotice error={resource.error} retry={resource.reload} />
     <ErrorNotice error={error} />
     {resource.data ? <>
-      {appointments.length === 0 ? <Text>Nenhuma consulta agendada.</Text> : null}
-      {appointments.map((appointment) => <Card key={appointment.id}>
-        <Text variant="h5">{appointment.patient.name}</Text>
-        <Text>{formatDateTime(appointment.scheduled_at)}</Text>
-        <Text>{statusText[appointment.status]}</Text>
-        <Text>Modalidade: {appointment.modality === 'online' ? 'Online' : appointment.modality === 'presencial' ? 'Presencial' : 'Não informada'}</Text>
-        {appointment.notes ? <Text>{appointment.notes}</Text> : null}
-        {activeBonds.has(appointment.bond_id) && (appointment.status === 'scheduled' || appointment.status === 'rescheduled') ? <>
-          <Action variant="secondary" label="Reagendar" accessibilityLabel={`Reagendar consulta de ${appointment.patient.name}`}
-            disabled={busy || conflict !== null} onPress={() => edit(appointment)} />
-          <Action variant="destructive" label="Cancelar consulta" accessibilityLabel={`Cancelar consulta de ${appointment.patient.name}`}
-            disabled={busy || conflict !== null} onPress={() => {
-              ask('Cancelar consulta?', `Consulta de ${appointment.patient.name}, ${formatDateTime(appointment.scheduled_at)}.`,
-                () => { void cancel(appointment.id); }, 'destructive');
-            }} />
-        </> : null}
-        {!activeBonds.has(appointment.bond_id) ? <Text>Vínculo encerrado. Somente leitura.</Text> : null}
-      </Card>)}
+      {!appointments.upcoming.length && !appointments.previous.length ? <Text>Nenhuma consulta agendada.</Text> : null}
+      {([['Próximas', appointments.upcoming], ['Anteriores', appointments.previous]] as const).map(([title, items]) => items.length ? <Fragment key={title}>
+        <Text variant="h4" accessibilityRole="header">{title}</Text>
+        {items.map((appointment) => <Card key={appointment.id}>
+          <Text variant="h5">{appointment.patient.name}</Text>
+          <Text>{formatDateTime(appointment.scheduled_at)}</Text>
+          <Text>{statusText[appointment.status]}</Text>
+          <Text>Modalidade: {appointment.modality === 'online' ? 'Online' : appointment.modality === 'presencial' ? 'Presencial' : 'Não informada'}</Text>
+          {appointment.notes ? <Text>{appointment.notes}</Text> : null}
+          {activeBonds.has(appointment.bond_id) && (appointment.status === 'scheduled' || appointment.status === 'rescheduled') ? <>
+            <Action variant="secondary" label="Reagendar" accessibilityLabel={`Reagendar consulta de ${appointment.patient.name}`}
+              disabled={busy || conflict !== null} onPress={() => edit(appointment)} />
+            <Action variant="destructive" label="Cancelar consulta" accessibilityLabel={`Cancelar consulta de ${appointment.patient.name}`}
+              disabled={busy || conflict !== null} onPress={() => {
+                ask('Cancelar consulta?', `Consulta de ${appointment.patient.name}, ${formatDateTime(appointment.scheduled_at)}.`,
+                  () => { void cancel(appointment.id); }, 'destructive');
+              }} />
+          </> : null}
+          {!activeBonds.has(appointment.bond_id) ? <Text>Vínculo encerrado. Somente leitura.</Text> : null}
+        </Card>)}
+      </Fragment> : null)}
       {resource.data.patients.length === 0 ? <Text>É preciso ter um vínculo ativo para agendar uma consulta.</Text> : <Card>
         <Text variant="h4">{editing === null ? 'Agendar consulta' : 'Reagendar consulta'}</Text>
         <Text>Paciente</Text>

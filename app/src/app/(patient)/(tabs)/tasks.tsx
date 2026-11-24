@@ -31,11 +31,11 @@ export default function Tasks() {
       <Text color="textSecondary">Prazo: {task.due_date ? formatDate(task.due_date) : 'Sem prazo'}</Text>
       <Text>{task.status === 'completed' ? 'Concluída' : 'Pendente'}</Text>
       {!active ? <Text variant="small" color="textSecondary">Vínculo encerrado. Somente leitura.</Text> : null}
-      {active && task.status === 'pending' ? <Button tone="patient" label={workingId === task.id ? 'Concluindo...' : 'Marcar como concluída'}
+      {active && task.status === 'pending' ? <Button tone="patient" variant="secondary" label={workingId === task.id ? 'Concluindo...' : 'Marcar como concluída'}
         accessibilityLabel={`Marcar como concluída: ${task.title}`} disabled={workingId !== null || loading} onPress={() => void complete(task.id)} /> : null}
     </Card>;
   }
-  return <PatientPage title="Minhas tarefas">
+  return <PatientPage title="Minhas tarefas" onRefresh={reload}>
     <Text color="textSecondary">Atividades combinadas com seu psicólogo.</Text>
     <Feedback loading={loading} error={error} retry={() => void reload()} />
     {actionError ? <Text accessibilityRole="alert" color="error">{actionError}</Text> : null}
@@ -46,6 +46,5 @@ export default function Tasks() {
       <Text variant="h5" accessibilityRole="header">Concluídas ({data.tasks.completed.length})</Text>
       {data.tasks.completed.length ? data.tasks.completed.map(renderTask) : <Text color="textSecondary">Nenhuma tarefa concluída ainda.</Text>}
     </> : null}
-    <Button tone="patient" variant="secondary" label="Atualizar tarefas" disabled={loading || workingId !== null} onPress={() => void reload()} />
   </PatientPage>;
 }

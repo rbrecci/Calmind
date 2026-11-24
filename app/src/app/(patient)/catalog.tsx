@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import type { CatalogPsychologist, Modality } from '@/api';
 import { patientApi } from '@/api/patient';
 import type { CatalogFilters, CatalogQuery } from '@/api/patient/types';
-import { catalogQuery, hasCatalogFilters } from '@/catalog/catalog-filters';
+import { catalogQuery, countCatalogFilters, hasCatalogFilters } from '@/catalog/catalog-filters';
 import { modalityLabel } from '@/catalog/load-catalog';
 import { Button, Text, TextField } from '@/design-system';
 import { loadPatientPages } from '@/patient/load-pages';
@@ -19,6 +19,9 @@ export default function PatientCatalog() {
   const router = useRouter();
   const [form, setForm] = useState<CatalogFilters>(EMPTY_FILTERS);
   const [applied, setApplied] = useState<CatalogFilters>({});
+  // Recolhidos por padrão: a lista de profissionais é o que a pessoa veio ver.
+  const [showFilters, setShowFilters] = useState(false);
+  const activeFilters = countCatalogFilters(applied);
   const loadCatalog = useMemo(() => () => loadPatientPages((page) => {
     const query: CatalogQuery = { ...page, ...applied };
     return patientApi.catalogPsychologists(query);
@@ -35,16 +38,22 @@ export default function PatientCatalog() {
   }
   return <PatientPage>
     <Text color="textSecondary">Psicólogos com registro conferido no CRP.</Text>
-    {!error ? <Card>
-      <Text variant="h5">Filtros</Text>
+    {!error ? <Button tone="patient" variant="secondary" label={activeFilters ? `Filtros (${activeFilters})` : 'Filtros'}
+      accessibilityLabel={`${showFilters ? 'Esconder' : 'Mostrar'} filtros${activeFilters ? `, ${activeFilters} ${activeFilters === 1 ? 'ativo' : 'ativos'}` : ''}`}
+      onPress={() => setShowFilters(!showFilters)} /> : null}
+    {!error && showFilters ? <Card>
       <TextField label="Abordagem" value={form.approach} onChangeText={(approach) => setForm({ ...form, approach })} maxLength={120} />
       <TextField label="Especialidade" value={form.specialty} onChangeText={(specialty) => setForm({ ...form, specialty })} maxLength={120} />
       <TextField label="Região" value={form.region} onChangeText={(region) => setForm({ ...form, region })} maxLength={120} />
-      <Text>Modalidade: {form.modality ? modalityLabel(form.modality) : 'Qualquer modalidade'}</Text>
-      <Button tone="patient" variant="secondary" label="Qualquer modalidade" onPress={() => setForm({ ...form, modality: undefined })} />
-      {MODALITIES.map((modality) => <Button key={modality} tone="patient" variant="secondary" label={modalityLabel(modality) ?? modality}
-        onPress={() => setForm({ ...form, modality })} />)}
-      <Button tone="patient" label="Buscar" disabled={loading || busy} onPress={() => setApplied(catalogQuery(form))} />
+      <Text>Modalidade</Text>
+      {/* A opção escolhida fica cheia e as outras em contorno; o leitor de tela ouve "selecionada". */}
+      {([undefined, ...MODALITIES] as const).map((modality) => {
+        const label = modality ? modalityLabel(modality) ?? modality : 'Qualquer modalidade';
+        const selected = form.modality === modality;
+        return <Button key={modality ?? 'any'} tone="patient" variant={selected ? 'primary' : 'secondary'} label={label}
+          accessibilityLabel={selected ? `${label}, selecionada` : label} onPress={() => setForm({ ...form, modality })} />;
+      })}
+      <Button tone="patient" label="Buscar" disabled={loading || busy} onPress={() => { setApplied(catalogQuery(form)); setShowFilters(false); }} />
       {hasCatalogFilters(form) || hasCatalogFilters(applied) ? <Button tone="patient" variant="secondary" label="Limpar filtros" disabled={loading || busy}
         onPress={() => { setForm(EMPTY_FILTERS); setApplied({}); }} /> : null}
     </Card> : null}

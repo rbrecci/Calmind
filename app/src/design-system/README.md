@@ -18,6 +18,18 @@ Fonte de verdade: [`docs/identidade-visual.md`](../../../docs/identidade-visual.
 
 `Screen` põe o conteúdo a partir do topo. `center` centraliza na vertical e serve só para tela de conteúdo único e curto (carregando, aviso de espera). Em lista ou formulário, centralizar deixa a metade de cima vazia quando há pouco item.
 
+As outras props valem com `scroll`:
+
+| Prop | O que faz | Quem usa |
+|------|-----------|----------|
+| `refreshing`, `onRefresh` | Arrastar para baixo recarrega a tela (`RefreshControl`). Substitui botão de "Atualizar"; o "Tentar de novo" do erro continua na tela | Início, tarefas e agenda do paciente |
+| `footer` | Fica fixo embaixo, fora da rolagem e acima do teclado (`KeyboardAvoidingView`). Numa aba ele para acima da barra de abas | Campo de mensagem das duas conversas |
+| `stickToEnd` | Rolagem abre no fim e volta para ele quando o conteúdo cresce ou o teclado abre | As duas conversas |
+
+```tsx
+<Screen scroll stickToEnd footer={<Button label="Enviar mensagem" onPress={send} />}>{mensagens}</Screen>
+```
+
 ## Qual botão usar
 
 | Variante | Visual | Quando usar | Exemplo |
@@ -48,6 +60,7 @@ Toda data em tela passa por `format-date.ts`, nunca por `toLocaleString`, que mo
 | Função | Saída |
 |--------|-------|
 | `formatDateTime(iso)` | `qua, 25/11 às 15:00` (o ano aparece só se não for o atual: `qua, 31/12/2025 às 23:59`) |
+| `formatWeekdayDate(iso)` | `qua, 25/11`, mesma regra de ano (`qua, 31/12/2025`). Cabeçalho de dia, como na agenda do paciente |
 | `formatDate(iso)` | `25/11/2026` |
 | `formatTime(iso)` | `15:00` |
 

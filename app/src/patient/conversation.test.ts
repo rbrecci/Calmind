@@ -3,7 +3,7 @@ import { setImmediate } from 'node:timers/promises';
 import { test } from 'node:test';
 import { ApiError } from '../api/types.ts';
 import type { Message, PatientApi } from '../api/patient/types.ts';
-import { deliverMessage, mergeMessages, watchConversation } from './conversation.ts';
+import { deliverMessage, lastOwnMessageId, mergeMessages, watchConversation } from './conversation.ts';
 
 const message: Message = { id: 1, bond_id: 8, sender_user_id: 2, mine: false, body: 'Olá', sent_at: '2026-10-29T08:00:00-03:00', read_at: null };
 
@@ -75,4 +75,11 @@ test('sair de foco também cancela a busca das próximas páginas do histórico'
   release!({ data: [message], meta: { total: 2, page: 1, per_page: 50 } });
   await setImmediate();
   assert.equal(requests, 1);
+});
+
+test('o estado de leitura aparece só na última mensagem própria', () => {
+  const history = [{ ...message, id: 1, mine: true }, { ...message, id: 2, mine: true }, { ...message, id: 3 }];
+  assert.equal(lastOwnMessageId(history), 2);
+  assert.equal(lastOwnMessageId([message]), null);
+  assert.equal(lastOwnMessageId([]), null);
 });

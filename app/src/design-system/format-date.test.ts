@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
-import { formatDate, formatDateTime, formatTime } from './format-date.ts';
+import { formatDate, formatDateTime, formatTime, formatWeekdayDate } from './format-date.ts';
 
 // As datas nascem de componentes locais, e o ISO é gerado a partir delas: assim o teste passa
 // em qualquer fuso, porque a formatação também lê a hora local do aparelho.
@@ -44,6 +44,32 @@ describe('formatDateTime', () => {
     const thisYear = new Date().getFullYear();
     assert.doesNotMatch(formatDateTime(localIso(thisYear, 6, 15, 10)), /\/\d{4}/);
     assert.match(formatDateTime(localIso(thisYear - 1, 6, 15, 10)), new RegExp(`/${thisYear - 1} `));
+  });
+});
+
+describe('formatWeekdayDate', () => {
+  test('mostra dia da semana, dia e mês, sem hora', () => {
+    assert.equal(formatWeekdayDate(localIso(2026, 11, 25, 15), NOW), 'qua, 25/11');
+    assert.equal(formatWeekdayDate(localIso(2026, 3, 5, 8, 7), NOW), 'qui, 05/03');
+  });
+
+  test('inclui o ano só quando ele é diferente do ano atual', () => {
+    assert.equal(formatWeekdayDate(localIso(2025, 12, 31, 23, 59), NOW), 'qua, 31/12/2025');
+    assert.equal(formatWeekdayDate(localIso(2027, 1, 4, 9), NOW), 'seg, 04/01/2027');
+  });
+
+  // O dia da agenda chega como "2026-11-25". Lido como meia-noite UTC, no Brasil viraria dia 24,
+  // e o dia da semana andaria junto.
+  test('data sem hora é dia de calendário, inclusive na virada do ano', () => {
+    assert.equal(formatWeekdayDate('2026-11-25', NOW), 'qua, 25/11');
+    assert.equal(formatWeekdayDate('2026-01-01', NOW), 'qui, 01/01');
+    assert.equal(formatWeekdayDate('2027-01-01', NOW), 'sex, 01/01/2027');
+  });
+
+  test('sem "agora" informado, compara com o ano corrente', () => {
+    const thisYear = new Date().getFullYear();
+    assert.doesNotMatch(formatWeekdayDate(`${thisYear}-06-15`), /\/\d{4}/);
+    assert.match(formatWeekdayDate(`${thisYear - 1}-06-15`), new RegExp(`/${thisYear - 1}$`));
   });
 });
 

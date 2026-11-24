@@ -36,7 +36,7 @@ export default function PatientHome() {
     try { await patientApi.cancelBondRequest(bond.id); setCancelling(false); await reload(); }
     catch (e) { setActionError(errorMessage(e)); } finally { setBusy(false); }
   }
-  return <PatientPage title="Seu espaço de cuidado">
+  return <PatientPage title="Seu espaço de cuidado" onRefresh={reload}>
     <Feedback loading={loading} error={error} retry={() => void reload()} />
     {data && !error ? <>
       <ListItem tone="patient" title="Notificações" badge={data.unread || undefined}
@@ -59,7 +59,6 @@ export default function PatientHome() {
         <ListItem tone="patient" title="Quero encontrar um profissional" onPress={() => router.push('/catalog')} />
       </> : null}
       {bond?.status === 'active' ? <Button tone="patient" label="Novo relato" onPress={() => router.push('/new-report')} /> : null}
-      <Button tone="patient" variant="secondary" label="Atualizar início" onPress={() => void reload()} disabled={loading || busy} />
     </> : null}
     <Button tone="patient" variant="secondary" label="Sair da conta" onPress={() => void signOut()} />
   </PatientPage>;

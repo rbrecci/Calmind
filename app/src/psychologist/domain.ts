@@ -54,11 +54,26 @@ export function isAppointmentConflict(error: unknown): boolean {
   return error instanceof ApiError && error.status === 422 && Boolean(error.errors?.confirm_conflict?.length);
 }
 
+const isUpcoming = (item: Appointment, now: number) => (item.status === 'scheduled' || item.status === 'rescheduled')
+  && Date.parse(item.scheduled_at) >= now;
+
 export function sortAppointments(appointments: Appointment[], now = Date.now()): Appointment[] {
-  const upcoming = (item: Appointment) => (item.status === 'scheduled' || item.status === 'rescheduled')
-    && Date.parse(item.scheduled_at) >= now;
+  const upcoming = (item: Appointment) => isUpcoming(item, now);
   return [...appointments].sort((left, right) => Number(upcoming(right)) - Number(upcoming(left))
     || Date.parse(left.scheduled_at) - Date.parse(right.scheduled_at) || left.id - right.id);
+}
+
+export function splitAppointments(appointments: Appointment[], now = Date.now()) {
+  const sorted = sortAppointments(appointments, now);
+  return {
+    upcoming: sorted.filter((item) => isUpcoming(item, now)),
+    previous: sorted.filter((item) => !isUpcoming(item, now)).reverse(),
+  };
+}
+
+// O estado de leitura vale para a conversa até ali, então basta mostrá-lo na última mensagem própria.
+export function lastOwnMessageId(messages: Message[]): number | null {
+  return [...messages].reverse().find((message) => message.mine)?.id ?? null;
 }
 
 export function composeRecord(

@@ -5,6 +5,11 @@ export function mergeMessages(current: Message[], incoming: Message[]): Message[
   return [...new Map([...current, ...incoming].map((message) => [message.id, message])).values()].sort((a, b) => a.id - b.id);
 }
 
+// O estado de leitura vale para a conversa até ali, então basta mostrá-lo na última mensagem própria.
+export function lastOwnMessageId(messages: Message[]): number | null {
+  return [...messages].reverse().find((message) => message.mine)?.id ?? null;
+}
+
 export async function deliverMessage(api: Pick<PatientApi, 'sendMessage'>, bondId: number, body: string) {
   try {
     return { status: 'sent' as const, message: await api.sendMessage(bondId, body) };

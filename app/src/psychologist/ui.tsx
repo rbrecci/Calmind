@@ -6,8 +6,10 @@ import type { TextFieldProps } from '@/design-system/text-field';
 import { createResource, type ResourceState } from './resource';
 
 // Tela empilhada já mostra o título no cabeçalho: repetir aqui seria dizer a mesma coisa duas vezes.
-export function Page({ title, children }: { title?: string; children: ReactNode }) {
-  return <Screen scroll>{title ? <Text variant="h3">{title}</Text> : null}{children}</Screen>;
+export function Page({ title, children, footer, stickToEnd }: {
+  title?: string; children: ReactNode; footer?: ReactNode; stickToEnd?: boolean;
+}) {
+  return <Screen scroll footer={footer} stickToEnd={stickToEnd}>{title ? <Text variant="h3">{title}</Text> : null}{children}</Screen>;
 }
 
 export function Card({ children }: { children: ReactNode }) {

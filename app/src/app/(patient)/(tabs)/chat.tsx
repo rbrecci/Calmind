@@ -6,7 +6,7 @@ import { patientApi } from '@/api/patient';
 import type { Message } from '@/api/patient/types';
 import { Button, Colors, formatDate, formatDateTime, formatUnread, ListItem, Radius, RoleColors, Spacing, Text, TextField } from '@/design-system';
 import { bondsWithConversation, selectBond } from '@/patient/bonds';
-import { deliverMessage, mergeMessages, watchConversation } from '@/patient/conversation';
+import { deliverMessage, lastOwnMessageId, mergeMessages, watchConversation } from '@/patient/conversation';
 import { loadPatientPages } from '@/patient/load-pages';
 import { Card, Feedback, PatientPage } from '@/patient/ui';
 import { usePatientData } from '@/patient/use-patient-data';
@@ -54,7 +54,18 @@ export default function Chat() {
     } else { setFailed(result.body); setSendError(result.error); }
   }
   const conversations = bondsWithConversation(bonds.data ?? []);
-  return <PatientPage title="Conversa">
+  const statusId = lastOwnMessageId(messages);
+  const composer = bond?.status === 'active' ? failed !== null ? <Card>
+    <Text accessibilityRole="alert" color="error">Não enviada. {sendError}</Text>
+    <Text>{failed}</Text>
+    <Button tone="patient" label="Reenviar" disabled={sending} onPress={() => void send(failed)} />
+    <Button tone="patient" variant="secondary" label="Editar mensagem" disabled={sending} onPress={() => { setDraft(failed); setFailed(null); setSendError(null); }} />
+  </Card> : <>
+    <TextField label="Mensagem" accessibilityLabel="Texto da mensagem" value={draft} onChangeText={setDraft}
+      multiline maxLength={2000} editable={!sending} />
+    <Button tone="patient" label={sending ? 'Enviando...' : 'Enviar mensagem'} disabled={sending || !draft.trim()} onPress={() => void send(draft)} />
+  </> : undefined;
+  return <PatientPage title="Conversa" footer={composer} stickToEnd>
     <Feedback loading={bonds.loading} error={bonds.error} retry={() => void bonds.reload()} />
     {!bonds.loading && !bonds.error && !bond ? <Text>Nenhum vínculo disponível para esta conversa.</Text> : null}
     {/* A aba abre a conversa do vínculo atual; as anteriores continuam alcançáveis daqui. */}
@@ -76,21 +87,9 @@ export default function Chat() {
           <Text variant="small">{message.mine ? 'Você' : bond.psychologist.name}</Text>
           <Text>{message.body}</Text>
           <Text variant="small" color={message.mine ? 'text' : 'textSecondary'}>{formatDateTime(message.sent_at)}</Text>
-          {message.mine ? <Text variant="small">{message.read_at ? 'Lida' : 'Enviada'}</Text> : null}
+          {message.id === statusId ? <Text variant="small">{message.read_at ? 'Lida' : 'Enviada'}</Text> : null}
         </View>)}
       </View>
-      {bond.status === 'active' ? <>
-        {failed !== null ? <Card>
-          <Text accessibilityRole="alert" color="error">Não enviada. {sendError}</Text>
-          <Text>{failed}</Text>
-          <Button tone="patient" label="Reenviar" disabled={sending} onPress={() => void send(failed)} />
-          <Button tone="patient" variant="secondary" label="Editar mensagem" disabled={sending} onPress={() => { setDraft(failed); setFailed(null); setSendError(null); }} />
-        </Card> : <>
-          <TextField label="Mensagem" accessibilityLabel="Texto da mensagem" value={draft} onChangeText={setDraft}
-            multiline maxLength={2000} editable={!sending} />
-          <Button tone="patient" label={sending ? 'Enviando...' : 'Enviar mensagem'} disabled={sending || !draft.trim()} onPress={() => void send(draft)} />
-        </>}
-      </> : null}
     </> : null}
   </PatientPage>;
 }

@@ -1,11 +1,20 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { Button, Colors, confirmationVariants, Radius, Screen, Spacing, Text, type ConfirmationKind } from '@/design-system';
 
 // Tela empilhada já mostra o título no cabeçalho: repetir aqui seria dizer a mesma coisa duas vezes.
-export function PatientPage({ title, children }: { title?: string; children: ReactNode }) {
-  return <Screen scroll>
+export function PatientPage({ title, children, onRefresh, footer, stickToEnd }: {
+  title?: string; children: ReactNode; onRefresh?: () => Promise<void>; footer?: ReactNode; stickToEnd?: boolean;
+}) {
+  // O indicador acompanha só o gesto: o recarregamento de quando a aba ganha foco já aparece no
+  // "Carregando..." e não precisa de um segundo aviso no topo.
+  const [refreshing, setRefreshing] = useState(false);
+  const refresh = onRefresh ? () => {
+    setRefreshing(true);
+    void onRefresh().finally(() => setRefreshing(false));
+  } : undefined;
+  return <Screen scroll refreshing={refreshing} onRefresh={refresh} footer={footer} stickToEnd={stickToEnd}>
     {title ? <>
       <Text variant="small" color="textSecondary">Calmind · Paciente</Text>
       <Text variant="h4">{title}</Text>

@@ -26,10 +26,15 @@ export function formatTime(iso: string): string {
   return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
-// "qua, 25/11 às 15:00", com o ano só quando ele não é o atual: "qua, 31/12/2025 às 23:59".
-export function formatDateTime(iso: string, now: Date = new Date()): string {
+// "qua, 25/11", com o ano só quando ele não é o atual: "qua, 31/12/2025".
+export function formatWeekdayDate(iso: string, now: Date = new Date()): string {
   const date = toLocalDate(iso);
   const day = `${pad(date.getDate())}/${pad(date.getMonth() + 1)}`;
   const year = date.getFullYear() === now.getFullYear() ? '' : `/${date.getFullYear()}`;
-  return `${WEEKDAYS[date.getDay()]}, ${day}${year} às ${formatTime(iso)}`;
+  return `${WEEKDAYS[date.getDay()]}, ${day}${year}`;
+}
+
+// "qua, 25/11 às 15:00", com o ano só quando ele não é o atual: "qua, 31/12/2025 às 23:59".
+export function formatDateTime(iso: string, now: Date = new Date()): string {
+  return `${formatWeekdayDate(iso, now)} às ${formatTime(iso)}`;
 }

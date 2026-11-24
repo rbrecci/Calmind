@@ -12,6 +12,10 @@ export function catalogQuery(filters: CatalogFilters): CatalogFilters {
   return query;
 }
 
+export function countCatalogFilters(filters: CatalogFilters): number {
+  return Object.keys(catalogQuery(filters)).length;
+}
+
 export function hasCatalogFilters(filters: CatalogFilters): boolean {
   return Object.keys(catalogQuery(filters)).length > 0;
 }

@@ -3,7 +3,7 @@
 export { Button, type ButtonProps, type ButtonTone, type ButtonVariant } from './button';
 export { confirmationVariants, type ConfirmationKind } from './confirmation';
 export { formatUnread, tabBadge } from './counts';
-export { formatDate, formatDateTime, formatTime } from './format-date';
+export { formatDate, formatDateTime, formatTime, formatWeekdayDate } from './format-date';
 export { ListItem, type ListItemProps } from './list-item';
 export { Screen } from './screen';
 export { Text, type TextColor, type TextProps } from './text';

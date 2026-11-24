@@ -8,11 +8,13 @@ import {
   composeRecord,
   formatDueDate,
   isAppointmentConflict,
+  lastOwnMessageId,
   localAppointmentIso,
   mergeMessages,
   notificationText,
   registrationGate,
   sortAppointments,
+  splitAppointments,
 } from './domain.ts';
 
 describe('registrationGate', () => {
@@ -209,5 +211,31 @@ describe('mergeMessages', () => {
     assert.equal(message.read_at, null);
     assert.deepEqual(current.map((entry) => entry.id), [41, 40]);
     assert.deepEqual(mergeMessages([], []), []);
+  });
+});
+
+describe('splitAppointments', () => {
+  test('separa as próximas, da mais perto para a mais longe, das anteriores, da mais recente para a mais antiga', () => {
+    const result = splitAppointments([
+      { ...appointment, id: 6, scheduled_at: '2026-11-04T09:00:00-03:00' },
+      { ...appointment, id: 1, scheduled_at: '2026-11-01T14:00:00-03:00', status: 'cancelled' },
+      { ...appointment, id: 3, scheduled_at: '2026-11-03T13:00:00-03:00', status: 'rescheduled' },
+      { ...appointment, id: 2, scheduled_at: '2026-11-02T09:00:00-03:00', status: 'done' },
+    ], Date.parse('2026-11-03T12:00:00-03:00'));
+    assert.deepEqual(result.upcoming.map((entry) => entry.id), [3, 6]);
+    assert.deepEqual(result.previous.map((entry) => entry.id), [2, 1]);
+  });
+
+  test('agenda vazia tem as duas seções vazias', () => {
+    assert.deepEqual(splitAppointments([], Date.now()), { upcoming: [], previous: [] });
+  });
+});
+
+describe('lastOwnMessageId', () => {
+  test('o estado de leitura aparece só na última mensagem própria', () => {
+    const message: Message = { id: 1, bond_id: 8, sender_user_id: 2, mine: true, body: 'Oi', sent_at: '2026-10-29T08:00:00-03:00', read_at: null };
+    assert.equal(lastOwnMessageId([message, { ...message, id: 4 }, { ...message, id: 5, mine: false }]), 4);
+    assert.equal(lastOwnMessageId([{ ...message, mine: false }]), null);
+    assert.equal(lastOwnMessageId([]), null);
   });
 });

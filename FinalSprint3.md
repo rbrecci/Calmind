@@ -67,9 +67,8 @@ Dois ensaios com o APK final no celular.
 
 | Decisão | Recomendação |
 |---|---|
-| Onde hospedar a API | Railway: 30 dias grátis, depois cerca de US$ 5/mês |
+| Onde hospedar a API | Fechada em 23/11: notebook do Rafael com o XAMPP, exposto pelo ngrok grátis em `https://lettuce-impeach-arose.ngrok-free.dev`. A Railway saiu porque o teste grátis acabou e o plano pago custa US$ 5 |
 | Sete requisitos Must cortados (medicação e IA) | Manter o corte e justificar por escrito, porque o congelamento foi em 30/10 |
-| Quem paga o servidor, se passar dos 30 dias | Definir hoje |
 
 ## Calendário até 04/12
 
@@ -77,20 +76,22 @@ Montado de trás para frente a partir da apresentação. Dias de aula em negrito
 
 | Data | Marco | Quem |
 |---|---|---|
-| seg 23/11 | APK atual testado no celular, em casa. Conta na Railway criada | Rafael |
-| ter 24/11 | API no ar na Railway, com HTTPS. Newman rodado contra o servidor | Rafael e Zanetti |
-| qua 25/11 | APK final v1 com o endereço da Railway, enviado ao grupo à noite | Rafael |
+| seg 23/11 | Banco de demonstração preparado com a senha própria, túnel ngrok testado e APK v1 gerado com o endereço HTTPS | Rafael |
+| ter 24/11 | APK v1 instalado e testado no celular, fora do Wi-Fi de casa (4G) | Rafael e Zanetti |
+| qua 25/11 | APK v1 enviado ao grupo, com a senha de demonstração passada por fora do repositório | Rafael |
 | **qui 26/11** | Teste no celular: paciente (Caio) e psicólogo (Mariana), numa lista única de bugs. Roteiro da demonstração fechado. Prints para os manuais | Caio, Mariana, Rafael, Nicoly, Isabela |
 | **sex 27/11** | Ensaio 1 completo, com cronômetro, mesmo com slides crus | Todos |
 | sáb 28 a seg 30/11 | Correção dos bugs da lista. **Código congela na segunda 30/11 à noite**, com APK final v2 e PR para o `main` | Rafael, Caio, Mariana |
 | ter 01/12 | ABNT, manuais e relatório de testes fechados. Vídeo da demonstração gravado como plano B | Isabela, Nicoly, Zanetti |
 | qua 02/12 | Slides fechados. Revisão cruzada: quem não escreveu lê | Todos |
-| **qui 03/12** | Ensaio 2 na escola: Wi-Fi da escola contra a Railway, projetor, celular espelhado | Todos |
+| **qui 03/12** | Ensaio 2 na escola: notebook ligado na tomada servindo a API pelo túnel, Wi-Fi da escola, projetor, celular espelhado | Todos |
 | **sex 04/12** | Apresentação | Todos |
 
 **Regra do congelamento:** depois de 30/11, código só muda se quebrar a demonstração, e cada mudança exige APK novo e o roteiro rodado de novo. Refinamento depois dessa data vai para slide e documento, não para código.
 
-**Plano B da demonstração:** se o Wi-Fi da escola falhar, o celular usa o 4G. Se o servidor cair, entra o vídeo gravado em 01/12.
+**Plano B da demonstração:** se o Wi-Fi da escola falhar, o notebook e o celular usam o 4G de um celular roteando. Se o notebook ou o túnel cair, entra o vídeo gravado em 01/12.
+
+**Subir o servidor no dia:** MySQL pelo painel do XAMPP; em `backend/`, `C:/xampp2/php/php.exe artisan serve --host=127.0.0.1 --port=8000`; em outro terminal, `ngrok http 8000`. O notebook não pode suspender. O painel web mostra um aviso do ngrok na primeira visita: clicar em "Visit Site".
 
 **O manual começa já:** não depende do servidor.
 

@@ -5,7 +5,7 @@ Sprint 2.
 
 Esta pasta existe por um motivo específico: **quatro pessoas codificam ao mesmo tempo, as quatro
 com apoio de ferramenta de IA.** Isso multiplica a velocidade e multiplica junto o risco de
-quatro padrões diferentes aparecerem na mesma semana — quatro formatos de erro, quatro jeitos de
+quatro padrões diferentes aparecerem na mesma semana: quatro formatos de erro, quatro jeitos de
 paginar, quatro estilos de Controller. Código que sai rápido e desalinhado custa mais caro do que
 código que sai devagar.
 
@@ -46,7 +46,7 @@ Não é complicado, são três hábitos:
 3. **Leia o que voltou antes de commitar.** Código que você não entende é código que você não
    consegue defender na banca, e a banca pergunta.
 
-O que a IA gera entra no repositório como código do grupo, sem marca de ferramenta — mesma regra
+O que a IA gera entra no repositório como código do grupo, sem marca de ferramenta, pela mesma regra
 que vale para qualquer biblioteca ou snippet de terceiro que o projeto usa.
 
 ---
@@ -71,11 +71,12 @@ Não estão esquecidas, estão esperando a etapa que precisa delas:
 
 | # | Decisão | Espera por |
 |---|---------|------------|
-| **DA-01** | Onde o app encontra o backend: LAN com IP fixo nos testes, servidor público na apresentação (Railway recomendada, sem publicação) | A publicação da API e o APK final |
 | **DA-04** | Provedor e modelo de IA, e onde a chave fica | Sprint 3 |
 
 Fechadas em 04/11/2026, registradas em [`../planejamento/decisoes-abertas.md`](../planejamento/decisoes-abertas.md): **DA-02**, identificador do pacote `com.tccsenai.calmind`; **DA-03**, HTTP liberado só para demonstração com dados fictícios, precisa sair com HTTPS antes de uso real.
 
+Fechada em 23/11/2026: **DA-01**, o backend da apresentação roda no notebook e é exposto pelo ngrok com HTTPS; o APK final sai com `usesCleartextTraffic` desligado.
+
 Quando uma fechar, ela sai desta tabela e entra no arquivo que ela afeta. Decisão fechada que
-continua listada como aberta é ruído — mesma regra do
+continua listada como aberta é ruído, pela mesma regra do
 [`../planejamento/decisoes-abertas.md`](../planejamento/decisoes-abertas.md).

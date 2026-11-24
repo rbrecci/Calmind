@@ -18,6 +18,8 @@ Fonte de verdade: [`docs/identidade-visual.md`](../../../docs/identidade-visual.
 
 `Screen` põe o conteúdo a partir do topo. `center` centraliza na vertical e serve só para tela de conteúdo único e curto (carregando, aviso de espera). Em lista ou formulário, centralizar deixa a metade de cima vazia quando há pouco item.
 
+A área segura do aparelho entra só onde ninguém mais a desconta: a de cima, quando a tela não tem cabeçalho; a de baixo, quando a tela não está numa aba. Aplicada duas vezes, ela deixa uma faixa branca que corta o conteúdo rolado, e isso só aparece no celular, não na web.
+
 As outras props valem com `scroll`:
 
 | Prop | O que faz | Quem usa |

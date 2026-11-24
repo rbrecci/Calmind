@@ -1,6 +1,9 @@
-import { useRef, useState, type ReactNode } from 'react';
+import { useContext, useRef, useState, type ReactNode } from 'react';
 import { KeyboardAvoidingView, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
+import { HeaderShownContext } from 'expo-router/react-navigation';
+// O expo-router não reexporta este contexto num caminho público; é o mesmo módulo que a barra de abas usa.
+import { BottomTabBarHeightContext } from 'expo-router/build/react-navigation/bottom-tabs';
 
 import { Colors, MaxContentWidth, Spacing } from './tokens';
 
@@ -32,6 +35,13 @@ export function Screen({
   footer,
   stickToEnd = false,
 }: ScreenProps) {
+  // O cabeçalho já desconta a barra de status e a barra de abas já desconta a borda de baixo.
+  // Aplicar a área segura de novo deixa uma faixa branca que corta o conteúdo rolado.
+  const headerShown = useContext(HeaderShownContext);
+  const tabBarHeight = useContext(BottomTabBarHeightContext);
+  const edges: Edge[] = ['left', 'right'];
+  if (!headerShown) edges.push('top');
+  if (!tabBarHeight) edges.push('bottom');
   const containerStyle = [styles.container, center && styles.center];
   const scrollRef = useRef<ScrollView>(null);
   const frameRef = useRef<View>(null);
@@ -63,7 +73,7 @@ export function Screen({
   );
 
   return (
-    <SafeAreaView style={styles.root}>
+    <SafeAreaView style={styles.root} edges={edges}>
       {footer ? (
         // O KeyboardAvoidingView compara a própria posição, relativa ao pai, com o topo do teclado,
         // que vem em coordenada da janela. Sem somar onde a tela começa, numa tela empilhada o

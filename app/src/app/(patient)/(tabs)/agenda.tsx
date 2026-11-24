@@ -1,9 +1,8 @@
 import { patientApi } from '@/api/patient';
-import { Text } from '@/design-system';
+import { Button, formatDate, formatTime, Text } from '@/design-system';
 import { appointmentStatus, groupAppointments } from '@/patient/agenda';
 import { loadPatientPages } from '@/patient/load-pages';
-import { formatDateOnly } from '@/patient/presentation';
-import { Card, Feedback, PatientPage, TextAction } from '@/patient/ui';
+import { Card, Feedback, PatientPage } from '@/patient/ui';
 import { usePatientData } from '@/patient/use-patient-data';
 
 const loadAgenda = () => loadPatientPages(patientApi.appointments);
@@ -19,15 +18,15 @@ export default function Agenda() {
       <Card key={title}>
         <Text variant="h5">{title}</Text>
         {days.map((day) => <Card key={day.day}>
-          <Text variant="h5">{formatDateOnly(day.day)}</Text>
+          <Text variant="h5">{formatDate(day.day)}</Text>
           {day.appointments.map((a) => <Card key={a.id}>
-            <Text>{new Date(a.scheduled_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} · {appointmentStatus(a.status)}</Text>
+            <Text>{formatTime(a.scheduled_at)} · {appointmentStatus(a.status)}</Text>
             <Text>{a.psychologist.name}</Text>
             <Text color="textSecondary">{a.modality === 'online' ? 'Online' : a.modality === 'presencial' ? 'Presencial' : 'Modalidade a combinar'}</Text>
             {a.notes ? <Text>{a.notes}</Text> : null}
           </Card>)}
         </Card>)}
       </Card> : null) : null}
-    <TextAction label="Atualizar agenda" onPress={() => void reload()} disabled={loading} />
+    <Button tone="patient" variant="secondary" label="Atualizar agenda" onPress={() => void reload()} disabled={loading} />
   </PatientPage>;
 }

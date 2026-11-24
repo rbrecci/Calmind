@@ -1,16 +1,11 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { ApiError, type PatientTask } from '../api/types.ts';
-import { errorMessage, formatDateOnly, orderTasks } from './presentation.ts';
+import { errorMessage, orderTasks } from './presentation.ts';
 
 test('erros de campo chegam ao paciente e exceções internas ficam ocultas', () => {
   assert.equal(errorMessage(new ApiError(422, 'Dados inválidos.', { body: ['Escreva uma mensagem.'] })), 'Dados inválidos. Escreva uma mensagem.');
   assert.doesNotMatch(errorMessage(new Error('SQLSTATE segredo')), /SQLSTATE|segredo/);
-});
-
-test('datas sem hora não mudam de dia por causa do fuso', () => {
-  assert.equal(formatDateOnly('2026-11-03'), '03/11/2026');
-  assert.equal(formatDateOnly(null), 'Sem prazo');
 });
 
 test('tarefas pendentes vêm primeiro sem alterar o array original', () => {

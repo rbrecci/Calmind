@@ -4,7 +4,7 @@ import { View } from 'react-native';
 import { ApiError } from '@/api';
 import { psychologistApi } from '@/api/psychologist';
 import type { Task } from '@/api/psychologist/types';
-import { Spacing, Text } from '@/design-system';
+import { formatDate, formatDateTime, Spacing, Text } from '@/design-system';
 import { formatDueDate } from '@/psychologist/domain';
 import { Action, Card, ErrorNotice, Field, useConfirmation } from '@/psychologist/ui';
 
@@ -76,16 +76,16 @@ export function TaskForm({ bondId, readonly, tasks, onChanged }: TaskFormProps) 
       <Text variant="h5">{task.title}</Text>
       {task.description ? <Text>{task.description}</Text> : null}
       <Text>{task.status === 'completed' ? 'Concluída' : 'Pendente'}</Text>
-      {task.due_date ? <Text>Prazo: {task.due_date.split('-').reverse().join('/')}</Text> : null}
-      {task.completed_at ? <Text>Concluída em {new Date(task.completed_at).toLocaleString('pt-BR')}</Text> : null}
+      {task.due_date ? <Text>Prazo: {formatDate(task.due_date)}</Text> : null}
+      {task.completed_at ? <Text>Concluída em {formatDateTime(task.completed_at)}</Text> : null}
       {!readonly && task.status === 'pending' ? <>
-        <Action label={`Editar tarefa: ${task.title}`} disabled={busy} onPress={() => {
+        <Action variant="secondary" label="Editar tarefa" accessibilityLabel={`Editar tarefa: ${task.title}`} disabled={busy} onPress={() => {
           setEditing(task.id); setTitle(task.title); setDescription(task.description ?? '');
           setDueDate(task.due_date?.split('-').reverse().join('/') ?? '');
           setError(null); setDateError(undefined);
         }} />
-        <Action label={`Arquivar tarefa: ${task.title}`} disabled={busy} onPress={() => {
-          ask('Arquivar tarefa?', `A tarefa "${task.title}" sairá da lista.`, () => archive(task));
+        <Action variant="destructive" label="Arquivar tarefa" accessibilityLabel={`Arquivar tarefa: ${task.title}`} disabled={busy} onPress={() => {
+          ask('Arquivar tarefa?', `A tarefa "${task.title}" sairá da lista.`, () => archive(task), 'destructive');
         }} />
       </> : null}
     </Card>)}
@@ -96,7 +96,7 @@ export function TaskForm({ bondId, readonly, tasks, onChanged }: TaskFormProps) 
       <Field label="Descrição da tarefa (opcional)" value={description} onChangeText={setDescription} multiline error={errors?.description?.join(' ')} editable={!busy} />
       <Field label="Prazo (DD/MM/AAAA)" value={dueDate} onChangeText={setDueDate} placeholder="DD/MM/AAAA" maxLength={10} error={dateError ?? errors?.due_date?.join(' ')} editable={!busy} />
       <Action label={busy ? 'Salvando tarefa...' : 'Salvar tarefa'} disabled={busy} onPress={() => { void save(); }} />
-      {editing !== null ? <Action label="Cancelar edição da tarefa" disabled={busy} onPress={reset} /> : null}
+      {editing !== null ? <Action variant="secondary" label="Cancelar edição da tarefa" disabled={busy} onPress={reset} /> : null}
     </Card> : null}
     {confirmation}
   </View>;

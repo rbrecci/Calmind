@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { bondStatusText, bondsWithConversation, selectBond } from './bonds.ts';
+import { bondStatusText, bondsWithConversation, selectBond, unreadMessages } from './bonds.ts';
 import type { PatientBond } from '../api/patient/types.ts';
 
 const bond: PatientBond = { id: 1, status: 'ended', origin: 'catalog', requested_at: '', responded_at: null, accepted_at: null, ended_at: '', unread_messages: 0, psychologist: { id: 1, name: 'Profissional fictício', crp: '06/000001' } };
@@ -32,4 +32,11 @@ test('só vínculo que chegou a ser aceito oferece conversa', () => {
   const active: PatientBond = { ...endedAfterActive, id: 7, status: 'active', ended_at: null };
   const pending: PatientBond = { ...bond, id: 8, status: 'pending', ended_at: null };
   assert.deepEqual(bondsWithConversation([active, pending, cancelled, rejected, endedAfterActive]).map((b) => b.id), [7, 6]);
+});
+
+test('mensagens não lidas somam todos os vínculos, inclusive conversa encerrada', () => {
+  const active = { ...bond, id: 2, status: 'active' as const, unread_messages: 2 };
+  const ended = { ...bond, id: 3, unread_messages: 1 };
+  assert.equal(unreadMessages([active, ended, bond]), 3);
+  assert.equal(unreadMessages([]), 0);
 });

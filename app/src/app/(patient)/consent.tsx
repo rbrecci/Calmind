@@ -20,13 +20,13 @@ export default function PatientConsent() {
     <Text variant="h4">Antes de começar</Text>
     {declined ? <>
       <Text>Sem o aceite, as funções clínicas ficam bloqueadas. Você pode sair da conta.</Text>
-      <Button tone="patient" label="Sair da conta" onPress={() => void signOut()} />
+      <Button tone="patient" variant="secondary" label="Sair da conta" onPress={() => void signOut()} />
     </> : <>
       <Text variant="h5">Termo de uso, versão {term?.version}</Text>
       <Text>{term?.body}</Text>
       {error ? <Text accessibilityRole="alert" color="error">{error}</Text> : null}
       <Button tone="patient" label={busy ? 'Registrando aceite...' : 'Li e aceito'} disabled={busy} onPress={() => void submit()} />
-      <Button tone="patient" label="Não aceito" disabled={busy} onPress={() => setDeclined(true)} />
+      <Button tone="patient" variant="destructive" label="Não aceito" disabled={busy} onPress={() => setDeclined(true)} />
     </>}
   </Screen>;
 }

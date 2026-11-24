@@ -16,7 +16,7 @@ export default function Invitation() {
     try { await patientApi.redeemInvitation(code); router.dismissTo('/home'); }
     catch (e) { setError(errorMessage(e)); } finally { setBusy(false); }
   }
-  return <PatientPage title="Código de convite">
+  return <PatientPage>
     <Text>Digite os 8 caracteres enviados pelo seu profissional.</Text>
     <TextField label="Código de convite" accessibilityLabel="Código de convite de 8 caracteres" value={code}
       onChangeText={setCode} maxLength={8} autoCapitalize="characters" autoCorrect={false} editable={!busy} error={error ?? undefined} />

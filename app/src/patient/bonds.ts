@@ -22,3 +22,8 @@ export function bondStatusText(bond: PatientBond): string {
 export function bondsWithConversation(bonds: PatientBond[]): PatientBond[] {
   return bonds.filter((b) => b.status !== 'pending' && !neverAccepted(b));
 }
+
+// Conversa encerrada também guarda mensagem não lida, e ela continua legível.
+export function unreadMessages(bonds: PatientBond[]): number {
+  return bonds.reduce((total, b) => total + b.unread_messages, 0);
+}

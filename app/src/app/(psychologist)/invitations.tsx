@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react';
 import { psychologistApi } from '@/api/psychologist';
 import type { Invitation } from '@/api/psychologist/types';
-import { Text } from '@/design-system';
-import { Action, Card, displayDate, ErrorNotice, Page, useConfirmation } from '@/psychologist/ui';
+import { formatDateTime, Text } from '@/design-system';
+import { Action, Card, ErrorNotice, Page, useConfirmation } from '@/psychologist/ui';
 
 export default function Invitations() {
   const [invitation, setInvitation] = useState<Invitation | null>(null);
@@ -24,11 +24,12 @@ export default function Invitations() {
     try { await psychologistApi.revokeInvitation(invitation.id); setInvitation(null); }
     catch (cause) { setError(cause); } finally { submitting.current = false; setBusy(false); }
   }
-  return <Page title="Convite para paciente"><Text>Compartilhe o código com a pessoa que deseja acompanhar.</Text>
+  return <Page><Text>Compartilhe o código com a pessoa que deseja acompanhar.</Text>
     <ErrorNotice error={error} />
     {invitation ? <Card><Text selectable variant="h2" accessibilityLabel={`Código do convite ${invitation.code}`}>{invitation.code}</Text>
-      <Text>Válido até {displayDate(invitation.expires_at)}</Text>
-      <Action label="Revogar convite" disabled={busy} onPress={() => ask('Revogar convite?', 'Este código deixará de permitir um novo vínculo.', () => { void revoke(); })} />
+      <Text>Válido até {formatDateTime(invitation.expires_at)}</Text>
+      <Action variant="destructive" label="Revogar convite" disabled={busy}
+        onPress={() => ask('Revogar convite?', 'Este código deixará de permitir um novo vínculo.', () => { void revoke(); }, 'destructive')} />
     </Card> : <Action label="Gerar convite" loading={busy} onPress={() => { void create(); }} />}
     {confirmation}
   </Page>;

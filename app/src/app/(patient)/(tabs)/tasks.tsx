@@ -1,11 +1,11 @@
 import { useState } from 'react';
 
 import { patientApi } from '@/api/patient';
-import { Button, Text } from '@/design-system';
+import { Button, formatDate, Text } from '@/design-system';
 import { loadPatientPages } from '@/patient/load-pages';
-import { errorMessage, formatDateOnly } from '@/patient/presentation';
+import { errorMessage } from '@/patient/presentation';
 import { splitTasks } from '@/patient/tasks';
-import { Card, Feedback, PatientPage, TextAction } from '@/patient/ui';
+import { Card, Feedback, PatientPage } from '@/patient/ui';
 import type { PatientTask } from '@/api';
 import { usePatientData } from '@/patient/use-patient-data';
 
@@ -28,7 +28,7 @@ export default function Tasks() {
     return <Card key={task.id}>
       <Text variant="h5">{task.title}</Text>
       {task.description ? <Text>{task.description}</Text> : null}
-      <Text color="textSecondary">Prazo: {formatDateOnly(task.due_date)}</Text>
+      <Text color="textSecondary">Prazo: {task.due_date ? formatDate(task.due_date) : 'Sem prazo'}</Text>
       <Text>{task.status === 'completed' ? 'Concluída' : 'Pendente'}</Text>
       {!active ? <Text variant="small" color="textSecondary">Vínculo encerrado. Somente leitura.</Text> : null}
       {active && task.status === 'pending' ? <Button tone="patient" label={workingId === task.id ? 'Concluindo...' : 'Marcar como concluída'}
@@ -46,6 +46,6 @@ export default function Tasks() {
       <Text variant="h5" accessibilityRole="header">Concluídas ({data.tasks.completed.length})</Text>
       {data.tasks.completed.length ? data.tasks.completed.map(renderTask) : <Text color="textSecondary">Nenhuma tarefa concluída ainda.</Text>}
     </> : null}
-    <TextAction label="Atualizar tarefas" disabled={loading || workingId !== null} onPress={() => void reload()} />
+    <Button tone="patient" variant="secondary" label="Atualizar tarefas" disabled={loading || workingId !== null} onPress={() => void reload()} />
   </PatientPage>;
 }

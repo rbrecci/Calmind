@@ -42,10 +42,10 @@ export default function Registration() {
     <Field label="Número do CRP (4 a 7 dígitos)" keyboardType="number-pad" maxLength={7} value={number} onChangeText={setNumber} error={fieldError('crp_number')} editable={!busy} />
     <Text>Documento em PDF, JPG ou PNG, de até 5 MB.</Text>
     {document ? <Text>{document.name}</Text> : null}
-    <Action label="Selecionar documento" disabled={busy} onPress={() => { void chooseDocument(); }} />
+    <Action variant="secondary" label="Selecionar documento" disabled={busy} onPress={() => { void chooseDocument(); }} />
     {fieldError('document') ? <Text color="error" accessibilityRole="alert">{fieldError('document')}</Text> : null}
     <ErrorNotice error={error} />
     <Action label={profile?.approval_status === 'rejected' ? 'Reenviar cadastro' : 'Enviar cadastro para análise'} loading={busy} onPress={() => { void submit(); }} />
-    <Action label="Sair da conta" disabled={busy} onPress={() => { void signOut(); }} />
+    <Action variant="secondary" label="Sair da conta" disabled={busy} onPress={() => { void signOut(); }} />
   </Screen>;
 }

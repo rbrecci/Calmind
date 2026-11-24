@@ -2,11 +2,11 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 
 import { patientApi } from '@/api/patient';
-import { Button, Text } from '@/design-system';
-import { bondStatusText, bondsWithConversation, selectBond } from '@/patient/bonds';
+import { Button, formatUnread, ListItem, Text } from '@/design-system';
+import { bondStatusText, selectBond } from '@/patient/bonds';
 import { loadPatientPages } from '@/patient/load-pages';
 import { errorMessage } from '@/patient/presentation';
-import { Card, Confirmation, Feedback, PatientPage, TextAction } from '@/patient/ui';
+import { Card, Confirmation, Feedback, PatientPage } from '@/patient/ui';
 import { usePatientData } from '@/patient/use-patient-data';
 import { useSession } from '@/session/session-context';
 
@@ -36,37 +36,31 @@ export default function PatientHome() {
     try { await patientApi.cancelBondRequest(bond.id); setCancelling(false); await reload(); }
     catch (e) { setActionError(errorMessage(e)); } finally { setBusy(false); }
   }
-  return <PatientPage title="Seu espaço de cuidado" home>
+  return <PatientPage title="Seu espaço de cuidado">
     <Feedback loading={loading} error={error} retry={() => void reload()} />
     {data && !error ? <>
-      <TextAction label={`Notificações (${data.unread} não lidas)`} onPress={() => router.push('/notifications')} />
+      <ListItem tone="patient" title="Notificações" badge={data.unread || undefined}
+        accessibilityLabel={`Notificações, ${formatUnread(data.unread)}`} onPress={() => router.push('/notifications')} />
       {bond ? <Card>
         <Text variant="h5">{bond.psychologist.name}</Text>
         <Text color="textSecondary">CRP {bond.psychologist.crp}</Text>
         <Text>{bondStatusText(bond)}</Text>
-        {bond.status === 'active' ? <TextAction label="Encerrar vínculo" onPress={() => setEnding(true)} disabled={busy} /> : null}
-        {bond.status === 'pending' ? <TextAction label="Cancelar solicitação" onPress={() => setCancelling(true)} disabled={busy} /> : null}
+        {bond.status === 'active' ? <Button tone="patient" variant="destructive" label="Encerrar vínculo" onPress={() => setEnding(true)} disabled={busy} /> : null}
+        {bond.status === 'pending' ? <Button tone="patient" variant="destructive" label="Cancelar solicitação" onPress={() => setCancelling(true)} disabled={busy} /> : null}
       </Card> : null}
       {actionError ? <Text accessibilityRole="alert" color="error">{actionError}</Text> : null}
       {ending ? <Confirmation message="Encerrar este vínculo? O histórico ficará disponível para leitura e novas trocas serão bloqueadas."
-        confirm={() => void endBond()} cancel={() => setEnding(false)} busy={busy} /> : null}
+        kind="destructive" confirm={() => void endBond()} cancel={() => setEnding(false)} busy={busy} /> : null}
       {cancelling ? <Confirmation message="Retirar esta solicitação? Você poderá escolher outro profissional depois."
-        confirm={() => void cancelRequest()} cancel={() => setCancelling(false)} busy={busy} /> : null}
+        kind="destructive" confirm={() => void cancelRequest()} cancel={() => setCancelling(false)} busy={busy} /> : null}
       {!bond || bond.status === 'ended' ? <>
         <Text variant="h5">Como você chegou aqui?</Text>
-        <Button tone="patient" label="Tenho um código de convite" onPress={() => router.push('/invitation')} />
-        <TextAction label="Quero encontrar um profissional" onPress={() => router.push('/catalog')} />
+        <ListItem tone="patient" title="Tenho um código de convite" onPress={() => router.push('/invitation')} />
+        <ListItem tone="patient" title="Quero encontrar um profissional" onPress={() => router.push('/catalog')} />
       </> : null}
       {bond?.status === 'active' ? <Button tone="patient" label="Novo relato" onPress={() => router.push('/new-report')} /> : null}
-      <Text variant="h5">Seu acompanhamento</Text>
-      <TextAction label="Meus relatos" onPress={() => router.push('/reports')} />
-      <TextAction label="Minhas tarefas" onPress={() => router.push('/tasks')} />
-      {bondsWithConversation(data.bonds).map((b) => <TextAction key={b.id}
-        label={b.status === 'active' ? `Conversa (${b.unread_messages} não lidas)` : `Conversa anterior com ${b.psychologist.name}, ${new Date(b.requested_at).toLocaleString('pt-BR')}`}
-        onPress={() => router.push({ pathname: '/chat', params: { bondId: b.id } })} />)}
-      <TextAction label="Minha agenda" onPress={() => router.push('/agenda')} />
-      <TextAction label="Atualizar início" onPress={() => void reload()} disabled={loading || busy} />
+      <Button tone="patient" variant="secondary" label="Atualizar início" onPress={() => void reload()} disabled={loading || busy} />
     </> : null}
-    <TextAction label="Sair da conta" onPress={() => void signOut()} />
+    <Button tone="patient" variant="secondary" label="Sair da conta" onPress={() => void signOut()} />
   </PatientPage>;
 }

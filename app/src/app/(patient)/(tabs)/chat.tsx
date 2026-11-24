@@ -1,11 +1,11 @@
-import { useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { patientApi } from '@/api/patient';
 import type { Message } from '@/api/patient/types';
-import { Button, Colors, Radius, RoleColors, Spacing, Text, TextField } from '@/design-system';
-import { selectBond } from '@/patient/bonds';
+import { Button, Colors, formatDate, formatDateTime, formatUnread, ListItem, Radius, RoleColors, Spacing, Text, TextField } from '@/design-system';
+import { bondsWithConversation, selectBond } from '@/patient/bonds';
 import { deliverMessage, mergeMessages, watchConversation } from '@/patient/conversation';
 import { loadPatientPages } from '@/patient/load-pages';
 import { Card, Feedback, PatientPage } from '@/patient/ui';
@@ -53,9 +53,18 @@ export default function Chat() {
       setMessages((current) => mergeMessages(current, [result.message])); setDraft(''); setFailed(null);
     } else { setFailed(result.body); setSendError(result.error); }
   }
+  const conversations = bondsWithConversation(bonds.data ?? []);
   return <PatientPage title="Conversa">
     <Feedback loading={bonds.loading} error={bonds.error} retry={() => void bonds.reload()} />
     {!bonds.loading && !bonds.error && !bond ? <Text>Nenhum vínculo disponível para esta conversa.</Text> : null}
+    {/* A aba abre a conversa do vínculo atual; as anteriores continuam alcançáveis daqui. */}
+    {conversations.length > 1 ? conversations.map((b) => {
+      const title = `${b.status === 'active' ? 'Conversa' : 'Conversa anterior'} com ${b.psychologist.name}`;
+      const since = b.status === 'active' ? undefined : formatDate(b.requested_at);
+      return <ListItem key={b.id} tone="patient" title={title} description={since} badge={b.unread_messages || undefined}
+        accessibilityLabel={[title, formatUnread(b.unread_messages), since].filter(Boolean).join(', ')}
+        onPress={() => router.setParams({ bondId: String(b.id) })} />;
+    }) : null}
     {bond ? <>
       <Text variant="h5">{bond.psychologist.name}</Text>
       <Text variant="small" color="textSecondary">CRP {bond.psychologist.crp}</Text>
@@ -66,7 +75,7 @@ export default function Chat() {
         {messages.map((message) => <View key={message.id} style={[styles.message, message.mine ? styles.mine : styles.theirs]}>
           <Text variant="small">{message.mine ? 'Você' : bond.psychologist.name}</Text>
           <Text>{message.body}</Text>
-          <Text variant="small" color={message.mine ? 'text' : 'textSecondary'}>{new Date(message.sent_at).toLocaleString('pt-BR')}</Text>
+          <Text variant="small" color={message.mine ? 'text' : 'textSecondary'}>{formatDateTime(message.sent_at)}</Text>
           {message.mine ? <Text variant="small">{message.read_at ? 'Lida' : 'Enviada'}</Text> : null}
         </View>)}
       </View>
@@ -75,7 +84,7 @@ export default function Chat() {
           <Text accessibilityRole="alert" color="error">Não enviada. {sendError}</Text>
           <Text>{failed}</Text>
           <Button tone="patient" label="Reenviar" disabled={sending} onPress={() => void send(failed)} />
-          <Button tone="patient" label="Editar mensagem" disabled={sending} onPress={() => { setDraft(failed); setFailed(null); setSendError(null); }} />
+          <Button tone="patient" variant="secondary" label="Editar mensagem" disabled={sending} onPress={() => { setDraft(failed); setFailed(null); setSendError(null); }} />
         </Card> : <>
           <TextField label="Mensagem" accessibilityLabel="Texto da mensagem" value={draft} onChangeText={setDraft}
             multiline maxLength={2000} editable={!sending} />

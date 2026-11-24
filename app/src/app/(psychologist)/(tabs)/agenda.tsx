@@ -1,14 +1,14 @@
 import { useCallback, useRef, useState } from 'react';
 import { View } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 
 import { ApiError } from '@/api';
 import { psychologistApi } from '@/api/psychologist';
 import type { Appointment, AppointmentInput } from '@/api/psychologist/types';
-import { Spacing, Text } from '@/design-system';
+import { formatDateTime, Spacing, Text } from '@/design-system';
 import { isAppointmentConflict, localAppointmentIso, sortAppointments } from '@/psychologist/domain';
 import { collectPages } from '@/psychologist/resource';
-import { Action, Card, displayDate, ErrorNotice, Field, Page, useConfirmation, useResource } from '@/psychologist/ui';
+import { Action, Card, ErrorNotice, Field, Page, useConfirmation, useResource } from '@/psychologist/ui';
 
 const statusText: Record<Appointment['status'], string> = {
   scheduled: 'Agendada', rescheduled: 'Reagendada', cancelled: 'Cancelada', done: 'Realizada',
@@ -17,6 +17,12 @@ const statusText: Record<Appointment['status'], string> = {
 export default function Agenda() {
   const params = useLocalSearchParams<{ bond_id?: string }>();
   const [bondId, setBondId] = useState<number | null>(params.bond_id ? Number(params.bond_id) : null);
+  // A aba fica montada: o prontuário que pede um agendamento troca o parâmetro sem recriar a tela.
+  const [requestedBond, setRequestedBond] = useState(params.bond_id);
+  if (params.bond_id !== requestedBond) {
+    setRequestedBond(params.bond_id);
+    if (params.bond_id) setBondId(Number(params.bond_id));
+  }
   const [editing, setEditing] = useState<number | null>(null);
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
@@ -35,6 +41,9 @@ export default function Agenda() {
     ]);
     return { appointments, patients };
   }, []));
+  // A aba fica montada entre uma visita e outra: sem recarregar no foco, a agenda envelhece.
+  const reload = resource.reload;
+  useFocusEffect(useCallback(() => { void reload(); }, [reload]));
   const activeBonds = new Set(resource.data?.patients.map((item) => item.bond_id));
   const errors = error instanceof ApiError ? error.errors : undefined;
 
@@ -108,22 +117,25 @@ export default function Agenda() {
       {appointments.length === 0 ? <Text>Nenhuma consulta agendada.</Text> : null}
       {appointments.map((appointment) => <Card key={appointment.id}>
         <Text variant="h5">{appointment.patient.name}</Text>
-        <Text>{displayDate(appointment.scheduled_at)}</Text>
+        <Text>{formatDateTime(appointment.scheduled_at)}</Text>
         <Text>{statusText[appointment.status]}</Text>
         <Text>Modalidade: {appointment.modality === 'online' ? 'Online' : appointment.modality === 'presencial' ? 'Presencial' : 'Não informada'}</Text>
         {appointment.notes ? <Text>{appointment.notes}</Text> : null}
         {activeBonds.has(appointment.bond_id) && (appointment.status === 'scheduled' || appointment.status === 'rescheduled') ? <>
-          <Action label={`Reagendar consulta de ${appointment.patient.name}`} disabled={busy || conflict !== null} onPress={() => edit(appointment)} />
-          <Action label={`Cancelar consulta de ${appointment.patient.name}`} disabled={busy || conflict !== null} onPress={() => {
-            ask('Cancelar consulta?', `Consulta de ${appointment.patient.name}, ${displayDate(appointment.scheduled_at)}.`, () => { void cancel(appointment.id); });
-          }} />
+          <Action variant="secondary" label="Reagendar" accessibilityLabel={`Reagendar consulta de ${appointment.patient.name}`}
+            disabled={busy || conflict !== null} onPress={() => edit(appointment)} />
+          <Action variant="destructive" label="Cancelar consulta" accessibilityLabel={`Cancelar consulta de ${appointment.patient.name}`}
+            disabled={busy || conflict !== null} onPress={() => {
+              ask('Cancelar consulta?', `Consulta de ${appointment.patient.name}, ${formatDateTime(appointment.scheduled_at)}.`,
+                () => { void cancel(appointment.id); }, 'destructive');
+            }} />
         </> : null}
         {!activeBonds.has(appointment.bond_id) ? <Text>Vínculo encerrado. Somente leitura.</Text> : null}
       </Card>)}
       {resource.data.patients.length === 0 ? <Text>É preciso ter um vínculo ativo para agendar uma consulta.</Text> : <Card>
         <Text variant="h4">{editing === null ? 'Agendar consulta' : 'Reagendar consulta'}</Text>
         <Text>Paciente</Text>
-        {resource.data.patients.map((item) => <Action key={item.bond_id}
+        {resource.data.patients.map((item) => <Action key={item.bond_id} variant="secondary"
           label={`${bondId === item.bond_id ? 'Selecionado: ' : 'Selecionar: '}${item.patient.name}`}
           disabled={busy || conflict !== null || editing !== null} onPress={() => setBondId(item.bond_id)} />)}
         {errors?.bond_id ? <Text color="error" accessibilityRole="alert">{errors.bond_id.join(' ')}</Text> : null}
@@ -132,9 +144,9 @@ export default function Agenda() {
         <Field label="Hora da consulta (HH:MM)" value={time} onChangeText={setTime} placeholder="HH:MM" maxLength={5} editable={!busy && conflict === null} />
         <View style={{ gap: Spacing.two }}>
           <Text>Modalidade: {modality === 'online' ? 'Online' : modality === 'presencial' ? 'Presencial' : 'Não informada'}</Text>
-          <Action label="Atendimento online" disabled={busy || conflict !== null} onPress={() => setModality('online')} />
-          <Action label="Atendimento presencial" disabled={busy || conflict !== null} onPress={() => setModality('presencial')} />
-          <Action label="Deixar modalidade sem informar" disabled={busy || conflict !== null} onPress={() => setModality(null)} />
+          <Action variant="secondary" label="Atendimento online" disabled={busy || conflict !== null} onPress={() => setModality('online')} />
+          <Action variant="secondary" label="Atendimento presencial" disabled={busy || conflict !== null} onPress={() => setModality('presencial')} />
+          <Action variant="secondary" label="Deixar modalidade sem informar" disabled={busy || conflict !== null} onPress={() => setModality(null)} />
           {errors?.modality ? <Text color="error" accessibilityRole="alert">{errors.modality.join(' ')}</Text> : null}
         </View>
         <Field label="Observação (opcional)" value={notes} onChangeText={setNotes} maxLength={255} multiline
@@ -145,9 +157,9 @@ export default function Agenda() {
           <Action label="Agendar mesmo assim" disabled={busy} onPress={() => {
             void submit({ ...conflict.input, confirm_conflict: true }, conflict.id);
           }} />
-          <Action label="Escolher outro horário" disabled={busy} onPress={() => { setConflict(null); setError(null); }} />
+          <Action variant="secondary" label="Escolher outro horário" disabled={busy} onPress={() => { setConflict(null); setError(null); }} />
         </> : <Action label={editing === null ? 'Agendar consulta' : 'Salvar reagendamento'} disabled={busy || bondId === null || !activeBonds.has(bondId)} onPress={save} />}
-        {editing !== null ? <Action label="Cancelar edição da consulta" disabled={busy} onPress={reset} /> : null}
+        {editing !== null ? <Action variant="secondary" label="Cancelar edição da consulta" disabled={busy} onPress={reset} /> : null}
       </Card>}
     </> : null}
     {confirmation}

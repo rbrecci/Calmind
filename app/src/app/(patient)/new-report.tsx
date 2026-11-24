@@ -19,7 +19,7 @@ export default function NewReport() {
     try { await patientApi.createReport({ body, visibility }); router.dismissTo('/reports'); }
     catch (e) { setError(errorMessage(e)); } finally { setBusy(false); }
   }
-  return <PatientPage title="Novo relato">
+  return <PatientPage>
     <Text variant="h5">Quem pode ver?</Text>
     <View accessibilityRole="radiogroup" style={styles.selector}>
       {(['shared', 'private'] as const).map((value) => <Pressable key={value}

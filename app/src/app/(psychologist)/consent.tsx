@@ -20,9 +20,9 @@ export default function Consent() {
   return <Screen scroll><Text variant="h3">Termo de uso</Text><Text>Versão {term.version}</Text>
     <Text>{term.body}</Text><ErrorNotice error={error} retry={declined ? undefined : () => { void accept(); }} />
     {declined ? <><Text>Para continuar é necessário aceitar o termo. Você pode sair da conta.</Text>
-      <Action label="Sair da conta" onPress={() => { void signOut(); }} /></> : <>
+      <Action variant="secondary" label="Sair da conta" onPress={() => { void signOut(); }} /></> : <>
       <Action label="Li e aceito" loading={busy} onPress={() => { void accept(); }} />
-      <Action label="Não aceito" disabled={busy} onPress={() => { setError(null); setDeclined(true); }} />
+      <Action variant="destructive" label="Não aceito" disabled={busy} onPress={() => { setError(null); setDeclined(true); }} />
     </>}
   </Screen>;
 }

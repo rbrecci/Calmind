@@ -9,7 +9,7 @@ import { modalityLabel } from '@/catalog/load-catalog';
 import { Button, Text, TextField } from '@/design-system';
 import { loadPatientPages } from '@/patient/load-pages';
 import { errorMessage } from '@/patient/presentation';
-import { Card, Confirmation, Feedback, PatientPage, TextAction } from '@/patient/ui';
+import { Card, Confirmation, Feedback, PatientPage } from '@/patient/ui';
 import { usePatientData } from '@/patient/use-patient-data';
 
 const EMPTY_FILTERS: CatalogFilters = { approach: '', specialty: '', region: '' };
@@ -33,7 +33,7 @@ export default function PatientCatalog() {
     try { await patientApi.requestBond(selected.id); router.dismissTo('/home'); }
     catch (e) { setActionError(errorMessage(e)); } finally { setBusy(false); }
   }
-  return <PatientPage title="Encontrar profissional">
+  return <PatientPage>
     <Text color="textSecondary">Psicólogos com registro conferido no CRP.</Text>
     {!error ? <Card>
       <Text variant="h5">Filtros</Text>
@@ -41,11 +41,11 @@ export default function PatientCatalog() {
       <TextField label="Especialidade" value={form.specialty} onChangeText={(specialty) => setForm({ ...form, specialty })} maxLength={120} />
       <TextField label="Região" value={form.region} onChangeText={(region) => setForm({ ...form, region })} maxLength={120} />
       <Text>Modalidade: {form.modality ? modalityLabel(form.modality) : 'Qualquer modalidade'}</Text>
-      <TextAction label="Qualquer modalidade" onPress={() => setForm({ ...form, modality: undefined })} />
-      {MODALITIES.map((modality) => <TextAction key={modality} label={modalityLabel(modality) ?? modality}
+      <Button tone="patient" variant="secondary" label="Qualquer modalidade" onPress={() => setForm({ ...form, modality: undefined })} />
+      {MODALITIES.map((modality) => <Button key={modality} tone="patient" variant="secondary" label={modalityLabel(modality) ?? modality}
         onPress={() => setForm({ ...form, modality })} />)}
       <Button tone="patient" label="Buscar" disabled={loading || busy} onPress={() => setApplied(catalogQuery(form))} />
-      {hasCatalogFilters(form) || hasCatalogFilters(applied) ? <TextAction label="Limpar filtros" disabled={loading || busy}
+      {hasCatalogFilters(form) || hasCatalogFilters(applied) ? <Button tone="patient" variant="secondary" label="Limpar filtros" disabled={loading || busy}
         onPress={() => { setForm(EMPTY_FILTERS); setApplied({}); }} /> : null}
     </Card> : null}
     <Feedback loading={loading} error={error} retry={() => void reload()} />

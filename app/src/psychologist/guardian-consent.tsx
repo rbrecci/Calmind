@@ -2,10 +2,10 @@ import { useRef, useState } from 'react';
 import { ApiError } from '@/api';
 import { psychologistApi } from '@/api/psychologist';
 import type { GuardianConsentInput } from '@/api/psychologist/types';
-import { Text } from '@/design-system';
+import { formatDate, formatDateTime, Text } from '@/design-system';
 import { formatDueDate } from '@/psychologist/domain';
 import { collectPages } from '@/psychologist/resource';
-import { Action, Card, displayDate, ErrorNotice, Field, useResource } from '@/psychologist/ui';
+import { Action, Card, ErrorNotice, Field, useResource } from '@/psychologist/ui';
 
 export function GuardianConsentSection({ patientId, guardianName }: { patientId: number; guardianName: string }) {
   const list = useResource(() => collectPages((page) => psychologistApi.guardianConsents(patientId, { page, per_page: 50 })), patientId);
@@ -33,14 +33,14 @@ export function GuardianConsentSection({ patientId, guardianName }: { patientId:
     <ErrorNotice error={list.error} retry={list.reload} />
     {list.data?.length === 0 ? <Text>Nenhum registro de consentimento do responsável.</Text> : null}
     {list.data?.map((item) => <Card key={item.id}><Text>{item.guardian_name}</Text>
-      <Text>Obtido em {displayDate(item.obtained_at)}</Text><Text>{methods[item.method]}</Text>
-      {item.note ? <Text>{item.note}</Text> : null}<Text>Registrado por {item.registered_by.name} (CRP {item.registered_by.crp}) em {displayDate(item.created_at)}</Text>
+      <Text>Obtido em {formatDate(item.obtained_at)}</Text><Text>{methods[item.method]}</Text>
+      {item.note ? <Text>{item.note}</Text> : null}<Text>Registrado por {item.registered_by.name} (CRP {item.registered_by.crp}) em {formatDateTime(item.created_at)}</Text>
     </Card>)}
     <Card><Text>Acrescente um novo registro. Os registros anteriores são preservados.</Text>
       <Field label="Nome do responsável" value={name} onChangeText={setName} maxLength={150} editable={!busy} error={errors?.guardian_name?.join(' ')} />
       <Field label="Data do consentimento (DD/MM/AAAA)" value={date} onChangeText={setDate} maxLength={10} editable={!busy} error={errors?.obtained_at?.join(' ')} />
       <Text>Forma de obtenção: {methods[method]}</Text>
-      {(Object.keys(methods) as (keyof typeof methods)[]).map((value) => <Action key={value} label={methods[value]} disabled={busy} onPress={() => setMethod(value)} />)}
+      {(Object.keys(methods) as (keyof typeof methods)[]).map((value) => <Action key={value} variant="secondary" label={methods[value]} disabled={busy} onPress={() => setMethod(value)} />)}
       {errors?.method ? <Text color="error">{errors.method.join(' ')}</Text> : null}
       <Field label="Observação do registro (opcional)" value={note} onChangeText={setNote} multiline editable={!busy} error={errors?.note?.join(' ')} />
       <ErrorNotice error={error} /><Action label="Registrar consentimento" loading={busy} onPress={() => { void save(); }} />

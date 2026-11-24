@@ -1,16 +1,19 @@
-import { useState } from 'react';
-import { useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { psychologistApi } from '@/api/psychologist';
 import type { Notification } from '@/api/psychologist/types';
-import { Text } from '@/design-system';
+import { formatDateTime, ListItem, Text } from '@/design-system';
 import { notificationText } from '@/psychologist/domain';
 import { notificationTarget } from '@/psychologist/notification-target';
 import { collectPages } from '@/psychologist/resource';
-import { Action, Card, displayDate, ErrorNotice, Page, useResource } from '@/psychologist/ui';
+import { Action, ErrorNotice, Page, useResource } from '@/psychologist/ui';
 
 export default function Notifications() {
   const router = useRouter();
   const list = useResource(() => collectPages((page) => psychologistApi.notifications({ page, per_page: 50 })));
+  // A aba fica montada entre uma visita e outra: sem recarregar no foco, a lista envelhece.
+  const reload = list.reload;
+  useFocusEffect(useCallback(() => { void reload(); }, [reload]));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
   async function open(item: Notification) {
@@ -33,9 +36,8 @@ export default function Notifications() {
     {list.loading ? <Text>Carregando notificações...</Text> : null}
     <ErrorNotice error={list.error} retry={list.reload} /><ErrorNotice error={error} />
     {list.data?.length === 0 ? <Text>Nenhuma notificação.</Text> : null}
-    {list.data?.map((item) => <Card key={item.id}><Text>{displayDate(item.created_at)}</Text>
-      <Text>{item.read_at ? 'Lida' : 'Não lida'}</Text>
-      <Action label={notificationText(item.type)} disabled={busy} onPress={() => { void open(item); }} />
-    </Card>)}
+    {list.data?.map((item) => <ListItem key={item.id} tone="psychologist" title={notificationText(item.type)}
+      description={`${item.read_at ? 'Lida' : 'Não lida'} · ${formatDateTime(item.created_at)}`}
+      disabled={busy} onPress={() => { void open(item); }} />)}
   </Page>;
 }

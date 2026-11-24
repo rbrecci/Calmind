@@ -79,7 +79,6 @@ export type ConsentTerm = { id: number; type: 'general'; version: string; body: 
 export type ConsentAcceptance = { id: number; consent_term_id: number; type: 'general'; version: string; accepted_at: string; revoked_at: string | null };
 export type GuardianConsentInput = { guardian_name: string; obtained_at: string; method: 'presencial' | 'telefone' | 'videochamada' | 'mensagem_escrita'; note?: string | null };
 export type GuardianConsent = GuardianConsentInput & { id: number; note: string | null; consent_term_id: number; registered_by_user_id: number; registered_by: { id: number; name: string; crp: string }; created_at: string };
-export type MockScenario = 'com-pacientes' | 'sem-pacientes' | 'cadastro-nao-enviado' | 'cadastro-pendente' | 'cadastro-recusado';
 
 export type PsychologistApi = {
   profile(): Promise<Profile>;

@@ -91,6 +91,8 @@ Montado de trás para frente a partir da apresentação. Dias de aula em negrito
 
 **Plano B da demonstração:** se o Wi-Fi da escola falhar, o notebook e o celular usam o 4G de um celular roteando. Se o notebook ou o túnel cair, entra o vídeo gravado em 01/12.
 
+**Recriar o banco na véspera:** em `backend/`, `php artisan migrate:fresh --force` e depois `sh scripts/preparar-demo.sh`, com `CALMIND_DEMO_PASSWORD` e `CALMIND_ADMIN_PASSWORD` exportadas a partir do `backend/.env`. Isso apaga o que foi criado nos testes e refaz as tarefas com datas relativas ao dia. A senha do admin é diferente da senha de demonstração, porque esta vai embutida no APK de teste.
+
 **Subir o servidor no dia:** MySQL pelo painel do XAMPP; em `backend/`, `C:/xampp2/php/php.exe artisan serve --host=127.0.0.1 --port=8000`; em outro terminal, `ngrok http 8000`. O notebook não pode suspender. O painel web mostra um aviso do ngrok na primeira visita: clicar em "Visit Site".
 
 **O manual começa já:** não depende do servidor.

@@ -40,6 +40,14 @@ export const RoleColors = {
   psychologist: { accent: Palette.primary.base, onAccent: Palette.dark.base },
 } as const;
 
+// Botões que não são a ação principal. Os dois são contorno sobre o fundo da tela, para não
+// competir com o botão cheio. O texto do destrutivo é o `-1` do Danger: a base reprova no
+// branco (3,0:1). A borda do secundário é Dark +1 porque a cinza dos campos some no branco.
+export const ButtonVariants = {
+  secondary: { background: WHITE, border: Palette.dark.tint, text: Palette.dark.base },
+  destructive: { background: WHITE, border: Palette.danger.shade, text: Palette.danger.shade },
+} as const;
+
 // Telas anteriores ao login não escolhem lado e usam o Gradiente Verde-Rosa (5.3). Os dois
 // extremos são as bases das duas famílias, como na medição de contraste da identidade.
 export const NeutralGradient = {

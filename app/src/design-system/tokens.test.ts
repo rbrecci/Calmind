@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
-import { Colors, NeutralGradient, Palette, RoleColors } from './tokens.ts';
+import { ButtonVariants, Colors, NeutralGradient, Palette, RoleColors } from './tokens.ts';
 
 // Contraste WCAG 2.x entre duas cores em hex (#RRGGBB).
 function luminance(hex: string): number {
@@ -18,6 +18,8 @@ function contrast(a: string, b: string): number {
 }
 
 const MIN_TEXT_CONTRAST = 4.5; // RNF-35
+// Borda que desenha o controle é componente de interface, não texto: o mínimo é 3:1 (WCAG 1.4.11).
+const MIN_UI_CONTRAST = 3;
 
 describe('contraste da identidade visual', () => {
   // Garante que a fórmula daqui é a mesma da identidade (seção 5.4), antes de confiar nas outras.
@@ -55,6 +57,29 @@ describe('contraste da identidade visual', () => {
     for (const [role, { accent, onAccent }] of Object.entries(RoleColors)) {
       assert.ok(contrast(onAccent, accent) >= MIN_TEXT_CONTRAST, `${role} reprova`);
     }
+  });
+
+  test('o texto de cada variante de botão passa sobre o fundo dela', () => {
+    for (const [variant, { background, text }] of Object.entries(ButtonVariants)) {
+      assert.ok(contrast(text, background) >= MIN_TEXT_CONTRAST, `${variant} reprova`);
+    }
+  });
+
+  // O botão de contorno fica sobre o fundo da tela: é contra ele que a borda precisa aparecer.
+  test('a borda de cada variante de botão aparece sobre o fundo da tela', () => {
+    for (const [variant, { border }] of Object.entries(ButtonVariants)) {
+      assert.ok(contrast(border, Colors.background) >= MIN_UI_CONTRAST, `${variant} reprova`);
+    }
+  });
+
+  // Sem este teste, a borda cinza de `Colors.border` parece a escolha óbvia para o secundário,
+  // e ela some no branco (2,9:1).
+  test('a borda cinza dos campos não serve de contorno de botão', () => {
+    assert.ok(contrast(Colors.border, Colors.background) < MIN_UI_CONTRAST);
+  });
+
+  test('o destrutivo não usa o vermelho base como texto, que reprova no branco', () => {
+    assert.notEqual(ButtonVariants.destructive.text, Palette.danger.base);
   });
 
   test('o texto passa sobre os dois extremos do gradiente', () => {

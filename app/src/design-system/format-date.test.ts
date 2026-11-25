@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
-import { formatDate, formatDateTime, formatTime, formatWeekdayDate } from './format-date.ts';
+import { formatDate, formatDateTime, formatShortDate, formatTaskDate, formatTime, formatWeekdayDate } from './format-date.ts';
 
 // As datas nascem de componentes locais, e o ISO é gerado a partir delas: assim o teste passa
 // em qualquer fuso, porque a formatação também lê a hora local do aparelho.
@@ -91,5 +91,35 @@ describe('formatTime', () => {
   test('mostra hora e minuto, sem segundos', () => {
     assert.equal(formatTime(localIso(2026, 11, 25, 15, 0, 59)), '15:00');
     assert.equal(formatTime(localIso(2026, 11, 25, 0, 5)), '00:05');
+  });
+});
+
+describe('formatShortDate', () => {
+  test('mostra dia e mês, com o ano só quando ele não é o atual', () => {
+    assert.equal(formatShortDate('2026-11-24', NOW), '24/11');
+    assert.equal(formatShortDate(localIso(2026, 3, 5, 8), NOW), '05/03');
+    assert.equal(formatShortDate('2025-12-31', NOW), '31/12/2025');
+  });
+});
+
+describe('formatTaskDate', () => {
+  const task = { status: 'pending', due_date: null, completed_at: null } as const;
+
+  test('pendente mostra o prazo curto, sem o ano atual', () => {
+    assert.equal(formatTaskDate({ ...task, due_date: '2026-11-24' }, NOW), 'Prazo ter, 24/11');
+    assert.equal(formatTaskDate({ ...task, due_date: '2027-01-04' }, NOW), 'Prazo seg, 04/01/2027');
+  });
+
+  test('pendente sem prazo diz isso', () => {
+    assert.equal(formatTaskDate(task, NOW), 'Sem prazo');
+  });
+
+  // Ao lado da etiqueta "Concluída", a linha completa a frase: "Concluída em qui, 19/11".
+  test('concluída mostra o dia da conclusão no lugar do prazo', () => {
+    assert.equal(formatTaskDate({ status: 'completed', due_date: '2026-11-24', completed_at: localIso(2026, 11, 19, 21) }, NOW), 'em qui, 19/11');
+  });
+
+  test('concluída sem data de conclusão não mostra linha', () => {
+    assert.equal(formatTaskDate({ status: 'completed', due_date: '2026-11-24', completed_at: null }, NOW), null);
   });
 });

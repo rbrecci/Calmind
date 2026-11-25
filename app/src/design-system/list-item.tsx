@@ -1,13 +1,21 @@
 import { Pressable, StyleSheet, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import type { ButtonTone } from './button';
+import { EaseOut } from './motion';
 import { Text } from './text';
 import { Colors, MinTouchTarget, Radius, RoleColors, Spacing } from './tokens';
+import { FontFamily } from './typography';
 
 export type ListItemProps = {
   title: string;
   onPress: () => void;
   description?: string;
+  // Segunda linha curta abaixo da descrição, como "1 tarefa vencida".
+  detail?: string;
+  // Não lida: ponto à esquerda e título no peso dos títulos. O estado não entra no nome lido
+  // pelo leitor de tela; quem usa passa um `accessibilityLabel` que o diga.
+  unread?: boolean;
   // Contador ao lado da seta, como as notificações não lidas.
   badge?: number | string;
   tone?: ButtonTone;
@@ -21,13 +29,15 @@ export function ListItem({
   title,
   onPress,
   description,
+  detail,
+  unread = false,
   badge,
   tone = 'neutral',
   disabled = false,
   accessibilityLabel,
 }: ListItemProps) {
   // O leitor de tela lê a linha inteira como um botão só, então o contador entra no nome.
-  const label = accessibilityLabel ?? [title, badge === undefined ? null : String(badge), description].filter(Boolean).join(', ');
+  const label = accessibilityLabel ?? [title, badge === undefined ? null : String(badge), description, detail].filter(Boolean).join(', ');
   const badgeColors = tone === 'neutral'
     ? { backgroundColor: Colors.surface, color: Colors.text }
     : { backgroundColor: RoleColors[tone].accent, color: RoleColors[tone].onAccent };
@@ -38,22 +48,35 @@ export function ListItem({
       accessibilityLabel={label}
       accessibilityState={{ disabled }}
       disabled={disabled}
-      onPress={onPress}
-      style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
-      <View style={styles.texts}>
-        <Text color={disabled ? 'textSecondary' : 'text'}>{title}</Text>
-        {description ? <Text variant="small" color="textSecondary">{description}</Text> : null}
-      </View>
+      onPress={onPress}>
+      {/* Linha larga não encolhe ao toque: só o fundo clareia. É cor, não movimento, então fica
+          igual com "reduzir movimento". */}
+      {({ pressed }) => <Animated.View style={[styles.row, {
+        backgroundColor: pressed ? Colors.surface : Colors.background,
+        transitionProperty: 'backgroundColor',
+        transitionDuration: 120,
+        transitionTimingFunction: EaseOut,
+      }]}>
+        {/* Dark e não a cor do lado: o ponto é a única marca visual da não lida, e as cores de lado
+            reprovam o contraste de 3:1 sobre o branco. */}
+        {unread ? <View style={styles.dot} /> : null}
 
-      {badge !== undefined ? (
-        <View style={[styles.badge, { backgroundColor: badgeColors.backgroundColor }]}>
-          <Text variant="small" style={{ color: badgeColors.color }}>{badge}</Text>
+        <View style={styles.texts}>
+          <Text color={disabled ? 'textSecondary' : 'text'} style={unread ? styles.unreadTitle : undefined}>{title}</Text>
+          {description ? <Text variant="small" color="textSecondary">{description}</Text> : null}
+          {detail ? <Text variant="small">{detail}</Text> : null}
         </View>
-      ) : null}
 
-      <Text variant="h4" color="textSecondary" importantForAccessibility="no" accessibilityElementsHidden>
-        ›
-      </Text>
+        {badge !== undefined ? (
+          <View style={[styles.badge, { backgroundColor: badgeColors.backgroundColor }]}>
+            <Text variant="small" style={{ color: badgeColors.color }}>{badge}</Text>
+          </View>
+        ) : null}
+
+        <Text variant="h4" color="textSecondary" importantForAccessibility="no" accessibilityElementsHidden>
+          ›
+        </Text>
+      </Animated.View>}
     </Pressable>
   );
 }
@@ -69,14 +92,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
     borderRadius: Radius.md,
-    backgroundColor: Colors.background,
-  },
-  pressed: {
-    backgroundColor: Colors.surface,
   },
   texts: {
     flex: 1,
     gap: Spacing.half,
+  },
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: Colors.text,
+  },
+  unreadTitle: {
+    fontFamily: FontFamily.heading,
   },
   badge: {
     minWidth: 28,

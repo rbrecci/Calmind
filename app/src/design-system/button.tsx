@@ -1,6 +1,8 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import Animated, { useReducedMotion } from 'react-native-reanimated';
 
+import { EaseOut } from './motion';
 import { Text } from './text';
 import { ButtonVariants, Colors, MinTouchTarget, NeutralGradient, Radius, RoleColors, Spacing } from './tokens';
 
@@ -31,6 +33,8 @@ export function Button({
   accessibilityLabel,
   style,
 }: ButtonProps) {
+  const reduced = useReducedMotion();
+  // Quem encolhe é a superfície, não o Pressable: o alvo de toque fica do mesmo tamanho.
   return (
     <Pressable
       accessibilityRole="button"
@@ -39,7 +43,16 @@ export function Button({
       disabled={disabled}
       onPress={onPress}
       style={[styles.pressable, style]}>
-      <Surface label={label} tone={tone} variant={variant} disabled={disabled} />
+      {({ pressed }) => (
+        <Animated.View style={[styles.clip, {
+          transform: [{ scale: pressed && !disabled && !reduced ? 0.97 : 1 }],
+          transitionProperty: 'transform',
+          transitionDuration: 120,
+          transitionTimingFunction: EaseOut,
+        }]}>
+          <Surface label={label} tone={tone} variant={variant} disabled={disabled} />
+        </Animated.View>
+      )}
     </Pressable>
   );
 }
@@ -85,6 +98,8 @@ function Surface({ label, tone, variant, disabled }: { label: string; tone: Butt
 const styles = StyleSheet.create({
   pressable: {
     minHeight: MinTouchTarget, // RNF-35
+  },
+  clip: {
     borderRadius: Radius.md,
     overflow: 'hidden',
   },

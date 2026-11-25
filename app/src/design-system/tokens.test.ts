@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
-import { ButtonVariants, Colors, NeutralGradient, Palette, RoleColors } from './tokens.ts';
+import { ButtonVariants, Colors, NeutralGradient, Palette, RoleColors, StatusTagColors } from './tokens.ts';
 
 // Contraste WCAG 2.x entre duas cores em hex (#RRGGBB).
 function luminance(hex: string): number {
@@ -86,6 +86,15 @@ describe('contraste da identidade visual', () => {
     for (const color of NeutralGradient.colors) {
       assert.ok(contrast(NeutralGradient.onGradient, color) >= MIN_TEXT_CONTRAST, `${color} reprova`);
     }
+  });
+
+  // Etiqueta de status: o texto é Dark sobre o tom claro de cada família, e tem de passar em todas.
+  test('o texto de cada etiqueta de status passa sobre o fundo dela', () => {
+    for (const [kind, { background, text }] of Object.entries(StatusTagColors)) {
+      assert.equal(text, Palette.dark.base, `${kind} não usa texto Dark`);
+      assert.ok(contrast(text, background) >= MIN_TEXT_CONTRAST, `${kind} reprova`);
+    }
+    assert.deepEqual(Object.keys(StatusTagColors).sort(), ['attention', 'negative', 'neutral', 'positive']);
   });
 
   // A regra 5.4: nesta paleta, branco sobre cor reprova. Se alguém trocar o texto para

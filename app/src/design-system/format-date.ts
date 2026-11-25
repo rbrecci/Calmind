@@ -26,6 +26,13 @@ export function formatTime(iso: string): string {
   return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+// "25/11", com o ano só quando ele não é o atual: "31/12/2025".
+export function formatShortDate(iso: string, now: Date = new Date()): string {
+  const date = toLocalDate(iso);
+  const year = date.getFullYear() === now.getFullYear() ? '' : `/${date.getFullYear()}`;
+  return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}${year}`;
+}
+
 // "qua, 25/11", com o ano só quando ele não é o atual: "qua, 31/12/2025".
 export function formatWeekdayDate(iso: string, now: Date = new Date()): string {
   const date = toLocalDate(iso);
@@ -37,4 +44,14 @@ export function formatWeekdayDate(iso: string, now: Date = new Date()): string {
 // "qua, 25/11 às 15:00", com o ano só quando ele não é o atual: "qua, 31/12/2025 às 23:59".
 export function formatDateTime(iso: string, now: Date = new Date()): string {
   return `${formatWeekdayDate(iso, now)} às ${formatTime(iso)}`;
+}
+
+// Linha que fica ao lado da etiqueta de status da tarefa: "Prazo ter, 24/11" ou "Sem prazo" na
+// pendente; na concluída, "em qui, 19/11", que completa a etiqueta "Concluída".
+export function formatTaskDate(
+  task: { status: 'pending' | 'completed'; due_date: string | null; completed_at: string | null },
+  now: Date = new Date(),
+): string | null {
+  if (task.status === 'completed') return task.completed_at ? `em ${formatWeekdayDate(task.completed_at, now)}` : null;
+  return task.due_date ? `Prazo ${formatWeekdayDate(task.due_date, now)}` : 'Sem prazo';
 }

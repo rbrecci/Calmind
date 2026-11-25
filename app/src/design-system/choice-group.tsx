@@ -64,7 +64,8 @@ const styles = StyleSheet.create({
   },
   option: {
     minHeight: MinTouchTarget, // RNF-35
-    paddingHorizontal: Spacing.three,
+    // Com 16 de cada lado, as três modalidades da agenda quebravam linha num cartão de celular.
+    paddingHorizontal: Spacing.two + Spacing.one,
     justifyContent: 'center',
     borderWidth: 2,
     borderRadius: Radius.md,

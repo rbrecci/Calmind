@@ -48,6 +48,15 @@ export const ButtonVariants = {
   destructive: { background: WHITE, border: Palette.danger.shade, text: Palette.danger.shade },
 } as const;
 
+// Etiqueta de status: fundo no tom claro (`+1`) e texto Dark, que passa em todos (5.4). A
+// paleta não tem amarelo, então "atenção" usa o lilás; o verde e o rosa base ficam com os lados.
+export const StatusTagColors = {
+  neutral: { background: Palette.light.tint, text: Palette.dark.base },
+  attention: { background: Palette.primary.tint, text: Palette.dark.base },
+  positive: { background: Palette.success.tint, text: Palette.dark.base },
+  negative: { background: Palette.danger.tint, text: Palette.dark.base },
+} as const;
+
 // Telas anteriores ao login não escolhem lado e usam o Gradiente Verde-Rosa (5.3). Os dois
 // extremos são as bases das duas famílias, como na medição de contraste da identidade.
 export const NeutralGradient = {

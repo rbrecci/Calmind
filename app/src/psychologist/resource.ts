@@ -5,16 +5,19 @@ export type ResourceState<T> = { data: T | null; error: unknown; loading: boolea
 export function createResource<T>(notify: (state: ResourceState<T>) => void) {
   let generation = 0;
   let disposed = false;
+  // O dado anterior fica na tela durante a recarga: zerar desmontaria a lista a cada foco da aba,
+  // e os cartões refariam a entrada animada toda vez.
+  let last: T | null = null;
   return {
     async load(loader: () => Promise<T>) {
       if (disposed) return;
       const current = ++generation;
-      notify({ data: null, error: null, loading: true });
+      notify({ data: last, error: null, loading: true });
       try {
         const data = await loader();
-        if (!disposed && current === generation) notify({ data, error: null, loading: false });
+        if (!disposed && current === generation) { last = data; notify({ data, error: null, loading: false }); }
       } catch (error) {
-        if (!disposed && current === generation) notify({ data: null, error, loading: false });
+        if (!disposed && current === generation) { last = null; notify({ data: null, error, loading: false }); }
       }
     },
     dispose() { disposed = true; generation++; },

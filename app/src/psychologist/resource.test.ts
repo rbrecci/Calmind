@@ -26,6 +26,18 @@ test('erro limpa dados anteriores e dispose impede atualização', async () => {
   assert.equal(states.length, count);
 });
 
+test('recarregar mantém o dado anterior na tela até a resposta nova chegar', async () => {
+  const states: unknown[] = [];
+  const resource = createResource<number>((state) => states.push(state));
+  await resource.load(async () => 1);
+  let finish!: (value: number) => void;
+  const reload = resource.load(() => new Promise<number>((resolve) => { finish = resolve; }));
+  assert.deepEqual(states.at(-1), { data: 1, error: null, loading: true });
+  finish(2);
+  await reload;
+  assert.deepEqual(states.at(-1), { data: 2, error: null, loading: false });
+});
+
 test('listas percorrem as páginas sem perder itens', async () => {
   const pages: number[] = [];
   const items = await collectPages(async (page) => {

@@ -33,7 +33,7 @@ export default function NewReport() {
     <Text variant="small" color="textSecondary">{visibility === 'shared' ? 'Seu profissional poderá ler este relato.' : 'Só você poderá ler este relato.'}</Text>
     <TextField label="Seu relato" accessibilityLabel="Texto do relato" value={body} onChangeText={setBody}
       multiline numberOfLines={7} textAlignVertical="top" maxLength={10000} editable={!busy} error={error ?? undefined} />
-    <Text variant="small" color="textSecondary">A visibilidade é definida na postagem. Você pode despublicar um relato compartilhado depois.</Text>
+    <Text variant="small" color="textSecondary">A visibilidade é definida na postagem. Você pode parar de compartilhar um relato depois.</Text>
     <Button tone="patient" label={busy ? 'Salvando...' : 'Salvar relato'} disabled={busy || !body.trim()} onPress={() => void save()} />
   </PatientPage>;
 }

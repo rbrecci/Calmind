@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { psychologistApi } from '@/api/psychologist';
 import type { Notification } from '@/api/psychologist/types';
-import { formatDateTime, ListItem, Text } from '@/design-system';
+import { EmptyState, formatDateTime, ListItem, Loading } from '@/design-system';
 import { notificationText } from '@/psychologist/domain';
 import { notificationTarget } from '@/psychologist/notification-target';
 import { collectPages } from '@/psychologist/resource';
@@ -32,12 +32,16 @@ export default function Notifications() {
     catch (cause) { setError(cause); } finally { setBusy(false); }
   }
   return <Page title="Notificações">
-    <Action label="Marcar todas como lidas" loading={busy} onPress={() => { void readAll(); }} />
-    {list.loading ? <Text>Carregando notificações...</Text> : null}
+    {list.data?.some((item) => !item.read_at) ? <Action variant="secondary" label="Marcar todas como lidas" loading={busy} onPress={() => { void readAll(); }} /> : null}
+    {list.loading && !list.data ? <Loading /> : null}
     <ErrorNotice error={list.error} retry={list.reload} /><ErrorNotice error={error} />
-    {list.data?.length === 0 ? <Text>Nenhuma notificação.</Text> : null}
-    {list.data?.map((item) => <ListItem key={item.id} tone="psychologist" title={notificationText(item.type)}
-      description={`${item.read_at ? 'Lida' : 'Não lida'} · ${formatDateTime(item.created_at)}`}
-      disabled={busy} onPress={() => { void open(item); }} />)}
+    {list.data?.length === 0 ? <EmptyState illustration="notificacoes" title="Nenhuma notificação" /> : null}
+    {list.data?.map((item) => {
+      const title = notificationText(item.type);
+      const date = formatDateTime(item.created_at);
+      return <ListItem key={item.id} tone="psychologist" title={title} description={date} unread={!item.read_at}
+        accessibilityLabel={[title, item.read_at ? null : 'não lida', date].filter(Boolean).join(', ')}
+        disabled={busy} onPress={() => { void open(item); }} />;
+    })}
   </Page>;
 }

@@ -1,6 +1,6 @@
 import { Redirect, Stack, usePathname } from 'expo-router';
 import { psychologistApi } from '@/api/psychologist';
-import { RoleColors, Screen, Text, Typography } from '@/design-system';
+import { Loading, RoleColors, Screen, Typography } from '@/design-system';
 import { useSession } from '@/session/session-context';
 import { AccessContext } from '@/psychologist/access';
 import { accessDestination } from '@/psychologist/domain';
@@ -28,7 +28,7 @@ export default function PsychologistLayout() {
     const profile = term.accepted ? await psychologistApi.profile() : null;
     return { term, profile };
   });
-  if (access.loading) return <Screen center><Text accessibilityLiveRegion="polite">Carregando seu acesso...</Text></Screen>;
+  if (access.loading) return <Screen center><Loading /></Screen>;
   if (access.error || !access.data) return <Screen center><ErrorNotice error={access.error} retry={access.reload} />
     <Action variant="secondary" label="Sair da conta" onPress={() => { void signOut(); }} /></Screen>;
   const { term, profile } = access.data;

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { psychologistApi } from '@/api/psychologist';
-import { formatDateTime, Text } from '@/design-system';
+import { formatDateTime, Loading, Text } from '@/design-system';
 import { collectPages } from '@/psychologist/resource';
 import { Action, Card, ErrorNotice, Page, useConfirmation, useResource } from '@/psychologist/ui';
 
@@ -17,7 +17,7 @@ export default function Requests() {
     } catch (cause) { setError(cause); } finally { setBusy(false); }
   }
   return <Page>
-    {list.loading ? <Text>Carregando solicitações...</Text> : null}
+    {list.loading && !list.data ? <Loading /> : null}
     <ErrorNotice error={list.error} retry={list.reload} /><ErrorNotice error={error} />
     {list.data?.length === 0 ? <Text>Nenhuma solicitação pendente.</Text> : null}
     {list.data?.map((item) => <Card key={item.id}><Text variant="h5">{item.patient.name}</Text>

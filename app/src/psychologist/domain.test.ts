@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
 import { ApiError } from '../api/types.ts';
-import type { Appointment, Message, PatientDetail, SharedReport, Task } from '../api/psychologist/types.ts';
+import type { Appointment, Message, PatientDetail, PatientSummary, SharedReport, Task } from '../api/psychologist/types.ts';
 import {
   accessDestination,
   composeRecord,
@@ -12,6 +12,7 @@ import {
   localAppointmentIso,
   mergeMessages,
   notificationText,
+  patientSummaryView,
   registrationGate,
   sortAppointments,
   splitAppointments,
@@ -237,5 +238,39 @@ describe('lastOwnMessageId', () => {
     assert.equal(lastOwnMessageId([message, { ...message, id: 4 }, { ...message, id: 5, mine: false }]), 4);
     assert.equal(lastOwnMessageId([{ ...message, mine: false }]), null);
     assert.equal(lastOwnMessageId([]), null);
+  });
+});
+
+describe('patientSummaryView', () => {
+  const NOW = new Date(2026, 10, 24, 10, 0);
+  const summary: PatientSummary = {
+    bond_id: 8, status: 'active', since: '2026-11-02', ended_at: null, patient: { id: 21, name: 'Luna Lovegood' },
+    unread_messages: 0, overdue_tasks: 0, next_appointment_at: null,
+  };
+
+  test('contador zerado não aparece na tela nem no leitor de tela', () => {
+    const view = patientSummaryView(summary, NOW);
+    assert.equal(view.badge, undefined);
+    assert.equal(view.detail, undefined);
+    assert.equal(view.description, 'Sem consulta marcada');
+    assert.equal(view.accessibilityLabel, 'Luna Lovegood, Sem consulta marcada');
+  });
+
+  test('próxima consulta em data curta, sem o ano atual', () => {
+    const next = new Date(2026, 10, 26, 15, 0).toISOString();
+    assert.equal(patientSummaryView({ ...summary, next_appointment_at: next }, NOW).description, 'Próxima consulta qui, 26/11 às 15:00');
+  });
+
+  test('tarefa vencida vira texto curto no singular e no plural', () => {
+    assert.equal(patientSummaryView({ ...summary, overdue_tasks: 1 }, NOW).detail, '1 tarefa vencida');
+    assert.equal(patientSummaryView({ ...summary, overdue_tasks: 2 }, NOW).detail, '2 tarefas vencidas');
+  });
+
+  test('mensagem não lida vira contador, e o nome do item diz tudo', () => {
+    const next = new Date(2026, 10, 26, 15, 0).toISOString();
+    const view = patientSummaryView({ ...summary, unread_messages: 3, overdue_tasks: 1, next_appointment_at: next }, NOW);
+    assert.equal(view.badge, 3);
+    assert.equal(view.accessibilityLabel, 'Luna Lovegood, 3 mensagens não lidas, 1 tarefa vencida, Próxima consulta qui, 26/11 às 15:00');
+    assert.match(patientSummaryView({ ...summary, unread_messages: 1 }, NOW).accessibilityLabel, /, 1 mensagem não lida,/);
   });
 });

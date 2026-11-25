@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { api, ApiError, type FieldErrors, type LoginInput, type Role } from '@/api';
-import { Button, Colors, Radius, Screen, Spacing, Text, TextField } from '@/design-system';
+import { Button, Colors, Logo, Radius, Screen, Spacing, Text, TextField } from '@/design-system';
 import { DEMO_ACCOUNTS, demoCredentials, demoEnv, isDemoLoginEnabled } from '@/auth/demo-accounts';
 import { authErrorMessage, buildRegisterInput, isMinor, validateRegisterForm } from '@/auth/register-form';
 import { useSession } from '@/session/session-context';
@@ -79,6 +79,7 @@ export default function EntryScreen() {
       {step === 'login' ? (
         <>
           <View style={styles.brand}>
+            <Logo animated />
             <Text variant="h1">Calmind</Text>
             <Text variant="small" color="textSecondary">Saúde Mental & Acolhimento</Text>
           </View>

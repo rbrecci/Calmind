@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { patientApi } from '@/api/patient';
 import type { Message } from '@/api/patient/types';
-import { Button, Colors, formatDate, formatDateTime, formatUnread, ListItem, MessageComposer, Radius, RoleColors, Spacing, Text } from '@/design-system';
+import { Appear, Button, Colors, EmptyState, formatDate, formatDateTime, formatUnread, ListItem, MessageComposer, Radius, RoleColors, SkipInitialAppear, Spacing, Text } from '@/design-system';
 import { bondsWithConversation, selectBond } from '@/patient/bonds';
 import { deliverMessage, lastOwnMessageId, mergeMessages, watchConversation } from '@/patient/conversation';
 import { loadPatientPages } from '@/patient/load-pages';
@@ -62,9 +62,10 @@ export default function Chat() {
     <Button tone="patient" variant="secondary" label="Editar mensagem" disabled={sending} onPress={() => { setDraft(failed); setFailed(null); setSendError(null); }} />
   </Card> : <MessageComposer tone="patient" value={draft} onChangeText={setDraft} sending={sending}
     onSend={() => void send(draft)} /> : undefined;
-  return <PatientPage title="Conversa" footer={composer} stickToEnd>
-    <Feedback loading={bonds.loading} error={bonds.error} retry={() => void bonds.reload()} />
-    {!bonds.loading && !bonds.error && !bond ? <Text>Nenhum vínculo disponível para esta conversa.</Text> : null}
+  // A aba já diz "Conversa": o título é a profissional, e o CRP fica no início.
+  return <PatientPage title={bond?.psychologist.name ?? 'Conversa'} footer={composer} stickToEnd>
+    <Feedback loading={bonds.loading} error={bonds.error} retry={() => void bonds.reload()} initial={bonds.data === null} />
+    {!bonds.loading && !bonds.error && !bond ? <EmptyState illustration="conversa" title="Nenhum vínculo disponível" /> : null}
     {/* A aba abre a conversa do vínculo atual; as anteriores continuam alcançáveis daqui. */}
     {conversations.length > 1 ? conversations.map((b) => {
       const title = `${b.status === 'active' ? 'Conversa' : 'Conversa anterior'} com ${b.psychologist.name}`;
@@ -74,19 +75,22 @@ export default function Chat() {
         onPress={() => router.setParams({ bondId: String(b.id) })} />;
     }) : null}
     {bond ? <>
-      <Text variant="h5">{bond.psychologist.name}</Text>
-      <Text variant="small" color="textSecondary">CRP {bond.psychologist.crp}</Text>
       {bond.status !== 'active' ? <Text>Este vínculo não está ativo. Conversa somente para leitura.</Text> : null}
-      <Feedback loading={loading} error={error} retry={() => void watcher.current?.refresh()} />
-      {!loading && !messages.length && !error ? <Text>Nenhuma mensagem por enquanto.</Text> : null}
-      <View accessibilityLiveRegion="polite" style={styles.history}>
-        {messages.map((message) => <View key={message.id} style={[styles.message, message.mine ? styles.mine : styles.theirs]}>
-          <Text variant="small">{message.mine ? 'Você' : bond.psychologist.name}</Text>
-          <Text>{message.body}</Text>
-          <Text variant="small" color={message.mine ? 'text' : 'textSecondary'}>{formatDateTime(message.sent_at)}</Text>
-          {message.id === statusId ? <Text variant="small">{message.read_at ? 'Lida' : 'Enviada'}</Text> : null}
-        </View>)}
-      </View>
+      <Feedback loading={loading} error={error} retry={() => void watcher.current?.refresh()} initial={!messages.length} />
+      {!loading && !messages.length && !error ? <EmptyState illustration="conversa" title="Nenhuma mensagem ainda" /> : null}
+      {/* O histórico monta junto com a primeira leva: o que já estava na conversa aparece parado,
+          e só a mensagem que chega ou é enviada depois entra animada. */}
+      {!loading || messages.length ? <SkipInitialAppear><View accessibilityLiveRegion="polite" style={styles.history}>
+        {messages.map((message) => {
+          const meta = message.id === statusId ? `${formatDateTime(message.sent_at)} · ${message.read_at ? 'Lida' : 'Enviada'}` : formatDateTime(message.sent_at);
+          // Numa conversa a dois o lado e a cor já dizem quem falou; o nome fica só para o leitor de tela.
+          return <Appear rise key={message.id} accessible accessibilityLabel={`${message.mine ? 'Você' : bond.psychologist.name}: ${message.body}. ${meta}`}
+            style={[styles.message, message.mine ? styles.mine : styles.theirs]}>
+            <Text>{message.body}</Text>
+            <Text variant="small" color={message.mine ? 'text' : 'textSecondary'}>{meta}</Text>
+          </Appear>;
+        })}
+      </View></SkipInitialAppear> : null}
     </> : null}
   </PatientPage>;
 }

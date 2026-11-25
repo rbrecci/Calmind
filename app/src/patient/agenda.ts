@@ -28,3 +28,10 @@ export function groupAppointments(appointments: Appointment[], now = new Date())
 export function appointmentStatus(status: Appointment['status']): string {
   return { scheduled: 'Agendada', rescheduled: 'Reagendada', cancelled: 'Cancelada', done: 'Realizada' }[status];
 }
+
+// Só agendada ou reagendada conta: cancelada não vai acontecer e realizada já passou.
+export function nextAppointment(appointments: Appointment[], now = new Date()): Appointment | null {
+  return appointments
+    .filter((a) => (a.status === 'scheduled' || a.status === 'rescheduled') && Date.parse(a.scheduled_at) >= now.getTime())
+    .reduce<Appointment | null>((next, a) => !next || Date.parse(a.scheduled_at) < Date.parse(next.scheduled_at) ? a : next, null);
+}

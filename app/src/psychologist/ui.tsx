@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Modal, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { ApiError } from '@/api';
-import { Button, Colors, confirmationVariants, Radius, Screen, Spacing, Text, TextField, type ButtonVariant, type ConfirmationKind } from '@/design-system';
+import { Appear, Button, Colors, confirmationVariants, Radius, Screen, Spacing, Text, TextField, type ButtonVariant, type ConfirmationKind } from '@/design-system';
 import type { TextFieldProps } from '@/design-system/text-field';
 import { createResource, type ResourceState } from './resource';
 
@@ -13,7 +13,7 @@ export function Page({ title, children, footer, stickToEnd }: {
 }
 
 export function Card({ children }: { children: ReactNode }) {
-  return <View style={styles.card}>{children}</View>;
+  return <Appear style={styles.card}>{children}</Appear>;
 }
 
 export function Action({ label, onPress, disabled = false, loading = false, variant, accessibilityLabel, style }: {

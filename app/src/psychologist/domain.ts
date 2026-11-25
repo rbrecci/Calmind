@@ -1,5 +1,6 @@
 import { ApiError } from '../api/types.ts';
-import type { Appointment, Message, PatientDetail, Profile, SharedReport, Task } from '../api/psychologist/types.ts';
+import type { Appointment, Message, PatientDetail, PatientSummary, Profile, SharedReport, Task } from '../api/psychologist/types.ts';
+import { formatDateTime } from '../design-system/format-date.ts';
 
 export function registrationGate(status: Profile['approval_status']): 'dashboard' | 'pending' | 'registration' {
   if (status === 'approved') return 'dashboard';
@@ -88,6 +89,22 @@ export function composeRecord(
     tasks: [...tasks],
     appointments: [...appointments].sort((a, b) => Date.parse(a.scheduled_at) - Date.parse(b.scheduled_at) || a.id - b.id),
     readOnly: patient.bond_status === 'ended',
+  };
+}
+
+// Item de paciente no início. Contador zerado não aparece (nem para o leitor de tela): a
+// ausência já diz "nada pendente". As não lidas vão no contador e entram por extenso no nome.
+export function patientSummaryView(item: PatientSummary, now = new Date()) {
+  const description = item.next_appointment_at ? `Próxima consulta ${formatDateTime(item.next_appointment_at, now)}` : 'Sem consulta marcada';
+  const overdue = item.overdue_tasks;
+  const detail = overdue > 0 ? `${overdue} ${overdue === 1 ? 'tarefa vencida' : 'tarefas vencidas'}` : undefined;
+  const unread = item.unread_messages;
+  const unreadText = unread > 0 ? `${unread} ${unread === 1 ? 'mensagem não lida' : 'mensagens não lidas'}` : null;
+  return {
+    description,
+    detail,
+    badge: unread > 0 ? unread : undefined,
+    accessibilityLabel: [item.patient.name, unreadText, detail, description].filter(Boolean).join(', '),
   };
 }
 

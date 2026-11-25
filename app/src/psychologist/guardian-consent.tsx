@@ -29,7 +29,7 @@ export function GuardianConsentSection({ patientId, guardianName }: { patientId:
     } catch (cause) { setError(cause); } finally { submitting.current = false; setBusy(false); }
   }
   return <><Text variant="h4">Consentimento do responsável</Text>
-    {list.loading ? <Text>Carregando registros...</Text> : null}
+    {list.loading && !list.data ? <Text>Carregando registros...</Text> : null}
     <ErrorNotice error={list.error} retry={list.reload} />
     {list.data?.length === 0 ? <Text>Nenhum registro de consentimento do responsável.</Text> : null}
     {list.data?.map((item) => <Card key={item.id}><Text>{item.guardian_name}</Text>

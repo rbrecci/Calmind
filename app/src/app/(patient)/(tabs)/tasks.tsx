@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { patientApi } from '@/api/patient';
-import { Button, formatDate, Text } from '@/design-system';
+import { Button, EmptyState, formatTaskDate, Text } from '@/design-system';
 import { loadPatientPages } from '@/patient/load-pages';
 import { errorMessage } from '@/patient/presentation';
 import { splitTasks } from '@/patient/tasks';
@@ -28,18 +28,19 @@ export default function Tasks() {
     return <Card key={task.id}>
       <Text variant="h5">{task.title}</Text>
       {task.description ? <Text>{task.description}</Text> : null}
-      <Text color="textSecondary">Prazo: {task.due_date ? formatDate(task.due_date) : 'Sem prazo'}</Text>
-      <Text>{task.status === 'completed' ? 'Concluída' : 'Pendente'}</Text>
+      {/* Sem etiqueta de status: a seção ("Pendentes", "Concluídas") já diz qual é. */}
+      <Text variant="small" color="textSecondary">{task.status === 'completed' ? `Concluída ${formatTaskDate(task)}` : formatTaskDate(task)}</Text>
       {!active ? <Text variant="small" color="textSecondary">Vínculo encerrado. Somente leitura.</Text> : null}
       {active && task.status === 'pending' ? <Button tone="patient" variant="secondary" label={workingId === task.id ? 'Concluindo...' : 'Marcar como concluída'}
         accessibilityLabel={`Marcar como concluída: ${task.title}`} disabled={workingId !== null || loading} onPress={() => void complete(task.id)} /> : null}
     </Card>;
   }
   return <PatientPage title="Minhas tarefas" onRefresh={reload}>
-    <Text color="textSecondary">Atividades combinadas com seu psicólogo.</Text>
-    <Feedback loading={loading} error={error} retry={() => void reload()} />
+    <Feedback loading={loading} error={error} retry={() => void reload()} initial={data === null} />
     {actionError ? <Text accessibilityRole="alert" color="error">{actionError}</Text> : null}
-    {data && !data.tasks.pending.length && !data.tasks.completed.length && !loading && !error ? <Text>Nenhuma tarefa por enquanto.</Text> : null}
+    {/* Sem `!loading`: o vazio fica na tela enquanto a aba recarrega, como a lista fica, e a
+        ilustração não refaz a entrada a cada visita. */}
+    {data && !data.tasks.pending.length && !data.tasks.completed.length && !error ? <EmptyState illustration="tarefas" title="Nenhuma tarefa por enquanto" /> : null}
     {!error && data && (data.tasks.pending.length || data.tasks.completed.length) ? <>
       <Text variant="h5" accessibilityRole="header">Pendentes ({data.tasks.pending.length})</Text>
       {data.tasks.pending.length ? data.tasks.pending.map(renderTask) : <Text color="textSecondary">Nenhuma tarefa pendente.</Text>}

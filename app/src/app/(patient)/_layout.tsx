@@ -1,6 +1,6 @@
 import { Redirect, Stack, usePathname } from 'expo-router';
 
-import { Button, RoleColors, Screen, Text, Typography } from '@/design-system';
+import { Button, Loading, RoleColors, Screen, Text, Typography } from '@/design-system';
 import { ConsentProvider, useConsent } from '@/patient/consent-context';
 import { decideConsentGate } from '@/patient/consent-gate';
 import { useSession } from '@/session/session-context';
@@ -21,7 +21,7 @@ function ConsentNavigator() {
   const { signOut } = useSession();
   const pathname = usePathname();
   const gate = decideConsentGate(state);
-  if (gate === 'loading') return <Screen center><Text>Carregando termo de uso...</Text></Screen>;
+  if (gate === 'loading') return <Screen center><Loading /></Screen>;
   if (gate === 'error') return <Screen center>
     <Text accessibilityRole="alert" color="error">{state.status === 'error' ? state.message : ''}</Text>
     <Button tone="patient" variant="secondary" label="Tentar de novo" onPress={() => void reload()} />

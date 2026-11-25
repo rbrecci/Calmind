@@ -4,7 +4,7 @@ import { View } from 'react-native';
 import { ApiError } from '@/api';
 import { psychologistApi } from '@/api/psychologist';
 import type { Task } from '@/api/psychologist/types';
-import { formatDate, formatDateTime, Spacing, Text } from '@/design-system';
+import { formatTaskDate, Spacing, StatusTag, statusTagKind, Text } from '@/design-system';
 import { formatDueDate } from '@/psychologist/domain';
 import { Action, Card, ErrorNotice, Field, useConfirmation } from '@/psychologist/ui';
 
@@ -75,9 +75,10 @@ export function TaskForm({ bondId, readonly, tasks, onChanged }: TaskFormProps) 
     {tasks.map((task) => <Card key={task.id}>
       <Text variant="h5">{task.title}</Text>
       {task.description ? <Text>{task.description}</Text> : null}
-      <Text>{task.status === 'completed' ? 'Concluída' : 'Pendente'}</Text>
-      {task.due_date ? <Text>Prazo: {formatDate(task.due_date)}</Text> : null}
-      {task.completed_at ? <Text>Concluída em {formatDateTime(task.completed_at)}</Text> : null}
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Spacing.two }}>
+        <StatusTag kind={statusTagKind(task.status)} label={task.status === 'completed' ? 'Concluída' : 'Pendente'} />
+        <Text variant="small" color="textSecondary">{formatTaskDate(task)}</Text>
+      </View>
       {!readonly && task.status === 'pending' ? <View style={{ flexDirection: 'row', gap: Spacing.two }}>
         <Action variant="secondary" label="Editar" accessibilityLabel={`Editar tarefa: ${task.title}`} disabled={busy} style={{ flex: 1 }} onPress={() => {
           setEditing(task.id); setTitle(task.title); setDescription(task.description ?? '');
@@ -94,7 +95,7 @@ export function TaskForm({ bondId, readonly, tasks, onChanged }: TaskFormProps) 
       <Text variant="h5">{editing === null ? 'Nova tarefa' : 'Editar tarefa'}</Text>
       <Field label="Título da tarefa" value={title} onChangeText={setTitle} maxLength={150} error={errors?.title?.join(' ')} editable={!busy} />
       <Field label="Descrição da tarefa (opcional)" value={description} onChangeText={setDescription} multiline error={errors?.description?.join(' ')} editable={!busy} />
-      <Field label="Prazo (DD/MM/AAAA)" value={dueDate} onChangeText={setDueDate} placeholder="DD/MM/AAAA" maxLength={10} error={dateError ?? errors?.due_date?.join(' ')} editable={!busy} />
+      <Field label="Prazo" value={dueDate} onChangeText={setDueDate} placeholder="DD/MM/AAAA" maxLength={10} error={dateError ?? errors?.due_date?.join(' ')} editable={!busy} />
       <Action label={busy ? 'Salvando tarefa...' : 'Salvar tarefa'} disabled={busy} onPress={() => { void save(); }} />
       {editing !== null ? <Action variant="secondary" label="Cancelar edição da tarefa" disabled={busy} onPress={reset} /> : null}
     </Card> : null}

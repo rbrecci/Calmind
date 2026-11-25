@@ -30,15 +30,15 @@ export default function ProfileScreen() {
       setCurrent(result); setSaved(true); refresh();
     } catch (cause) { setError(cause); } finally { submitting.current = false; setBusy(false); }
   }
-  return <Page title="Meu perfil profissional"><Text>CRP: {current?.crp}</Text>
-    <Text>Escreva sua apresentação para as pessoas que consultam o catálogo.</Text>
+  return <Page title="Perfil"><Text color="textSecondary">CRP {current?.crp}</Text>
+    <Text color="textSecondary">Aparece no catálogo de profissionais.</Text>
     <Field label="Abordagem" value={form.profile_approach ?? ''} onChangeText={(value) => setForm({ ...form, profile_approach: value })} error={fieldError('profile_approach')} />
     <Field label="Especialidade" value={form.profile_specialty ?? ''} onChangeText={(value) => setForm({ ...form, profile_specialty: value })} error={fieldError('profile_specialty')} />
     <ChoiceGroup tone="psychologist" label="Modalidade" value={form.profile_modality ?? null}
       onChange={(modality) => setForm({ ...form, profile_modality: modality })} disabled={busy}
       options={[{ value: 'online', label: 'Online' }, { value: 'presencial', label: 'Presencial' }, { value: 'ambos', label: 'Online e presencial' }]} />
     <Field label="Região de atendimento" value={form.profile_region ?? ''} onChangeText={(value) => setForm({ ...form, profile_region: value })} error={fieldError('profile_region')} />
-    <Field label="Sobre você (até 3000 caracteres)" multiline maxLength={3000} value={form.profile_bio ?? ''} onChangeText={(value) => setForm({ ...form, profile_bio: value })} error={fieldError('profile_bio')} />
+    <Field label="Sobre você" multiline maxLength={3000} value={form.profile_bio ?? ''} onChangeText={(value) => setForm({ ...form, profile_bio: value })} error={fieldError('profile_bio')} />
     <ErrorNotice error={error} /><FieldErrorsDisplay error={error} />
     {saved ? <Text accessibilityLiveRegion="polite">Perfil salvo{current?.profile_published_at ? ' e publicado' : ''}.</Text> : null}
     <Action label="Salvar perfil" loading={busy} onPress={() => { void save(false); }} />

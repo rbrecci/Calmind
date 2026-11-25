@@ -1,18 +1,18 @@
 # Calmind: fechamento da Sprint 3
 
-Estado em 04/11/2026, para a reunião de 05/11. Calendário revisado em 23/11/2026.
+Estado atualizado em 25/11/2026. Calendário revisado em 23/11/2026.
 
 **Apresentação: sexta 04/12/2026.**
 
 ## Resumo
 
-**O sistema funciona no navegador. Ainda não rodou em celular nem está em servidor. A documentação é o que mais falta.**
+**O sistema roda no celular, pelo 4G, com a API no notebook exposta pelo ngrok. O visual foi refeito entre 23 e 25/11. A documentação é o que mais falta.**
 
 ## Progresso dos entregáveis
 
 | Entregável | Estado | O que falta |
 |---|---|---|
-| Sistema completo | Quase pronto | Celular, servidor e PR para o `main` |
+| Sistema completo | Pronto para o teste do grupo | Lista de bugs de 26/11, APK final v2 e PR para o `main` |
 | Relatório de testes | Só evidências soltas | Juntar em um relatório |
 | Documento ABNT | Parado em 23/10 | Atualizar com o estado atual |
 | Manual do usuário | Não começou | Escrever os dois manuais |
@@ -20,13 +20,30 @@ Estado em 04/11/2026, para a reunião de 05/11. Calendário revisado em 23/11/20
 
 ## O sistema hoje
 
-**Funciona (API real, app testado no navegador):** login, cadastro, aprovação de psicólogo, catálogo, convite, vínculo, consentimento, relatos, tarefas, chat, agenda e notificações dentro do app.
+**Funciona (API real, app testado no celular Android pelo 4G em 24/11):** login, cadastro, aprovação de psicólogo, catálogo, convite, vínculo, consentimento, relatos, tarefas, chat, agenda e notificações dentro do app.
 
-**Testes:** 242 do backend e 161 do app passando. Roteiro web e app (RNF-61): 18 de 18.
+**Testes:** 267 do backend e 228 do app passando. Roteiro web e app (RNF-61): 18 de 18, rodado antes do redesenho.
+
+**Visual refeito entre 23 e 25/11:**
+- Ícone e splash com o logo.
+- Oito ilustrações próprias nos estados vazios.
+- Animações discretas.
+- Menos texto por tela.
+- Etiquetas de status coloridas.
+- Agenda com formulário recolhido.
+- Conversa com campo e botão na mesma linha.
+
+As regras ficaram no [README do design system](app/src/design-system/README.md) (seções "Texto na tela", "Movimento" e "Ilustrações") e na seção 4.4 da [identidade visual](docs/identidade-visual.md).
 
 **Cortado, vai para o documento como evolução futura:** medicação, IA, auditoria de leitura, push e chat em tempo real.
 
-**Nunca testado:** APK em celular, upload de arquivo no celular, servidor público.
+**Nunca testado:** iPhone, upload de arquivo no celular e o roteiro RNF-61 depois do redesenho.
+
+**Pendências conhecidas, sem bloquear a demonstração:**
+- **Notificação de pedido de vínculo sem o nome do paciente:** o tipo da notificação não traz o nome, então resolver exige mudar o backend.
+- **Vínculo recusado aparece como "Conversa anterior":** falta a coluna `accepted_at`.
+- **Lembretes do RF-16 sem agendamento:** são gerados quando a lista de notificações abre, não por agendador.
+- **Splash escura nos Xiaomi:** com o celular em modo escuro, o MIUI escurece a splash, e o app não controla isso.
 
 ## O que cada um faz
 
@@ -76,8 +93,8 @@ Montado de trás para frente a partir da apresentação. Dias de aula em negrito
 
 | Data | Marco | Quem |
 |---|---|---|
-| seg 23/11 | Banco de demonstração preparado com a senha própria, túnel ngrok testado e APK v1 gerado com o endereço HTTPS | Rafael |
-| ter 24/11 | APK v1 instalado e testado no celular, fora do Wi-Fi de casa (4G) | Rafael e Zanetti |
+| seg 23/11 | Feito: banco de demonstração preparado com a senha própria, túnel ngrok testado e APK v1 gerado com o endereço HTTPS | Rafael |
+| ter 24/11 | Feito: APK instalado e testado no celular pelo 4G, nos dois lados. No mesmo dia, o redesenho visual | Rafael |
 | qua 25/11 | APK v1 enviado ao grupo, com a senha de demonstração passada por fora do repositório | Rafael |
 | **qui 26/11** | Teste no celular: paciente (Caio) e psicólogo (Mariana), numa lista única de bugs. Roteiro da demonstração fechado. Prints para os manuais | Caio, Mariana, Rafael, Nicoly, Isabela |
 | **sex 27/11** | Ensaio 1 completo, com cronômetro, mesmo com slides crus | Todos |
@@ -99,6 +116,8 @@ Montado de trás para frente a partir da apresentação. Dias de aula em negrito
 
 ## Avisos
 
-- **O APK atual não funciona na escola:** ele só conecta na rede de casa do Rafael. Até sair o APK final, os prints saem pela versão web (`npm start` em `app/`, depois tecla `w`).
+- **O APK atual funciona em qualquer rede**, mas só enquanto o notebook do Rafael estiver com o MySQL, o `artisan serve` e o ngrok ligados. Sem eles, nenhum login passa.
+- **O APK de teste tem os botões "Entrar como"** e a senha de demonstração embutida. Antes do APK da banca, `app/.env.local` vai com `EXPO_PUBLIC_DEMO_LOGIN=false` e `EXPO_PUBLIC_DEMO_PASSWORD` vazio, e o APK é gerado de novo.
+- **Gerar o APK:** copiar `app/` para `C:\cal\app` (`robocopy app C:\cal\app /MIR /XD .cxx android node_modules`). Quando o `app.json` ou os ícones mudarem, rodar `npx expo prebuild --platform android --no-install` lá e recriar o `android/local.properties`. Depois, em `C:\cal\app\android`: `gradlew.bat assembleRelease -PreactNativeArchitectures=arm64-v8a --max-workers=3`. Não deixar o Gradle rodando junto com os servidores: o notebook fica sem memória e derruba os três.
 - **Branch de trabalho:** `integracao/fechamento-30-10`. O `main` está desatualizado. Dê `git pull` nela antes de começar.
 - **Só dados fictícios**, inclusive nos prints.

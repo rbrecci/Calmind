@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 420" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f1f8f3"/><stop offset=".5" stop-color="#f2f5f7"/><stop offset="1" stop-color="#f8f1f9"/></linearGradient>
+    <radialGradient id="g1" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#dfeef0" stop-opacity=".95"/><stop offset="1" stop-color="#dfeef0" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="600" height="420" fill="url(#bg)"/>
+  <circle cx="300" cy="150" r="180" fill="url(#g1)"/>
+  <g transform="translate(300 150)">
+    <ellipse cx="0" cy="84" rx="150" ry="12" fill="#1c1c2e" opacity=".05"/>
+    <g transform="translate(-104 0)">
+      <rect x="-44" y="-62" width="88" height="132" rx="12" fill="#fff" stroke="#a9dcaa" stroke-width="3"/>
+      <circle cx="0" cy="-26" r="18" fill="#e3f6e2"/><circle cx="0" cy="-30" r="7" fill="#a9dcaa"/><path d="M-12 -14 c 3 -9 21 -9 24 0" fill="#a9dcaa"/>
+      <rect x="-28" y="6" width="56" height="7" rx="3.500" fill="#e8f2e8"/><rect x="-22" y="22" width="44" height="7" rx="3.500" fill="#eef4ee"/><rect x="-26" y="38" width="52" height="7" rx="3.500" fill="#eef4ee"/>
+    </g>
+    <g>
+      <rect x="-44" y="-62" width="88" height="132" rx="12" fill="#fff" stroke="#9ccdd1" stroke-width="3"/>
+      <circle cx="0" cy="-26" r="18" fill="#e5f1f2"/><circle cx="0" cy="-30" r="7" fill="#9ccdd1"/><path d="M-12 -14 c 3 -9 21 -9 24 0" fill="#9ccdd1"/>
+      <rect x="-28" y="6" width="56" height="7" rx="3.500" fill="#e6eff0"/><rect x="-22" y="22" width="44" height="7" rx="3.500" fill="#edf3f4"/><rect x="-26" y="38" width="52" height="7" rx="3.500" fill="#edf3f4"/>
+    </g>
+    <g transform="translate(104 0)">
+      <rect x="-44" y="-62" width="88" height="132" rx="12" fill="#fff" stroke="#e2b3e5" stroke-width="3"/>
+      <circle cx="0" cy="-26" r="18" fill="#f8e3f9"/><circle cx="0" cy="-30" r="7" fill="#e2b3e5"/><path d="M-12 -14 c 3 -9 21 -9 24 0" fill="#e2b3e5"/>
+      <rect x="-28" y="6" width="56" height="7" rx="3.500" fill="#f4e8f5"/><rect x="-22" y="22" width="44" height="7" rx="3.500" fill="#f7eef7"/><rect x="-26" y="38" width="52" height="7" rx="3.500" fill="#f7eef7"/>
+    </g>
+  </g>
+</svg>

@@ -6,6 +6,7 @@
   <meta name="description" content="Calmind: saúde mental e acolhimento. Conheça uma proposta de conexão entre pacientes e psicólogos, com privacidade desde a primeira palavra.">
   <title>Calmind | Saúde mental e acolhimento</title>
   <link rel="icon" type="image/png" href="assets/calmind-logo.png">
+  <script>document.documentElement.classList.add('js')</script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -23,22 +24,23 @@
 
   <main id="conteudo">
     <section id="inicio" class="hero">
+      <div class="orbs" aria-hidden="true"><span class="orb orb-green" data-parallax style="--speed:1"></span><span class="orb orb-pink" data-parallax style="--speed:-.8"></span></div>
       <div class="container hero-grid">
         <div class="hero-copy">
           <h1>Um lugar para falar. E alguém treinado para escutar.</h1>
           <p>O Calmind conecta quem procura acompanhamento a psicólogos com registro no CRP conferido. Sem preço em destaque, sem nota, sem ranking: a escolha é sua, pelo que a pessoa escreve sobre o próprio trabalho.</p>
           <div class="actions"><button class="button button-gradient" data-access="Criar conta grátis">Criar conta grátis</button><button class="button button-outline" data-access="Sou psicólogo">Sou psicólogo</button></div>
         </div>
-        <div class="hero-image screenshot" role="img" aria-label="Mulher sorrindo com uma camiseta com a marca Calmind"><img src="assets/referencia-inicio.png" alt="" fetchpriority="high"></div>
+        <div class="hero-image screenshot" data-tilt role="img" aria-label="Mulher sorrindo com uma camiseta com a marca Calmind"><img src="assets/referencia-inicio.png" alt="" fetchpriority="high"></div>
       </div>
     </section>
 
     <section class="benefits" aria-label="Os compromissos do Calmind">
-      <div class="container grid grid-four">
-        <article class="card"><h3>Gratuito</h3><p>para quem procura acolhimento: o paciente não paga para usar</p></article>
-        <article class="card"><h3>CRP conferido</h3><p>todo psicólogo passa por conferência antes de aparecer no catálogo</p></article>
-        <article class="card"><h3>Relato privado</h3><p>cada anotação nasce sua; você decide se e quando compartilha</p></article>
-        <article class="card"><h3>Sem ranking</h3><p>nenhuma nota, estrela ou ordenação por reputação: art. 20 do Código de Ética</p></article>
+      <div class="container xpanels">
+        <article class="xpanel" tabindex="0"><img class="xpanel-art" src="assets/compromissos/gratuito.svg" alt="" width="600" height="420" loading="lazy" decoding="async"><div class="xpanel-body"><h3>Gratuito</h3><p>para quem procura acolhimento: o paciente não paga para usar</p></div></article>
+        <article class="xpanel" tabindex="0"><img class="xpanel-art" src="assets/compromissos/crp.svg" alt="" width="600" height="420" loading="lazy" decoding="async"><div class="xpanel-body"><h3>CRP conferido</h3><p>todo psicólogo passa por conferência antes de aparecer no catálogo</p></div></article>
+        <article class="xpanel" tabindex="0"><img class="xpanel-art" src="assets/compromissos/relato.svg" alt="" width="600" height="420" loading="lazy" decoding="async"><div class="xpanel-body"><h3>Relato privado</h3><p>cada anotação nasce sua; você decide se e quando compartilha</p></div></article>
+        <article class="xpanel" tabindex="0"><img class="xpanel-art" src="assets/compromissos/sem-ranking.svg" alt="" width="600" height="420" loading="lazy" decoding="async"><div class="xpanel-body"><h3>Sem ranking</h3><p>nenhuma nota, estrela ou ordenação por reputação: art. 20 do Código de Ética</p></div></article>
       </div>
     </section>
 
@@ -57,13 +59,13 @@
       <div class="container audience-grid">
         <div class="audience-copy"><h2>O que você escreve é seu, até você dizer o contrário.</h2><ul class="feature-list"><li>Relato com seletor de privacidade acima do campo, visível antes de você escrever a primeira palavra.</li><li>Tarefas combinadas com a psicóloga, com prazo e sem cobrança automática.</li><li>Agenda das consultas e conversa direta, sem sair do aplicativo.</li><li>Catálogo sem preço, sem nota e sem ordenação por reputação.</li></ul>
         </div>
-        <div class="app-panel app-patient screenshot" role="img" aria-label="Três telas verdes do aplicativo para pacientes: início, novo relato e tarefas"><img src="assets/referencia-paciente.png" alt="" loading="lazy"></div>
+        <div class="app-panel app-illustration screenshot" data-parallax style="--speed:.3"><img src="assets/paciente-ilustracao.webp" srcset="assets/paciente-ilustracao-600.webp 600w, assets/paciente-ilustracao.webp 1200w" sizes="(max-width: 780px) 100vw, 680px" width="1200" height="800" alt="Ilustração de uma paciente usando o app no celular, com um psicólogo ao lado, entre um calendário e um escudo de privacidade" loading="lazy" decoding="async"></div>
       </div>
     </section>
 
     <section id="psicologos" class="audience psychologist section">
       <div class="container audience-grid audience-reverse">
-        <div class="app-panel app-psychologist screenshot" role="img" aria-label="Três telas rosas do aplicativo para psicólogos: registro no CRP, relatos e pacientes"><img src="assets/referencia-psicologo.png" alt="" loading="lazy"></div>
+        <div class="app-panel app-illustration screenshot" data-parallax style="--speed:-.3"><img src="assets/psicologo-ilustracao.webp" srcset="assets/psicologo-ilustracao-700.webp 700w, assets/psicologo-ilustracao.webp 1400w" sizes="(max-width: 780px) 100vw, 680px" width="1400" height="933" alt="Ilustração de uma psicóloga no computador consultando a lista de pacientes, com selo de registro conferido, enquanto conversa com uma paciente" loading="lazy" decoding="async"></div>
         <div class="audience-copy"><h2>Seus pacientes num lugar só, e o registro no CRP conferido antes de tudo.</h2><ul class="feature-list"><li>Cadastro com número de registro e documento comprobatório, conferido antes de o perfil ir ao ar.</li><li>Lista de pacientes com o que mudou desde a última vez que você abriu.</li><li>Prontuário com os relatos que o paciente escolheu compartilhar: só esses.</li><li>Convite por código para vincular quem já é seu paciente fora do app.</li></ul>
         </div>
       </div>
@@ -71,13 +73,33 @@
 
     <section id="privacidade" class="privacy section">
       <div class="container"><div class="section-heading"><h2>Privacidade não é uma tela de configuração</h2></div>
-        <div class="grid grid-three"><article class="card"><h3>Consentimento com data e hora</h3><p>Cada aceite grava versão do texto, data e hora. Dá para consultar depois o que foi aceito, e quando.</p></article><article class="card"><h3>Relato privado por padrão</h3><p>O seletor “Compartilhado / Só para mim” fica acima do campo de texto e aparece sem rolagem.</p></article><article class="card"><h3>Ninguém vê o que não foi dado</h3><p>O prontuário do psicólogo mostra apenas os relatos marcados como compartilhados.</p></article></div>
+        <div class="priv-layout"><div class="priv-cards"><article class="card priv-card" tabindex="0" data-target="consent"><span class="ico ico-doc" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path class="check" d="M9 14l2 2 4-4"/></svg></span><h3>Consentimento com data e hora</h3><p>Cada aceite grava versão do texto, data e hora. Dá para consultar depois o que foi aceito, e quando.</p></article><article class="card priv-card" tabindex="0" data-target="selector"><span class="ico ico-eye" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path class="eye" d="M2.500 12S6 5.500 12 5.500 21.500 12 21.500 12 18 18.500 12 18.500 2.500 12 2.500 12z"/><circle class="pupil" cx="12" cy="12" r="2.800"/><path class="slash" d="M4 4l16 16"/></svg></span><h3>Relato privado por padrão</h3><p>O seletor “Compartilhado / Só para mim” fica acima do campo de texto e aparece sem rolagem.</p></article><article class="card priv-card" tabindex="0" data-target="view"><span class="ico ico-key" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><g class="keyg"><circle cx="8" cy="15" r="4"/><path d="M11 12l8-8M16 7l3 3M14 9l2 2"/></g></svg></span><h3>Ninguém vê o que não foi dado</h3><p>O prontuário do psicólogo mostra apenas os relatos marcados como compartilhados.</p></article></div>
+          <div class="priv-demo" aria-label="Demonstração: como o relato privado funciona">
+            <div class="priv-app">
+              <div class="priv-app-top"><span class="priv-dot"></span><span>Novo relato</span><span class="priv-chip">Demonstração</span></div>
+              <p class="priv-label">Quem pode ver</p>
+              <div class="priv-toggle" role="group" aria-label="Quem pode ver este relato" data-part="selector">
+                <span class="priv-thumb" aria-hidden="true"></span>
+                <button type="button" class="priv-opt" data-mode="private" aria-pressed="true">Só para mim</button>
+                <button type="button" class="priv-opt" data-mode="shared" aria-pressed="false">Compartilhado</button>
+              </div>
+              <div class="priv-text">Terça foi difícil. Discussão no trabalho e voltei pensando naquilo a noite toda.</div>
+              <p class="priv-consent" data-part="consent" aria-live="polite"><span class="priv-consent-ico" aria-hidden="true"></span><span class="priv-consent-text">Relato privado: nenhum consentimento de compartilhamento.</span></p>
+            </div>
+            <div class="priv-view" data-part="view">
+              <p class="priv-view-title">O que a psicóloga vê no prontuário</p>
+              <div class="priv-view-body">
+                <div class="priv-empty"><span class="priv-lock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9.5" rx="2.2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>Nenhum relato compartilhado</div>
+                <div class="priv-entry"><span class="priv-entry-date">Terça</span><span class="priv-entry-text">Terça foi difícil. Discussão no trabalho e voltei pensando naquilo a noite toda.</span></div>
+              </div>
+            </div>
+          </div></div>
       </div>
     </section>
 
     <section class="testimonials section" aria-labelledby="depoimentos-titulo">
       <div class="container"><div class="section-heading"><h2 id="depoimentos-titulo">Quem já usou</h2><p>Espaço reservado. Os depoimentos entram depois do teste de usabilidade com pessoas de fora do grupo.</p></div>
-        <div class="grid grid-three"><figure class="card"><blockquote>“Escrevi coisa que nunca tinha falado em voz alta. Saber que só eu via até eu decidir mudou tudo.”</blockquote><figcaption>Paciente · 27 anos</figcaption></figure><figure class="card"><blockquote>“Chego na sessão já sabendo o que aconteceu na semana. O tempo da consulta rende mais.”</blockquote><figcaption>Psicóloga · CRP 06</figcaption></figure><figure class="card"><blockquote>“O código de convite resolveu o vínculo com quem eu já atendia fora do app.”</blockquote><figcaption>Psicólogo · CRP 05</figcaption></figure></div>
+        <div class="grid grid-three"><figure class="quote"><blockquote class="bubble">“Escrevi coisa que nunca tinha falado em voz alta. Saber que só eu via até eu decidir mudou tudo.”</blockquote><figcaption><span class="avatar avatar-free"><img src="assets/avatar-paciente-solta.webp" alt="" width="420" height="352" loading="lazy" decoding="async"></span><span class="who">Paciente · 27 anos</span></figcaption></figure><figure class="quote"><blockquote class="bubble">“Chego na sessão já sabendo o que aconteceu na semana. O tempo da consulta rende mais.”</blockquote><figcaption><span class="avatar avatar-free"><img src="assets/avatar-psicologa-solta.webp" alt="" width="420" height="353" loading="lazy" decoding="async"></span><span class="who">Psicóloga · CRP 06</span></figcaption></figure><figure class="quote"><blockquote class="bubble">“O código de convite resolveu o vínculo com quem eu já atendia fora do app.”</blockquote><figcaption><span class="avatar avatar-free"><img src="assets/avatar-psicologo-solto.webp" alt="" width="420" height="352" loading="lazy" decoding="async"></span><span class="who">Psicólogo · CRP 05</span></figcaption></figure></div>
       </div>
     </section>
 
@@ -94,7 +116,7 @@
       </div>
     </section>
 
-    <section id="comecar" class="closing section"><div class="container"><h2>Dá para começar hoje, escrevendo uma linha.</h2><p>Criar a conta leva menos de dois minutos e não pede cartão.</p><div class="actions"><button class="button button-white" data-access="Criar conta grátis">Criar conta grátis</button><button class="button button-outline" data-access="Sou psicólogo">Sou psicólogo</button></div></div></section>
+    <section id="comecar" class="closing section"><div class="orbs" aria-hidden="true"><span class="orb orb-white" data-parallax style="--speed:.8"></span><span class="orb orb-white orb-b" data-parallax style="--speed:-.6"></span></div><div class="container"><h2>Dá para começar hoje, escrevendo uma linha.</h2><p>Criar a conta leva menos de dois minutos e não pede cartão.</p><div class="actions"><button class="button button-gradient" data-access="Criar conta grátis">Criar conta grátis</button><button class="button button-outline" data-access="Sou psicólogo">Sou psicólogo</button></div></div></section>
   </main>
 
   <footer class="site-footer"><div class="container"><div class="footer-grid">

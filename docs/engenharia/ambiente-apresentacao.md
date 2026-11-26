@@ -81,7 +81,7 @@ em tempo real.
 
 ## 6. Pendências do ambiente
 
-- **Coleção do Postman** sem as rotas de medicação, IA e prontuário, e o Newman ainda por rodar contra o código atual.
+- **Coleção do Postman** atualizada em 26/11 (pastas 12 a 14), com o [Newman sem falhas](../testes/2026-11-26-newman-completo.txt) e a IA simulada. A chamada real ao Gemini se confere com `php artisan ai:check`.
 - **Massa de demonstração:** o `ClosingDemoSeeder` não cria medicação nem o aceite do termo de IA; hoje isso se faz pela API.
 - **Lembretes sem agendador:** nascem quando o app abre as notificações (aceito para a demonstração).
 - **Onde será a apresentação** (rede, tomada, projetor) e qual celular roda o app: definir até 02/12.

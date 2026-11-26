@@ -84,7 +84,7 @@ A decisão de hospedagem foi reavaliada e mantida (notebook com ngrok), com os p
 2. Testar o upload de documento no cadastro de psicólogo.
 
 ### Zanetti
-1. Repetir o Newman contra o código atual e salvar a saída em `docs/testes/`.
+1. Feito em 26/11: Newman contra o código atual, [saída salva](docs/testes/2026-11-26-newman-completo.txt).
 2. Montar a lista de requisitos Must: atendido, parcial ou cortado.
 3. Conferir se Policies e expiração de token ainda estão pendentes, como o ABNT diz.
 

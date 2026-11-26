@@ -1,6 +1,7 @@
 param(
     [string]$BaseUrl = 'http://127.0.0.1:8000/api/v1',
-    [string]$OutputPath
+    [string]$OutputPath,
+    [string]$Note
 )
 
 $ErrorActionPreference = 'Stop'
@@ -10,7 +11,7 @@ if ($apiUri.Scheme -ne 'http' -or $apiUri.Host -notin @('127.0.0.1', 'localhost'
     throw 'Use somente a API HTTP local em /api/v1.'
 }
 if (-not $OutputPath) {
-    $OutputPath = Join-Path $repositoryPath ('docs/testes/{0}-newman-fechamento.txt' -f (Get-Date -Format 'yyyy-MM-dd'))
+    $OutputPath = Join-Path $repositoryPath ('docs/testes/{0}-newman-completo.txt' -f (Get-Date -Format 'yyyy-MM-dd'))
 }
 $OutputPath = [IO.Path]::GetFullPath($OutputPath)
 if (Test-Path -LiteralPath $OutputPath) {
@@ -59,8 +60,9 @@ if (!$app->environment('local') || $connection !== 'mysql' || $config['database'
 
 try {
     New-Item -ItemType Directory -Path $temporaryPath | Out-Null
-    Write-Evidence 'Calmind fechamento: pastas 01 a 10. Consentimento registrado pela API, sem fixture de aceite.'
+    Write-Evidence 'Calmind: pastas 01 a 14. Consentimento registrado pela API, sem fixture de aceite.'
     Write-Evidence ('Data: ' + (Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz'))
+    if ($Note) { Write-Evidence $Note }
     Push-Location (Join-Path $repositoryPath 'backend')
     try {
         $bootstrap | & php
@@ -69,6 +71,10 @@ try {
     Write-Evidence 'Ambiente confirmado: local, mysql loopback, banco calmind. Nenhum reset executado.'
 
     $collection = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'Calmind.postman_collection.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+    # Banco preparado pelo preparar-demo.sh tem a senha do admin trocada: vem do ambiente e so vai para a copia temporaria.
+    if ($env:CALMIND_ADMIN_PASSWORD) {
+        ($collection.variable | Where-Object key -eq 'senhaAdmin').value = $env:CALMIND_ADMIN_PASSWORD
+    }
     # O export-collection do Newman nao preserva as mutacoes das variaveis da colecao.
     $authTests = $collection.item[0].item[-1].event | Where-Object listen -eq 'test'
     $authTests.script.exec += "pm.environment.set('calmindNewmanState', JSON.stringify(pm.collectionVariables.toObject()));"
@@ -95,7 +101,11 @@ try {
         '07 Perfil e pacientes',
         '08 Chat',
         '09 Agenda',
-        '10 Notificacoes'
+        '10 Notificacoes',
+        '11 Foto de perfil e capa',
+        '12 Medicacao',
+        '13 Analise por IA',
+        '14 Prontuario consolidado'
     )
 } catch {
     if ($exitCode -eq 0) { $exitCode = 1 }

@@ -127,6 +127,22 @@ Mudou o `.env`? Rode a última linha de novo.
 Para voltar o banco ao estado de partida (apaga tudo o que foi criado nos testes):
 `php artisan migrate:fresh --force` e repita a seção 5.
 
+## Onde parou em 26/11
+
+O servidor está no ar em `https://calmind.alwaysdata.net`, na branch `Rafael` (commit `cbb2e9f`).
+
+| Teste da seção 8 | Estado |
+|---|---|
+| 1, 2, 3 e 7 | passaram (view criada, 401, `.env` 404, 139 MB de 1 GB) |
+| 4 e 5 | **pendentes**. A chave #2 respondeu 200 pelo servidor web; as três chaves do `.env` foram conferidas depois |
+| 6 | abriu na rede do computador do SENAI; falta pela rede móvel. A porta 22 é bloqueada nessa rede |
+
+**Problema em aberto:** o `testar-hospedagem.ps1` estoura o tempo no primeiro pedido, e o pedido não
+aparece no log de acesso do servidor. Acontece também sem senha, com `Invoke-RestMethod` e
+`Invoke-WebRequest`, enquanto o `curl.exe` responde em 1 s. Uma chamada pelo PowerShell chegou a
+passar. A causa não foi identificada. Próximo passo: reescrever as chamadas do script com `curl.exe`
+e testar também o app no celular pela rede móvel.
+
 ## Cuidado: `ai:check` pelo terminal falha
 
 O terminal SSH roda numa máquina diferente da que serve o site. Em 26/11, a chamada ao Gemini saída

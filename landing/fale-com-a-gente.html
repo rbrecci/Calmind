@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Fale com o Calmind: canais de contato e formulário de mensagem.">
+  <title>Fale com a gente | Calmind</title>
+  <link rel="icon" type="image/png" href="assets/calmind-logo.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand navbar-brand" href="index.html" aria-label="Calmind, início"><img class="navbar-logo" src="assets/calmind-logo.png" alt="Calmind" width="56" height="56"></a>
+      <button class="menu-toggle" aria-expanded="false" aria-controls="navigation" aria-label="Abrir menu"><span></span><span></span><span></span></button>
+      <nav id="navigation" aria-label="Navegação principal">
+        <a href="index.html#como-funciona">Como funciona</a><a href="index.html#pacientes">Para pacientes</a><a href="index.html#psicologos">Para psicólogos</a><a href="index.html#privacidade">Privacidade</a><a href="index.html#perguntas">Perguntas</a>
+      </nav>
+      <div class="header-actions"><button class="button button-outline" data-access="Entrar">Entrar</button><button class="button button-gradient" data-access="Criar conta">Criar conta</button></div>
+    </div>
+  </header>
+
+  <main id="conteudo">
+    <section class="page-hero"><div class="container"><a class="back-link" href="index.html">← Voltar para a página inicial</a><h1>Fale com a gente</h1><p>Dúvida, sugestão ou pedido sobre seus dados? Escolha o canal ou escreva por aqui.</p></div></section>
+    <div class="page-body"><div class="container">
+      <div class="page-grid">
+        <article class="card"><h3>Contato geral</h3><p>Dúvidas sobre o app e sugestões.</p><p><a href="mailto:contato@calmind.example">contato@calmind.example</a></p></article>
+        <article class="card"><h3>Privacidade e dados</h3><p>Direitos da LGPD e canal do encarregado.</p><p><a href="mailto:dpo@calmind.example">dpo@calmind.example</a></p></article>
+        <article class="card"><h3>Imprensa</h3><p>Pedidos de entrevista e materiais.</p><p><a href="mailto:imprensa@calmind.example">imprensa@calmind.example</a></p></article>
+      </div>
+      <p class="doc-meta" style="margin-top:20px;border:0;padding:0">Os endereços acima são canais de demonstração do projeto.</p>
+      <div class="stack" style="margin-top:36px">
+        <div>
+          <h2>Envie uma mensagem</h2>
+          <p>Preencha o formulário. Este site não tem servidor para receber mensagens: ao enviar, montamos o e-mail para você abrir no seu programa de e-mail ou copiar.</p>
+          <form id="contact-form" class="form" data-to="contato@calmind.example" novalidate>
+            <div class="field"><label for="nome">Nome</label><input id="nome" name="nome" type="text" autocomplete="name" required></div>
+            <div class="field"><label for="email">Seu e-mail</label><input id="email" name="email" type="email" autocomplete="email" required></div>
+            <div class="field"><label for="assunto">Assunto</label><select id="assunto" name="assunto" required><option value="">Selecione</option><option>Dúvida sobre o aplicativo</option><option>Privacidade e dados (LGPD)</option><option>Sugestão</option><option>Parceria</option><option>Outro assunto</option></select></div>
+            <div class="field"><label for="mensagem">Mensagem</label><textarea id="mensagem" name="mensagem" required></textarea></div>
+            <div><button class="button button-gradient" type="submit">Preparar mensagem</button></div>
+          </form>
+          <div id="contact-result" class="form-result" hidden>
+            <h3>Mensagem pronta, ainda não enviada</h3>
+            <p>Nada foi enviado. Abra no seu e-mail ou copie o texto e mande para <strong>contato@calmind.example</strong>.</p>
+            <pre>Assunto: <span id="contact-subject"></span>
+
+<span id="contact-body"></span></pre>
+            <div class="actions"><a class="button button-gradient" id="contact-mailto" href="mailto:contato@calmind.example">Abrir no meu e-mail</a><button class="button button-outline" id="contact-copy" type="button">Copiar mensagem</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="cvv-box"><strong>Em crise ou emergência? Ligue 188.</strong>CVV, ligação gratuita, 24 horas, ou <a href="tel:188">188</a>. Em risco imediato de vida, ligue 192 (SAMU).</div>
+      <a class="back-link back-bottom" href="index.html">← Voltar para a página inicial</a>
+    </div></div>
+  </main>
+
+  <footer class="site-footer"><div class="container"><div class="footer-grid">
+    <div class="footer-about"><a class="brand" href="index.html">Calmind</a><p>Saúde mental e acolhimento. Projeto integrador do SENAI: não substitui atendimento de urgência.</p><p>Em crise? CVV <a href="tel:188">188</a>, ligação gratuita, 24 horas.</p></div>
+    <div><h3>Produto</h3><a href="index.html#como-funciona">Como funciona</a><a href="index.html#pacientes">Para pacientes</a><a href="index.html#psicologos">Para psicólogos</a><a href="precos.html">Preços</a></div>
+    <div><h3>Confiança</h3><a href="politica-de-privacidade.html">Privacidade</a><a href="termos-de-uso.html">Termos de uso</a><a href="lgpd.html">LGPD</a><a href="codigo-de-etica.html">Código de Ética</a></div>
+    <div><h3>Contato</h3><a href="fale-com-a-gente.html" aria-current="page">Fale com a gente</a><a href="imprensa.html">Imprensa</a><a href="trabalhe-conosco.html">Trabalhe conosco</a></div>
+  </div><div class="copyright">© 2026 Calmind · Todos os direitos reservados</div></div></footer>
+
+  <dialog id="notice" aria-labelledby="notice-title"><button class="dialog-close" aria-label="Fechar">×</button><h2 id="notice-title"></h2><p id="notice-message"></p><button class="button button-gradient dialog-done">Entendi</button></dialog>
+  <script src="site.js" defer></script>
+</body>
+</html>

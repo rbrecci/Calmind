@@ -444,7 +444,7 @@ Preferências de notificação (CA-16.2) e push ficam fora desta versão.
 
 ### 3.8.6 O que fica de fora do fechamento de 30/10
 
-Medicação (RF-27, RF-28, RF-29, RF-38, RF-39) e auditoria de leitura (RF-17) **entraram em 26/11/2026**, ver a seção 3.8.8. A análise por IA (RF-41, RF-42) entrou no mesmo dia, ver a seção 3.8.9. Seguem de fora: a tela de consentimento de IA no app (o endpoint existe), prontuário como rota própria, preferências de notificação, push e chat em tempo real. O texto e o ABNT registram o corte como evolução futura.
+Medicação (RF-27, RF-28, RF-29, RF-38, RF-39) e auditoria de leitura (RF-17) **entraram em 26/11/2026**, ver a seção 3.8.8. A análise por IA (RF-41, RF-42) entrou no mesmo dia, ver a seção 3.8.9, e o prontuário consolidado (RF-36), na 3.8.10. Seguem de fora: a tela de consentimento de IA no app (o endpoint existe), preferências de notificação, push e chat em tempo real. O texto e o ABNT registram o corte como evolução futura.
 
 ### 3.8.7 Foto de perfil e capa (acrescentado em 25/11/2026)
 
@@ -570,6 +570,47 @@ Depois de confirmada, `summary` é a versão mais recente e `versions` traz toda
 **Rodízio de chaves e de modelos.** `GEMINI_API_KEYS=chave2,chave3` acrescenta chaves (de contas do próprio dono do projeto) depois da `GEMINI_API_KEY`, e `GEMINI_MODELS=a,b` define a ordem de queda dos modelos. A chamada tenta, para cada chave, cada modelo, e passa ao próximo quando recebe 429 (cota), erro 5xx, tempo esgotado ou chave recusada. O par que falhou fica em descanso (10 min por cota, 2 min por sobrecarga, 30 min por chave inválida) e é pulado nas chamadas seguintes; se todos estiverem em descanso, tenta mesmo assim. Bloqueio de conteúdo (resposta sem texto) não roda o rodízio, porque outra chave daria o mesmo resultado. O orçamento total é `AI_BUDGET` (70 s) e cada tentativa `AI_TIMEOUT` (25 s). Se tudo falhar, a API responde 502 e nada é salvo. Nos logs as chaves aparecem só como `chave #n`.
 
 Para conferir a ligação: `php artisan ai:check` (relato fictício, com rodízio), `php artisan ai:check --keys` (cada chave com cada modelo, um por um, para ver qual conta falha) e `php artisan ai:check --models` (lista os modelos da conta).
+
+### 3.8.10 Prontuário consolidado (acrescentado em 26/11/2026)
+
+RF-36, o último requisito Must do backend. Uma chamada devolve, em ordem cronológica, tudo o que o psicólogo precisa ver de um paciente: relatos compartilhados, tarefas, consultas, registros de medicação e análises de IA confirmadas.
+
+`GET /psychologist/patients/{id}/record?from=Y-m-d&to=Y-m-d&order=asc|desc`
+
+O `{id}` é o `users.id` do paciente, o mesmo de `GET /psychologist/patients/{id}`. Sem `from` e `to`, o período são os últimos 30 dias (máximo 366). `order` é `asc` por padrão (do mais antigo ao mais novo); `desc` inverte.
+
+```json
+{
+  "bond_id": 12, "bond_status": "active", "since": "2026-10-20T14:00:00-03:00",
+  "patient": { "id": 7, "name": "Elizabeth Bennet", "avatar_url": null, "cover_url": null },
+  "is_minor": false, "guardian": null,
+  "period": { "from": "2026-10-28", "to": "2026-11-26" }, "order": "asc",
+  "totals": { "report": 3, "task": 1, "appointment": 2, "medication": 1, "analysis": 1 },
+  "timeline": [
+    { "type": "report", "at": "2026-11-24T09:00:00-03:00", "id": 41, "data": { "id": 41, "body": "...", "created_at": "..." } },
+    { "type": "task", "at": "...", "id": 5, "data": { "...": "objeto de tarefa da seção 3.6" } },
+    { "type": "appointment", "at": "...", "id": 9, "data": { "...": "objeto de consulta da seção 3.8.4" } },
+    { "type": "medication", "at": "...", "id": 3, "data": { "...": "objeto de medicação da seção 3.8.8" } },
+    { "type": "analysis", "at": "...", "id": 2, "data": { "...": "objeto de análise da seção 3.8.9" } }
+  ]
+}
+```
+
+Cada item da `timeline` traz `type`, `at` (a data usada na ordem), `id` e `data`, que é exatamente o objeto que o endpoint próprio daquele tipo já devolve. O app reaproveita os componentes que já tem. O que define `at`: o `created_at` do relato, da tarefa e da medicação; o `scheduled_at` da consulta; o `confirmed_at` da análise.
+
+**O que nunca aparece:** relato privado ou despublicado (nem na lista, nem em contagem), sugestão de IA ainda não confirmada ou descartada, tarefa arquivada, e qualquer dado de outro psicólogo do mesmo paciente. Por isso a chave de contagem se chama `totals` e conta só o que está na `timeline`. Cada tipo tem teto de 200 itens por chamada: se o período for longo, o app deve reduzir o intervalo.
+
+**Vínculo:** vale o mesmo critério de `GET /psychologist/patients/{id}`: vínculo ativo, ou encerrado do mesmo psicólogo (o histórico continua dele, RF-14). Se o mesmo psicólogo e paciente tiveram mais de um vínculo, o prontuário junta os dois. Sem vínculo, a resposta é 404, igual à de paciente inexistente.
+
+**Erros:** 404 sem vínculo; 403 para quem não é psicólogo; 422 para data inválida, `to` antes de `from`, período acima de 366 dias ou `order` fora de `asc`/`desc`.
+
+**Auditoria:** abrir o prontuário grava a ação `read_patient_record` (CA-36.2), inclusive a tentativa negada. Não há tela para isso.
+
+**Menor de idade (CA-36.5):** `is_minor` vem `true` e `guardian` traz nome, telefone e parentesco do responsável. O app deve exibir esse contato no topo do prontuário.
+
+**O que o app precisa fazer (Caio):** a tela de prontuário do psicólogo pode trocar as várias chamadas por esta uma (ou manter as abas e usar esta só para a visão geral). Mostrar a `timeline` com um ícone por `type`, agrupar por dia usando `at`, e oferecer um seletor de período com 30 dias como padrão.
+
+---
 
 ---
 

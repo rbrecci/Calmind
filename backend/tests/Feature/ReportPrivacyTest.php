@@ -79,6 +79,7 @@ class ReportPrivacyTest extends TestCase
         'POST psychologist/medications' => self::NONE,
         'GET psychologist/medications/{}' => self::NONE,
         'POST psychologist/medications/{}/reactivate' => self::NONE,
+        'GET psychologist/patients/{}/record' => self::READS,
         'POST psychologist/analyses' => self::READS,
         'GET psychologist/analyses' => self::NONE,
         'GET psychologist/analyses/{}' => self::NONE,
@@ -110,6 +111,7 @@ class ReportPrivacyTest extends TestCase
     private const PSYCHOLOGIST_SIDE = [
         'Services/SharedReportService.php',
         'Services/AnalysisService.php',
+        'Services/PatientRecordService.php',
         'Http/Controllers/Api/V1/PsychologistReportController.php',
         'Http/Resources/SharedReportResource.php',
         'Http/Resources/SharedReportCollection.php',
@@ -574,6 +576,16 @@ class ReportPrivacyTest extends TestCase
                 foreach ($this->ids['hidden'] as $id) {
                     $this->showAs($this->psy1, $id)->assertNotFound()->assertExactJson(self::NOT_FOUND);
                 }
+            },
+            // RF-36, CA-36.4: o prontuario consolidado tambem le so a view; privado e despublicado nao deixam rastro
+            'GET psychologist/patients/{}/record' => function (): void {
+                $url = '/api/v1/psychologist/patients/'.$this->patientA->user_id.'/record';
+
+                $response = $this->getJson($url, $this->bearer($this->psy1))->assertOk();
+
+                $this->assertNoTrace($response);
+                $this->assertSame(count($this->ids['visibleA']), $response->json('totals.report'));
+                $this->getJson($url, $this->bearer($this->psy2))->assertNotFound();
             },
             // RNF-08: o pacote enviado ao servico de IA sai da view, entao nenhum relato privado ou despublicado vai junto
             'POST psychologist/analyses' => function (): void {

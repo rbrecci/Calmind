@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -25,6 +26,14 @@ class PatientBondResource extends JsonResource
                 'id' => $this->psychologist->id,
                 'name' => $this->psychologist->user->name,
                 'crp' => $this->psychologist->crp_region.'/'.$this->psychologist->crp_number,
+                // Mesmos campos do CatalogPsychologistResource: com vinculo ativo o catalogo responde 403
+                'approach' => $this->psychologist->profile_approach,
+                'specialty' => $this->psychologist->profile_specialty,
+                'modality' => $this->psychologist->profile_modality,
+                'region' => $this->psychologist->profile_region,
+                'bio' => $this->psychologist->profile_bio,
+                'avatar_url' => User::profileImageUrl($this->psychologist->user_id, 'avatar', $this->psychologist->user->avatar_path),
+                'cover_url' => User::profileImageUrl($this->psychologist->user_id, 'cover', $this->psychologist->user->cover_path),
             ],
             'unread_messages' => (int) $this->unread_messages,
         ];

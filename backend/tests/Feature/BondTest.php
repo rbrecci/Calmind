@@ -725,6 +725,38 @@ class BondTest extends TestCase
         );
     }
 
+    // O catalogo recusa quem ja tem vinculo ativo, entao o perfil publico vem junto do vinculo
+    public function test_patient_bond_carries_the_public_profile_of_the_psychologist(): void
+    {
+        $psychologist = $this->psychologist([
+            'crp_region' => '06',
+            'crp_number' => '123456',
+            'profile_approach' => 'TCC',
+            'profile_specialty' => 'Ansiedade',
+            'profile_modality' => 'online',
+            'profile_region' => 'São Paulo, SP',
+            'profile_bio' => 'Texto escrito pelo profissional.',
+        ]);
+        $patient = $this->patient();
+        $this->activeBond($patient, $psychologist);
+
+        $item = $this->as($patient->user)->getJson('/api/v1/patient/bonds')->assertOk()->json('data.0.psychologist');
+
+        $this->assertSame(['id', 'name', 'crp', 'approach', 'specialty', 'modality', 'region', 'bio', 'avatar_url', 'cover_url'], array_keys($item));
+        $this->assertSame([
+            'id' => $psychologist->id,
+            'name' => $psychologist->user->name,
+            'crp' => '06/123456',
+            'approach' => 'TCC',
+            'specialty' => 'Ansiedade',
+            'modality' => 'online',
+            'region' => 'São Paulo, SP',
+            'bio' => 'Texto escrito pelo profissional.',
+            'avatar_url' => null,
+            'cover_url' => null,
+        ], $item);
+    }
+
     public function test_psychologist_ends_active_bond(): void
     {
         $psychologist = $this->psychologist();
@@ -818,7 +850,7 @@ class BondTest extends TestCase
 
         $item = $this->as($this->patient()->user)->getJson(self::CATALOG)->assertOk()->json('data.0');
 
-        $this->assertSame(['id', 'name', 'crp', 'approach', 'specialty', 'modality', 'region', 'bio'], array_keys($item));
+        $this->assertSame(['id', 'name', 'crp', 'approach', 'specialty', 'modality', 'region', 'bio', 'avatar_url', 'cover_url'], array_keys($item));
         $this->assertSame([
             'id' => $psychologist->id,
             'name' => $psychologist->user->name,
@@ -828,6 +860,8 @@ class BondTest extends TestCase
             'modality' => 'online',
             'region' => 'São Paulo, SP',
             'bio' => 'Texto escrito pelo profissional.',
+            'avatar_url' => null,
+            'cover_url' => null,
         ], $item);
     }
 

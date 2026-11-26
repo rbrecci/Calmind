@@ -172,7 +172,7 @@ class BondService
 
         $query = Psychologist::query()
             ->join('users', 'users.id', '=', 'psychologists.user_id')
-            ->select('psychologists.*', 'users.name')
+            ->select('psychologists.*', 'users.name', 'users.avatar_path', 'users.cover_path')
             ->where('psychologists.approval_status', 'approved')
             ->whereNotNull('psychologists.profile_published_at')
             ->where('users.status', 'active')

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -20,7 +21,12 @@ class PatientDirectoryResource extends JsonResource
             'status' => $this->status,
             'since' => $attributes['responded_at'] ?? null,
             'ended_at' => $attributes['ended_at'] ?? null,
-            'patient' => ['id' => $this->patient->user_id, 'name' => $this->patient->user->name],
+            'patient' => [
+                'id' => $this->patient->user_id,
+                'name' => $this->patient->user->name,
+                'avatar_url' => User::profileImageUrl($this->patient->user_id, 'avatar', $this->patient->user->avatar_path),
+                'cover_url' => User::profileImageUrl($this->patient->user_id, 'cover', $this->patient->user->cover_path),
+            ],
             'unread_messages' => $active ? (int) $this->unread_messages : 0,
             'overdue_tasks' => $active ? (int) $this->overdue_tasks : 0,
             'next_appointment_at' => $active && $this->next_appointment_at !== null

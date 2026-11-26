@@ -23,6 +23,8 @@ class User extends Authenticatable
         'role',
         'status',
         'suspended_at',
+        'avatar_path',
+        'cover_path',
     ];
 
     // RNF-07: a senha nunca sai em resposta
@@ -41,6 +43,21 @@ class User extends Authenticatable
             'password_hash' => 'hashed',
             'suspended_at' => 'datetime',
         ];
+    }
+
+    // URL absoluta com o APP_URL do .env. O ?v= muda a cada envio (o nome do arquivo e novo), entao o
+    // cache de imagem do app percebe a troca. Estatico porque o catalogo traz o caminho pelo join, sem User
+    public static function profileImageUrl(int $userId, string $kind, ?string $path): ?string
+    {
+        if ($path === null) {
+            return null;
+        }
+
+        return rtrim(config('app.url'), '/').route('users.profile-image', [
+            'id' => $userId,
+            'kind' => $kind,
+            'v' => substr(sha1($path), 0, 12),
+        ], false);
     }
 
     public function patient(): HasOne

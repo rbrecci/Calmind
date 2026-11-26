@@ -20,10 +20,12 @@ rede da escola já bloqueou a porta 22.
 
 Em **Databases > MySQL**:
 
-1. Crie o banco `CONTA_calmind` (utf8mb4).
-2. Crie um usuário com todos os privilégios **só** nesse banco e uma senha nova.
+1. Crie o banco `CONTA_calmind`.
+2. O usuário `CONTA` já existe e tem acesso total a ele. Em **Users**, defina uma senha.
 
-Servidor: `mysql-CONTA.alwaysdata.net`, porta 3306.
+Servidor: `mysql-CONTA.alwaysdata.net`, porta 3306 (MariaDB 11.8 em 26/11).
+
+Na conta usada pelo grupo, `CONTA` é `calmind` e o banco é `calmind_calmind`.
 
 ## 3. Código
 
@@ -125,6 +127,13 @@ Mudou o `.env`? Rode a última linha de novo.
 Para voltar o banco ao estado de partida (apaga tudo o que foi criado nos testes):
 `php artisan migrate:fresh --force` e repita a seção 5.
 
+## Cuidado: `ai:check` pelo terminal falha
+
+O terminal SSH roda numa máquina diferente da que serve o site. Em 26/11, a chamada ao Gemini saída
+do SSH recebeu `400 User location is not supported`, e a mesma chave, chamada pelo servidor web,
+respondeu 200. Para testar a IA, peça uma análise pela API. Não conclua nada pelo `ai:check` do
+servidor, a não ser `401 API key not valid`, que indica chave colada errada.
+
 ## 8. Testes de aceite
 
 | # | Teste | Passa se |
@@ -132,8 +141,8 @@ Para voltar o banco ao estado de partida (apaga tudo o que foi criado nos testes
 | 1 | Seção 5 | termina sem erro, com a view criada |
 | 2 | `curl -s -o /dev/null -w "%{http_code}\n" -H "Accept: application/json" https://CONTA.alwaysdata.net/api/v1/me` | `401` |
 | 3 | `https://CONTA.alwaysdata.net/.env` | `404` |
-| 4 | No app ou Postman: enviar foto de perfil e abrir de novo | a foto volta, com URL em `https` |
-| 5 | `php artisan ai:check` no servidor, e uma análise pedida pela API | as duas respondem |
+| 4 | Na máquina com o `backend/.env`: `.\backend\scripts\testar-hospedagem.ps1` (foto de perfil) | a foto volta, com URL em `https` |
+| 5 | O mesmo script (análise por IA pela API) | a sugestão é gerada pelo Gemini |
 | 6 | Abrir o endereço na rede da escola e pela rede móvel | abre nas duas |
 | 7 | `df -h ~` e `du -sh ~/calmind` | cabe com folga no 1 GB do plano |
 

@@ -579,7 +579,7 @@ class ReportPrivacyTest extends TestCase
             'POST psychologist/analyses' => function (): void {
                 $term = ConsentTerm::factory()->create(['type' => 'ai_analysis']);
                 ConsentAcceptance::factory()->create(['user_id' => $this->patientA->user_id, 'consent_term_id' => $term->id]);
-                config(['services.ai.provider' => 'gemini', 'services.gemini.key' => 'chave-de-teste']);
+                config(['services.ai.provider' => 'gemini', 'services.gemini.keys' => ['chave-de-teste'], 'services.gemini.models' => ['modelo-teste']]);
                 Http::fake(['*' => Http::response(['candidates' => [['content' => ['parts' => [['text' => 'Resumo de teste']]]]]])]);
                 $bond = Bond::where('patient_id', $this->patientA->id)->where('psychologist_id', $this->psy1->psychologist->id)->where('status', 'active')->firstOrFail();
                 $payload = ['bond_id' => $bond->id, 'period_start' => now()->subDays(3)->toDateString(), 'period_end' => now()->toDateString()];

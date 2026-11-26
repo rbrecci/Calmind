@@ -28,7 +28,7 @@ class AnalysisTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        config(['services.ai.provider' => 'gemini', 'services.gemini.key' => 'chave-de-teste']);
+        config(['services.ai.provider' => 'gemini', 'services.gemini.keys' => ['chave-de-teste'], 'services.gemini.models' => ['modelo-teste']]);
         $this->fakeGemini('- Ansiedade antes da prova.');
 
         $this->bond = Bond::factory()->active()->create();

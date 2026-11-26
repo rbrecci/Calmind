@@ -178,6 +178,21 @@ class ProfileImageTest extends TestCase
         $this->as($suspended)->getJson("/api/v1/users/{$psychologist->id}/avatar")->assertForbidden();
     }
 
+    public function test_foto_de_psicologo_fora_do_catalogo_so_sai_para_quem_tem_vinculo(): void
+    {
+        $pending = $this->withImage(Psychologist::factory()->create()->user);
+        $unpublished = $this->withImage(Psychologist::factory()->approved()->create()->user);
+        $stranger = Patient::factory()->create()->user;
+
+        foreach ([$pending, $unpublished] as $owner) {
+            $this->as($stranger)->getJson("/api/v1/users/{$owner->id}/avatar")->assertForbidden();
+            $this->as($owner)->get("/api/v1/users/{$owner->id}/avatar")->assertOk();
+        }
+
+        $bond = Bond::factory()->create(['psychologist_id' => $unpublished->psychologist->id, 'status' => 'active', 'accepted_at' => now()]);
+        $this->as($bond->patient->user)->get("/api/v1/users/{$unpublished->id}/avatar")->assertOk();
+    }
+
     public function test_psicologo_vinculado_ve_foto_do_paciente_em_vinculo_pendente_ativo_ou_encerrado(): void
     {
         foreach (['pending' => [], 'active' => ['status' => 'active', 'responded_at' => now(), 'accepted_at' => now()], 'ended' => ['status' => 'ended', 'responded_at' => now(), 'accepted_at' => now(), 'ended_at' => now()]] as $state) {

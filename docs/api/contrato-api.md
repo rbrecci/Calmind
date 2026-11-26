@@ -444,7 +444,7 @@ Preferências de notificação (CA-16.2) e push ficam fora desta versão.
 
 ### 3.8.6 O que fica de fora do fechamento de 30/10
 
-Medicação (RF-27, RF-28, RF-29, RF-38, RF-39) e auditoria de leitura (RF-17) **entraram em 26/11/2026**, ver a seção 3.8.8. A análise por IA (RF-41, RF-42) entrou no mesmo dia, ver a seção 3.8.9, e o prontuário consolidado (RF-36), na 3.8.10. Seguem de fora: a tela de consentimento de IA no app (o endpoint existe), preferências de notificação, push e chat em tempo real. O texto e o ABNT registram o corte como evolução futura.
+Medicação (RF-27, RF-28, RF-29, RF-38, RF-39) e auditoria de leitura (RF-17) **entraram em 26/11/2026**, ver a seção 3.8.8. A análise por IA (RF-41, RF-42) entrou no mesmo dia, ver a seção 3.8.9, e o prontuário consolidado (RF-36), na 3.8.10. No app, as telas de medicação, consentimento de IA, análise e prontuário ainda não existem (os endpoints existem). Seguem de fora preferências de notificação, push e chat em tempo real, que o texto e o ABNT registram como evolução futura.
 
 ### 3.8.7 Foto de perfil e capa (acrescentado em 25/11/2026)
 
@@ -626,10 +626,13 @@ O teste automatizado do RNF-08, previsto para a semana 4, verifica exatamente is
 
 ## 5. O que ainda não está neste contrato
 
-Chat, agenda, notificações, lista de pacientes e consentimento entraram na seção 3.8. Continuam de fora, e a seção 3.8.6 explica o corte:
+Chat, agenda, notificações, lista de pacientes e consentimento entraram na seção 3.8. Medicação, auditoria de leitura, análise por IA e prontuário consolidado entraram em 26/11/2026 (seções 3.8.8 a 3.8.10). Continuam de fora, como evolução futura:
 
 | Bloco | Requisitos |
 |-------|------------|
-| Medicação | RF-27 a RF-29, RF-38, RF-39, RF-43 |
-| Análise por IA | RF-41, RF-42 |
-| Auditoria de leitura | RF-17 |
+| Denúncias | RF-18, RF-45 |
+| Nova versão de termo pelo administrador | RF-46 |
+| Aceite do contrato de serviço | RF-48 |
+| Exportação dos dados | RF-31 |
+| Política de retenção | RF-47 |
+| Push, preferências de notificação e chat em tempo real | CA-16.2 |

@@ -48,7 +48,7 @@ O `.env` não vai para o repositório. Conferir, no notebook de apresentação:
 
 ## 4. Checklist
 
-### 4.1 Até quarta 03/12 (ensaio completo, na máquina e na rede da apresentação)
+### 4.1 Até quinta 03/12 (ensaio completo, na máquina e na rede da apresentação)
 
 - [ ] `php artisan test` passa (em 26/11: 332 testes). Antes, `php artisan optimize:clear`.
 - [ ] `php artisan ai:check --keys`: cada chave com cada modelo. Anotar quais contas funcionam.

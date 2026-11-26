@@ -1,7 +1,7 @@
 # Subir o Calmind em outra máquina
 
 Guia para ligar o sistema inteiro num computador que acabou de clonar o repositório: banco, API,
-túnel público e app. Escrito em 25/11/2026, contra a branch `integracao/fechamento-30-10`.
+túnel público e app. Escrito em 25/11/2026 e revisto em 26/11/2026, contra a branch `main`.
 
 O detalhe de cada peça do backend (extensões do PHP, diferença entre MariaDB e MySQL, erros comuns)
 continua em [setup-backend.md](setup-backend.md). Este guia é a sequência que funciona hoje, do zero
@@ -53,7 +53,7 @@ frente. Sem o `fileinfo`, o envio de foto de perfil falha. O GD não é necessá
 ```bash
 git clone https://github.com/rbrecci/Calmind.git
 cd Calmind
-git checkout integracao/fechamento-30-10
+git checkout main
 
 cd backend
 composer install
@@ -185,8 +185,8 @@ php artisan test
 ```
 
 O `optimize:clear` vem antes porque o `preparar-demo.sh` deixa a configuração em cache apontando
-para o banco `calmind`, e a suíte se recusa a rodar fora do `calmind_test`. Em 25/11 eram 284 testes
-no backend e 284 no app, todos passando.
+para o banco `calmind`, e a suíte se recusa a rodar fora do `calmind_test`. Em 26/11 eram 332 testes
+no backend (em 25/11, 284 no app), todos passando.
 
 Depois de mudar rota no backend com o servidor ligado, rode `php artisan route:cache`, ou o servidor
 em uso continua com as rotas antigas.

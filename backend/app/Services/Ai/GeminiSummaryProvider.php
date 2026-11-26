@@ -36,8 +36,14 @@ class GeminiSummaryProvider implements SummaryProvider
         $pairs = $this->orderedPairs($keys);
         $deadline = microtime(true) + (int) config('services.ai.budget');
         $failures = [];
+        $rejectedKeys = [];
 
         foreach ($pairs as [$k, $model]) {
+            // chave recusada vale para todos os modelos: nao gasta outra chamada com ela
+            if (isset($rejectedKeys[$k])) {
+                continue;
+            }
+
             if (microtime(true) >= $deadline) {
                 $failures[] = 'orcamento de tempo esgotado';
                 break;
@@ -63,6 +69,9 @@ class GeminiSummaryProvider implements SummaryProvider
             }
 
             $failures[] = $this->classify($response, $k, $model);
+            if (Cache::has($this->restKeyName($k, '*'))) {
+                $rejectedKeys[$k] = true;
+            }
         }
 
         // so status e motivo tecnico: nada do que foi enviado e nenhuma chave

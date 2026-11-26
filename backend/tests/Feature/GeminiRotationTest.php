@@ -74,6 +74,15 @@ class GeminiRotationTest extends TestCase
         $this->assertSame(['KEY-B-segredo|modelo-1'], $this->sent, 'o par em descanso nao deve ser tentado de novo');
     }
 
+    public function test_rejected_key_is_not_retried_with_another_model_in_the_same_call(): void
+    {
+        $this->plan(['KEY-A-segredo|*' => [400, 'API key not valid. Please pass a valid API key.']]);
+
+        $this->summarize();
+
+        $this->assertSame(['KEY-A-segredo|modelo-1', 'KEY-B-segredo|modelo-1'], $this->sent);
+    }
+
     public function test_rejected_key_rests_for_every_model(): void
     {
         $this->plan(['KEY-A-segredo|*' => [400, 'API key not valid. Please pass a valid API key.']]);

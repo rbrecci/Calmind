@@ -10,7 +10,7 @@ export type TextFieldProps = Omit<TextInputProps, 'style' | 'placeholderTextColo
 };
 
 // Altura do campo de uma linha, como no protótipo; passa do alvo de toque de 44 (RNF-35).
-const FIELD_HEIGHT = 56;
+export const FIELD_HEIGHT = 52;
 
 // O rótulo fica visível acima do campo, e não só no placeholder: quando o usuário começa a
 // digitar o placeholder some, e leitor de tela precisa de um nome estável (RNF-35).
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     ...Typography.body,
     minHeight: FIELD_HEIGHT,
     borderWidth: 1,
-    borderRadius: Radius.md,
+    borderRadius: Radius.control,
     paddingHorizontal: Spacing.three,
     backgroundColor: FieldColors.background,
     color: Colors.text,

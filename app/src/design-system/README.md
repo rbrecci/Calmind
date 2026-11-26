@@ -31,7 +31,7 @@ Fonte de verdade: [`docs/identidade-visual.md`](../../../docs/identidade-visual.
 | `motion.ts` | Curvas de movimento (ease-out e ease-in-out) nos dois formatos que o Reanimated pede |
 | `app-header.tsx` | Cabeçalho das telas depois do login (`AppHeader`): barra na cor do lado com a base arredondada, ícone e título no centro, avatar ou voltar à esquerda, sino e engrenagem à direita |
 | `tab-bar.tsx` | Barra de abas flutuante (`TabBar`), que entra no `tabBar` dos layouts de abas |
-| `icon.tsx` | Ícone de contorno (`Icon`): SF Symbols no iOS, Material Symbols no Android e na web. Sempre decorativo |
+| `icon.tsx` | Ícones Phosphor com peso `regular`, iguais no Android, iOS e web. Imports individuais para evitar carregar o catálogo inteiro. Sempre decorativos |
 | `avatar.tsx`, `initials.ts` | Círculo com a foto (`uri`, com `headers` para rota autenticada) ou as iniciais em Dark sobre o tom claro do lado. Foto que não carrega também cai para as iniciais |
 | `cover.tsx` | Faixa de capa (`Cover`): a imagem quando houver; sem ela, ou se não carregar, o degradê do tom claro à cor do lado |
 | `image-source.ts` | `useImageSource`: fonte de imagem estável entre renderizações, para a web não buscar a foto de novo a cada uma |

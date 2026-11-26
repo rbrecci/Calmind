@@ -17,12 +17,12 @@ const gateOptions = { headerShown: false, gestureEnabled: false };
 // Telas empilhadas. `actions` põe sino e engrenagem no cabeçalho; formulário não tem, e as
 // telas de notificações e de conta não apontam para si mesmas.
 const SCREENS: Record<string, { title: string; icon: IconName; actions?: boolean }> = {
-  requests: { title: 'Solicitações', icon: { ios: 'person.badge.plus', android: 'person_add' }, actions: true },
-  'patients/[id]': { title: 'Prontuário', icon: { ios: 'list.bullet.rectangle', android: 'article' }, actions: true },
-  'patients/[id]/chat': { title: 'Chat', icon: { ios: 'bubble.left', android: 'chat_bubble' }, actions: true },
-  notifications: { title: 'Notificações', icon: { ios: 'bell', android: 'notifications' } },
-  settings: { title: 'Conta', icon: { ios: 'gearshape', android: 'settings' } },
-  invitations: { title: 'Convite', icon: { ios: 'key', android: 'key' } },
+  requests: { title: 'Solicitações', icon: 'user-plus', actions: true },
+  'patients/[id]': { title: 'Prontuário', icon: 'article', actions: true },
+  'patients/[id]/chat': { title: 'Chat', icon: 'chat', actions: true },
+  notifications: { title: 'Notificações', icon: 'bell' },
+  settings: { title: 'Conta', icon: 'gear' },
+  invitations: { title: 'Convite', icon: 'key' },
 };
 
 const loadUnread = () => psychologistApi.notifications({ unread: 1, per_page: 1 }).then((page) => page.meta.total);
@@ -47,6 +47,7 @@ function PsychologistNavigator() {
   return <AccessContext.Provider value={{ term, profile, refresh: access.reload }}>
     <UnreadNotificationsProvider load={loadUnread} enabled={released}>
       <Stack screenOptions={{
+        animation: 'none',
         header: ({ navigation, route, options, back }) => <SideHeader tone="psychologist" title={options.title ?? ''}
           icon={SCREENS[route.name]?.icon} actions={SCREENS[route.name]?.actions}
           onBack={back ? () => navigation.goBack() : undefined} />,

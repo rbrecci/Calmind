@@ -4,7 +4,7 @@ import { Icon, type IconName } from './icon';
 import { Colors, FieldColors, Radius, RoleColors, Spacing } from './tokens';
 import { Typography } from './typography';
 
-const SEND: IconName = { ios: 'arrow.right', android: 'arrow_forward' };
+const SEND: IconName = 'arrow-right';
 
 // Altura do campo de uma linha e lado do botão quadrado, como no protótipo; passa dos 44 (RNF-35).
 const ROW_HEIGHT = 56;
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     maxHeight: Typography.body.lineHeight * 5 + Spacing.three * 2,
     borderWidth: 1,
     borderColor: FieldColors.border,
-    borderRadius: Radius.md,
+    borderRadius: Radius.control,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.three,
     backgroundColor: FieldColors.background,
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   send: {
     width: ROW_HEIGHT,
     height: ROW_HEIGHT,
-    borderRadius: Radius.md,
+    borderRadius: Radius.control,
     alignItems: 'center',
     justifyContent: 'center',
   },

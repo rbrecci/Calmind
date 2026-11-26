@@ -18,7 +18,7 @@ const WHITE = '#FFFFFF';
 export const Colors = {
   background: WHITE,
   surface: Palette.light.tint, // fundo de campo
-  border: Palette.light.shade,
+  border: Palette.light.base,
   // "Dark" na identidade é o tom base: é com ele que a tabela de contraste (5.4) foi medida.
   text: Palette.dark.base,
   // Placeholder e texto de apoio. Dark +1 passa a 6,3:1 sobre branco (identidade, pendência 2).
@@ -40,6 +40,12 @@ export const Colors = {
 export const RoleColors = {
   patient: { accent: Palette.secondary.base, onAccent: Palette.dark.base, tint: Palette.secondary.tint, shade: Palette.secondary.shade },
   psychologist: { accent: Palette.primary.base, onAccent: Palette.dark.base, tint: Palette.primary.tint, shade: Palette.primary.shade },
+} as const;
+
+// Fundo contínuo do cabeçalho e do destaque, medido na referência do protótipo.
+export const HeaderGradients = {
+  patient: ['#BCFEBA', '#BFFFBD', '#8DF58A'],
+  psychologist: ['#FEB3FF', '#FBC0FD', '#F696F8'],
 } as const;
 
 // Botões que não são a ação principal. Os dois são contorno sobre o fundo da tela, para não
@@ -72,7 +78,7 @@ export const ErrorBannerColors = {
 export const StatusTagColors = {
   neutral: { background: Palette.light.tint, text: Palette.dark.base },
   attention: { background: Palette.primary.tint, text: Palette.dark.base },
-  positive: { background: Palette.success.tint, text: Palette.dark.base },
+  positive: { background: Palette.secondary.tint, text: Palette.dark.base },
   negative: { background: Palette.danger.tint, text: Palette.dark.base },
 } as const;
 
@@ -102,6 +108,7 @@ export const Spacing = {
   two: 8,
   three: 16,
   four: 24,
+  page: 20,
   five: 32,
   six: 64,
 } as const;
@@ -109,7 +116,7 @@ export const Spacing = {
 export const MinTouchTarget = 44; // RNF-35
 
 // `lg` é a base arredondada do cabeçalho.
-export const Radius = { md: 16, lg: 24 } as const;
+export const Radius = { control: 8, md: 12, lg: 24 } as const;
 
 // Largura máxima do conteúdo: em tablet ou na web o formulário não se estica pela tela toda.
 export const MaxContentWidth = 480;

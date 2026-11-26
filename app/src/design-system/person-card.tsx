@@ -7,6 +7,7 @@ import type { StatusTagKind } from './status-kind';
 import { StatusTag } from './status-tag';
 import { Text } from './text';
 import { Colors, MinTouchTarget, Radius, Spacing } from './tokens';
+import { FontFamily } from './typography';
 
 export type PersonCardProps = {
   tone: 'patient' | 'psychologist';
@@ -33,10 +34,10 @@ export function PersonCard({ tone, name, avatarUri, headers, tag, description, o
         transitionDuration: 120,
         transitionTimingFunction: EaseOut,
       }]}>
-        <Avatar tone={tone} name={name} size={40} uri={avatarUri} headers={headers} />
+        {avatarUri ? <Avatar tone={tone} name={name} size={40} uri={avatarUri} headers={headers} /> : null}
         <View style={styles.texts}>
           <View style={styles.titleRow}>
-            <Text variant="h5" style={styles.name}>{name}</Text>
+            <Text style={styles.name}>{name}</Text>
             {tag ? <StatusTag kind={tag.kind} label={tag.label} /> : null}
           </View>
           {description ? <Text variant="small" color="textSecondary">{description}</Text> : null}
@@ -59,5 +60,5 @@ const styles = StyleSheet.create({
   },
   texts: { flex: 1, gap: Spacing.one },
   titleRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: Spacing.two },
-  name: { flexShrink: 1, marginRight: 'auto' },
+  name: { flexShrink: 1, marginRight: 'auto', fontFamily: FontFamily.heading },
 });

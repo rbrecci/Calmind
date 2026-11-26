@@ -1,11 +1,11 @@
 // Fonte de verdade: docs/identidade-visual.md, seção 6.
-// Quicksand SemiBold nos títulos (carrega o tom de calma), Poppins Regular no corpo
-// (a Quicksand cansa em texto corrido, por isso não desce para o corpo).
+// O protótipo usa Quicksand SemiBold nos títulos e Regular no corpo.
 
 // Nomes que o expo-font registra. Têm de bater com as chaves de fonts.ts.
 export const FontFamily = {
   heading: 'Quicksand_600SemiBold',
-  body: 'Poppins_400Regular',
+  body: 'Quicksand_400Regular',
+  bold: 'Quicksand_700Bold',
 } as const;
 
 // lineHeight não está na identidade: 1,2x nos títulos e 1,5x no texto corrido, que é o que

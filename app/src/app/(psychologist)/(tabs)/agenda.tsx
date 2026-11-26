@@ -1,11 +1,12 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
-import { View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 
 import { ApiError } from '@/api';
 import { psychologistApi } from '@/api/psychologist';
 import type { Appointment, AppointmentInput } from '@/api/psychologist/types';
-import { ChoiceGroup, EmptyState, formatDateTime, Loading, Spacing, StatusTag, statusTagKind, Text } from '@/design-system';
+import { ChoiceGroup, EmptyState, formatDateTime, Icon, Loading, RoleColors, Spacing, StatusTag, statusTagKind, Text } from '@/design-system';
+import { calendarDays } from '@/patient/agenda';
 import { isAppointmentConflict, localAppointmentIso, splitAppointments } from '@/psychologist/domain';
 import { collectPages } from '@/psychologist/resource';
 import { Action, Card, ErrorNotice, Field, Page, useConfirmation, useResource } from '@/psychologist/ui';
@@ -15,6 +16,7 @@ const statusText: Record<Appointment['status'], string> = {
 };
 
 export default function Agenda() {
+  const [month, setMonth] = useState(() => new Date());
   const params = useLocalSearchParams<{ bond_id?: string }>();
   const [bondId, setBondId] = useState<number | null>(params.bond_id ? Number(params.bond_id) : null);
   // Formulário aberto: 'new' no topo da tela, o id da consulta quando ele abre dentro do cartão
@@ -167,6 +169,19 @@ export default function Agenda() {
     <ErrorNotice error={resource.error} retry={resource.reload} />
     <ErrorNotice error={cancelError} />
     {resource.data ? <>
+      <View style={styles.calendar}>
+        <View style={styles.monthRow}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Mês anterior" style={styles.monthButton} onPress={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}><Icon name="caret-left" /></Pressable>
+          <Text variant="h5">{month.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}</Text>
+          <Pressable accessibilityRole="button" accessibilityLabel="Próximo mês" style={styles.monthButton} onPress={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))}><Icon name="caret-right" /></Pressable>
+        </View>
+        <View style={styles.grid}>
+          {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((day, index) => <View key={`weekday-${index}`} style={styles.cell}><Text variant="small" color="textSecondary">{day}</Text></View>)}
+          {calendarDays(month, resource.data.appointments).map((entry, index) => <View key={index} style={styles.cell}>
+            {entry ? <View accessible accessibilityLabel={`${entry.day} de ${month.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}${entry.hasAppointment ? ', com consulta' : ''}`} style={[styles.day, entry.hasAppointment && styles.marked]}><Text variant="small">{entry.day}</Text></View> : null}
+          </View>)}
+        </View>
+      </View>
       {patients.length === 0 ? <Text>É preciso ter um vínculo ativo para agendar uma consulta.</Text>
         : form === 'new' ? <Card>{renderForm()}</Card>
           : <Action label="Agendar consulta" disabled={busy || conflict !== null} onPress={openNew} />}
@@ -198,3 +213,13 @@ export default function Agenda() {
     {confirmation}
   </Page>;
 }
+
+const styles = StyleSheet.create({
+  calendar: { gap: Spacing.two },
+  monthRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  monthButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  grid: { flexDirection: 'row', flexWrap: 'wrap' },
+  cell: { width: '14.2857%', minHeight: 44, alignItems: 'center', justifyContent: 'center' },
+  day: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  marked: { backgroundColor: RoleColors.psychologist.tint },
+});

@@ -1,10 +1,20 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { Appointment } from '../api/patient/types.ts';
-import { appointmentStatus, groupAppointments, nextAppointment } from './agenda.ts';
+import { appointmentStatus, calendarDays, groupAppointments, nextAppointment } from './agenda.ts';
 
 process.env.TZ = 'America/Sao_Paulo';
 const appointment: Appointment = { id: 1, bond_id: 8, scheduled_at: '2026-11-03T10:00:00-03:00', status: 'scheduled', modality: 'online', notes: null, created_at: '', psychologist: { id: 1, name: 'Profissional fictício' } };
+
+test('calendário respeita o início da semana, o ano bissexto e o horário local', () => {
+  const days = calendarDays(new Date(2024, 1, 1), [
+    { ...appointment, scheduled_at: '2024-03-01T01:00:00Z' },
+  ]);
+  assert.equal(days.length, 35);
+  assert.deepEqual(days.slice(0, 4), [null, null, null, null]);
+  assert.deepEqual(days[32], { day: 29, hasAppointment: true });
+  assert.equal(days[33], null);
+});
 
 test('agrupa consultas no dia do aparelho e separa próximas e passadas', () => {
   const data = [appointment, { ...appointment, id: 2, scheduled_at: '2026-10-28T12:00:00-03:00', status: 'done' as const },

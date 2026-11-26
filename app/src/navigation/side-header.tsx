@@ -40,15 +40,15 @@ export function UnreadNotificationsProvider({ load, enabled, children }: {
 // logado à esquerda, com a foto quando houver. Tela empilhada: seta de voltar. `actions` põe o
 // sino e a engrenagem, que ficam fora dos formulários e das próprias telas de notificações e de
 // conta. `flush` deixa a base reta, para o bloco de destaque do início continuar a cor.
-export function SideHeader({ tone, title, icon, onBack, actions = false, flush = false }: {
-  tone: Side; title: string; icon?: IconName; onBack?: () => void; actions?: boolean; flush?: boolean;
+export function SideHeader({ tone, title, icon, onBack, actions = false, flush = false, collapseProgress }: {
+  tone: Side; title: string; icon?: IconName; onBack?: () => void; actions?: boolean; flush?: boolean; collapseProgress?: number;
 }) {
   const router = useRouter();
   const count = useContext(UnreadNotificationsContext);
   const { name, avatarUrl } = useSession();
   const routes = ROUTES[tone];
   const profile = routes.profile;
-  return <AppHeader tone={tone} title={title} icon={icon} onBack={onBack} flush={flush}
+  return <AppHeader tone={tone} title={title} icon={icon} onBack={onBack} flush={flush} collapseProgress={collapseProgress}
     avatar={!onBack && name ? {
       name, uri: avatarUrl, headers: avatarUrl ? imageHeaders() : undefined,
       onPress: profile ? () => router.push(profile) : undefined, accessibilityLabel: profile ? 'Meu perfil' : undefined,

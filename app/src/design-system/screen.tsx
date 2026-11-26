@@ -1,6 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { createContext, useContext, useRef, useState, type ReactNode } from 'react';
-import { KeyboardAvoidingView, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { Animated, KeyboardAvoidingView, RefreshControl, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { useScreenContentOpacity } from './motion';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 import { HeaderShownContext } from 'expo-router/react-navigation';
 // O expo-router não reexporta este contexto num caminho público; é o mesmo módulo que a barra de abas usa.
@@ -29,6 +30,8 @@ type ScreenProps = {
   stickToEnd?: boolean;
   // Troca o tom do fundo dado pelo layout. Os consentimentos são neutros dentro do lado.
   tone?: ButtonTone;
+  onScrollOffset?: (offset: number) => void;
+  scrollExtraSpace?: number;
 };
 
 // Base de toda tela: fundo quase branco (a identidade pede fundo majoritariamente branco), num
@@ -43,7 +46,11 @@ export function Screen({
   footer,
   stickToEnd = false,
   tone,
+  onScrollOffset,
+  scrollExtraSpace = 0,
 }: ScreenProps) {
+  const { height } = useWindowDimensions();
+  const contentOpacity = useScreenContentOpacity();
   const contextTone = useContext(ScreenToneContext);
   const gradient = ScreenGradients[tone ?? contextTone];
   // O cabeçalho já desconta a barra de status e a barra de abas já desconta a borda de baixo.
@@ -56,7 +63,8 @@ export function Screen({
   // A barra de abas flutua por cima da tela: o fim do conteúdo rolado precisa passar dela. Com
   // rodapé, quem sobe é a moldura inteira, e o campo de mensagem fica logo acima da barra.
   const aboveTabBar = tabBarHeight ? { paddingBottom: tabBarHeight + (footer ? 0 : Spacing.four) } : null;
-  const containerStyle = [styles.container, center && styles.center, !footer && aboveTabBar];
+  const containerStyle = [styles.container, center && styles.center, !footer && aboveTabBar,
+    scrollExtraSpace > 0 && { minHeight: height + scrollExtraSpace }];
   const scrollRef = useRef<ScrollView>(null);
   const frameRef = useRef<View>(null);
   const [frameTop, setFrameTop] = useState(0);
@@ -72,6 +80,9 @@ export function Screen({
       ref={scrollRef}
       contentContainerStyle={containerStyle}
       keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+      onScroll={onScrollOffset ? (event) => onScrollOffset(event.nativeEvent.contentOffset.y) : undefined}
+      scrollEventThrottle={16}
       // Com rodapé, quem desvia do teclado é o KeyboardAvoidingView; ajustar aqui também dobraria o recuo.
       automaticallyAdjustKeyboardInsets={!footer}
       refreshControl={onRefresh ? <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> : undefined}
@@ -89,7 +100,7 @@ export function Screen({
   return (
     <SafeAreaView style={styles.root} edges={edges}>
       <LinearGradient colors={gradient.colors} locations={gradient.locations} style={StyleSheet.absoluteFill} />
-      {footer ? (
+      <Animated.View style={[styles.fill, { opacity: contentOpacity }]}>{footer ? (
         // O KeyboardAvoidingView compara a própria posição, relativa ao pai, com o topo do teclado,
         // que vem em coordenada da janela. Sem somar onde a tela começa, numa tela empilhada o
         // teclado cobre do rodapé a altura do cabeçalho. Numa aba a tela já termina acima da barra.
@@ -102,7 +113,7 @@ export function Screen({
             </View>
           </KeyboardAvoidingView>
         </View>
-      ) : body}
+      ) : body}</Animated.View>
     </SafeAreaView>
   );
 }
@@ -119,7 +130,7 @@ const styles = StyleSheet.create({
   // funcionar também com `scroll`.
   container: {
     flexGrow: 1,
-    padding: Spacing.four,
+    padding: Spacing.page,
   },
   center: {
     justifyContent: 'center',
@@ -133,7 +144,7 @@ const styles = StyleSheet.create({
   // Sem faixa nem borda: o rodapé fica sobre o fundo da tela, como no protótipo. A rolagem
   // termina acima dele, então nada passa por baixo.
   footer: {
-    paddingHorizontal: Spacing.four,
+    paddingHorizontal: Spacing.page,
     paddingVertical: Spacing.three,
   },
 });

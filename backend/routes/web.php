@@ -2,13 +2,12 @@
 
 use App\Http\Controllers\Web\AdminRegistrationController;
 use App\Http\Controllers\Web\AdminSessionController;
+use App\Http\Controllers\Web\PsychologistAppointmentController;
 use App\Http\Controllers\Web\PsychologistSessionController;
 use App\Http\Controllers\Web\PsychologistTaskController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', fn () => redirect()->route('psychologist.login'));
 
 Route::prefix('admin')->name('admin.')->group(function (): void {
     Route::get('login', [AdminSessionController::class, 'create'])->name('login');
@@ -31,5 +30,7 @@ Route::prefix('psychologist')->name('psychologist.')->group(function (): void {
         Route::post('logout', [PsychologistSessionController::class, 'destroy'])->name('logout');
         Route::get('tasks', [PsychologistTaskController::class, 'index'])->name('tasks.index');
         Route::post('tasks', [PsychologistTaskController::class, 'store'])->name('tasks.store');
+        Route::get('appointments', [PsychologistAppointmentController::class, 'index'])->name('appointments.index');
+        Route::post('appointments', [PsychologistAppointmentController::class, 'store'])->name('appointments.store');
     });
 });

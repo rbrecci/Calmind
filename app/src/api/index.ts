@@ -9,5 +9,6 @@ const useMock = process.env.EXPO_PUBLIC_USE_MOCK === 'true';
 export const api: Api = useMock ? mockApi : httpApi;
 
 export { setAuthToken } from './auth-token.ts';
+export { imageHeaders } from './http.ts';
 export { ApiError } from './types.ts';
-export type { CatalogList, CatalogPsychologist, FieldErrors, LoginInput, Modality, PatientTask, PatientTaskList, RegisterInput, Role, User, UserRole } from './types.ts';
+export type { CatalogList, CatalogPsychologist, FieldErrors, ImageKind, ImageUpload, LoginInput, Modality, PatientTask, PatientTaskList, RegisterInput, Role, User, UserRole } from './types.ts';

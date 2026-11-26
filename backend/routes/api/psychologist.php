@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AdminRegistrationController;
+use App\Http\Controllers\Api\V1\PatientDirectoryController;
 use App\Http\Controllers\Api\V1\PsychologistRegistrationController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum', 'role:psychologist'])->prefix('psychologist')->group(function () {
+    Route::get('profile', [PatientDirectoryController::class, 'profile']);
     Route::post('registration', [PsychologistRegistrationController::class, 'store']);
     Route::put('profile', [PsychologistRegistrationController::class, 'update']);
     Route::post('profile/publish', [PsychologistRegistrationController::class, 'publish']);

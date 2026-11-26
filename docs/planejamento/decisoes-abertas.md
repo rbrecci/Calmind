@@ -1,8 +1,8 @@
 # Decisões abertas
 
 **TCC · Técnico em Desenvolvimento de Sistemas · SENAI-SP · 4º termo**
-**Calmind** — Saúde Mental & Acolhimento
-Revisão de 20/08/2026.
+**Calmind**: Saúde Mental & Acolhimento
+Revisão de 04/11/2026.
 
 > Substitui o antigo `decisoes-pendentes.md`, que foi removido na limpeza de 20/08/2026 porque estava 85% resolvido e dizia que MER e wireframes ainda não tinham começado. Este arquivo carrega só o que continua em aberto de verdade.
 >
@@ -12,11 +12,7 @@ Revisão de 20/08/2026.
 
 ## 1. Trava agora, antes do marco M2 de 28/08
 
-| # | Decisão | Quem decide | Consequência de não decidir |
-|---|---------|-------------|------------------------------|
-| DA-01 | **Onde o app encontra o backend em desenvolvimento** — LAN com IP fixo, servidor de teste ou túnel. Era a D6 do `arranque-react-native.md` | Grupo, na segunda | O celular físico não enxerga o `localhost` do notebook. Sem isso, a prova 2 do spike não roda e a semana 1 não anda |
-| DA-02 | **Identificador do pacote do app**, no formato `com.<grupo>.calmind` | Grupo | Trava o primeiro APK assinado, que é a prova 4 do spike |
-| DA-03 | **Liberar tráfego sem TLS no build de desenvolvimento** | Quem montar o app | Android 9+ bloqueia `http://` por padrão. O sintoma é erro de rede genérico, que parece bug de código e come um dia |
+Nenhuma em aberto. A última, DA-01, fechou em 23/11/2026 e está na seção 6.
 
 ## 2. Trava a Sprint 2
 
@@ -49,7 +45,6 @@ Estas não são decisões de mesa: já têm pergunta no `../pesquisa/roteiro-ent
 
 | # | Pergunta | Situação |
 |---|----------|----------|
-| DA-15 | Data exata da apresentação final | Perguntar em aula |
 | DA-16 | Existe versão 2026 do escopo, com pesos de nota? O rodapé do PDF diz 2024 | Perguntar em aula |
 | DA-17 | **Data e formato da entrega da Sprint 1.** Em 20/08/2026 o grupo soube que não é mais 21/08, e não há data nova. Sem ela o `cronograma.md` inteiro fica sem âncora | Perguntar em aula, é a mais urgente das três |
 
@@ -66,7 +61,7 @@ Estas não são decisões de mesa: já têm pergunta no `../pesquisa/roteiro-ent
 | Um repositório só, com backend, app e docs separados | 19/08/2026 | `arranque-react-native.md` D3 |
 | Idioma do código: inglês nos identificadores | 19/08/2026 | `arranque-react-native.md` D4 |
 | Autenticação por token em toda requisição | 19/08/2026 | `../api/contrato-api.md` §2.2 |
-| Nome e slogan: Calmind — Saúde Mental & Acolhimento | 20/08/2026 | `arranque-react-native.md` D2 |
+| Nome e slogan: Calmind, Saúde Mental & Acolhimento | 20/08/2026 | `arranque-react-native.md` D2 |
 | Idade mínima de 12 anos para conta de paciente | 20/08/2026 | DEC-16, RF-01 (CA-01.4) |
 | Menor de 18 informa contato do responsável; responsável sem acesso ao app | 20/08/2026 | DEC-17, RF-01 (CA-01.5), RF-36 (CA-36.5) |
 | Consentimento do responsável registrado pelo psicólogo, não por ele | 20/08/2026 | DEC-18, RF-49 |
@@ -75,3 +70,7 @@ Estas não são decisões de mesa: já têm pergunta no `../pesquisa/roteiro-ent
 | Formalização da pesquisa de campo | 20/08/2026 | `../pesquisa/roteiro-entrevistas.md` |
 | Papéis do Scrum e divisão de trabalho | 19/08/2026 | `README.md`, seção Equipe |
 | Datas reais das três sprints | 18/08/2026 | `cronograma.md` |
+| DA-02: identificador do pacote do app, `com.tccsenai.calmind` | 04/11/2026 | `../../app/app.json` (`android.package`) |
+| DA-03: tráfego sem TLS liberado (`usesCleartextTraffic` via `expo-build-properties`) apenas para demonstração com dados fictícios. Limite de segurança: token e dados trafegam abertos na rede; precisa sair, com HTTPS na API, antes de qualquer uso real | 04/11/2026 | `../../app/app.json` (plugin `expo-build-properties`) |
+| DA-15: apresentação final na sexta 04/12/2026 | 23/11/2026 | `cronograma.md` §0.2 e `../../FinalSprint3.md` |
+| DA-01: na apresentação, o backend roda no notebook (XAMPP) e sai para a internet pelo ngrok grátis, com HTTPS e domínio fixo da conta; o APK final aponta para esse endereço e não libera mais HTTP sem criptografia (fecha também a pendência da DA-03). Railway descartada por custo: o teste grátis acabou e o plano pago custa US$ 5. Supabase e InfinityFree seguem descartados pelos motivos de 04/11 | 23/11/2026 | `../../FinalSprint3.md` e `../engenharia/README.md` |

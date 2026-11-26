@@ -20,6 +20,11 @@ class BondController extends Controller
         return (new BondResource($bond))->response()->setStatusCode(201);
     }
 
+    public function cancel(Request $request, int $id): BondResource
+    {
+        return new BondResource($this->bonds->cancelRequest($request->user(), $id));
+    }
+
     public function accept(Request $request, int $id): BondResource
     {
         return new BondResource($this->bonds->accept($request->user(), $id));

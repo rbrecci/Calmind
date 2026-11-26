@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             ConsentTermSeeder::class,
             BondSeeder::class,
+            ClosingDemoSeeder::class,
         ]);
     }
 }

@@ -151,8 +151,25 @@ verde do lado do paciente e o rosa do lado do psicólogo. A marca não escolhe l
 |---|---|
 | 1 | Exportar o símbolo em **SVG**. Hoje só existe PNG, e a landing page precisa de vetor |
 | 2 | Corrigir `callmind` para `calmind` nos três nomes de arquivo |
-| 3 | Gerar o **ícone do aplicativo** nas densidades do Android e do iOS, com o recorte redondo e o quadrado |
+| 3 | ~~Gerar o **ícone do aplicativo**~~ Feito em 24/11/2026: o símbolo sem textura sobre branco em `app/assets/images/` (`icon.png`, ícone adaptativo do Android com frente, fundo e monocromático, e `splash-icon.png`). As densidades saem do `expo prebuild` |
 | 4 | Montar o **lockup horizontal** (símbolo mais a palavra) como arquivo único, para cabeçalho e slide |
+
+### 4.4 Ilustrações
+
+O app tem um conjunto próprio de oito ilustrações, desenhado no mesmo motivo do logo (muda, folhas,
+mão em concha) e com as cores dele: sálvia `#B4C9AC`, menta `#A3CDBB` e lilás `#CFAAD6`, mais os
+tons claros, sobre uma mancha quase branca. Sem contorno escuro, sem texto e sem rosto.
+
+| Regra | Por quê |
+|---|---|
+| Ilustração só em tela inteira vazia ou em momento de espera | Em lista com conteúdo ela compete com o dado |
+| Sempre decorativa: o leitor de tela lê o texto ao lado, não a imagem | O sentido está no texto |
+| Nada comemorativo (confete, troféu, festa) | A marca é acolhedora, não festiva (seção 2) |
+| Cor nova só a partir da paleta | Uma ilustração fora da família quebra o conjunto |
+
+A fonte de cada uma é SVG, gerado por [`prototipo/assets/ilustracoes/gerar.py`](prototipo/assets/ilustracoes/gerar.py);
+o app usa o PNG transparente em `app/assets/images/illustrations/`. Desenho próprio, sem licença de
+terceiros.
 
 ---
 
@@ -261,6 +278,7 @@ rede.
 |---|---|
 | Arquivo de design, telas e estilos | Figma: `figma.com/design/lpg2qDhPuOmKfvLAPFOVKA/Calmind` |
 | Logotipo, 5 variantes em PNG | [`prototipo/assets/`](prototipo/assets/) |
+| Ilustrações do app, em SVG, e o script que as gera | [`prototipo/assets/ilustracoes/`](prototipo/assets/ilustracoes/) |
 | Telas em PDF, uma por arquivo | [`prototipo/telas-pdf/`](prototipo/telas-pdf/) |
 | Wireframes navegáveis das 16 telas | [`prototipo/wireframes.html`](prototipo/wireframes.html) |
 | Mapa de UX do fluxo entre as telas | [`prototipo/fluxo-ux.html`](prototipo/fluxo-ux.html) |
@@ -273,7 +291,7 @@ rede.
 
 | # | Pendência | Responsável |
 |---|---|---|
-| 1 | Logo em SVG, nomes de arquivo corrigidos, ícone do app e lockup horizontal (seção 4.3) | Zanetti |
+| 1 | Logo em SVG, nomes de arquivo corrigidos e lockup horizontal (seção 4.3). O ícone do app ficou pronto em 24/11/2026 | Zanetti |
 | 2 | A paleta não tem neutro aprovado para *placeholder* e texto desabilitado. Hoje o placeholder usa `Dark +1`, que passa a 6,3:1 — funciona, mas não foi decidido, foi herdado | Grupo |
-| 3 | A tela de login ainda tem rótulos, link e a palavra "Calmind" em rosa. Pela regra da seção 5.5 tudo isso vira `Dark` e a marca vira a variante monocromática, porque a tela é anterior ao login | Caio |
+| 3 | ~~A tela de login ainda tem rótulos, link e a palavra "Calmind" em rosa~~ Resolvido: rótulos e marca em `Dark`, e o símbolo colorido sobre o branco, que a regra 4.2.4 permite e cujo gradiente é a cor neutra de antes do login (seção 5.5) | Caio |
 | 4 | Definir o identificador do pacote, `com.<grupo>.calmind` | Grupo |

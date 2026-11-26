@@ -177,7 +177,34 @@ paleta acima, e texto que cresce sem quebrar o layout.
 
 | Sintoma | Causa provável |
 |---------|----------------|
-| Erro de rede genérico no celular | Android 9+ bloqueia `http://` sem TLS — decisão **DA-03**, só importa na integração |
+| Erro de rede genérico no celular | Android 9+ bloqueia `http://` sem TLS. A decisão **DA-03** está fechada e aplicada em `app.json` para demonstração |
 | App não acha o backend | O celular não enxerga o `localhost` do notebook — decisão **DA-01** |
 | Data aparece errada na tela | O mock devolveu `Z` em vez de offset `-03:00` — ver seção 4 |
 | Lista não renderiza | O mock devolveu array solto em vez de `{data, meta}` — ver seção 4 |
+| `ninja: error: manifest 'build.ninja' still dirty after 100 tries` no build do APK | Caminho longo demais no Windows, ver abaixo |
+
+### Build do APK no Windows: caminho longo
+
+Compilar a partir do caminho do repositório falha com:
+
+```text
+ninja: error: manifest 'build.ninja' still dirty after 100 tries
+```
+
+A causa é o arquivo `react-native-workletsConfigVersion.cmake`, que fica num caminho de exatamente 260 caracteres, o limite MAX_PATH do Windows com CMake 3.22.1 e ninja 1.10.2. `subst` não resolve, porque o Node volta ao caminho real.
+
+O que funcionou:
+
+1. Gerar o projeto nativo com `npx expo prebuild --platform android` dentro de `app/`, antes de copiar: a pasta `android/` é gerada e ignorada pelo git.
+2. Copiar `app/` para um caminho curto (`C:\cal\app`), excluindo só as pastas `.cxx` dentro de `node_modules`. Excluir `build`, `dist` ou `.gradle` retira pastas de pacotes e quebra o build.
+3. Incluir `.env.local` na cópia.
+4. Rodar, com o `gradlew.bat` de `C:\cal\app\android`:
+
+```text
+gradlew.bat assembleRelease -PreactNativeArchitectures=arm64-v8a --max-workers=3
+```
+
+Dois cuidados:
+
+- O build consome bastante memória: feche jogos e programas pesados. Uma tentativa foi encerrada por falta de memória com 16 GB e um jogo aberto.
+- `EXPO_PUBLIC_*` fica embutido no bundle: trocar de endereço exige novo build.

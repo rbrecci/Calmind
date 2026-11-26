@@ -4,8 +4,6 @@ namespace App\Services;
 
 use App\Exceptions\ApiException;
 use App\Models\Bond;
-use App\Models\ConsentAcceptance;
-use App\Models\ConsentTerm;
 use App\Models\Patient;
 use App\Models\Report;
 use App\Models\User;
@@ -110,16 +108,7 @@ class ReportService
     // CA-03.3: vale o aceite nao revogado da versao VIGENTE do termo geral. Termo novo pede novo aceite.
     private function assertAcceptedCurrentTerm(User $user): void
     {
-        $term = ConsentTerm::where('type', 'general')
-            ->where('effective_from', '<=', now())
-            ->orderByDesc('effective_from')
-            ->orderByDesc('id')
-            ->first();
-
-        $accepted = $term !== null && ConsentAcceptance::where('user_id', $user->id)
-            ->where('consent_term_id', $term->id)
-            ->whereNull('revoked_at')
-            ->exists();
+        $accepted = app(ConsentService::class)->hasAccepted($user);
 
         if (! $accepted) {
             throw new ApiException(403, self::NO_CONSENT);

@@ -27,6 +27,7 @@ class BondResource extends JsonResource
             'patient_user_id' => $this->resource->patient->user_id,
             'requested_at' => $attributes['requested_at'],
             'responded_at' => $attributes['responded_at'] ?? null,
+            'accepted_at' => $attributes['accepted_at'] ?? null,
             'ended_at' => $attributes['ended_at'] ?? null,
         ];
     }

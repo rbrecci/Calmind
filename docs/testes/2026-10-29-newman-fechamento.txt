@@ -1,0 +1,654 @@
+Calmind fechamento: pastas 01 a 10. Consentimento registrado pela API, sem fixture de aceite.
+Data: 2026-10-29T08:44:05-03:00
+Ambiente confirmado: local, mysql loopback, banco calmind. Nenhum reset executado.
+(node:6072) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(Use `node --trace-deprecation ...` to show where the warning was created)
+newman
+
+Calmind - API da plataforma paciente e psicologo
+
+Folder 01 Conta e autenticacao
+Sub-folder Cadastrar paciente
+  -
+  | 'Execucao', '74259438'
+  -
+  POST http://127.0.0.1:8000/api/v1/auth/register [201 Created, 367B, 2.2s]
+  Pass  responde 201
+  Pass  devolve id e papel
+  Pass  nunca devolve a senha
+
+Sub-folder Cadastrar com e-mail repetido deve falhar
+  POST http://127.0.0.1:8000/api/v1/auth/register [422 Unprocessable Content, 355B, 972ms]
+  Pass  responde 422
+  Pass  nao vaza dado da conta existente
+
+Sub-folder Cadastrar psicologo
+  POST http://127.0.0.1:8000/api/v1/auth/register [201 Created, 374B, 1882ms]
+  Pass  responde 201
+
+Sub-folder Login do paciente
+  POST http://127.0.0.1:8000/api/v1/auth/login [200 OK, 282B, 1944ms]
+  Pass  responde 200
+  Pass  devolve token
+
+Sub-folder Login com senha errada
+  POST http://127.0.0.1:8000/api/v1/auth/login [401 Unauthorized, 271B, 1714ms]
+  Pass  responde 401
+  Pass  mensagem generica
+
+Sub-folder Login do psicologo
+  POST http://127.0.0.1:8000/api/v1/auth/login [200 OK, 282B, 1857ms]
+  Pass  responde 200
+
+Sub-folder Login do administrador
+  POST http://127.0.0.1:8000/api/v1/auth/login [200 OK, 282B, 1939ms]
+  Pass  responde 200
+
+Sub-folder Dados do usuario logado
+  GET http://127.0.0.1:8000/api/v1/me [200 OK, 353B, 1032ms]
+  Pass  responde 200
+  Pass  papel paciente
+
+Sub-folder Area interna sem token deve ser negada
+  GET http://127.0.0.1:8000/api/v1/me [401 Unauthorized, 287B, 782ms]
+  Pass  responde 401
+
+----------------------------------------------------------------------
+|                         |            executed |             failed |
+--------------------------+---------------------+---------------------
+|              iterations |                   1 |                  0 |
+--------------------------+---------------------+---------------------
+|                requests |                   9 |                  0 |
+--------------------------+---------------------+---------------------
+|            test-scripts |                   9 |                  0 |
+--------------------------+---------------------+---------------------
+|      prerequest-scripts |                   1 |                  0 |
+--------------------------+---------------------+---------------------
+|              assertions |                  15 |                  0 |
+----------------------------------------------------------------------
+| total run duration: 15.3s                                          |
+----------------------------------------------------------------------
+| total data received: 824B (approx)                                 |
+----------------------------------------------------------------------
+| average response time: 1592ms [min: 782ms, max: 2.2s, s.d.: 488ms] |
+----------------------------------------------------------------------
+Newman exit: 0
+(node:2356) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(Use `node --trace-deprecation ...` to show where the warning was created)
+newman
+
+Calmind - API da plataforma paciente e psicologo
+
+Folder 02 Consentimento
+Sub-folder Termo geral vigente
+  GET http://127.0.0.1:8000/api/v1/consent-terms/current?type=general [200 OK, 426B, 1139ms]
+  Pass  responde 200
+  Pass  campos do contrato
+  Pass  data com offset e aceite booleano
+
+Sub-folder Tipo invalido deve falhar
+  GET http://127.0.0.1:8000/api/v1/consent-terms/current?type=invalido [422 Unprocessable Content, 357B, 956ms]
+  Pass  responde 422
+  Pass  erro em type
+
+Sub-folder Termo inexistente deve falhar
+  POST http://127.0.0.1:8000/api/v1/consent-acceptances [422 Unprocessable Content, 355B, 998ms]
+  Pass  responde 422
+  Pass  erro no termo
+
+Sub-folder Aceitar termo geral
+  POST http://127.0.0.1:8000/api/v1/consent-acceptances [201 Created, 346B, 1052ms]
+  Pass  responde 201
+  Pass  campos do contrato
+
+Sub-folder Aceite geral repetido preserva registro
+  POST http://127.0.0.1:8000/api/v1/consent-acceptances [200 OK, 341B, 1096ms]
+  Pass  responde 200
+  Pass  mesmo aceite e instante
+
+Sub-folder Outro usuario nao revoga aceite
+  POST http://127.0.0.1:8000/api/v1/consent-acceptances/2/revoke [404 Not Found, 269B, 1049ms]
+  Pass  responde 404
+
+Sub-folder Revogar termo geral
+  POST http://127.0.0.1:8000/api/v1/consent-acceptances/2/revoke [200 OK, 364B, 1116ms]
+  Pass  responde 200
+  Pass  revogacao registrada
+
+Sub-folder Revogar novamente preserva data
+  POST http://127.0.0.1:8000/api/v1/consent-acceptances/2/revoke [200 OK, 364B, 1111ms]
+  Pass  responde 200
+  Pass  revogacao idempotente
+
+Sub-folder Reaceitar termo geral
+  POST http://127.0.0.1:8000/api/v1/consent-acceptances [200 OK, 341B, 1176ms]
+  Pass  responde 200
+  Pass  reativa mesmo aceite
+
+Sub-folder Termo atual confirma aceite
+  GET http://127.0.0.1:8000/api/v1/consent-terms/current [200 OK, 425B, 1112ms]
+  Pass  responde 200
+  Pass  accepted verdadeiro
+
+Sub-folder Termo de IA vigente
+  GET http://127.0.0.1:8000/api/v1/consent-terms/current?type=ai_analysis [200 OK, 449B, 1058ms]
+  Pass  responde 200
+
+Sub-folder Psicologo nao aceita IA
+  POST http://127.0.0.1:8000/api/v1/consent-acceptances [403 Forbidden, 313B, 1098ms]
+  Pass  responde 403
+
+Sub-folder Aceitar termo de IA
+  POST http://127.0.0.1:8000/api/v1/consent-acceptances [201 Created, 350B, 1162ms]
+  Pass  responde 201
+  Pass  campos do contrato
+
+Sub-folder Consentimento sem token deve falhar
+  GET http://127.0.0.1:8000/api/v1/consent-terms/current [401 Unauthorized, 287B, 839ms]
+  Pass  responde 401
+
+Folder 03 Cadastro profissional e aprovacao
+Sub-folder Enviar registro profissional
+(node:2356) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+  POST http://127.0.0.1:8000/api/v1/psychologist/registration [201 Created, 443B, 1288ms]
+  Pass  responde 201
+  Pass  nasce pendente
+
+Sub-folder CRP em formato invalido deve falhar
+  POST http://127.0.0.1:8000/api/v1/psychologist/registration [422 Unprocessable Content, 437B, 1381ms]
+  Pass  responde 422
+  Pass  indica CRP e regiao invalidos
+
+Sub-folder Publicar perfil antes da aprovacao deve falhar
+  POST http://127.0.0.1:8000/api/v1/psychologist/profile/publish [403 Forbidden, 313B, 1042ms]
+  Pass  responde 403
+
+Sub-folder Gerar convite antes da aprovacao deve falhar
+  POST http://127.0.0.1:8000/api/v1/psychologist/invitations [403 Forbidden, 295B, 1028ms]
+  Pass  responde 403
+
+Sub-folder Fila de cadastros pendentes
+  GET http://127.0.0.1:8000/api/v1/admin/registrations?status=pending [200 OK, 701B, 1026ms]
+  Pass  responde 200
+  Pass  e uma lista
+
+Sub-folder Aprovar cadastro
+  POST http://127.0.0.1:8000/api/v1/admin/registrations/4/approve [200 OK, 461B, 1026ms]
+  Pass  responde 200
+  Pass  fica aprovado
+  Pass  documento cadastrado
+
+Sub-folder Reprovar sem justificativa deve falhar
+  POST http://127.0.0.1:8000/api/v1/admin/registrations/4/reject [422 Unprocessable Content, 355B, 1086ms]
+  Pass  responde 422
+
+Sub-folder Documento comprobatorio nao e publico
+  GET http://127.0.0.1:8000/api/v1/psychologist/documents/1 [403 Forbidden, 313B, 1052ms]
+  Pass  responde 403
+
+Sub-folder Editar perfil
+  PUT http://127.0.0.1:8000/api/v1/psychologist/profile [200 OK, 548B, 1056ms]
+  Pass  responde 200
+  Pass  preserva os campos do perfil
+
+Sub-folder Salvar rascunho com honorario
+  PUT http://127.0.0.1:8000/api/v1/psychologist/profile [200 OK, 537B, 1092ms]
+  Pass  responde 200
+  Pass  rascunho salvo sem publicar
+
+Sub-folder Perfil com honorario deve ser recusado
+  POST http://127.0.0.1:8000/api/v1/psychologist/profile/publish [422 Unprocessable Content, 397B, 1066ms]
+  Pass  responde 422
+  Pass  indica texto proibido
+
+Sub-folder Restaurar perfil sem honorario
+  PUT http://127.0.0.1:8000/api/v1/psychologist/profile [200 OK, 548B, 1027ms]
+  Pass  responde 200
+  Pass  preserva os campos do perfil
+
+Sub-folder Publicar perfil
+  POST http://127.0.0.1:8000/api/v1/psychologist/profile/publish [200 OK, 571B, 1029ms]
+  Pass  responde 200
+  Pass  tem data de publicacao
+
+Folder 04 Convite e vinculo
+Sub-folder Gerar convite
+  POST http://127.0.0.1:8000/api/v1/psychologist/invitations [201 Created, 333B, 975ms]
+  Pass  responde 201
+  Pass  sem caracteres ambiguos
+  Pass  tem expiracao
+
+Sub-folder Codigo inexistente deve falhar
+  POST http://127.0.0.1:8000/api/v1/patient/bonds/redeem-invitation [422 Unprocessable Content, 367B, 1321ms]
+  Pass  responde 422
+  Pass  nao revela o profissional
+
+Sub-folder Entrar pelo convite
+  POST http://127.0.0.1:8000/api/v1/patient/bonds/redeem-invitation [201 Created, 415B, 1415ms]
+  Pass  responde 201
+  Pass  vinculo nasce ativo
+
+Sub-folder Reusar o mesmo convite deve falhar
+  POST http://127.0.0.1:8000/api/v1/patient/bonds/redeem-invitation [422 Unprocessable Content, 367B, 1349ms]
+  Pass  responde 422
+
+Sub-folder Catalogo com vinculo ativo deve ser negado
+  GET http://127.0.0.1:8000/api/v1/catalog/psychologists [403 Forbidden, 329B, 998ms]
+  Pass  responde 403
+
+Sub-folder Encerrar vinculo
+  POST http://127.0.0.1:8000/api/v1/bonds/2/end [200 OK, 432B, 1067ms]
+  Pass  responde 200
+  Pass  fica encerrado
+
+Sub-folder Catalogo liberado apos encerrar
+  GET http://127.0.0.1:8000/api/v1/catalog/psychologists?modality=online [200 OK, 811B, 1113ms]
+  Pass  responde 200
+  Pass  e uma lista
+  Pass  CA-09.3: sem preco, nota ou ranking
+  Pass  exibe nome completo e CRP
+
+Sub-folder Solicitar vinculo pelo catalogo
+  POST http://127.0.0.1:8000/api/v1/patient/bonds/requests [201 Created, 390B, 1024ms]
+  Pass  responde 201
+  Pass  nasce pendente
+
+Sub-folder Aceitar solicitacao
+  POST http://127.0.0.1:8000/api/v1/psychologist/bond-requests/3/accept [200 OK, 407B, 1058ms]
+  Pass  responde 200
+  Pass  fica ativo
+
+Sub-folder Segundo vinculo ativo deve falhar
+  POST http://127.0.0.1:8000/api/v1/patient/bonds/requests [409 Conflict, 348B, 1071ms]
+  Pass  recusa com 409 ou 422, nunca 500
+  Pass  nao estourou erro de banco
+
+Folder 05 Relatos e a garantia de privacidade
+Sub-folder Relato compartilhado
+  POST http://127.0.0.1:8000/api/v1/patient/reports [201 Created, 395B, 1129ms]
+  Pass  responde 201
+  Pass  padrao e compartilhado
+
+Sub-folder Relato privado
+  POST http://127.0.0.1:8000/api/v1/patient/reports [201 Created, 422B, 1151ms]
+  Pass  responde 201
+  Pass  gravado como privado
+
+Sub-folder Promover privado para compartilhado deve falhar
+  PATCH http://127.0.0.1:8000/api/v1/patient/reports/7 [422 Unprocessable Content, 416B, 1014ms]
+  Pass  recusa a promocao
+
+Sub-folder PROVA RNF-08: psicologo nao ve o relato privado
+  GET http://127.0.0.1:8000/api/v1/psychologist/patients/8/reports [200 OK, 374B, 1158ms]
+  Pass  responde 200
+  Pass  o conteudo privado nao aparece
+  Pass  o id do relato privado nao aparece
+  Pass  CA-23.2: a contagem so soma os compartilhados
+  Pass  nenhum campo denuncia a existencia de privados
+
+Sub-folder PROVA CA-23.5: acesso direto ao relato privado
+  GET http://127.0.0.1:8000/api/v1/psychologist/reports/7 [404 Not Found, 269B, 951ms]
+  Pass  responde 404, nao 403
+  Pass  nao vaza o conteudo
+
+Sub-folder Despublicar relato compartilhado
+  POST http://127.0.0.1:8000/api/v1/patient/reports/6/unpublish [200 OK, 413B, 1095ms]
+  Pass  responde 200
+  Pass  informa se ja foi usado em analise
+
+Sub-folder Relato despublicado some da visao do psicologo
+  GET http://127.0.0.1:8000/api/v1/psychologist/patients/8/reports [200 OK, 273B, 1108ms]
+  Pass  responde 200
+  Pass  o relato despublicado nao aparece
+  Pass  sem marca de removido
+
+Sub-folder Paciente ve os proprios relatos, inclusive os privados
+  GET http://127.0.0.1:8000/api/v1/patient/reports [200 OK, 664B, 1196ms]
+  Pass  responde 200
+  Pass  o proprio relato privado aparece para o dono
+
+Folder 06 Tarefas terapeuticas
+Sub-folder Criar tarefa com prazo passado deve falhar
+  POST http://127.0.0.1:8000/api/v1/psychologist/tasks [422 Unprocessable Content, 364B, 1081ms]
+  Pass  responde 422
+  Pass  indica prazo
+
+Sub-folder Criar tarefa
+  POST http://127.0.0.1:8000/api/v1/psychologist/tasks [201 Created, 418B, 1156ms]
+  Pass  responde 201
+  Pass  tarefa pendente no vinculo
+
+Sub-folder Listar tarefas do psicologo
+  GET http://127.0.0.1:8000/api/v1/psychologist/tasks?bond_id=3 [200 OK, 466B, 974ms]
+  Pass  responde 200
+  Pass  lista contem tarefa
+  Pass  meta paginada
+
+Sub-folder Ler tarefa do psicologo
+  GET http://127.0.0.1:8000/api/v1/psychologist/tasks/1 [200 OK, 413B, 933ms]
+  Pass  responde 200
+  Pass  le a tarefa criada
+
+Sub-folder Editar tarefa pendente
+  PUT http://127.0.0.1:8000/api/v1/psychologist/tasks/1 [200 OK, 411B, 1015ms]
+  Pass  responde 200
+  Pass  titulo atualizado
+
+Sub-folder Paciente nao cria tarefa
+  POST http://127.0.0.1:8000/api/v1/psychologist/tasks [403 Forbidden, 313B, 952ms]
+  Pass  responde 403
+
+Sub-folder Listar tarefas do paciente
+  GET http://127.0.0.1:8000/api/v1/patient/tasks [200 OK, 464B, 1081ms]
+  Pass  responde 200
+  Pass  lista contem tarefa pendente
+
+Sub-folder Ler tarefa do paciente
+  GET http://127.0.0.1:8000/api/v1/patient/tasks/1 [200 OK, 411B, 993ms]
+  Pass  responde 200
+  Pass  le tarefa propria
+
+Sub-folder Tarefa inexistente deve devolver 404
+  GET http://127.0.0.1:8000/api/v1/patient/tasks/999999999 [404 Not Found, 269B, 1019ms]
+  Pass  responde 404
+
+Sub-folder Concluir tarefa
+  POST http://127.0.0.1:8000/api/v1/patient/tasks/1/complete [200 OK, 436B, 998ms]
+  Pass  responde 200
+  Pass  concluida com data
+
+Sub-folder Concluir novamente preserva a data
+  POST http://127.0.0.1:8000/api/v1/patient/tasks/1/complete [200 OK, 436B, 961ms]
+  Pass  responde 200
+  Pass  mesma data
+
+Sub-folder Editar tarefa concluida deve falhar
+  PUT http://127.0.0.1:8000/api/v1/psychologist/tasks/1 [409 Conflict, 292B, 1032ms]
+  Pass  responde 409
+
+Sub-folder Arquivar tarefa concluida
+  DELETE http://127.0.0.1:8000/api/v1/psychologist/tasks/1 [200 OK, 251B, 1099ms]
+  Pass  responde 200
+  Pass  confirma arquivo
+
+Sub-folder Tarefa arquivada some da lista
+  GET http://127.0.0.1:8000/api/v1/patient/tasks [200 OK, 273B, 1030ms]
+  Pass  responde 200
+  Pass  nao lista a tarefa
+
+Sub-folder Sem token deve falhar
+  GET http://127.0.0.1:8000/api/v1/patient/tasks [401 Unauthorized, 287B, 819ms]
+  Pass  responde 401
+
+Folder 07 Perfil e pacientes
+Sub-folder Perfil do psicologo
+  GET http://127.0.0.1:8000/api/v1/psychologist/profile [200 OK, 571B, 1017ms]
+  Pass  responde 200
+  Pass  campos do contrato
+  Pass  aprovado com CRP
+
+Sub-folder Paciente nao le perfil profissional
+  GET http://127.0.0.1:8000/api/v1/psychologist/profile [403 Forbidden, 313B, 987ms]
+  Pass  responde 403
+
+Sub-folder Vinculos do paciente
+  GET http://127.0.0.1:8000/api/v1/patient/bonds [200 OK, 775B, 1102ms]
+  Pass  responde 200
+  Pass  lista com meta do contrato
+  Pass  inclui vinculo ativo
+
+Sub-folder Solicitacoes pendentes
+  GET http://127.0.0.1:8000/api/v1/psychologist/bond-requests [200 OK, 273B, 1000ms]
+  Pass  responde 200
+  Pass  lista com meta do contrato
+  Pass  somente pendentes
+
+Sub-folder Pacientes ativos
+  GET http://127.0.0.1:8000/api/v1/psychologist/patients [200 OK, 467B, 1026ms]
+  Pass  responde 200
+  Pass  lista com meta do contrato
+  Pass  campos sem dado de relato
+  Pass  paciente usa users.id
+
+Sub-folder Pacientes encerrados sem contadores
+  GET http://127.0.0.1:8000/api/v1/psychologist/patients?status=ended [200 OK, 489B, 1107ms]
+  Pass  responde 200
+  Pass  lista com meta do contrato
+  Pass  encerrados sem contadores clinicos
+
+Sub-folder Detalhe do paciente
+  GET http://127.0.0.1:8000/api/v1/psychologist/patients/8 [200 OK, 371B, 1005ms]
+  Pass  responde 200
+  Pass  campos do contrato
+  Pass  adulto sem responsavel
+
+Sub-folder Paciente inexistente
+  GET http://127.0.0.1:8000/api/v1/psychologist/patients/999999999 [404 Not Found, 269B, 977ms]
+  Pass  responde 404
+
+Sub-folder Status invalido
+  GET http://127.0.0.1:8000/api/v1/psychologist/patients?status=pending [422 Unprocessable Content, 359B, 1093ms]
+  Pass  responde 422
+
+Sub-folder Lista sem token
+  GET http://127.0.0.1:8000/api/v1/psychologist/patients [401 Unauthorized, 287B, 863ms]
+  Pass  responde 401
+
+Folder 08 Chat
+Sub-folder Enviar mensagem do paciente
+  POST http://127.0.0.1:8000/api/v1/bonds/3/messages [201 Created, 383B, 1156ms]
+  Pass  responde 201
+  Pass  campos do contrato
+  Pass  mensagem propria
+
+Sub-folder Enviar resposta do psicologo
+  POST http://127.0.0.1:8000/api/v1/bonds/3/messages [201 Created, 383B, 1154ms]
+  Pass  responde 201
+
+Sub-folder Listar mensagens
+  GET http://127.0.0.1:8000/api/v1/bonds/3/messages [200 OK, 591B, 1083ms]
+  Pass  responde 200
+  Pass  lista com meta do contrato
+  Pass  ordem crescente e autoria
+
+Sub-folder Polling apenas mensagens novas
+  GET http://127.0.0.1:8000/api/v1/bonds/3/messages?after_id=1 [200 OK, 432B, 1099ms]
+  Pass  responde 200
+  Pass  lista com meta do contrato
+  Pass  ids depois do cursor
+
+Sub-folder Marcar mensagens recebidas
+  POST http://127.0.0.1:8000/api/v1/bonds/3/messages/read [200 OK, 230B, 1022ms]
+  Pass  responde 200
+  Pass  uma resposta lida
+
+Sub-folder Marcar novamente nao altera
+  POST http://127.0.0.1:8000/api/v1/bonds/3/messages/read [200 OK, 230B, 1076ms]
+  Pass  responde 200
+  Pass  nenhuma nova leitura
+
+Sub-folder Leitura nao marca mensagem propria
+  GET http://127.0.0.1:8000/api/v1/bonds/3/messages [200 OK, 614B, 1038ms]
+  Pass  responde 200
+  Pass  so marca a outra parte
+
+Sub-folder Mensagem vazia deve falhar
+  POST http://127.0.0.1:8000/api/v1/bonds/3/messages [422 Unprocessable Content, 353B, 1003ms]
+  Pass  responde 422
+  Pass  erro no corpo
+
+Sub-folder Mensagem longa deve falhar
+  POST http://127.0.0.1:8000/api/v1/bonds/3/messages [422 Unprocessable Content, 353B, 1156ms]
+  Pass  responde 422
+
+Sub-folder Vinculo inexistente nao revela mensagens
+  GET http://127.0.0.1:8000/api/v1/bonds/999999999/messages [404 Not Found, 269B, 1034ms]
+  Pass  responde 404
+
+Sub-folder Historico encerrado permanece legivel
+  GET http://127.0.0.1:8000/api/v1/bonds/2/messages [200 OK, 273B, 1061ms]
+  Pass  responde 200
+  Pass  lista com meta do contrato
+
+Sub-folder Nao envia em vinculo encerrado
+  POST http://127.0.0.1:8000/api/v1/bonds/2/messages [409 Conflict, 280B, 1094ms]
+  Pass  responde 409
+
+Sub-folder Revogar consentimento antes de enviar
+  POST http://127.0.0.1:8000/api/v1/consent-acceptances/2/revoke [200 OK, 364B, 1045ms]
+  Pass  responde 200
+
+Sub-folder Mensagem sem aceite deve falhar
+  POST http://127.0.0.1:8000/api/v1/bonds/3/messages [403 Forbidden, 305B, 977ms]
+  Pass  responde 403
+  Pass  mensagem de consentimento
+
+Sub-folder Relato sem aceite deve falhar
+  POST http://127.0.0.1:8000/api/v1/patient/reports [403 Forbidden, 306B, 998ms]
+  Pass  responde 403
+
+Sub-folder Restaurar consentimento para as proximas pastas
+  POST http://127.0.0.1:8000/api/v1/consent-acceptances [200 OK, 341B, 1077ms]
+  Pass  responde 200
+
+Sub-folder Chat sem token
+  GET http://127.0.0.1:8000/api/v1/bonds/3/messages [401 Unauthorized, 287B, 802ms]
+  Pass  responde 401
+
+Folder 09 Agenda
+Sub-folder Consulta no passado deve falhar
+  POST http://127.0.0.1:8000/api/v1/psychologist/appointments [422 Unprocessable Content, 366B, 1024ms]
+  Pass  responde 422
+  Pass  erro na data
+
+Sub-folder Paciente nao cria consulta
+  POST http://127.0.0.1:8000/api/v1/psychologist/appointments [403 Forbidden, 313B, 948ms]
+  Pass  responde 403
+
+Sub-folder Criar consulta
+  POST http://127.0.0.1:8000/api/v1/psychologist/appointments [201 Created, 471B, 1062ms]
+  Pass  responde 201
+  Pass  campos do contrato
+  Pass  consulta agendada com paciente
+
+Sub-folder Conflito exige confirmacao
+  POST http://127.0.0.1:8000/api/v1/psychologist/appointments [422 Unprocessable Content, 411B, 1078ms]
+  Pass  responde 422
+  Pass  erro de confirmacao exato
+
+Sub-folder Conflito confirmado permite criar
+  POST http://127.0.0.1:8000/api/v1/psychologist/appointments [201 Created, 425B, 1065ms]
+  Pass  responde 201
+
+Sub-folder Agenda do psicologo por dia e vinculo
+  GET http://127.0.0.1:8000/api/v1/psychologist/appointments?bond_id=3&from=2026-11-05&to=2026-11-05 [200 OK, 720B, 1093ms]
+  Pass  responde 200
+  Pass  lista com meta do contrato
+  Pass  inclui as duas consultas
+
+Sub-folder Paciente le propria agenda
+  GET http://127.0.0.1:8000/api/v1/patient/appointments [200 OK, 732B, 1087ms]
+  Pass  responde 200
+  Pass  lista com meta do contrato
+  Pass  psicologo no lugar de paciente
+
+Sub-folder Reagendar consulta
+  PUT http://127.0.0.1:8000/api/v1/psychologist/appointments/1 [200 OK, 456B, 1184ms]
+  Pass  responde 200
+  Pass  status reagendada
+
+Sub-folder Cancelar consulta
+  POST http://127.0.0.1:8000/api/v1/psychologist/appointments/1/cancel [200 OK, 454B, 1002ms]
+  Pass  responde 200
+  Pass  status cancelada
+
+Sub-folder Cancelar novamente e idempotente
+  POST http://127.0.0.1:8000/api/v1/psychologist/appointments/1/cancel [200 OK, 454B, 958ms]
+  Pass  responde 200
+  Pass  permanece cancelada
+
+Sub-folder Consulta cancelada nao reagenda
+  PUT http://127.0.0.1:8000/api/v1/psychologist/appointments/1 [409 Conflict, 281B, 965ms]
+  Pass  responde 409
+
+Sub-folder Consulta alheia ou inexistente
+  POST http://127.0.0.1:8000/api/v1/psychologist/appointments/999999999/cancel [404 Not Found, 269B, 920ms]
+  Pass  responde 404
+
+Sub-folder Nao cria em vinculo encerrado
+  POST http://127.0.0.1:8000/api/v1/psychologist/appointments [409 Conflict, 280B, 968ms]
+  Pass  responde 409
+
+Sub-folder Agenda sem token
+  GET http://127.0.0.1:8000/api/v1/patient/appointments [401 Unauthorized, 287B, 797ms]
+  Pass  responde 401
+
+Folder 10 Notificacoes
+Sub-folder Notificacoes nao lidas do paciente
+  GET http://127.0.0.1:8000/api/v1/notifications?unread=1 [200 OK, 1.04kB, 976ms]
+  Pass  responde 200
+  Pass  lista com meta do contrato
+  Pass  somente campos seguros
+  Pass  eventos de tarefa mensagem agenda e vinculo
+
+Sub-folder Psicologo nao le notificacao do paciente
+  POST http://127.0.0.1:8000/api/v1/notifications/10/read [404 Not Found, 269B, 1002ms]
+  Pass  responde 404
+
+Sub-folder Ler notificacao propria
+  POST http://127.0.0.1:8000/api/v1/notifications/10/read [200 OK, 355B, 1007ms]
+  Pass  responde 200
+  Pass  campos do contrato
+  Pass  leitura registrada
+
+Sub-folder Leitura repetida preserva data
+  POST http://127.0.0.1:8000/api/v1/notifications/10/read [200 OK, 355B, 1027ms]
+  Pass  responde 200
+  Pass  leitura idempotente
+
+Sub-folder Ler todas notificacoes
+  POST http://127.0.0.1:8000/api/v1/notifications/read-all [200 OK, 230B, 922ms]
+  Pass  responde 200
+  Pass  contagem de leitura
+
+Sub-folder Nao restam notificacoes nao lidas
+  GET http://127.0.0.1:8000/api/v1/notifications?unread=1 [200 OK, 273B, 983ms]
+  Pass  responde 200
+  Pass  lista com meta do contrato
+  Pass  lista vazia
+
+Sub-folder Ler todas novamente nao altera
+  POST http://127.0.0.1:8000/api/v1/notifications/read-all [200 OK, 230B, 938ms]
+  Pass  responde 200
+  Pass  nenhuma leitura adicional
+
+Sub-folder Psicologo recebe pedido e mensagem
+  GET http://127.0.0.1:8000/api/v1/notifications [200 OK, 609B, 1001ms]
+  Pass  responde 200
+  Pass  lista com meta do contrato
+  Pass  eventos dirigidos ao psicologo
+
+Sub-folder Notificacoes sem token
+  GET http://127.0.0.1:8000/api/v1/notifications [401 Unauthorized, 287B, 759ms]
+  Pass  responde 401
+
+------------------------------------------------------------------------
+|                         |             executed |              failed |
+--------------------------+----------------------+----------------------
+|              iterations |                    1 |                   0 |
+--------------------------+----------------------+----------------------
+|                requests |                  110 |                   0 |
+--------------------------+----------------------+----------------------
+|            test-scripts |                  110 |                   0 |
+--------------------------+----------------------+----------------------
+|      prerequest-scripts |                    2 |                   0 |
+--------------------------+----------------------+----------------------
+|              assertions |                  213 |                   0 |
+------------------------------------------------------------------------
+| total run duration: 2m 5.6s                                          |
+------------------------------------------------------------------------
+| total data received: 18.83kB (approx)                                |
+------------------------------------------------------------------------
+| average response time: 1048ms [min: 759ms, max: 1415ms, s.d.: 104ms] |
+------------------------------------------------------------------------
+Newman exit: 0

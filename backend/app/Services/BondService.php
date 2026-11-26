@@ -68,13 +68,16 @@ class BondService
                 throw new ApiException(409, 'Você já tem uma solicitação pendente.');
             }
 
-            return Bond::create([
+            $bond = Bond::create([
                 'patient_id' => $patient->id,
                 'psychologist_id' => $psychologist->id,
                 'status' => 'pending',
                 'origin' => 'catalog',
                 'requested_at' => now(),
             ])->load('patient');
+            app(NotificationService::class)->create($psychologist->user_id, 'bond.requested', $bond->id);
+
+            return $bond;
         });
     }
 
@@ -86,7 +89,9 @@ class BondService
                 $bond = $this->pendingRequestOf($user, $bondId);
 
                 // Se o paciente ja ganhou outro vinculo ativo, este UPDATE estoura no indice unico
-                $bond->update(['status' => 'active', 'responded_at' => now()]);
+                $bond->update(['status' => 'active', 'responded_at' => now(), 'accepted_at' => now()]);
+
+                app(NotificationService::class)->create($bond->patient->user_id, 'bond.accepted', $bond->id);
 
                 return $bond->load('patient');
             }),
@@ -106,6 +111,8 @@ class BondService
                 'ended_at' => now(),
                 'ended_by_user_id' => $user->id,
             ]);
+
+            app(NotificationService::class)->create($bond->patient->user_id, 'bond.rejected', $bond->id);
 
             return $bond->load('patient');
         });
@@ -128,6 +135,30 @@ class BondService
 
             $bond->update(['status' => 'ended', 'ended_at' => now(), 'ended_by_user_id' => $user->id]);
 
+            // CA-13.1: notifica so a outra parte
+            $otherUserId = $bond->patient->user_id === $user->id ? $bond->psychologist->user_id : $bond->patient->user_id;
+            app(NotificationService::class)->create($otherUserId, 'bond.ended', $bond->id);
+
+            return $bond->load('patient');
+        });
+    }
+
+    // RF-10, CA-10.3: o paciente cancela a propria solicitacao. Segue o caminho da recusa (ended), sem
+    // status novo; responded_at fica nulo porque o psicologo nao respondeu. Alheia ou inexistente: 404
+    public function cancelRequest(User $user, int $bondId): Bond
+    {
+        return DB::transaction(function () use ($user, $bondId) {
+            $bond = Bond::whereKey($bondId)
+                ->where('patient_id', $user->patient?->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($bond->status !== 'pending') {
+                throw new ApiException(409, 'Esta solicitação não está mais pendente.');
+            }
+
+            $bond->update(['status' => 'ended', 'ended_at' => now(), 'ended_by_user_id' => $user->id]);
+
             return $bond->load('patient');
         });
     }
@@ -141,7 +172,7 @@ class BondService
 
         $query = Psychologist::query()
             ->join('users', 'users.id', '=', 'psychologists.user_id')
-            ->select('psychologists.*', 'users.name')
+            ->select('psychologists.*', 'users.name', 'users.avatar_path', 'users.cover_path')
             ->where('psychologists.approval_status', 'approved')
             ->whereNotNull('psychologists.profile_published_at')
             ->where('users.status', 'active')

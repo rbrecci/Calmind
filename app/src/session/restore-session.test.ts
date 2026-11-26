@@ -4,7 +4,7 @@ import { beforeEach, describe, test } from 'node:test';
 import { getAuthToken, setAuthToken } from '../api/auth-token.ts';
 import { createMockApi } from '../api/mock.ts';
 import { ApiError, type Api } from '../api/types.ts';
-import { restoreSession, type TokenStorage } from './restore-session.ts';
+import { restoreSession, sessionUser, type TokenStorage } from './restore-session.ts';
 
 // Armazenamento falso que conta quantas vezes o token foi apagado.
 function fakeStorage(initialToken: string | null) {
@@ -45,6 +45,12 @@ const offlineApi: Api = {
   catalogPsychologists: async () => {
     throw new ApiError(0, 'Sem conexão com o servidor.');
   },
+  uploadProfileImage: async () => {
+    throw new ApiError(0, 'Sem conexão com o servidor.');
+  },
+  removeProfileImage: async () => {
+    throw new ApiError(0, 'Sem conexão com o servidor.');
+  },
 };
 
 describe('restoreSession', () => {
@@ -57,10 +63,11 @@ describe('restoreSession', () => {
     assert.equal(getAuthToken(), null);
   });
 
-  test('com token válido, devolve o papel do /me e deixa o token ativo', async () => {
+  // Nome e foto vão para o avatar do cabeçalho; sem eles a sessão restaurada abriria sem iniciais.
+  test('com token válido, devolve papel, nome, foto e capa do /me e deixa o token ativo', async () => {
     const { storage, state } = fakeStorage('mock-token-1'); // paciente do mock
 
-    assert.equal(await restoreSession(storage, createMockApi()), 'patient');
+    assert.deepEqual(await restoreSession(storage, createMockApi()), { role: 'patient', name: 'Paciente de Teste', avatarUrl: null, coverUrl: null });
     assert.equal(getAuthToken(), 'mock-token-1');
     assert.equal(state.clearCalls, 0);
   });
@@ -84,6 +91,22 @@ describe('restoreSession', () => {
     assert.equal(state.clearCalls, 1);
   });
 
+  // O backend responde 403 no /me quando a conta foi suspensa: o token não volta a valer.
+  test('conta suspensa (403 no /me), apaga o token guardado e pede login', async () => {
+    const suspendedApi: Api = {
+      ...offlineApi,
+      me: async () => {
+        throw new ApiError(403, 'Conta suspensa.');
+      },
+    };
+    const { storage, state } = fakeStorage('mock-token-1');
+
+    assert.equal(await restoreSession(storage, suspendedApi), null);
+    assert.equal(getAuthToken(), null);
+    assert.equal(state.token, null);
+    assert.equal(state.clearCalls, 1);
+  });
+
   // Sem rede não dá para saber se o token vale: apagar deslogaria quem só está offline.
   test('sem rede, pede login mas mantém o token guardado', async () => {
     const { storage, state } = fakeStorage('mock-token-1');
@@ -100,5 +123,19 @@ describe('restoreSession', () => {
     assert.equal(await restoreSession(storage, createMockApi()), null);
     assert.equal(getAuthToken(), null);
     assert.equal(state.clearCalls, 1);
+  });
+});
+
+describe('sessionUser', () => {
+  // A troca de foto devolve o usuário inteiro, e é por aqui que o cabeçalho passa a mostrá-la.
+  test('leva a foto e a capa do usuário, e ausência vira null', () => {
+    const base = { id: 7, name: 'Pessoa Fictícia', email: 'ficticia@calmind.test' };
+    assert.deepEqual(sessionUser({ ...base, role: 'psychologist', avatar_url: 'http://api.teste/users/7/avatar?v=1', cover_url: null }),
+      { role: 'psychologist', name: 'Pessoa Fictícia', avatarUrl: 'http://api.teste/users/7/avatar?v=1', coverUrl: null });
+    assert.deepEqual(sessionUser({ ...base, role: 'patient' }), { role: 'patient', name: 'Pessoa Fictícia', avatarUrl: null, coverUrl: null });
+  });
+
+  test('admin não vira sessão do app', () => {
+    assert.equal(sessionUser({ id: 3, name: 'Administrador', email: 'admin@plataforma.local', role: 'admin' }), null);
   });
 });

@@ -24,6 +24,7 @@ class BondSeeder extends Seeder
             'status' => 'active',
             'origin' => 'catalog',
             'responded_at' => now(),
+            'accepted_at' => now(),
         ]);
 
         // RNF-12: o aceite existe antes de qualquer relato

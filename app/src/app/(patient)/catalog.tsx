@@ -1,60 +1,75 @@
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { api } from '@/api';
-import { Button, Colors, Radius, Screen, Spacing, Text } from '@/design-system';
-import { loadCatalog, modalityLabel, type CatalogState } from '@/catalog/load-catalog';
+import { imageHeaders, type Modality } from '@/api';
+import { patientApi } from '@/api/patient';
+import type { CatalogFilters, CatalogQuery } from '@/api/patient/types';
+import { catalogQuery, countCatalogFilters, hasCatalogFilters } from '@/catalog/catalog-filters';
+import { modalityLabel } from '@/catalog/load-catalog';
+import { Button, Chip, PersonCard, Spacing, Text, TextField } from '@/design-system';
+import { loadPatientPages } from '@/patient/load-pages';
+import { Card, Feedback, PatientPage } from '@/patient/ui';
+import { usePatientData } from '@/patient/use-patient-data';
 
+const EMPTY_FILTERS: CatalogFilters = { approach: '', specialty: '', region: '' };
+const MODALITIES: Modality[] = ['online', 'presencial', 'ambos'];
+
+// Catálogo: a busca é pela abordagem, a modalidade fica em chips que valem na hora, e
+// especialidade e região ficam atrás de "Mais filtros". O cartão abre o perfil, que é onde se
+// pede o vínculo. Nada de preço, nota ou ordenação por reputação (art. 20 do Código de Ética).
 export default function PatientCatalog() {
   const router = useRouter();
-  const [state, setState] = useState<CatalogState | null>(null);
-
-  const retry = useCallback(() => {
-    setState(null);
-    void loadCatalog(api).then(setState);
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    void loadCatalog(api).then((next) => {
-      if (!cancelled) setState(next);
-    });
-    return () => { cancelled = true; };
-  }, []);
-
-  return (
-    <Screen scroll>
-      <Text variant="small" color="textSecondary">Calmind</Text>
-      <Text variant="h3">Encontrar profissional</Text>
-      <Text variant="small" color="textSecondary">Psicólogos com registro conferido no CRP.</Text>
-      {state === null ? <Text>Carregando profissionais...</Text> : null}
-      {state?.status === 'error' ? (
-        <>
-          <Text variant="small" color="error" accessibilityRole="alert">{state.message}</Text>
-          <Button tone="patient" label="Tentar de novo" onPress={retry} />
-        </>
-      ) : null}
-      {state?.status === 'empty' ? <Text>Nenhum profissional disponível por enquanto.</Text> : null}
-      {state?.status === 'ready' ? state.psychologists.map((psychologist) => {
-        const modality = modalityLabel(psychologist.modality);
-        return (
-          <View key={psychologist.id} style={styles.card}>
-            <Text variant="h5">{psychologist.name}</Text>
-            <Text variant="small" color="textSecondary">CRP {psychologist.crp}</Text>
-            {psychologist.approach ? <Text variant="small">{psychologist.approach}</Text> : null}
-            {modality ? <Text variant="small" color="textSecondary">{modality}</Text> : null}
-          </View>
-        );
-      }) : null}
-      <Text variant="small" color="textSecondary">
-        Sem preço, sem nota, sem estrela e sem ordenação por reputação (art. 20 do Código de Ética).
-      </Text>
-      <Button tone="patient" label="Voltar" onPress={() => router.back()} />
-    </Screen>
-  );
+  const [form, setForm] = useState<CatalogFilters>(EMPTY_FILTERS);
+  const [applied, setApplied] = useState<CatalogFilters>({});
+  // Recolhidos por padrão: a lista de profissionais é o que a pessoa veio ver.
+  const [showFilters, setShowFilters] = useState(false);
+  // A abordagem e a modalidade já aparecem na tela; o contador do chip é só do que está escondido.
+  const hiddenFilters = countCatalogFilters({ specialty: applied.specialty, region: applied.region });
+  const loadCatalog = useMemo(() => () => loadPatientPages((page) => {
+    const query: CatalogQuery = { ...page, ...applied };
+    return patientApi.catalogPsychologists(query);
+  }), [applied]);
+  const { data, loading, error, reload } = usePatientData(loadCatalog);
+  const apply = (filters: CatalogFilters) => { setForm(filters); setApplied(catalogQuery(filters)); };
+  const headers = imageHeaders();
+  return <PatientPage>
+    {!error ? <>
+      <TextField label="Buscar por abordagem" placeholder="Ex.: TCC, psicanálise" value={form.approach} maxLength={120}
+        returnKeyType="search" onChangeText={(approach) => setForm({ ...form, approach })} onSubmitEditing={() => apply(form)} />
+      <View style={styles.chips}>
+        {MODALITIES.map((modality) => {
+          const label = modalityLabel(modality) ?? modality;
+          const selected = applied.modality === modality;
+          return <Chip key={modality} tone="patient" label={label} selected={selected}
+            onPress={() => apply({ ...form, modality: selected ? undefined : modality })} />;
+        })}
+        <Chip tone="patient" label={hiddenFilters ? `Mais filtros (${hiddenFilters})` : 'Mais filtros'} selected={showFilters}
+          accessibilityLabel={`${showFilters ? 'Esconder' : 'Mostrar'} mais filtros${hiddenFilters ? `, ${hiddenFilters} ${hiddenFilters === 1 ? 'ativo' : 'ativos'}` : ''}`}
+          onPress={() => setShowFilters(!showFilters)} />
+      </View>
+    </> : null}
+    {!error && showFilters ? <Card>
+      <TextField label="Especialidade" value={form.specialty} onChangeText={(specialty) => setForm({ ...form, specialty })} maxLength={120} />
+      <TextField label="Região" value={form.region} onChangeText={(region) => setForm({ ...form, region })} maxLength={120} />
+      <Button tone="patient" label="Buscar" disabled={loading} onPress={() => { apply(form); setShowFilters(false); }} />
+      {hasCatalogFilters(form) || hasCatalogFilters(applied) ? <Button tone="patient" variant="secondary" label="Limpar filtros" disabled={loading}
+        onPress={() => apply(EMPTY_FILTERS)} /> : null}
+    </Card> : null}
+    <Feedback loading={loading} error={error} retry={() => void reload()} />
+    {data?.length === 0 && !loading && !error ? <Text accessibilityLiveRegion="polite">{hasCatalogFilters(applied)
+      ? 'Nenhum profissional encontrado com esses filtros. Ajuste os filtros e busque de novo.'
+      : 'Nenhum profissional disponível por enquanto.'}</Text> : null}
+    {!error ? data?.map((p) => <PersonCard key={p.id} tone="patient" name={p.name} avatarUri={p.avatar_url} headers={headers}
+      tag={{ kind: 'neutral', label: `CRP ${p.crp}` }}
+      description={[p.approach, modalityLabel(p.modality)].filter(Boolean).join(' · ') || undefined}
+      onPress={() => router.push({ pathname: '/(patient)/psychologist/[id]', params: { id: String(p.id) } })} />) : null}
+    {data && data.length > 0 && !error ? <Text variant="small" color="textSecondary">
+      Sem preço, nota ou ordenação por reputação, conforme o art. 20 do Código de Ética.
+    </Text> : null}
+  </PatientPage>;
 }
 
 const styles = StyleSheet.create({
-  card: { borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.md, padding: Spacing.three, gap: Spacing.one },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
 });

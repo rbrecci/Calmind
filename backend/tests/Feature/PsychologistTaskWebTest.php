@@ -15,6 +15,50 @@ class PsychologistTaskWebTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_patient_without_consent_returns_to_form_with_message_and_typed_values(): void
+    {
+        $bond = Bond::factory()->active()->create();
+
+        $this->actingAs($bond->psychologist->user)
+            ->from('/psychologist/tasks')
+            ->post('/psychologist/tasks', [
+                'bond_id' => $bond->id,
+                'title' => 'Tarefa digitada',
+                'due_date' => now()->addDays(3)->toDateString(),
+            ])
+            ->assertRedirect('/psychologist/tasks')
+            ->assertSessionHasErrors('bond_id')
+            ->assertSessionHasInput('title', 'Tarefa digitada');
+
+        $this->assertSame(0, Task::count());
+    }
+
+    public function test_ended_bond_returns_to_form_with_message(): void
+    {
+        $bond = Bond::factory()->active()->create();
+        $term = ConsentTerm::create([
+            'type' => 'general',
+            'version' => '1.0',
+            'body' => 'Termo de teste',
+            'effective_from' => now()->subDay(),
+            'published_by_user_id' => User::factory()->admin()->create()->id,
+        ]);
+        ConsentAcceptance::create(['user_id' => $bond->patient->user_id, 'consent_term_id' => $term->id]);
+        $bond->update(['status' => 'ended', 'ended_at' => now()]);
+
+        $this->actingAs($bond->psychologist->user)
+            ->from('/psychologist/tasks')
+            ->post('/psychologist/tasks', [
+                'bond_id' => $bond->id,
+                'title' => 'Tarefa digitada',
+                'due_date' => now()->addDays(3)->toDateString(),
+            ])
+            ->assertRedirect('/psychologist/tasks')
+            ->assertSessionHasErrors('bond_id');
+
+        $this->assertSame(0, Task::count());
+    }
+
     public function test_psychologist_logs_in_and_creates_task_from_web_form(): void
     {
         $bond = Bond::factory()->active()->create();

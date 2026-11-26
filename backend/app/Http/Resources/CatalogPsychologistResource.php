@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Psychologist;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -23,6 +24,9 @@ class CatalogPsychologistResource extends JsonResource
             'modality' => $this->profile_modality,
             'region' => $this->profile_region,
             'bio' => $this->profile_bio,
+            // avatar_path e cover_path tambem vem do join; a URL usa o id do usuario, nao o do psicologo
+            'avatar_url' => User::profileImageUrl($this->user_id, 'avatar', $this->avatar_path),
+            'cover_url' => User::profileImageUrl($this->user_id, 'cover', $this->cover_path),
         ];
     }
 }

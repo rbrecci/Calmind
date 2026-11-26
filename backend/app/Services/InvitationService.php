@@ -121,6 +121,7 @@ class InvitationService
                     'invitation_id' => $locked->id,
                     'requested_at' => now(),
                     'responded_at' => now(),
+                    'accepted_at' => now(),
                 ]);
 
                 $locked->update(['consumed_at' => now(), 'consumed_by_patient_id' => $patient->id]);

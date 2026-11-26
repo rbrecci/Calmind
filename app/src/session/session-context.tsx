@@ -8,22 +8,29 @@ import {
   type ReactNode,
 } from 'react';
 
-import { api, ApiError, setAuthToken, type LoginInput, type Role } from '@/api';
-import { restoreSession } from '@/session/restore-session';
+import { api, ApiError, setAuthToken, type LoginInput, type Role, type User } from '@/api';
+import { restoreSession, sessionUser, type SessionUser } from '@/session/restore-session';
 import { secureTokenStorage } from '@/session/token-storage';
 
 type SessionValue = {
   role: Role | null;
+  // Nome e foto de quem está logado, para o avatar do cabeçalho, e a capa da tela de perfil.
+  // null sem sessão ou sem imagem.
+  name: string | null;
+  avatarUrl: string | null;
+  coverUrl: string | null;
   // true até o app saber se há uma sessão guardada para restaurar.
   isLoading: boolean;
   signIn: (credentials: LoginInput) => Promise<void>;
   signOut: () => Promise<void>;
+  // Troca de foto ou capa devolve o usuário inteiro: com ele, o cabeçalho muda na hora.
+  updateUser: (user: User) => void;
 };
 
 const SessionContext = createContext<SessionValue | null>(null);
 
 export function SessionProvider({ children }: { children: ReactNode }) {
-  const [role, setRole] = useState<Role | null>(null);
+  const [user, setUser] = useState<SessionUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -31,7 +38,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
     restoreSession(secureTokenStorage, api)
       .then((restored) => {
-        if (!cancelled) setRole(restored);
+        if (!cancelled) setUser(restored);
       })
       .catch(() => {
         // Falha ao ler o armazenamento: segue sem sessão, o usuário entra de novo.
@@ -51,8 +58,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
     try {
       // O papel manda na navegação, e quem informa o papel é o /me, nunca a tela.
-      const user = await api.me();
-      if (user.role === 'admin') {
+      const user = sessionUser(await api.me());
+      if (!user) {
         // O admin usa só o painel web; o app não tem árvore de telas para ele.
         throw new ApiError(403, 'Este perfil acessa a plataforma pelo painel web.');
       }
@@ -62,7 +69,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       } catch {
         // Sem como guardar no aparelho, a sessão vale só até fechar o app; não bloqueia o login.
       }
-      setRole(user.role);
+      setUser(user);
     } catch (error) {
       setAuthToken(null);
       throw error;
@@ -81,12 +88,21 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     } catch {
       // Token que não pôde ser apagado já não vale: o logout acima o revogou no servidor.
     }
-    setRole(null);
+    setUser(null);
+  }, []);
+
+  const updateUser = useCallback((next: User) => {
+    const updated = sessionUser(next);
+    // Sem sessão aberta não há o que atualizar: a resposta chegou depois de sair da conta.
+    setUser((current) => current && updated);
   }, []);
 
   const value = useMemo(
-    () => ({ role, isLoading, signIn, signOut }),
-    [role, isLoading, signIn, signOut],
+    () => ({
+      role: user?.role ?? null, name: user?.name ?? null, avatarUrl: user?.avatarUrl ?? null, coverUrl: user?.coverUrl ?? null,
+      isLoading, signIn, signOut, updateUser,
+    }),
+    [user, isLoading, signIn, signOut, updateUser],
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

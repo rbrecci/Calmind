@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 260" width="360" height="260"><defs>
+  <linearGradient id="fundo" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#F7F0F9"/><stop offset="1" stop-color="#EEF6F1"/>
+  </linearGradient>
+  <linearGradient id="marca" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#CFAAD6"/><stop offset="1" stop-color="#A3CDBB"/>
+  </linearGradient>
+  <linearGradient id="marcaH" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#A3CDBB"/><stop offset="1" stop-color="#CFAAD6"/>
+  </linearGradient>
+  <linearGradient id="folha" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#C6D8BE"/><stop offset="1" stop-color="#97B48F"/>
+  </linearGradient>
+  <linearGradient id="lilas" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#EBD9EF"/><stop offset="1" stop-color="#D9B9E0"/>
+  </linearGradient>
+  <linearGradient id="menta" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#D3EAE0"/><stop offset="1" stop-color="#B5D9C9"/>
+  </linearGradient>
+</defs><path d="M58 150 C40 92 92 38 162 44 C226 50 252 30 294 68 C334 106 324 182 272 206 C220 230 122 236 86 206 C70 192 64 172 58 150 Z" fill="url(#fundo)"/><ellipse cx="180" cy="222" rx="90" ry="10.8" fill="#1C1C1C" opacity="0.06"/>
+  <path d="M262 52 A28 28 0 1 0 290 86 A22 22 0 1 1 262 52 Z" fill="#CFAAD6"/>
+  <circle cx="110" cy="62" r="3.5" fill="#CFAAD6"/><circle cx="240" cy="120" r="3" fill="#A3CDBB"/><circle cx="96" cy="120" r="2.5" fill="#A3CDBB"/>
+  <circle cx="180" cy="64" r="9" fill="#D9B9E0"/>
+  <path d="M180 70 C150 70 132 94 132 124 L132 154 L118 176 L242 176 L228 154 L228 124 C228 94 210 70 180 70 Z" fill="url(#lilas)"/>
+  <ellipse cx="180" cy="188" rx="17" ry="11" fill="#A3CDBB"/>
+  <path d="M150 104 C152 92 160 86 168 84" stroke="#FFFFFF" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.8"/>
+  <path transform="translate(116 214) rotate(-150) scale(1.2)" d="M0 0 C4 -12 14 -18 26 -18 C22 -6 12 0 0 0 Z" fill="#C6D8BE"/><path transform="translate(242 214) rotate(-30) scale(1.2)" d="M0 0 C4 -12 14 -18 26 -18 C22 -6 12 0 0 0 Z" fill="#B4C9AC"/></svg>

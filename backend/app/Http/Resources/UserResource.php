@@ -23,6 +23,8 @@ class UserResource extends JsonResource
             'email' => $attributes['email'],
             'role' => $attributes['role'],
             'created_at' => $attributes['created_at'],
+            'avatar_url' => User::profileImageUrl($this->id, 'avatar', $this->avatar_path),
+            'cover_url' => User::profileImageUrl($this->id, 'cover', $this->cover_path),
         ];
     }
 }

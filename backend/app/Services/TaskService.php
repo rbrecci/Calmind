@@ -4,12 +4,11 @@ namespace App\Services;
 
 use App\Exceptions\ApiException;
 use App\Models\Bond;
-use App\Models\ConsentAcceptance;
-use App\Models\ConsentTerm;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class TaskService
 {
@@ -46,13 +45,18 @@ class TaskService
         $this->assertActive($bond);
         $this->assertPatientConsent($bond);
 
-        return Task::create([
-            'bond_id' => $bond->id,
-            'title' => $data['title'],
-            'description' => $data['description'] ?? null,
-            'due_date' => $data['due_date'],
-            'created_by_user_id' => $user->id,
-        ]);
+        return DB::transaction(function () use ($user, $data, $bond) {
+            $task = Task::create([
+                'bond_id' => $bond->id,
+                'title' => $data['title'],
+                'description' => $data['description'] ?? null,
+                'due_date' => $data['due_date'],
+                'created_by_user_id' => $user->id,
+            ]);
+            app(NotificationService::class)->create($bond->patient->user_id, 'task.assigned', $task->id);
+
+            return $task;
+        });
     }
 
     public function update(User $user, int $id, array $data): Task
@@ -126,16 +130,7 @@ class TaskService
 
     private function assertPatientConsent(Bond $bond): void
     {
-        $term = ConsentTerm::where('type', 'general')
-            ->where('effective_from', '<=', now())
-            ->orderByDesc('effective_from')
-            ->orderByDesc('id')
-            ->first();
-
-        $accepted = $term !== null && ConsentAcceptance::where('user_id', $bond->patient->user_id)
-            ->where('consent_term_id', $term->id)
-            ->whereNull('revoked_at')
-            ->exists();
+        $accepted = app(ConsentService::class)->hasAccepted($bond->patient->user);
 
         if (! $accepted) {
             throw new ApiException(403, 'O paciente precisa aceitar o termo de uso vigente antes de receber tarefas.');

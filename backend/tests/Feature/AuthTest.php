@@ -50,7 +50,7 @@ class AuthTest extends TestCase
 
         $this->assertSame(['user'], array_keys($response->json()));
         $this->assertSame(
-            ['id', 'name', 'email', 'role', 'created_at'],
+            ['id', 'name', 'email', 'role', 'created_at', 'avatar_url', 'cover_url'],
             array_keys($response->json('user'))
         );
         $content = $response->getContent();
@@ -348,7 +348,7 @@ class AuthTest extends TestCase
 
         $response = $this->getJson('/api/v1/me', $this->bearer($token))->assertOk();
 
-        $this->assertSame(['id', 'name', 'email', 'role', 'created_at'], array_keys($response->json()));
+        $this->assertSame(['id', 'name', 'email', 'role', 'created_at', 'avatar_url', 'cover_url'], array_keys($response->json()));
         $this->assertSame($user->id, $response->json('id'));
         $this->assertSame($user->name, $response->json('name'));
         $this->assertSame($user->email, $response->json('email'));

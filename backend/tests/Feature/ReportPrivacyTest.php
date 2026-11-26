@@ -11,6 +11,7 @@ use App\Models\Report;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Testing\TestResponse;
 use RecursiveDirectoryIterator;
@@ -49,6 +50,13 @@ class ReportPrivacyTest extends TestCase
     // 'no_reports' e uma afirmacao que a varredura estatica (c) confere; 'reads_shared_reports'
     // exige um exercicio em exercisers().
     private const ROUTES = [
+        'GET psychologist/profile' => self::NONE,
+        'GET psychologist/bond-requests' => self::NONE,
+        'GET psychologist/patients' => self::NONE,
+        'GET psychologist/appointments' => self::NONE,
+        'POST psychologist/appointments' => self::NONE,
+        'PUT psychologist/appointments/{}' => self::NONE,
+        'POST psychologist/appointments/{}/cancel' => self::NONE,
         'GET psychologist/patients/{}/reports' => self::READS,
         'GET psychologist/reports/{}' => self::READS,
         'POST psychologist/registration' => self::NONE,
@@ -67,6 +75,16 @@ class ReportPrivacyTest extends TestCase
         'GET psychologist/tasks/{}' => self::NONE,
         'PUT psychologist/tasks/{}' => self::NONE,
         'DELETE psychologist/tasks/{}' => self::NONE,
+        'GET psychologist/medications' => self::NONE,
+        'POST psychologist/medications' => self::NONE,
+        'GET psychologist/medications/{}' => self::NONE,
+        'POST psychologist/medications/{}/reactivate' => self::NONE,
+        'POST psychologist/analyses' => self::READS,
+        'GET psychologist/analyses' => self::NONE,
+        'GET psychologist/analyses/{}' => self::NONE,
+        'PUT psychologist/analyses/{}' => self::NONE,
+        'POST psychologist/analyses/{}/confirm' => self::NONE,
+        'POST psychologist/analyses/{}/discard' => self::NONE,
         'GET admin/registrations' => self::NONE,
         'POST admin/registrations/{}/approve' => self::NONE,
         'POST admin/registrations/{}/reject' => self::NONE,
@@ -91,6 +109,7 @@ class ReportPrivacyTest extends TestCase
     // Classes do lado do psicologo que leem relato: precisam passar pela view
     private const PSYCHOLOGIST_SIDE = [
         'Services/SharedReportService.php',
+        'Services/AnalysisService.php',
         'Http/Controllers/Api/V1/PsychologistReportController.php',
         'Http/Resources/SharedReportResource.php',
         'Http/Resources/SharedReportCollection.php',
@@ -555,6 +574,27 @@ class ReportPrivacyTest extends TestCase
                 foreach ($this->ids['hidden'] as $id) {
                     $this->showAs($this->psy1, $id)->assertNotFound()->assertExactJson(self::NOT_FOUND);
                 }
+            },
+            // RNF-08: o pacote enviado ao servico de IA sai da view, entao nenhum relato privado ou despublicado vai junto
+            'POST psychologist/analyses' => function (): void {
+                $term = ConsentTerm::factory()->create(['type' => 'ai_analysis']);
+                ConsentAcceptance::factory()->create(['user_id' => $this->patientA->user_id, 'consent_term_id' => $term->id]);
+                config(['services.ai.provider' => 'gemini', 'services.gemini.keys' => ['chave-de-teste'], 'services.gemini.models' => ['modelo-teste']]);
+                Http::fake(['*' => Http::response(['candidates' => [['content' => ['parts' => [['text' => 'Resumo de teste']]]]]])]);
+                $bond = Bond::where('patient_id', $this->patientA->id)->where('psychologist_id', $this->psy1->psychologist->id)->where('status', 'active')->firstOrFail();
+                $payload = ['bond_id' => $bond->id, 'period_start' => now()->subDays(3)->toDateString(), 'period_end' => now()->toDateString()];
+
+                $response = $this->postJson('/api/v1/psychologist/analyses', $payload, $this->bearer($this->psy1))->assertCreated();
+
+                $this->assertNoTrace($response);
+                Http::assertSent(function ($request) {
+                    $sent = json_encode($request->data(), JSON_UNESCAPED_UNICODE);
+
+                    return str_contains($sent, 'COMPARTILHADO-') && ! str_contains($sent, 'MARCADOR-');
+                });
+                // psicologo sem vinculo com o paciente recebe o mesmo 404 e nada e enviado por ele
+                $this->postJson('/api/v1/psychologist/analyses', $payload, $this->bearer($this->psy2))->assertNotFound();
+                Http::assertSentCount(1);
             },
         ];
     }

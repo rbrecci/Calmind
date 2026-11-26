@@ -33,18 +33,67 @@ export const Colors = {
   onDisabled: Palette.dark.tint,
 } as const;
 
-// Cor de cada lado do app. Primária e secundária entram em botão, linha e detalhe, nunca em
-// grandes áreas de fundo (5.5). O texto sobre a cor é sempre Dark: branco reprova (5.4).
+// Cor de cada lado do app. Primária e secundária entram em botão, linha, cabeçalho e detalhe,
+// nunca em grandes áreas de fundo (5.5). O texto sobre a cor é sempre Dark: branco reprova (5.4).
+// `tint` é o tom claro (pílula da aba ativa, fundo do avatar, ponto mais claro do cabeçalho) e
+// `shade` o escuro, que desenha o ícone da aba ativa sobre a pílula, onde a base sumiria.
 export const RoleColors = {
-  patient: { accent: Palette.secondary.base, onAccent: Palette.dark.base },
-  psychologist: { accent: Palette.primary.base, onAccent: Palette.dark.base },
+  patient: { accent: Palette.secondary.base, onAccent: Palette.dark.base, tint: Palette.secondary.tint, shade: Palette.secondary.shade },
+  psychologist: { accent: Palette.primary.base, onAccent: Palette.dark.base, tint: Palette.primary.tint, shade: Palette.primary.shade },
 } as const;
 
-// Telas anteriores ao login não escolhem lado e usam o Gradiente Verde-Rosa (5.3). Os dois
-// extremos são as bases das duas famílias, como na medição de contraste da identidade.
+// Botões que não são a ação principal. Os dois são contorno sobre o fundo da tela, para não
+// competir com o botão cheio. O texto do destrutivo é o `-1` do Danger: a base reprova no
+// branco (3,0:1). A borda do secundário é Dark +1 porque a cinza dos campos some no branco.
+export const ButtonVariants = {
+  secondary: { background: WHITE, border: Palette.dark.tint, text: Palette.dark.base },
+  destructive: { background: WHITE, border: Palette.danger.shade, text: Palette.danger.shade },
+} as const;
+
+// Campo de texto: branco com borda fina, como no protótipo de 25/11. A borda é Dark +1 porque a
+// cinza de `Colors.border` fica em 2,9:1 no branco e não desenha o campo (borda pede 3:1).
+// Placeholder e erro passam no branco; mesmo assim o erro continua abaixo do campo.
+export const FieldColors = {
+  background: WHITE,
+  border: Palette.dark.tint,
+  placeholder: Palette.dark.tint,
+} as const;
+
+// Aviso de erro em bloco (`ErrorBanner`), como a falha do login: fundo no tom claro do Danger,
+// texto Dark, borda no `-1`.
+export const ErrorBannerColors = {
+  background: Palette.danger.tint,
+  border: Palette.danger.shade,
+  text: Palette.dark.base,
+} as const;
+
+// Etiqueta de status: fundo no tom claro (`+1`) e texto Dark, que passa em todos (5.4). A
+// paleta não tem amarelo, então "atenção" usa o lilás; o verde e o rosa base ficam com os lados.
+export const StatusTagColors = {
+  neutral: { background: Palette.light.tint, text: Palette.dark.base },
+  attention: { background: Palette.primary.tint, text: Palette.dark.base },
+  positive: { background: Palette.success.tint, text: Palette.dark.base },
+  negative: { background: Palette.danger.tint, text: Palette.dark.base },
+} as const;
+
+// Telas anteriores ao login não escolhem lado e usam o Gradiente Verde-Rosa (5.3). O botão
+// principal delas é contorno em degradê das bases e texto em degradê dos -1, sobre branco, como
+// "Entrar" no protótipo de 25/11. Exceção ao AA decidida pelo dono do projeto: o verde -1 fica
+// em 2,9:1 no branco (tokens.test.ts mede). Na web não há máscara para o degradê, e o texto
+// fica sólido no rosa -1, que passa.
 export const NeutralGradient = {
   colors: [Palette.secondary.base, Palette.primary.base],
-  onGradient: Palette.dark.base,
+  textColors: [Palette.secondary.shade, Palette.primary.shade],
+  textFallback: Palette.primary.shade,
+} as const;
+
+// Fundo das telas: degradê vertical muito suave do branco a um tom claro com transparência
+// (#RRGGBBAA). As telas neutras vão do verde no topo ao rosa no fim. A transparência é o teto
+// em que texto de apoio e erro ainda passam 4,5:1 no ponto mais colorido (tokens.test.ts).
+export const ScreenGradients = {
+  neutral: { colors: [`${Palette.secondary.tint}99`, WHITE, WHITE, `${Palette.primary.tint}66`], locations: [0, 0.35, 0.65, 1] },
+  patient: { colors: [WHITE, `${Palette.secondary.tint}99`], locations: [0.25, 1] },
+  psychologist: { colors: [WHITE, `${Palette.primary.tint}66`], locations: [0.25, 1] },
 } as const;
 
 export const Spacing = {
@@ -59,7 +108,8 @@ export const Spacing = {
 
 export const MinTouchTarget = 44; // RNF-35
 
-export const Radius = { md: 16 } as const;
+// `lg` é a base arredondada do cabeçalho.
+export const Radius = { md: 16, lg: 24 } as const;
 
 // Largura máxima do conteúdo: em tablet ou na web o formulário não se estica pela tela toda.
 export const MaxContentWidth = 480;

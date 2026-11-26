@@ -13,6 +13,19 @@ Evidências datadas de execução. Cada arquivo guarda a saída bruta de uma rod
 | [Capturas do app](capturas-app/) | Login com erro, escolha de perfil, cadastro e catálogo no Expo web | Ver pasta |
 | [Resumo da validação](2026-10-23-resumo-validacao-sprint2.md) | Falhas encontradas, correções e limites da rodada | Ver o resumo |
 
+## Backend do fechamento (29/10/2026)
+
+| Evidência | O que prova | Resultado |
+|-----------|-------------|-----------|
+| [php artisan test](2026-10-29-php-artisan-test-fechamento.txt) | Suíte do backend naquela data | 220 testes passando, 3835 asserções |
+| [Newman, pastas 01 a 10](2026-10-29-newman-fechamento.txt) | Coleção do Postman contra a API real, com consentimento registrado pela API, sem fixture de aceite. O arquivo traz duas execuções | Pasta 01: 9 requisições, 15 asserções. Pastas 02 a 10: 110 requisições, 213 asserções. 0 falhas e exit 0 nas duas |
+
+## Fechamento (04/11/2026)
+
+| Evidência | O que prova | Resultado |
+|-----------|-------------|-----------|
+| [Roteiro cruzado, testes e APK](2026-11-04-roteiro-rnf-61.md) | RNF-61: tarefa e consulta criadas no painel web, vistas pelo paciente no app e conclusão de volta no painel, com o app no Expo web; testes automatizados no código final; APK gerado e conferido como arquivo | 18 de 18 verificações; 242 testes do backend (4080 asserções); 161 testes do app; APK não executado em aparelho |
+
 ## Histórico (não use como prova de sucesso)
 
 - [Newman A/B/C/D/E/F](2026-10-23-newman-blocos-a-b-c-d-e-f.txt): primeira rodada, incluiu a pasta B por engano e terminou com 55 falhas.
@@ -22,6 +35,6 @@ Evidências datadas de execução. Cada arquivo guarda a saída bruta de uma rod
 
 ## Limites declarados
 
-- O bloco B (consentimento) não foi implementado nem testado; a demonstração usa aceite preparado.
-- Tudo do app foi verificado no Expo web, não em celular físico, iOS ou Android.
+- O bloco B (consentimento) não estava implementado nem testado na Sprint 2 (23/10/2026), e aquela demonstração usou aceite preparado. A rodada de 04/11/2026 exercitou a regra no painel (tarefa sem consentimento volta ao formulário), mas registrar o consentimento do responsável pela tela segue não verificado.
+- Tudo do app foi executado no Expo web, não em celular físico, iOS ou Android. O APK de 04/11/2026 foi gerado e conferido como arquivo, sem execução em aparelho.
 - Provas de modelo no banco: [testes-do-modelo.sql](../diagramas/testes-do-modelo.sql).

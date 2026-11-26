@@ -56,9 +56,16 @@ class PatientDirectoryService
 
     public function patient(User $user, int $patientUserId): Bond
     {
-        return $this->psychologistBonds($user)->whereIn('status', ['active', 'ended'])
+        $bond = $this->psychologistBonds($user)->whereIn('status', ['active', 'ended'])
             ->whereHas('patient', fn (Builder $query) => $query->where('user_id', $patientUserId))
-            ->with('patient.user')->orderByRaw("CASE status WHEN 'active' THEN 0 ELSE 1 END")->orderByDesc('id')->firstOrFail();
+            ->with('patient.user')->orderByRaw("CASE status WHEN 'active' THEN 0 ELSE 1 END")->orderByDesc('id')->first();
+
+        // RF-17, CA-17.1 e CA-17.2: abrir o prontuario entra na trilha, e a tentativa negada tambem
+        app(AuditService::class)->record($user->id, 'read_patient_record', 'patient', $bond ? 'allowed' : 'denied', $bond?->patient_id, $bond?->patient_id);
+
+        abort_if($bond === null, 404);
+
+        return $bond;
     }
 
     private function psychologistBonds(User $user): Builder

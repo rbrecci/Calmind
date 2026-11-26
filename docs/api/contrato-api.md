@@ -444,7 +444,7 @@ Preferências de notificação (CA-16.2) e push ficam fora desta versão.
 
 ### 3.8.6 O que fica de fora do fechamento de 30/10
 
-Medicação (RF-27, RF-28, RF-29, RF-38, RF-43), análise por IA (RF-41, RF-42), consentimento de IA pela interface, auditoria de leitura (RF-17), prontuário como rota própria, preferências de notificação, push e chat em tempo real. Nenhuma frente os implementa. O texto e o ABNT registram o corte como evolução futura.
+Medicação (RF-27, RF-28, RF-29, RF-38, RF-39) e auditoria de leitura (RF-17) **entraram em 26/11/2026**, ver a seção 3.8.8. Seguem de fora: análise por IA (RF-41, RF-42) e consentimento de IA pela interface, prontuário como rota própria, preferências de notificação, push e chat em tempo real. O texto e o ABNT registram o corte como evolução futura.
 
 ### 3.8.7 Foto de perfil e capa (acrescentado em 25/11/2026)
 
@@ -461,6 +461,65 @@ O envio é `multipart/form-data` com o campo `image`: `jpeg`, `png` ou `webp`, a
 Quem pode ver no `GET`: a própria pessoa e o admin, sempre; foto e capa de psicólogo que está no catálogo (aprovado, com perfil publicado e conta ativa), qualquer usuário autenticado e ativo; psicólogo fora do catálogo (pendente, recusado, despublicado ou suspenso), só o paciente com vínculo pendente, ativo ou encerrado depois de aceito; foto e capa de paciente, só o psicólogo com vínculo pendente, ativo ou encerrado depois de aceito (`accepted_at` preenchido). A permissão é conferida antes da existência do arquivo: quem não pode ver recebe 403 mesmo quando não há imagem, para não revelar se ela existe.
 
 Os objetos que mostram uma pessoa ganham `avatar_url` e `cover_url`: o `/me`, cada item do catálogo, o `patient` da lista de pacientes, do detalhe do paciente e das solicitações, o `psychologist` do vínculo visto pelo paciente e as duas partes da consulta. O valor é a URL absoluta do `GET` acima, com `?v=` mudando a cada troca para o cache do app perceber, ou `null` sem imagem. Exemplo: `"avatar_url": "https://lettuce-impeach-arose.ngrok-free.dev/api/v1/users/7/avatar?v=6a4e7142d430"`. O `{id}` é sempre o `users.id`, nunca o `psychologists.id`.
+
+### 3.8.8 Medicação e auditoria (acrescentado em 26/11/2026)
+
+RF-27, RF-28, RF-29, RF-38, RF-39 e RF-17. **A plataforma não prescreve nem altera prescrição médica (DEC-10).** O psicólogo registra uma medicação já prescrita por um médico, o paciente confirma, recusa ou suspende, e só a medicação **ativa** gera lembrete.
+
+**Estados** (`status`): `awaiting_confirmation` (recém-registrada) → `active` (paciente confirmou) → `suspended` (paciente suspendeu), ou `awaiting_confirmation` → `refused` (paciente recusou com motivo). Não há volta: uma suspensão ou recusa só se resolve com um **novo registro** do psicólogo, que o paciente confirma de novo.
+
+**Objeto `medication`** (resposta de todos os endpoints abaixo):
+
+```json
+{
+  "id": 3, "bond_id": 12, "name": "Sertralina", "dosage": "50 mg",
+  "prescription_source": "Dr. Paulo, psiquiatra",
+  "status": "awaiting_confirmation",
+  "schedules": [{ "weekday": 1, "time_of_day": "08:00" }],
+  "confirmed_at": null, "refused_at": null, "refusal_reason": null,
+  "suspended_at": null, "suspended_by": null,
+  "created_at": "2026-11-26T10:00:00-03:00",
+  "notice": "A plataforma não prescreve nem altera prescrição médica."
+}
+```
+
+`weekday` vai de 0 (domingo) a 6 (sábado). `suspended_by` é `"patient"` quando o paciente suspendeu, senão `null`. O campo `notice` vem em toda resposta: o app **deve exibir esse aviso de forma permanente** em qualquer tela de medicação (CA-29.4, CA-38.3).
+
+**Psicólogo** (precisa de conta aprovada):
+
+| Método | Rota | O que faz | Erros |
+|--------|------|-----------|-------|
+| GET | `/psychologist/medications?bond_id=` | lista paginada (padrão da seção 2.5), com estado, motivo de recusa e data de suspensão | 404 se o `bond_id` não é do psicólogo |
+| POST | `/psychologist/medications` | registra a medicação em `awaiting_confirmation` e notifica o paciente (`medication.registered`). Corpo: `bond_id`, `name`, `dosage?`, `prescription_source` (obrigatório), `schedules[]` com `weekday` e `time_of_day` (`HH:MM`) | 422 sem origem ou sem horário; 404 vínculo de outro psicólogo; 409 vínculo encerrado; 403 paciente sem termo aceito |
+| GET | `/psychologist/medications/{id}` | um registro | 404 |
+| POST | `/psychologist/medications/{id}/reactivate` | **sempre recusa** (409). Existe para o app mostrar a mensagem correta: suspensão do paciente exige novo registro | 409 |
+
+**Paciente:**
+
+| Método | Rota | O que faz | Erros |
+|--------|------|-----------|-------|
+| GET | `/patient/medications` | lista paginada, a que aguarda confirmação vem primeiro | |
+| GET | `/patient/medications/{id}` | um registro | 404 |
+| POST | `/patient/medications/{id}/confirm` | passa para `active` | 409 se não aguarda confirmação |
+| POST | `/patient/medications/{id}/refuse` | corpo `{ "reason": "..." }`, motivo obrigatório. Passa para `refused` | 422 sem motivo; 409 se não aguarda confirmação |
+| POST | `/patient/medications/{id}/suspend` | só de `active` para `suspended`; grava data e autor | 409 se já suspensa ou não ativa |
+| GET | `/patient/medications/doses?from=Y-m-d&to=Y-m-d` | horários previstos das medicações **ativas** no período (padrão: hoje a 6 dias) | |
+| POST | `/patient/medications/{id}/intakes` | marca a tomada. Corpo `{ "scheduled_for": "2026-11-26 08:00" }`, que precisa ser um horário da agenda e não pode ser futuro. Repetir não duplica | 422 horário inválido; 409 medicação não ativa |
+
+Um item de `doses` traz `medication_id`, `name`, `dosage`, `scheduled_for`, `taken` e `marked_at`. **Horário sem marcação aparece como `taken: false`**: o sistema nunca presume que o paciente tomou (CA-28.4).
+
+**Lembretes (RF-28).** Não há agendador no servidor, igual aos outros lembretes (seção 3.8.5): quando o app abre `GET /notifications`, o servidor gera uma notificação `medication.reminder` (`resource_id` = id da medicação) para o último horário de hoje já vencido e sem marcação. É no máximo uma por horário. Medicação em `awaiting_confirmation`, `refused` ou `suspended` não gera lembrete.
+
+**Tipos de notificação novos** (campo `type`; `resource_id` é sempre o id da medicação): para o paciente, `medication.registered` e `medication.reminder`; para o psicólogo, `medication.confirmed`, `medication.refused` e `medication.suspended`. O texto de cada uma é do app.
+
+**Auditoria (RF-17).** Fica no servidor e não tem tela: cada leitura de medicação, de relato compartilhado e de prontuário (`GET /psychologist/patients/{id}`) pelo psicólogo grava quem, o quê, qual paciente e quando, inclusive a tentativa negada. A trilha só aceita inserção e nenhum endpoint a altera ou apaga. Não há endpoint para consultá-la.
+
+**O que o app precisa fazer (Caio):**
+
+1. **Psicólogo.** Formulário "Registrar medicação em uso" (nome, dose, origem da prescrição obrigatória, dias e horários) e lista por paciente com o estado de cada registro. Mostrar `refusal_reason` quando recusada, e `suspended_at` com o texto "suspensa pelo paciente" quando `suspended_by` for `patient`. Usar o vocabulário "registrar medicação em uso" e "lembrete de adesão", nunca "prescrever".
+2. **Paciente.** Cartão de medicação a confirmar com os botões Confirmar e Recusar (a recusa abre campo de motivo, obrigatório), lista das medicações com Suspender nas ativas, e a lista de `doses` do dia com botão "Tomei" que chama `intakes`.
+3. **Aviso permanente** do `notice` em todas as telas de medicação dos dois lados.
+4. **Notificações.** Os cinco tipos novos precisam de texto e de destino de toque (a tela da medicação).
 
 ---
 

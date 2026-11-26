@@ -65,6 +65,8 @@ class NotificationService
                 // tasks nao tem updated_at; o lembrete do prazo atual so pode ter nascido hoje
                 $due['task.due_soon'] = Task::whereIn('bond_id', $bondIds)->whereNull('completed_at')->whereNull('archived_at')
                     ->where('due_date', today()->toDateString())->pluck('id')->mapWithKeys(fn ($id) => [$id => today()]);
+                // RF-28: so medicacao ativa gera lembrete (CA-28.3); o marco e o ultimo horario de hoje ja vencido e sem marcacao
+                $due['medication.reminder'] = app(MedicationService::class)->dueReminders($bondIds);
             }
             foreach ($due as $type => $changedAt) {
                 $sent = Notification::where('user_id', $user->id)->where('type', $type)->whereIn('resource_id', $changedAt->keys())

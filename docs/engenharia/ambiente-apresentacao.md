@@ -50,7 +50,7 @@ O `.env` não vai para o repositório. Conferir, no notebook de apresentação:
 
 ### 4.1 Até quinta 03/12 (ensaio completo, na máquina e na rede da apresentação)
 
-- [ ] `php artisan test` passa (em 26/11: 332 testes). Antes, `php artisan optimize:clear`.
+- [ ] `php artisan test` passa (em 26/11: 335 testes). Antes, `php artisan optimize:clear`.
 - [ ] `php artisan ai:check --keys`: cada chave com cada modelo. Anotar quais contas funcionam.
 - [ ] Banco criado com `scripts/preparar-demo.sh` (migrations, massa fictícia e troca das senhas).
 - [ ] Ligar os três processos na ordem do guia: MySQL, `php artisan serve`, `ngrok http --url=... 8000`.
@@ -82,6 +82,6 @@ em tempo real.
 ## 6. Pendências do ambiente
 
 - **Coleção do Postman** atualizada em 26/11 (pastas 12 a 14), com o [Newman sem falhas](../testes/2026-11-26-newman-completo.txt) e a IA simulada. A chamada real ao Gemini se confere com `php artisan ai:check`.
-- **Massa de demonstração:** o `ClosingDemoSeeder` não cria medicação nem o aceite do termo de IA; hoje isso se faz pela API.
+- **Massa de demonstração:** desde 26/11 o `PresentationSeeder` cria a medicação, o aceite do termo de IA e uma análise confirmada ([o que ele traz](rodar-em-outra-maquina.md#massa-da-apresentação)).
 - **Lembretes sem agendador:** nascem quando o app abre as notificações (aceito para a demonstração).
 - **Onde será a apresentação** (rede, tomada, projetor) e qual celular roda o app: definir até 02/12.

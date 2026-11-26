@@ -122,6 +122,30 @@ sh scripts/preparar-demo.sh
 Troque `/c/xampp/php` pela pasta do PHP da máquina. O script só cria a massa quando o banco está
 vazio; rodar de novo num banco já semeado só aplica migration nova e confere as senhas.
 
+### Massa da apresentação
+
+O `PresentationSeeder` roda junto com o seed e deixa, no vínculo de Elizabeth Bennet com Hermione
+Granger:
+
+- **Quatro medicações**, uma em cada estado: Sertralina ativa (08:00, com a tomada de anteontem
+  esquecida e a de hoje em aberto), Melatonina aguardando confirmação, Escitalopram suspenso e
+  Fluoxetina recusada.
+- **O termo de IA aceito** pela paciente.
+- **Uma análise confirmada** sobre os três relatos compartilhados. O texto **não veio da IA**: começa
+  com `[EXEMPLO DE DEMONSTRAÇÃO, não gerado pela IA]` e não deve ser apresentado como se fosse.
+
+Num banco semeado antes de 26/11, rode em `backend/`:
+
+```bash
+php artisan db:seed --class=PresentationSeeder
+```
+
+Rodar de novo não duplica nada, e também não desfaz o que mudou no ensaio (medicação confirmada,
+aceite revogado). Para voltar ao estado de partida, recrie o banco.
+
+Depois das 08:00, abrir as notificações da paciente gera o lembrete da Sertralina. Enquanto o app não
+tiver a tela de medicação, ele aparece só como "Você tem uma nova notificação".
+
 ---
 
 ## 5. Todo dia: ligar o servidor
@@ -185,7 +209,7 @@ php artisan test
 ```
 
 O `optimize:clear` vem antes porque o `preparar-demo.sh` deixa a configuração em cache apontando
-para o banco `calmind`, e a suíte se recusa a rodar fora do `calmind_test`. Em 26/11 eram 332 testes
+para o banco `calmind`, e a suíte se recusa a rodar fora do `calmind_test`. Em 26/11 eram 335 testes
 no backend (em 25/11, 284 no app), todos passando.
 
 Depois de mudar rota no backend com o servidor ligado, rode `php artisan route:cache`, ou o servidor

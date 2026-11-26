@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
             ConsentTermSeeder::class,
             BondSeeder::class,
             ClosingDemoSeeder::class,
+            PresentationSeeder::class,
         ]);
     }
 }

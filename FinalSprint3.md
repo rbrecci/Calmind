@@ -24,7 +24,7 @@ Para ligar o sistema em outro computador, siga [rodar-em-outra-maquina.md](docs/
 
 **Funciona (API real, app testado no celular Android pelo 4G em 24/11):** login, cadastro, aprovação de psicólogo, catálogo, convite, vínculo, consentimento, relatos, tarefas, chat, agenda e notificações dentro do app.
 
-**Testes:** 332 do backend (26/11) e 284 do app (25/11 à noite) passando, com TypeScript e lint limpos. Roteiro web e app (RNF-61): 18 de 18, rodado antes do redesenho.
+**Testes:** 335 do backend (26/11) e 284 do app (25/11 à noite) passando, com TypeScript e lint limpos. Roteiro web e app (RNF-61): 18 de 18, rodado antes do redesenho.
 
 **Visual refeito entre 23 e 25/11:**
 - Ícone e splash com o logo.
@@ -62,7 +62,7 @@ As regras ficaram no [README do design system](app/src/design-system/README.md) 
 
 ## Backend em 26/11
 
-Todos os requisitos **Must** do backend estão implementados: medicação (RF-27, 28, 29, 38, 39), auditoria (RF-17), consentimento e análise por IA (RF-04, 41, 42) com rodízio de chaves e de modelos do Gemini, e o prontuário consolidado (RF-36). Suíte: 332 testes. As rotas novas estão nas seções 3.8.8, 3.8.9 e 3.8.10 do [contrato](docs/api/contrato-api.md), com a lista do que o app precisa fazer.
+Todos os requisitos **Must** do backend estão implementados: medicação (RF-27, 28, 29, 38, 39), auditoria (RF-17), consentimento e análise por IA (RF-04, 41, 42) com rodízio de chaves e de modelos do Gemini, e o prontuário consolidado (RF-36). Suíte: 335 testes. As rotas novas estão nas seções 3.8.8, 3.8.9 e 3.8.10 do [contrato](docs/api/contrato-api.md), com a lista do que o app precisa fazer.
 
 A decisão de hospedagem foi reavaliada e mantida (notebook com ngrok), com os planos A, B e C e o checklist do dia em [ambiente-apresentacao.md](docs/engenharia/ambiente-apresentacao.md). **A rede do SENAI bloqueia o ngrok**: na apresentação, o notebook usa o hotspot do celular.
 

@@ -5622,6 +5622,278 @@
           ]
         }
       ]
+    },
+    {
+      "name": "11 Foto de perfil e capa",
+      "description": "Foto de perfil (avatar) e capa (cover) de paciente e psicologo. Executar depois das pastas anteriores: usa os tokens da 01 e o vinculo da 04. A imagem fica no disco privado e so sai pela rota autenticada: a de psicologo e publica para usuario ativo; a de paciente so para ele, admin e psicologo com vinculo nao recusado.",
+      "item": [
+        {
+          "name": "Paciente envia foto de perfil",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/me/avatar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "me",
+                "avatar"
+              ]
+            },
+            "description": "Multipart, campo image: jpeg, png ou webp ate 2 MB. Devolve o usuario com avatar_url.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "docs/api/fixtures/avatar-teste.png"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.test('avatar_url absoluta com carimbo de troca', () => pm.expect(b.avatar_url).to.match(new RegExp('^https?://.+/api/v1/users/' + b.id + '/avatar\\\\?v=[0-9a-f]{12}$')));",
+                  "pm.test('nunca devolve o caminho interno', () => pm.expect(pm.response.text()).to.not.include('avatar_path'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Psicologo envia capa",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/me/cover",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "me",
+                "cover"
+              ]
+            },
+            "description": "Multipart, campo image. Trocar a capa apaga o arquivo anterior e muda o ?v= da URL.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "docs/api/fixtures/avatar-teste.png"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.test('cover_url absoluta com carimbo de troca', () => pm.expect(b.cover_url).to.match(new RegExp('^https?://.+/api/v1/users/' + b.id + '/cover\\\\?v=[0-9a-f]{12}$')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Psicologo vinculado ve a foto do paciente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{idUsuarioPaciente}}/avatar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{idUsuarioPaciente}}",
+                "avatar"
+              ]
+            },
+            "description": "Stream da imagem com o content-type certo e cache privado curto. Sem vinculo valido: 403."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('devolve imagem', () => pm.expect(pm.response.headers.get('Content-Type')).to.match(/^image\\/(png|jpeg|webp)/));",
+                  "pm.test('cache privado', () => pm.expect(pm.response.headers.get('Cache-Control')).to.include('private'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Paciente ve a capa do psicologo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{idUsuarioPsicologo}}/cover",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{idUsuarioPsicologo}}",
+                "cover"
+              ]
+            },
+            "description": "Foto e capa de psicologo sao visiveis para qualquer usuario autenticado e ativo."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('devolve imagem', () => pm.expect(pm.response.headers.get('Content-Type')).to.match(/^image\\/(png|jpeg|webp)/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Paciente remove a foto de perfil",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/me/avatar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "me",
+                "avatar"
+              ]
+            },
+            "description": "Apaga o arquivo e zera a URL. Remover o que ja nao existe tambem responde 200."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('avatar_url nula', () => pm.expect(pm.response.json().avatar_url).to.eql(null));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Psicologo remove a capa",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/me/cover",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "me",
+                "cover"
+              ]
+            },
+            "description": "Apaga o arquivo e zera a URL."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('cover_url nula', () => pm.expect(pm.response.json().cover_url).to.eql(null));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
   ],
   "variable": [

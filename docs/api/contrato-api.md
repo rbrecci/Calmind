@@ -90,6 +90,8 @@ Cada linha tem os testes correspondentes na coleção do Postman.
 | POST | `/auth/login` | RF-02 |
 | POST | `/auth/logout` | RNF-09 |
 | GET | `/me` | RF-05 |
+| POST, DELETE | `/me/avatar`, `/me/cover` | seção 3.8.7 |
+| GET | `/users/{id}/avatar`, `/users/{id}/cover` | seção 3.8.7 |
 
 ### 3.2 Consentimento
 
@@ -289,7 +291,7 @@ Cada registro (no POST e em cada item do GET) traz também o autor, para o psic�
 }
 ```
 
-`unread_messages` conta mensagens do psicólogo ainda sem `read_at` neste vínculo. É esta rota que dá ao app o `bond_id` para chat e agenda.
+`psychologist` traz também `approach`, `specialty`, `modality`, `region`, `bio`, `avatar_url` e `cover_url`, com os nomes do item do catálogo: com vínculo ativo o catálogo responde 403, e é daqui que o app tira o perfil do psicólogo. `unread_messages` conta mensagens do psicólogo ainda sem `read_at` neste vínculo. É esta rota que dá ao app o `bond_id` para chat e agenda.
 
 `GET /psychologist/bond-requests`, 200 `{data, meta}`. Só solicitações `pending` dirigidas ao psicólogo autenticado, mais antigas primeiro:
 
@@ -443,6 +445,22 @@ Preferências de notificação (CA-16.2) e push ficam fora desta versão.
 ### 3.8.6 O que fica de fora do fechamento de 30/10
 
 Medicação (RF-27, RF-28, RF-29, RF-38, RF-43), análise por IA (RF-41, RF-42), consentimento de IA pela interface, auditoria de leitura (RF-17), prontuário como rota própria, preferências de notificação, push e chat em tempo real. Nenhuma frente os implementa. O texto e o ABNT registram o corte como evolução futura.
+
+### 3.8.7 Foto de perfil e capa (acrescentado em 25/11/2026)
+
+Entrou depois do congelamento de 30/10, junto com o redesenho do app pelo protótipo de 25/11. Vale para paciente e psicólogo.
+
+| Método | Rota | Quem | Resposta |
+|--------|------|------|----------|
+| POST | `/me/avatar`, `/me/cover` | o próprio usuário | 200 com o objeto do `/me` atualizado; 422 na validação |
+| DELETE | `/me/avatar`, `/me/cover` | o próprio usuário | 200 com o objeto do `/me`, também quando não havia imagem |
+| GET | `/users/{id}/avatar`, `/users/{id}/cover` | ver abaixo | 200 com a imagem e `Cache-Control: private, max-age=300`; 401, 403 ou 404 |
+
+O envio é `multipart/form-data` com o campo `image`: `jpeg`, `png` ou `webp`, até 2048 KB. O servidor não redimensiona (o PHP do ambiente não tem GD): o app recorta e comprime antes de enviar. Trocar apaga o arquivo anterior. As imagens ficam no disco privado, nunca em pasta pública, porque a foto do paciente é dado pessoal (LGPD).
+
+Quem pode ver no `GET`: a própria pessoa e o admin, sempre; foto e capa de psicólogo, qualquer usuário autenticado e ativo, porque o perfil dele é público no catálogo; foto e capa de paciente, só o psicólogo com vínculo pendente, ativo ou encerrado depois de aceito (`accepted_at` preenchido). A permissão é conferida antes da existência do arquivo: quem não pode ver recebe 403 mesmo quando não há imagem, para não revelar se ela existe.
+
+Os objetos que mostram uma pessoa ganham `avatar_url` e `cover_url`: o `/me`, cada item do catálogo, o `patient` da lista de pacientes, do detalhe do paciente e das solicitações, o `psychologist` do vínculo visto pelo paciente e as duas partes da consulta. O valor é a URL absoluta do `GET` acima, com `?v=` mudando a cada troca para o cache do app perceber, ou `null` sem imagem. Exemplo: `"avatar_url": "https://lettuce-impeach-arose.ngrok-free.dev/api/v1/users/7/avatar?v=6a4e7142d430"`. O `{id}` é sempre o `users.id`, nunca o `psychologists.id`.
 
 ---
 

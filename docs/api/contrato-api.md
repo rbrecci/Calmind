@@ -444,7 +444,7 @@ Preferências de notificação (CA-16.2) e push ficam fora desta versão.
 
 ### 3.8.6 O que fica de fora do fechamento de 30/10
 
-Medicação (RF-27, RF-28, RF-29, RF-38, RF-39) e auditoria de leitura (RF-17) **entraram em 26/11/2026**, ver a seção 3.8.8. Seguem de fora: análise por IA (RF-41, RF-42) e consentimento de IA pela interface, prontuário como rota própria, preferências de notificação, push e chat em tempo real. O texto e o ABNT registram o corte como evolução futura.
+Medicação (RF-27, RF-28, RF-29, RF-38, RF-39) e auditoria de leitura (RF-17) **entraram em 26/11/2026**, ver a seção 3.8.8. A análise por IA (RF-41, RF-42) entrou no mesmo dia, ver a seção 3.8.9. Seguem de fora: a tela de consentimento de IA no app (o endpoint existe), prontuário como rota própria, preferências de notificação, push e chat em tempo real. O texto e o ABNT registram o corte como evolução futura.
 
 ### 3.8.7 Foto de perfil e capa (acrescentado em 25/11/2026)
 
@@ -520,6 +520,52 @@ Um item de `doses` traz `medication_id`, `name`, `dosage`, `scheduled_for`, `tak
 2. **Paciente.** Cartão de medicação a confirmar com os botões Confirmar e Recusar (a recusa abre campo de motivo, obrigatório), lista das medicações com Suspender nas ativas, e a lista de `doses` do dia com botão "Tomei" que chama `intakes`.
 3. **Aviso permanente** do `notice` em todas as telas de medicação dos dois lados.
 4. **Notificações.** Os cinco tipos novos precisam de texto e de destino de toque (a tela da medicação).
+
+### 3.8.9 Análise semanal por IA (acrescentado em 26/11/2026)
+
+RF-04, RF-41 e RF-42. **Só o psicólogo usa, e só quando pede.** Não existe rota de paciente: a sugestão de IA nunca aparece para ele (CA-42.3). Nenhum evento (relato novo, fim de semana, véspera de consulta) aciona a IA (CA-41.2).
+
+**Fluxo:** o psicólogo escolhe o paciente e um período → o servidor lê **só os relatos compartilhados** do período (a view `shared_reports`, nunca a tabela `reports`), manda ao serviço de IA sem nome, e-mail ou id do paciente e devolve uma **sugestão não confirmada** → o psicólogo **confirma** (com ou sem edição) ou **descarta**. Só o confirmado entra no prontuário.
+
+**Estados** (`status`): `generated` (sugestão ainda não revisada) → `confirmed` (incorporada ao prontuário). `discarded` não aparece em nenhuma consulta: descartar apaga o texto e o vínculo com os relatos usados.
+
+**Objeto `analysis`:**
+
+```json
+{
+  "id": 5, "bond_id": 12, "period_start": "2026-11-19", "period_end": "2026-11-26",
+  "status": "generated", "origin": "ai_suggestion",
+  "label": "Resumo baseado apenas nos relatos compartilhados pelo paciente. Sugestão gerada por IA: revise antes de confirmar.",
+  "summary": "- Ansiedade antes da prova.\n- Sono ruim na semana.",
+  "requested_at": "2026-11-26T10:00:00-03:00", "confirmed_at": null,
+  "confirmed_by_user_id": null, "versions": []
+}
+```
+
+Depois de confirmada, `summary` é a versão mais recente e `versions` traz todas, da mais antiga à mais nova (`id`, `body`, `edited_at`, `edited_by_user_id`). `confirmed_by_user_id` e `confirmed_at` registram quem e quando.
+
+| Método | Rota | O que faz | Erros |
+|--------|------|-----------|-------|
+| POST | `/psychologist/analyses` | corpo `bond_id`, `period_start`, `period_end` (`Y-m-d`, até 31 dias, não no futuro). Aciona a IA e devolve 201 com a sugestão em `generated` | 403 paciente sem consentimento de IA vigente (CA-04.2); 422 sem relatos compartilhados no período; 409 vínculo encerrado; 404 vínculo de outro psicólogo; **502 serviço de IA fora do ar, nada é salvo (CA-41.5)** |
+| GET | `/psychologist/analyses?bond_id=` | lista paginada das **confirmadas** | 404 `bond_id` alheio |
+| GET | `/psychologist/analyses/{id}` | uma análise, `generated` ou `confirmed` | 404 se descartada, expirada ou de outro psicólogo |
+| POST | `/psychologist/analyses/{id}/confirm` | corpo opcional `{ "body": "texto editado" }`. Passa para `confirmed` e grava a primeira versão | 404 se já confirmada, descartada ou expirada |
+| POST | `/psychologist/analyses/{id}/discard` | apaga o texto da sugestão | 404 |
+| PUT | `/psychologist/analyses/{id}` | corpo `{ "body": "..." }`, obrigatório. Só em `confirmed`: grava **nova versão** e preserva as anteriores (CA-42.4) | 404 se não confirmada; 422 sem texto |
+
+**A sugestão expira em 60 minutos.** Quem abandona a tela sem confirmar nem descartar perde a sugestão: depois desse prazo ela vira `discarded` sozinha, sem agendador (CA-42.2). O app deve avisar isso na tela de revisão e tratar o 404 como "sugestão expirada, gere de novo".
+
+**Consentimento de IA (RF-04).** As rotas já existem na seção 3.2: `GET /consent-terms/current?type=ai_analysis`, `POST /consent-acceptances` e `POST /consent-acceptances/{id}/revoke`. O termo de IA é separado do geral e só o paciente o aceita. Revogar vale na hora: a próxima análise é recusada com 403 (CA-04.3). **O app do paciente precisa de uma tela para ler, aceitar e revogar esse termo.** Hoje não existe essa tela, e sem ela nenhuma análise passa do 403.
+
+**O que o app precisa fazer (Caio):**
+
+1. **Paciente.** Tela "Uso de IA" com o texto do termo `ai_analysis`, botão Aceitar e, quando já aceito, botão Revogar. Explicar em linguagem simples que só os relatos marcados como compartilhados são resumidos, e só quando o psicólogo pede.
+2. **Psicólogo.** No prontuário do paciente, botão "Gerar resumo da semana" com seletor de período. Mostrar um carregamento (a chamada leva alguns segundos) e tratar 403 ("o paciente não autorizou a IA"), 422 ("sem relatos compartilhados no período") e 502 ("serviço indisponível, tente de novo").
+3. **Revisão.** Tela com o `label` sempre visível, o `summary` editável e dois botões: Confirmar (manda o texto editado em `body`) e Descartar. Aviso de que a sugestão some em 60 minutos.
+4. **Histórico.** Lista das análises confirmadas do paciente e, na análise, as versões anteriores quando houve edição.
+5. **Rótulo "gerado por IA"** em todo texto que veio de sugestão (`origin: "ai_suggestion"`), mesmo depois de confirmado e editado.
+
+**Configuração do servidor** (`backend/.env`, nunca no repositório): `AI_PROVIDER=gemini`, `GEMINI_API_KEY=<chave do Google AI Studio>` e `GEMINI_MODEL` (padrão `gemini-flash-latest`). Com `AI_PROVIDER=simulated` o fluxo roda sem chave e sem rede, e o texto vem marcado como `[SIMULADO, sem IA real]`. Para testar a ligação com o Gemini de verdade: `php artisan ai:check` (usa um relato fictício, nunca lê o banco) e `php artisan ai:check --models` para listar os modelos disponíveis.
 
 ---
 

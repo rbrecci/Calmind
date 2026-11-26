@@ -28,6 +28,19 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    // RF-41: servico de IA da analise semanal. Chave so no .env, nunca no repositorio.
+    'ai' => [
+        'provider' => env('AI_PROVIDER', 'gemini'),
+        'timeout' => (int) env('AI_TIMEOUT', 40),
+    ],
+
+    'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
+        // alias que acompanha o Flash vigente; fixe um id (ex.: o que o ai:check listar) se precisar de reproducao exata
+        'model' => env('GEMINI_MODEL', 'gemini-flash-latest'),
+        'base_url' => env('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

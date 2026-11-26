@@ -4,12 +4,21 @@
 export type Role = 'patient' | 'psychologist';
 export type UserRole = Role | 'admin';
 
-export type User = {
+// Foto e capa vêm como URL absoluta de rota autenticada (Bearer), ou null sem imagem. Opcionais
+// só para não quebrar objeto de teste antigo; o backend sempre envia.
+export type ProfileImages = { avatar_url?: string | null; cover_url?: string | null };
+
+export type User = ProfileImages & {
   id: number;
   name: string;
   email: string;
   role: UserRole;
 };
+
+export type ImageKind = 'avatar' | 'cover';
+
+// Imagem escolhida no aparelho. Na web o seletor entrega o `File`; no celular, só a URI local.
+export type ImageUpload = { uri: string; name: string; mimeType: string; file?: File };
 
 export type RegisterInput = {
   name: string;
@@ -43,7 +52,7 @@ export type Modality = 'online' | 'presencial' | 'ambos';
 
 // Contrato 3.4 (GET /catalog/psychologists). A lista de campos é fechada: sem preço, nota ou
 // ranking (RNF-21, RNF-23).
-export type CatalogPsychologist = {
+export type CatalogPsychologist = ProfileImages & {
   id: number;
   name: string;
   crp: string;
@@ -89,4 +98,6 @@ export type Api = {
   patientTasks(): Promise<PatientTaskList>; // GET /patient/tasks
   completePatientTask(id: number): Promise<PatientTask>; // POST /patient/tasks/{id}/complete
   catalogPsychologists(): Promise<CatalogList>; // GET /catalog/psychologists
+  uploadProfileImage(kind: ImageKind, image: ImageUpload): Promise<User>; // POST /me/{avatar|cover}, multipart
+  removeProfileImage(kind: ImageKind): Promise<User>; // DELETE /me/{avatar|cover}
 };

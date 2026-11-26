@@ -30,7 +30,7 @@ export default function Reports() {
     try { await patientApi.unpublishReport(selected.id); setSelected(null); await reload(); }
     catch (e) { setActionError(errorMessage(e)); } finally { setBusy(false); }
   }
-  return <PatientPage title="Meus relatos">
+  return <PatientPage>
     <Feedback loading={loading} error={error} retry={() => void reload()} initial={data === null} />
     {actionError ? <Text accessibilityRole="alert" color="error">{actionError}</Text> : null}
     {data?.active && !error ? <Button tone="patient" label="Novo relato" onPress={() => router.push('/new-report')} /> : null}

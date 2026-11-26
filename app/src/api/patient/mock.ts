@@ -7,8 +7,8 @@ import type {
 
 const CREATED = '2026-10-29T08:00:00-03:00';
 const PROFESSIONALS: CatalogPsychologist[] = [
-  { id: 2, name: 'Atticus Finch', crp: '06/000002', approach: 'Psicanálise', specialty: 'Luto e relacionamentos', modality: 'ambos', region: 'Campinas, SP', bio: 'Escuta para adultos em momentos de mudança.' },
-  { id: 1, name: 'Hermione Granger', crp: '06/000001', approach: 'Terapia cognitivo-comportamental', specialty: 'Ansiedade e estresse', modality: 'online', region: 'São Paulo, SP', bio: 'Atendo adolescentes e adultos com foco em ansiedade.' },
+  { id: 2, name: 'Atticus Finch', crp: '06/000002', approach: 'Psicanálise', specialty: 'Luto e relacionamentos', modality: 'ambos', region: 'Campinas, SP', bio: 'Escuta para adultos em momentos de mudança.', avatar_url: null, cover_url: null },
+  { id: 1, name: 'Hermione Granger', crp: '06/000001', approach: 'Terapia cognitivo-comportamental', specialty: 'Ansiedade e estresse', modality: 'online', region: 'São Paulo, SP', bio: 'Atendo adolescentes e adultos com foco em ansiedade.', avatar_url: null, cover_url: null },
 ];
 
 function now(): string {
@@ -58,7 +58,7 @@ function seed(scenario: PatientScenario, userId: number) {
   const bonds: PatientBond[] = hasBond ? [{
     id: 8, status: active ? 'active' : 'pending', origin: 'catalog', requested_at: CREATED,
     responded_at: active ? CREATED : null, accepted_at: active ? CREATED : null, ended_at: null,
-    psychologist: { id: 1, name: 'Hermione Granger', crp: '06/000001' }, unread_messages: active ? 1 : 0,
+    psychologist: { ...find(PROFESSIONALS, 1) }, unread_messages: active ? 1 : 0,
   }] : [];
   const reports: PatientReport[] = active ? [
     { id: 2, body: 'Hoje consegui reservar um tempo para descansar.', visibility: 'shared', unpublished_at: null, created_at: CREATED, used_in_analysis: false },
@@ -102,7 +102,7 @@ export function createPatientMock({ scenario = 'com-vinculo' }: { scenario?: Pat
     const bond: PatientBond = {
       id: Math.max(8, ...s.bonds.map((b) => b.id)) + 1, status: invitation ? 'active' : 'pending',
       origin: invitation ? 'invitation' : 'catalog', requested_at: now(), responded_at: invitation ? now() : null,
-      accepted_at: invitation ? now() : null, ended_at: null, psychologist: { id: professional.id, name: professional.name, crp: professional.crp }, unread_messages: 0,
+      accepted_at: invitation ? now() : null, ended_at: null, psychologist: { ...professional }, unread_messages: 0,
     };
     s.bonds.unshift(bond);
     return bondResult(bond, s.userId);

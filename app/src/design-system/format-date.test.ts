@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
-import { formatDate, formatDateTime, formatShortDate, formatTaskDate, formatTime, formatWeekdayDate } from './format-date.ts';
+import { formatDate, formatDateTime, formatDayHeading, formatShortDate, formatTaskDate, formatTime, formatWeekdayDate, taskDeadlineTag } from './format-date.ts';
 
 // As datas nascem de componentes locais, e o ISO é gerado a partir delas: assim o teste passa
 // em qualquer fuso, porque a formatação também lê a hora local do aparelho.
@@ -121,5 +121,56 @@ describe('formatTaskDate', () => {
 
   test('concluída sem data de conclusão não mostra linha', () => {
     assert.equal(formatTaskDate({ status: 'completed', due_date: '2026-11-24', completed_at: null }, NOW), null);
+  });
+});
+
+describe('formatDayHeading', () => {
+  // Separador de dia da conversa: "Segunda, 23/11", com o dia da semana por extenso.
+  test('mostra o dia da semana por extenso, dia e mês', () => {
+    assert.equal(formatDayHeading(localIso(2026, 11, 23, 9, 30), NOW), 'Segunda, 23/11');
+    assert.equal(formatDayHeading(localIso(2026, 11, 28, 21), NOW), 'Sábado, 28/11');
+  });
+
+  test('usa o nome de cada dia da semana', () => {
+    const week = [22, 23, 24, 25, 26, 27, 28].map((day) => formatDayHeading(localIso(2026, 11, day, 12), NOW).split(',')[0]);
+    assert.deepEqual(week, ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']);
+  });
+
+  test('inclui o ano só quando ele não é o atual', () => {
+    assert.equal(formatDayHeading(localIso(2025, 12, 31, 23, 59), NOW), 'Quarta, 31/12/2025');
+  });
+});
+
+describe('taskDeadlineTag', () => {
+  const pending = { status: 'pending', due_date: null, completed_at: null } as const;
+
+  test('prazo hoje é negativo e diz "hoje", em qualquer hora do dia', () => {
+    assert.deepEqual(taskDeadlineTag({ ...pending, due_date: '2026-11-23' }, NOW), { kind: 'negative', label: 'hoje' });
+    assert.deepEqual(taskDeadlineTag({ ...pending, due_date: '2026-11-23' }, new Date(2026, 10, 23, 23, 59)), { kind: 'negative', label: 'hoje' });
+    assert.deepEqual(taskDeadlineTag({ ...pending, due_date: '2026-11-23' }, new Date(2026, 10, 23, 0, 1)), { kind: 'negative', label: 'hoje' });
+  });
+
+  test('prazo que já passou é negativo e diz "vencida"', () => {
+    assert.deepEqual(taskDeadlineTag({ ...pending, due_date: '2026-11-22' }, NOW), { kind: 'negative', label: 'vencida' });
+    assert.deepEqual(taskDeadlineTag({ ...pending, due_date: '2025-12-31' }, NOW), { kind: 'negative', label: 'vencida' });
+  });
+
+  test('prazo futuro é neutro e diz "até" com a data curta', () => {
+    assert.deepEqual(taskDeadlineTag({ ...pending, due_date: '2026-11-24' }, NOW), { kind: 'neutral', label: 'até 24/11' });
+    assert.deepEqual(taskDeadlineTag({ ...pending, due_date: '2027-01-04' }, NOW), { kind: 'neutral', label: 'até 04/01/2027' });
+  });
+
+  test('pendente sem prazo continua dizendo isso, em etiqueta neutra', () => {
+    assert.deepEqual(taskDeadlineTag(pending, NOW), { kind: 'neutral', label: 'sem prazo' });
+  });
+
+  // Concluída não está vencida, mesmo com o prazo no passado: a etiqueta é o dia em que foi feita.
+  test('concluída é neutra e mostra o dia em que foi feita', () => {
+    const done = { status: 'completed', due_date: '2026-11-10', completed_at: localIso(2026, 11, 16, 21) } as const;
+    assert.deepEqual(taskDeadlineTag(done, NOW), { kind: 'neutral', label: 'feita 16/11' });
+  });
+
+  test('concluída sem data de conclusão diz só "feita"', () => {
+    assert.deepEqual(taskDeadlineTag({ status: 'completed', due_date: null, completed_at: null }, NOW), { kind: 'neutral', label: 'feita' });
   });
 });

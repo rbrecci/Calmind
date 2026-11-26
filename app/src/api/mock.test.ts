@@ -196,3 +196,25 @@ describe('mock da API', () => {
     });
   });
 });
+
+describe('mock da API: foto e capa', () => {
+  beforeEach(() => setAuthToken(null));
+
+  // Sem servidor de arquivo, a URI local escolhida faz as vezes da URL, e o /me passa a mostrá-la.
+  test('trocar e remover a foto muda o que o /me devolve', async () => {
+    const api = createMockApi();
+    setAuthToken((await api.login(PATIENT)).token);
+
+    const updated = await api.uploadProfileImage('avatar', { uri: 'file:///foto.jpg', name: 'foto.jpg', mimeType: 'image/jpeg' });
+    assert.equal(updated.avatar_url, 'file:///foto.jpg');
+    assert.equal((await api.me()).avatar_url, 'file:///foto.jpg');
+
+    assert.equal((await api.removeProfileImage('avatar')).avatar_url, null);
+    assert.equal((await api.me()).cover_url, null);
+  });
+
+  test('sem sessão, a troca responde 401 como a API', async () => {
+    const error = await rejection(createMockApi().removeProfileImage('cover'));
+    assert.equal(error.status, 401);
+  });
+});

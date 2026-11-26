@@ -248,29 +248,42 @@ describe('patientSummaryView', () => {
     unread_messages: 0, overdue_tasks: 0, next_appointment_at: null,
   };
 
-  test('contador zerado não aparece na tela nem no leitor de tela', () => {
+  // Função, e não constante: outro teste deste arquivo troca o fuso, e o ISO precisa nascer no fuso da hora do teste.
+  const thursday = () => new Date(2026, 10, 26, 15, 0).toISOString();
+
+  test('contador zerado não vira etiqueta nem entra no leitor de tela', () => {
     const view = patientSummaryView(summary, NOW);
-    assert.equal(view.badge, undefined);
-    assert.equal(view.detail, undefined);
-    assert.equal(view.description, 'Sem consulta marcada');
-    assert.equal(view.accessibilityLabel, 'Luna Lovegood, Sem consulta marcada');
+    assert.equal(view.tag, null);
+    assert.equal(view.summary, 'sem consulta marcada');
+    assert.equal(view.accessibilityLabel, 'Luna Lovegood, sem consulta marcada');
   });
 
-  test('próxima consulta em data curta, sem o ano atual', () => {
-    const next = new Date(2026, 10, 26, 15, 0).toISOString();
-    assert.equal(patientSummaryView({ ...summary, next_appointment_at: next }, NOW).description, 'Próxima consulta qui, 26/11 às 15:00');
+  test('consulta nos próximos dias leva só o dia da semana e a hora', () => {
+    assert.equal(patientSummaryView({ ...summary, next_appointment_at: thursday() }, NOW).summary, 'consulta qui, 15:00');
+    // Hoje também é "nos próximos dias".
+    const today = new Date(2026, 10, 24, 18, 30).toISOString();
+    assert.equal(patientSummaryView({ ...summary, next_appointment_at: today }, NOW).summary, 'consulta ter, 18:30');
   });
 
-  test('tarefa vencida vira texto curto no singular e no plural', () => {
-    assert.equal(patientSummaryView({ ...summary, overdue_tasks: 1 }, NOW).detail, '1 tarefa vencida');
-    assert.equal(patientSummaryView({ ...summary, overdue_tasks: 2 }, NOW).detail, '2 tarefas vencidas');
+  test('consulta a partir de uma semana leva a data, para o dia da semana não confundir', () => {
+    const later = new Date(2026, 11, 1, 9, 0).toISOString();
+    assert.equal(patientSummaryView({ ...summary, next_appointment_at: later }, NOW).summary, 'consulta ter, 01/12 às 09:00');
   });
 
-  test('mensagem não lida vira contador, e o nome do item diz tudo', () => {
-    const next = new Date(2026, 10, 26, 15, 0).toISOString();
-    const view = patientSummaryView({ ...summary, unread_messages: 3, overdue_tasks: 1, next_appointment_at: next }, NOW);
-    assert.equal(view.badge, 3);
-    assert.equal(view.accessibilityLabel, 'Luna Lovegood, 3 mensagens não lidas, 1 tarefa vencida, Próxima consulta qui, 26/11 às 15:00');
-    assert.match(patientSummaryView({ ...summary, unread_messages: 1 }, NOW).accessibilityLabel, /, 1 mensagem não lida,/);
+  test('mensagem não lida vira etiqueta de atenção, no singular e no plural', () => {
+    assert.deepEqual(patientSummaryView({ ...summary, unread_messages: 1 }, NOW).tag, { kind: 'attention', label: '1 não lida' });
+    assert.deepEqual(patientSummaryView({ ...summary, unread_messages: 2 }, NOW).tag, { kind: 'attention', label: '2 não lidas' });
+  });
+
+  test('tarefa vencida sem mensagem vira etiqueta negativa', () => {
+    assert.deepEqual(patientSummaryView({ ...summary, overdue_tasks: 1 }, NOW).tag, { kind: 'negative', label: '1 tarefa vencida' });
+    assert.deepEqual(patientSummaryView({ ...summary, overdue_tasks: 2 }, NOW).tag, { kind: 'negative', label: '2 tarefas vencidas' });
+  });
+
+  test('com as duas, a mensagem fica na etiqueta e a tarefa vencida desce para o resumo', () => {
+    const view = patientSummaryView({ ...summary, unread_messages: 3, overdue_tasks: 1, next_appointment_at: thursday() }, NOW);
+    assert.deepEqual(view.tag, { kind: 'attention', label: '3 não lidas' });
+    assert.equal(view.summary, '1 tarefa vencida · consulta qui, 15:00');
+    assert.equal(view.accessibilityLabel, 'Luna Lovegood, 3 mensagens não lidas, 1 tarefa vencida, consulta qui, 15:00');
   });
 });

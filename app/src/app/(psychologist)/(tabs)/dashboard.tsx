@@ -1,7 +1,9 @@
 import { useCallback, useState } from 'react';
 import { useFocusEffect, useRouter } from 'expo-router';
+import { imageHeaders } from '@/api';
 import { psychologistApi } from '@/api/psychologist';
-import { EmptyState, formatDate, ListItem, Loading, Screen, Text } from '@/design-system';
+import type { PatientSummary } from '@/api/psychologist/types';
+import { Button, EmptyState, formatShortDate, ListItem, Loading, PersonCard, Screen, Text } from '@/design-system';
 import { usePsychologistAccess } from '@/psychologist/access';
 import { patientSummaryView } from '@/psychologist/domain';
 import { collectPages } from '@/psychologist/resource';
@@ -21,29 +23,31 @@ export default function PsychologistHome() {
   });
   const reload = state.reload;
   useFocusEffect(useCallback(() => { void reload(); }, [reload]));
-  return <Screen scroll><Text variant="h3">Início</Text>
+  const headers = imageHeaders();
+  const openRecord = (item: PatientSummary) => router.push(`/(psychologist)/patients/${item.patient.id}`);
+  // Gerar convite é a ação principal da aba e fica fixo embaixo, acima da barra de abas.
+  return <Screen scroll footer={<Button tone="psychologist" label="Gerar convite para novo paciente"
+    onPress={() => router.push('/(psychologist)/invitations')} />}>
     {profile?.profile_published_at === null ? <Card><Text>Seu perfil ainda não foi publicado no catálogo.</Text>
       <ListItem tone="psychologist" title="Editar e publicar perfil" onPress={() => router.push('/(psychologist)/(tabs)/profile')} /></Card> : null}
-    <ListItem tone="psychologist" title="Gerar convite" onPress={() => router.push('/(psychologist)/invitations')} />
     {state.loading && !state.data ? <Loading /> : null}
     <ErrorNotice error={state.error} retry={state.reload} />
     {state.data ? <>
-      <ListItem tone="psychologist" title="Solicitações pendentes" badge={state.data.pending || undefined}
-        onPress={() => router.push('/(psychologist)/requests')} />
-      <Text variant="h4">Pacientes ativos</Text>
+      {/* Só com pedido esperando resposta (R2). */}
+      {state.data.pending ? <ListItem tone="psychologist" title="Solicitações pendentes" badge={state.data.pending}
+        onPress={() => router.push('/(psychologist)/requests')} /> : null}
       {!state.data.active.length ? <EmptyState illustration="pacientes" title="Você ainda não tem pacientes" description="Gere um convite para começar." /> : null}
       {state.data.active.map((item) => {
         const view = patientSummaryView(item);
-        return <ListItem key={item.bond_id} tone="psychologist" title={item.patient.name} description={view.description}
-          detail={view.detail} badge={view.badge} accessibilityLabel={view.accessibilityLabel}
-          onPress={() => router.push(`/(psychologist)/patients/${item.patient.id}`)} />;
+        return <PersonCard key={item.bond_id} tone="psychologist" name={item.patient.name} avatarUri={item.patient.avatar_url} headers={headers}
+          tag={view.tag} description={view.summary} accessibilityLabel={view.accessibilityLabel} onPress={() => openRecord(item)} />;
       })}
-      <Action variant="secondary" label={showEnded ? 'Recolher vínculos encerrados' : 'Mostrar vínculos encerrados'} onPress={() => setShowEnded(!showEnded)} />
-      {showEnded ? <><Text>Vínculos encerrados, somente leitura.</Text>
-        {!state.data.ended.length ? <Text>Nenhum vínculo encerrado.</Text> : null}
-        {state.data.ended.map((item) => <ListItem key={item.bond_id} tone="psychologist" title={item.patient.name}
-          description={item.ended_at ? `Encerrado em ${formatDate(item.ended_at)}` : undefined}
-          onPress={() => router.push(`/(psychologist)/patients/${item.patient.id}`)} />)}</> : null}
+      {state.data.ended.length ? <Action variant="secondary" label={showEnded ? 'Recolher vínculos encerrados' : 'Mostrar vínculos encerrados'}
+        onPress={() => setShowEnded(!showEnded)} /> : null}
+      {showEnded ? state.data.ended.map((item) => <PersonCard key={item.bond_id} tone="psychologist" name={item.patient.name}
+        avatarUri={item.patient.avatar_url} headers={headers}
+        tag={{ kind: 'neutral', label: 'encerrado' }} description={item.ended_at ? `em ${formatShortDate(item.ended_at)}` : undefined}
+        onPress={() => openRecord(item)} />) : null}
     </> : null}
   </Screen>;
 }

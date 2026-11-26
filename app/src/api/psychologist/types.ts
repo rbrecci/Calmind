@@ -1,6 +1,8 @@
+import type { ProfileImages } from '../types.ts';
+
 export type PageParams = { page?: number; per_page?: number };
 export type Page<T> = { data: T[]; meta: { total: number; page: number; per_page: number } };
-export type Person = { id: number; name: string };
+export type Person = { id: number; name: string } & ProfileImages;
 export type Profile = {
   id: number | null;
   crp: string | null;

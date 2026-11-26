@@ -1,6 +1,7 @@
 import { ApiError } from '../api/types.ts';
 import type { Appointment, Message, PatientDetail, PatientSummary, Profile, SharedReport, Task } from '../api/psychologist/types.ts';
-import { formatDateTime } from '../design-system/format-date.ts';
+import { formatDateTime, formatTime, formatWeekdayDate } from '../design-system/format-date.ts';
+import type { StatusTagKind } from '../design-system/status-kind.ts';
 
 export function registrationGate(status: Profile['approval_status']): 'dashboard' | 'pending' | 'registration' {
   if (status === 'approved') return 'dashboard';
@@ -92,20 +93,31 @@ export function composeRecord(
   };
 }
 
-// Item de paciente no início. Contador zerado não aparece (nem para o leitor de tela): a
-// ausência já diz "nada pendente". As não lidas vão no contador e entram por extenso no nome.
-export function patientSummaryView(item: PatientSummary, now = new Date()) {
-  const description = item.next_appointment_at ? `Próxima consulta ${formatDateTime(item.next_appointment_at, now)}` : 'Sem consulta marcada';
-  const overdue = item.overdue_tasks;
-  const detail = overdue > 0 ? `${overdue} ${overdue === 1 ? 'tarefa vencida' : 'tarefas vencidas'}` : undefined;
+// Cartão do paciente no início. A etiqueta mostra só o mais urgente: mensagem não lida, porque é
+// alguém esperando resposta, e depois tarefa vencida. Com as duas, a vencida desce para o resumo,
+// para não sumir. Contador zerado não aparece, nem para o leitor de tela (R2).
+export function patientSummaryView(item: PatientSummary, now = new Date()): {
+  tag: { kind: StatusTagKind; label: string } | null; summary: string; accessibilityLabel: string;
+} {
   const unread = item.unread_messages;
+  const overdue = item.overdue_tasks;
+  const overdueText = overdue > 0 ? `${overdue} ${overdue === 1 ? 'tarefa vencida' : 'tarefas vencidas'}` : null;
   const unreadText = unread > 0 ? `${unread} ${unread === 1 ? 'mensagem não lida' : 'mensagens não lidas'}` : null;
-  return {
-    description,
-    detail,
-    badge: unread > 0 ? unread : undefined,
-    accessibilityLabel: [item.patient.name, unreadText, detail, description].filter(Boolean).join(', '),
-  };
+  const tag = unread > 0 ? { kind: 'attention' as const, label: `${unread} ${unread === 1 ? 'não lida' : 'não lidas'}` }
+    : overdueText ? { kind: 'negative' as const, label: overdueText } : null;
+  const appointment = item.next_appointment_at ? `consulta ${appointmentWhen(item.next_appointment_at, now)}` : 'sem consulta marcada';
+  const summary = [unread > 0 ? overdueText : null, appointment].filter(Boolean).join(' · ');
+  return { tag, summary, accessibilityLabel: [item.patient.name, unreadText, overdueText, appointment].filter(Boolean).join(', ') };
+}
+
+// Na semana que vem pela frente, o dia da semana basta ("qui, 15:00"). Daí em diante ele se
+// repete, e a data entra para não confundir.
+function appointmentWhen(iso: string, now: Date): string {
+  const date = new Date(iso);
+  const days = Math.round((new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
+    - new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()) / 86_400_000);
+  if (days >= 0 && days < 7) return `${formatWeekdayDate(iso, now).split(',')[0]}, ${formatTime(iso)}`;
+  return formatDateTime(iso, now);
 }
 
 export function notificationText(type: string): string {

@@ -1,33 +1,33 @@
 import { usePathname } from 'expo-router';
 import { Tabs } from 'expo-router/js-tabs';
-import { SymbolView, type AndroidSymbol, type SFSymbol } from 'expo-symbols';
 import { useEffect, useState } from 'react';
 import type { ColorValue } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { patientApi } from '@/api/patient';
-import { Colors, formatUnread, RoleColors, tabBadge, Typography } from '@/design-system';
+import { formatUnread, Icon, TabBar, tabBadge, type IconName } from '@/design-system';
+import { SideHeader } from '@/navigation/side-header';
 import { unreadMessages } from '@/patient/bonds';
 import { loadPatientPages } from '@/patient/load-pages';
 
 // As abas abrem pelo início, e é para ele que o voltar do Android leva antes de fechar o app.
 export const unstable_settings = { anchor: 'home' };
 
-// No Android e na web o expo-symbols desenha o ícone com a fonte Material Symbols.
-function tabIcon({ ios, android }: { ios: SFSymbol; android: AndroidSymbol }) {
+// O mesmo ícone vai na aba e no cabeçalho da tela dela.
+const TABS = {
+  home: { title: 'Início', icon: { ios: 'house', android: 'home' } },
+  reports: { title: 'Relatos', icon: { ios: 'list.bullet.rectangle', android: 'article' } },
+  tasks: { title: 'Tarefas', icon: { ios: 'checklist', android: 'checklist' } },
+  chat: { title: 'Conversa', icon: { ios: 'bubble.left', android: 'chat_bubble' } },
+} satisfies Record<string, { title: string; icon: IconName }>;
+
+function tabIcon(name: IconName) {
   return function TabIcon({ color, size }: { color: ColorValue; size: number }) {
-    return <SymbolView name={{ ios, android, web: android }} tintColor={color} size={size} />;
+    return <Icon name={name} color={color} size={size} />;
   };
 }
 
-// A altura padrão da barra é 49, e o rótulo em 14 (lineHeight 21) perde a metade de baixo:
-// 5 de respiro + ícone 28 + rótulo 21 + 5 dão 59. Com altura própria a barra não soma a área
-// segura sozinha, só a usa de recuo por dentro, então ela entra na conta aqui.
-const TAB_BAR_HEIGHT = 64;
-
 export default function PatientTabsLayout() {
   const pathname = usePathname();
-  const insets = useSafeAreaInsets();
   const [unread, setUnread] = useState<number>();
   // Busca de novo a cada troca de tela, inclusive ao voltar de uma tela empilhada: assim o
   // contador acompanha o que foi lido sem canal próprio. Falha só mantém o último número,
@@ -37,26 +37,19 @@ export default function PatientTabsLayout() {
     loadPatientPages(patientApi.bonds).then((bonds) => { if (current) setUnread(unreadMessages(bonds)); }, () => {});
     return () => { current = false; };
   }, [pathname]);
-  // A aba ativa ganha o fundo verde do lado com texto Dark; verde sobre branco reprovaria o
-  // contraste do rótulo (RNF-35). O rótulo fica no degrau small, que é o piso de 14 (RNF-34).
-  return <Tabs screenOptions={{
-    headerShown: false,
-    tabBarActiveBackgroundColor: RoleColors.patient.accent,
-    tabBarActiveTintColor: RoleColors.patient.onAccent,
-    tabBarInactiveTintColor: Colors.textSecondary,
-    tabBarLabelStyle: { fontFamily: Typography.small.fontFamily, fontSize: Typography.small.fontSize, lineHeight: Typography.small.lineHeight },
-    tabBarStyle: { backgroundColor: Colors.background, borderTopColor: Colors.border, height: TAB_BAR_HEIGHT + insets.bottom },
-    // O contador padrão é vermelho com texto branco, que reprova o contraste; vai na cor do lado.
-    tabBarBadgeStyle: { backgroundColor: RoleColors.patient.accent, color: RoleColors.patient.onAccent },
-  }}>
-    <Tabs.Screen name="home" options={{ title: 'Início', tabBarAccessibilityLabel: 'Início', tabBarIcon: tabIcon({ ios: 'house.fill', android: 'home' }) }} />
+  return <Tabs tabBar={(props) => <TabBar {...props} tone="patient" />} screenOptions={({ route }) => ({
+    // O início tem o bloco de destaque colado ao cabeçalho, que ali fica com a base reta.
+    header: ({ options }) => <SideHeader tone="patient" title={options.title ?? ''} icon={TABS[route.name as keyof typeof TABS]?.icon} actions
+      flush={route.name === 'home'} />,
+  })}>
+    <Tabs.Screen name="home" options={{ title: TABS.home.title, tabBarAccessibilityLabel: TABS.home.title, tabBarIcon: tabIcon(TABS.home.icon) }} />
+    <Tabs.Screen name="reports" options={{ title: TABS.reports.title, tabBarAccessibilityLabel: TABS.reports.title, tabBarIcon: tabIcon(TABS.reports.icon) }} />
+    <Tabs.Screen name="tasks" options={{ title: TABS.tasks.title, tabBarAccessibilityLabel: TABS.tasks.title, tabBarIcon: tabIcon(TABS.tasks.icon) }} />
+    {/* A conversa troca o título do cabeçalho pelo nome da profissional; o rótulo da aba fica fixo. */}
     <Tabs.Screen name="chat" options={{
-      title: 'Conversa', tabBarIcon: tabIcon({ ios: 'bubble.left.and.bubble.right.fill', android: 'chat' }),
+      title: TABS.chat.title, tabBarLabel: TABS.chat.title, tabBarIcon: tabIcon(TABS.chat.icon),
       tabBarBadge: tabBadge(unread, pathname === '/chat'),
       tabBarAccessibilityLabel: unread ? `Conversa, ${formatUnread(unread)}` : 'Conversa',
     }} />
-    <Tabs.Screen name="tasks" options={{ title: 'Tarefas', tabBarAccessibilityLabel: 'Tarefas', tabBarIcon: tabIcon({ ios: 'checklist', android: 'checklist' }) }} />
-    <Tabs.Screen name="agenda" options={{ title: 'Agenda', tabBarAccessibilityLabel: 'Agenda', tabBarIcon: tabIcon({ ios: 'calendar', android: 'calendar_month' }) }} />
-    <Tabs.Screen name="reports" options={{ title: 'Relatos', tabBarAccessibilityLabel: 'Relatos', tabBarIcon: tabIcon({ ios: 'square.and.pencil', android: 'edit_note' }) }} />
   </Tabs>;
 }

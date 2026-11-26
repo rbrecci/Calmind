@@ -10,3 +10,8 @@ export function orderTasks(tasks: PatientTask[]): PatientTask[] {
   return [...tasks].sort((a, b) => Number(a.status === 'completed') - Number(b.status === 'completed')
     || (a.due_date ?? '').localeCompare(b.due_date ?? '') || a.id - b.id);
 }
+
+// Primeiro nome da saudação do início. Sem nome, a tela diz só "Olá!", sem vírgula solta.
+export function firstName(name: string | null): string | null {
+  return name?.trim().split(/\s+/)[0] || null;
+}

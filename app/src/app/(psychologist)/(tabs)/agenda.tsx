@@ -162,7 +162,7 @@ export default function Agenda() {
     </>;
   }
 
-  return <Page title="Agenda">
+  return <Page>
     {resource.loading && !resource.data ? <Loading /> : null}
     <ErrorNotice error={resource.error} retry={resource.reload} />
     <ErrorNotice error={cancelError} />

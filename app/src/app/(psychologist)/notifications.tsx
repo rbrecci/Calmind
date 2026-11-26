@@ -11,7 +11,7 @@ import { Action, ErrorNotice, Page, useResource } from '@/psychologist/ui';
 export default function Notifications() {
   const router = useRouter();
   const list = useResource(() => collectPages((page) => psychologistApi.notifications({ page, per_page: 50 })));
-  // A aba fica montada entre uma visita e outra: sem recarregar no foco, a lista envelhece.
+  // Ao voltar da conversa ou das solicitações, a lista recarrega para mostrar o que foi lido.
   const reload = list.reload;
   useFocusEffect(useCallback(() => { void reload(); }, [reload]));
   const [busy, setBusy] = useState(false);
@@ -31,7 +31,7 @@ export default function Notifications() {
     try { await psychologistApi.readAllNotifications(); await list.reload(); }
     catch (cause) { setError(cause); } finally { setBusy(false); }
   }
-  return <Page title="Notificações">
+  return <Page>
     {list.data?.some((item) => !item.read_at) ? <Action variant="secondary" label="Marcar todas como lidas" loading={busy} onPress={() => { void readAll(); }} /> : null}
     {list.loading && !list.data ? <Loading /> : null}
     <ErrorNotice error={list.error} retry={list.reload} /><ErrorNotice error={error} />

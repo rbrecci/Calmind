@@ -1,10 +1,11 @@
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { useCallback, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Tabs } from 'expo-router/js-tabs';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { View } from 'react-native';
 
 import { patientApi } from '@/api/patient';
 import type { Message } from '@/api/patient/types';
-import { Appear, Button, Colors, EmptyState, formatDate, formatDateTime, formatUnread, ListItem, MessageComposer, Radius, RoleColors, SkipInitialAppear, Spacing, Text } from '@/design-system';
+import { Button, EmptyState, formatDate, formatDateTime, formatTime, formatUnread, groupMessagesByDay, ListItem, MessageBubble, MessageComposer, MessageDay, SkipInitialAppear, Spacing, Text } from '@/design-system';
 import { bondsWithConversation, selectBond } from '@/patient/bonds';
 import { deliverMessage, lastOwnMessageId, mergeMessages, watchConversation } from '@/patient/conversation';
 import { loadPatientPages } from '@/patient/load-pages';
@@ -18,6 +19,10 @@ export default function Chat() {
   const bonds = usePatientData(loadBonds);
   const bond = bondId ? bonds.data?.find((b) => b.id === Number(bondId)) : selectBond(bonds.data ?? []);
   const id = bond?.id;
+  const name = bond?.psychologist.name;
+  // R1: um título só, no cabeçalho. O nome da profissional entra no lugar de "Conversa" quando há
+  // vínculo; a aba continua "Conversa" pelo `tabBarLabel` do layout.
+  const headerOptions = useMemo(() => ({ title: name ?? 'Conversa' }), [name]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,8 +67,8 @@ export default function Chat() {
     <Button tone="patient" variant="secondary" label="Editar mensagem" disabled={sending} onPress={() => { setDraft(failed); setFailed(null); setSendError(null); }} />
   </Card> : <MessageComposer tone="patient" value={draft} onChangeText={setDraft} sending={sending}
     onSend={() => void send(draft)} /> : undefined;
-  // A aba já diz "Conversa": o título é a profissional, e o CRP fica no início.
-  return <PatientPage title={bond?.psychologist.name ?? 'Conversa'} footer={composer} stickToEnd>
+  return <PatientPage footer={composer} stickToEnd>
+    <Tabs.Screen options={headerOptions} />
     <Feedback loading={bonds.loading} error={bonds.error} retry={() => void bonds.reload()} initial={bonds.data === null} />
     {!bonds.loading && !bonds.error && !bond ? <EmptyState illustration="conversa" title="Nenhum vínculo disponível" /> : null}
     {/* A aba abre a conversa do vínculo atual; as anteriores continuam alcançáveis daqui. */}
@@ -80,24 +85,19 @@ export default function Chat() {
       {!loading && !messages.length && !error ? <EmptyState illustration="conversa" title="Nenhuma mensagem ainda" /> : null}
       {/* O histórico monta junto com a primeira leva: o que já estava na conversa aparece parado,
           e só a mensagem que chega ou é enviada depois entra animada. */}
-      {!loading || messages.length ? <SkipInitialAppear><View accessibilityLiveRegion="polite" style={styles.history}>
-        {messages.map((message) => {
-          const meta = message.id === statusId ? `${formatDateTime(message.sent_at)} · ${message.read_at ? 'Lida' : 'Enviada'}` : formatDateTime(message.sent_at);
-          // Numa conversa a dois o lado e a cor já dizem quem falou; o nome fica só para o leitor de tela.
-          return <Appear rise key={message.id} accessible accessibilityLabel={`${message.mine ? 'Você' : bond.psychologist.name}: ${message.body}. ${meta}`}
-            style={[styles.message, message.mine ? styles.mine : styles.theirs]}>
-            <Text>{message.body}</Text>
-            <Text variant="small" color={message.mine ? 'text' : 'textSecondary'}>{meta}</Text>
-          </Appear>;
-        })}
+      {!loading || messages.length ? <SkipInitialAppear><View accessibilityLiveRegion="polite" style={{ gap: Spacing.three }}>
+        {groupMessagesByDay(messages).map((day) => <MessageDay key={day.key} label={day.label}>
+          {day.messages.map((message) => {
+            // A hora vai no balão e o dia no separador; o "Lida" só na última minha.
+            const status = message.id === statusId ? (message.read_at ? 'Lida' : 'Enviada') : null;
+            const meta = [formatTime(message.sent_at), status].filter(Boolean).join(' · ');
+            // Numa conversa a dois o lado e a cor já dizem quem falou; o nome fica só para o leitor de tela.
+            return <MessageBubble key={message.id} tone="patient" mine={message.mine} body={message.body} meta={meta}
+              accessibilityLabel={`${message.mine ? 'Você' : bond.psychologist.name}: ${message.body}. ${[formatDateTime(message.sent_at), status].filter(Boolean).join(' · ')}`} />;
+          })}
+        </MessageDay>)}
       </View></SkipInitialAppear> : null}
     </> : null}
   </PatientPage>;
 }
 
-const styles = StyleSheet.create({
-  history: { gap: Spacing.two },
-  message: { maxWidth: '92%', padding: Spacing.three, gap: Spacing.one, borderRadius: Radius.md },
-  mine: { backgroundColor: RoleColors.patient.accent, alignSelf: 'flex-end' },
-  theirs: { backgroundColor: Colors.surface, alignSelf: 'flex-start' },
-});

@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
 
 import { psychologistApi } from '@/api/psychologist';
-import { Appear, Colors, EmptyState, formatDateTime, Loading, MessageComposer, Radius, RoleColors, SkipInitialAppear, Spacing, Text } from '@/design-system';
+import { Colors, EmptyState, formatDateTime, formatTime, groupMessagesByDay, Loading, MessageBubble, MessageComposer, MessageDay, Radius, RoleColors, SkipInitialAppear, Spacing, Text } from '@/design-system';
 import { createChatController, type ChatState } from '@/psychologist/chat-state';
 import { lastOwnMessageId } from '@/psychologist/domain';
 import { Action, ErrorNotice, Page, useResource } from '@/psychologist/ui';
@@ -46,17 +46,18 @@ export default function PatientChat() {
       {/* O histórico monta junto com a primeira leva: o que já estava na conversa aparece parado,
           e só a mensagem que chega ou é enviada depois entra animada. */}
       {!state.loading || state.messages.length ? <SkipInitialAppear><View style={styles.history}>
-        {state.messages.map((message) => {
-          const meta = message.id === statusId ? `${formatDateTime(message.sent_at)} · ${message.read_at ? 'Lida' : 'Enviada'}` : formatDateTime(message.sent_at);
-          // Numa conversa a dois o lado e a cor já dizem quem falou; o nome fica só para o leitor de tela.
-          return <Appear rise key={message.id} accessible accessibilityLabel={`${message.mine ? 'Você' : patient.data?.patient.name}: ${message.body}. ${meta}`}
-            style={[styles.message, message.mine ? styles.mine : styles.theirs]}>
-            <Text selectable>{message.body}</Text>
-            <Text variant="small">{meta}</Text>
-          </Appear>;
-        })}
+        {groupMessagesByDay(state.messages).map((day) => <MessageDay key={day.key} label={day.label}>
+          {day.messages.map((message) => {
+            // A hora vai no balão e o dia no separador; o "Lida" só na última minha.
+            const status = message.id === statusId ? (message.read_at ? 'Lida' : 'Enviada') : null;
+            const meta = [formatTime(message.sent_at), status].filter(Boolean).join(' · ');
+            // Numa conversa a dois o lado e a cor já dizem quem falou; o nome fica só para o leitor de tela.
+            return <MessageBubble key={message.id} tone="psychologist" mine={message.mine} body={message.body} meta={meta} selectable
+              accessibilityLabel={`${message.mine ? 'Você' : patient.data?.patient.name}: ${message.body}. ${[formatDateTime(message.sent_at), status].filter(Boolean).join(' · ')}`} />;
+          })}
+        </MessageDay>)}
       </View></SkipInitialAppear> : null}
-      {state.outbox.map((draft) => <View key={`draft-${draft.id}`} style={[styles.message, styles.draft]}>
+      {state.outbox.map((draft) => <View key={`draft-${draft.id}`} style={styles.draft}>
         <Text>{draft.body}</Text>
         <Text color={draft.status === 'failed' ? 'error' : 'textSecondary'} accessibilityLiveRegion="polite">
           {draft.status === 'failed' ? `Não enviada. ${draft.error ?? ''}` : 'Enviando...'}
@@ -69,9 +70,10 @@ export default function PatientChat() {
 
 const styles = StyleSheet.create({
   history: { gap: Spacing.three },
-  message: { borderRadius: Radius.md, padding: Spacing.three, gap: Spacing.two, maxWidth: '95%' },
-  mine: { alignSelf: 'flex-end', backgroundColor: RoleColors.psychologist.accent },
-  // Rascunho fica em contorno: "Enviando..." e o erro reprovam o contraste sobre o rosa.
-  draft: { alignSelf: 'flex-end', borderWidth: 1, borderColor: RoleColors.psychologist.accent, backgroundColor: Colors.background },
-  theirs: { alignSelf: 'flex-start', backgroundColor: Colors.surface },
+  // Rascunho no formato do balão, mas em contorno: "Enviando..." e o erro reprovam o contraste sobre o rosa.
+  draft: {
+    alignSelf: 'flex-end', maxWidth: '85%', gap: Spacing.two, borderRadius: Radius.md,
+    paddingHorizontal: Spacing.three, paddingVertical: Spacing.two,
+    borderWidth: 1, borderColor: RoleColors.psychologist.accent, backgroundColor: Colors.background,
+  },
 });

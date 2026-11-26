@@ -13,7 +13,7 @@ const loadAgenda = () => loadPatientPages(patientApi.appointments);
 export default function Agenda() {
   const { data, loading, error, reload } = usePatientData(loadAgenda);
   const groups = groupAppointments(data ?? []);
-  return <PatientPage title="Minha agenda" onRefresh={reload}>
+  return <PatientPage onRefresh={reload}>
     <Feedback loading={loading} error={error} retry={() => void reload()} initial={data === null} />
     {data?.length === 0 && !error ? <EmptyState illustration="agenda" title="Nenhuma consulta por enquanto" /> : null}
     {!error ? ([['Próximas consultas', groups.upcoming], ['Consultas passadas', groups.past]] as const).map(([title, days]) => days.length ? <Fragment key={title}>

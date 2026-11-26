@@ -1,4 +1,4 @@
-import type { CatalogPsychologist, Modality, PatientTask } from '../types.ts';
+import type { CatalogPsychologist, Modality, PatientTask, ProfileImages } from '../types.ts';
 
 export type PageQuery = { page?: number; per_page?: number };
 // Os mesmos filtros do CatalogIndexRequest. Nada de preço, nota ou ranking (CA-09.3).
@@ -22,7 +22,11 @@ export type BondResult = {
   accepted_at?: string | null;
 };
 export type PatientBond = Omit<BondResult, 'psychologist_id' | 'patient_user_id'> & {
-  psychologist: { id: number; name: string; crp: string }; unread_messages: number;
+  // O perfil público vem com os nomes do catálogo, que a API recusa a quem tem vínculo ativo.
+  // Opcional só para não quebrar objeto de teste antigo; o backend sempre envia (nulo se vazio).
+  psychologist: { id: number; name: string; crp: string } & ProfileImages
+    & Partial<Pick<CatalogPsychologist, 'approach' | 'specialty' | 'modality' | 'region' | 'bio'>>;
+  unread_messages: number;
 };
 export type Visibility = 'shared' | 'private';
 export type PatientReport = {
@@ -37,7 +41,7 @@ export type Appointment = {
   id: number; bond_id: number; scheduled_at: string;
   status: 'scheduled' | 'rescheduled' | 'cancelled' | 'done';
   modality: 'online' | 'presencial' | null; notes: string | null; created_at: string;
-  psychologist: { id: number; name: string };
+  psychologist: { id: number; name: string } & ProfileImages;
 };
 export type PatientNotification = {
   id: number; type: string; resource_id: number; created_at: string; read_at: string | null;

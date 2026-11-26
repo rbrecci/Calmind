@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { api, ApiError, type FieldErrors, type LoginInput, type Role } from '@/api';
-import { Button, Colors, Logo, Radius, Screen, Spacing, Text, TextField } from '@/design-system';
+import { BackHeader, Button, ChoiceCard, Colors, ErrorBanner, Logo, RoleColors, Screen, Spacing, Text, TextField } from '@/design-system';
 import { DEMO_ACCOUNTS, demoCredentials, demoEnv, isDemoLoginEnabled } from '@/auth/demo-accounts';
 import { authErrorMessage, buildRegisterInput, isMinor, validateRegisterForm } from '@/auth/register-form';
 import { useSession } from '@/session/session-context';
@@ -74,8 +74,13 @@ export default function EntryScreen() {
     }
   }
 
+  // No cadastro o botão fica no rodapé, fora da rolagem e acima do teclado.
+  const footer = step === 'register'
+    ? <Button label={submitting ? 'Criando conta...' : 'Criar conta'} disabled={submitting} onPress={submitRegister} />
+    : undefined;
+
   return (
-    <Screen scroll center={step === 'login'}>
+    <Screen scroll center={step === 'login'} footer={footer}>
       {step === 'login' ? (
         <>
           <View style={styles.brand}>
@@ -83,13 +88,18 @@ export default function EntryScreen() {
             <Text variant="h1">Calmind</Text>
             <Text variant="small" color="textSecondary">Saúde Mental & Acolhimento</Text>
           </View>
-          {message ? <Text variant="small" color="error" accessibilityRole="alert">{message}</Text> : null}
+          {message ? <ErrorBanner message={message} /> : null}
           <TextField label="E-mail" placeholder="seu@email.com" autoCapitalize="none" autoComplete="email"
             keyboardType="email-address" value={email} onChangeText={setEmail} error={fieldErrors.email?.[0]} />
           <TextField label="Senha" placeholder="Sua senha" autoCapitalize="none" autoComplete="current-password"
             secureTextEntry value={password} onChangeText={setPassword} error={fieldErrors.password?.[0]} />
           <Button label={submitting ? 'Entrando...' : 'Entrar'} disabled={submitting}
             onPress={() => submitLogin({ email, password })} />
+          <View style={styles.separator}>
+            <View style={styles.line} />
+            <Text variant="small" color="textSecondary">ou</Text>
+            <View style={styles.line} />
+          </View>
           <Button variant="secondary" label="Criar conta" disabled={submitting} onPress={() => goTo('choice')} />
           <Text variant="small" color="textSecondary" style={styles.center}>
             No cadastro você escolhe se é paciente ou psicólogo.
@@ -109,31 +119,30 @@ export default function EntryScreen() {
         </>
       ) : step === 'choice' ? (
         <>
-          <Text variant="small" color="textSecondary">Criar conta</Text>
-          <Text variant="h4">Como você vai usar o Calmind?</Text>
+          <BackHeader title="Criar conta" backLabel="Voltar para entrar" onBack={() => goTo('login')} />
+          <Text variant="h5">Como você vai usar o Calmind?</Text>
           <Text variant="small" color="textSecondary">Essa escolha não muda depois: a conta fica presa ao perfil.</Text>
-          <View style={styles.choice}>
-            <Text variant="h5">Sou paciente</Text>
-            <Text variant="small" color="textSecondary">Quero acompanhar meu processo, escrever relatos e falar com meu psicólogo.</Text>
-            <Button label="Continuar como paciente" onPress={() => goTo('register', 'patient')} />
-          </View>
-          <View style={styles.choice}>
-            <Text variant="h5">Sou psicólogo</Text>
-            <Text variant="small" color="textSecondary">Tenho registro no CRP e quero atender pacientes pela plataforma.</Text>
-            <Button label="Continuar como psicólogo" onPress={() => goTo('register', 'psychologist')} />
-          </View>
-          <Text variant="small" color="textSecondary">O registro no CRP passa por conferência antes de o perfil ir ao ar.</Text>
-          <Button variant="secondary" label="Voltar para entrar" onPress={() => goTo('login')} />
+          <ChoiceCard tone="patient" title="Sou paciente"
+            description="Quero acompanhar meu processo, escrever relatos e falar com meu psicólogo."
+            onPress={() => goTo('register', 'patient')} />
+          <ChoiceCard tone="psychologist" title="Sou psicólogo"
+            description="Tenho registro no CRP e quero atender pacientes pela plataforma."
+            onPress={() => goTo('register', 'psychologist')} />
+          <Text variant="small" color="textSecondary" style={styles.center}>
+            O registro no CRP passa por conferência antes de o perfil ir ao ar.
+          </Text>
         </>
       ) : (
         <>
-          <Text variant="small" color="textSecondary">Criar conta</Text>
-          <Text variant="h4">Cadastro</Text>
-          <Text variant="small">Perfil: {selectedRole === 'patient' ? 'Paciente' : 'Psicólogo'}</Text>
-          {message ? <Text variant="small" color="error" accessibilityRole="alert">{message}</Text> : null}
+          <BackHeader title="Criar conta" backLabel="Voltar para escolher perfil" onBack={() => goTo('choice')} />
+          {/* Etiqueta de lado: o tom claro do perfil escolhido, com texto Dark. */}
+          <View style={[styles.roleTag, { backgroundColor: RoleColors[selectedRole].tint }]}>
+            <Text variant="small">{selectedRole === 'patient' ? 'Paciente' : 'Psicólogo'}</Text>
+          </View>
+          {message ? <ErrorBanner message={message} /> : null}
           <TextField label="Nome completo" value={name} onChangeText={setName} autoComplete="name"
             error={fieldErrors.name?.[0]} />
-          <TextField label="E-mail" value={email} onChangeText={setEmail} autoCapitalize="none"
+          <TextField label="E-mail" placeholder="seu@email.com" value={email} onChangeText={setEmail} autoCapitalize="none"
             autoComplete="email" keyboardType="email-address" error={fieldErrors.email?.[0]} />
           {selectedRole === 'patient' ? (
             <>
@@ -157,8 +166,6 @@ export default function EntryScreen() {
           <TextField label="Confirmar senha" secureTextEntry autoComplete="new-password" value={confirmPassword}
             onChangeText={setConfirmPassword} error={fieldErrors.confirm_password?.[0]} />
           <Text variant="small" color="textSecondary">Mínimo de 8 caracteres.</Text>
-          <Button label={submitting ? 'Criando conta...' : 'Criar conta'} disabled={submitting} onPress={submitRegister} />
-          <Button variant="secondary" label="Voltar para escolher perfil" disabled={submitting} onPress={() => goTo('choice')} />
         </>
       )}
     </Screen>
@@ -166,7 +173,9 @@ export default function EntryScreen() {
 }
 
 const styles = StyleSheet.create({
-  brand: { alignItems: 'center', gap: Spacing.one, marginBottom: Spacing.four },
+  brand: { alignItems: 'center', gap: Spacing.one, marginBottom: Spacing.three },
   center: { textAlign: 'center' },
-  choice: { borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.md, padding: Spacing.three, gap: Spacing.two },
+  separator: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
+  line: { flex: 1, height: 1, backgroundColor: Colors.border },
+  roleTag: { alignSelf: 'flex-start', paddingHorizontal: Spacing.three, paddingVertical: Spacing.half, borderRadius: Spacing.three },
 });

@@ -58,6 +58,12 @@ As regras ficaram no [README do design system](app/src/design-system/README.md) 
 - **Lembretes do RF-16 sem agendamento:** são gerados quando a lista de notificações abre, não por agendador.
 - **Splash escura nos Xiaomi:** com o celular em modo escuro, o MIUI escurece a splash, e o app não controla isso.
 
+## Backend em 26/11
+
+Todos os requisitos **Must** do backend estão implementados: medicação (RF-27, 28, 29, 38, 39), auditoria (RF-17), consentimento e análise por IA (RF-04, 41, 42) com rodízio de chaves e de modelos do Gemini, e o prontuário consolidado (RF-36). Suíte: 332 testes. As rotas novas estão nas seções 3.8.8, 3.8.9 e 3.8.10 do [contrato](docs/api/contrato-api.md), com a lista do que o app precisa fazer.
+
+A decisão de hospedagem foi reavaliada e mantida (notebook com ngrok), com os planos A, B e C e o checklist do dia em [ambiente-apresentacao.md](docs/engenharia/ambiente-apresentacao.md). **A rede do SENAI bloqueia o ngrok**: na apresentação, o notebook usa o hotspot do celular.
+
 ## O que cada um faz
 
 ### Rafael

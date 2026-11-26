@@ -36,6 +36,8 @@ O produto completo prevê relatos, tarefas, chat, agenda, lembretes de medicaç�
 
 ### Executar o MVP
 
+**Para ligar o sistema inteiro numa máquina nova, com banco, API, túnel público e APK, siga [`docs/engenharia/rodar-em-outra-maquina.md`](docs/engenharia/rodar-em-outra-maquina.md).** O estado atual do desenvolvimento está em [`FinalSprint3.md`](FinalSprint3.md). O resumo abaixo é da Sprint 2.
+
 O preparo do MySQL, a configuração do `.env` e os dados fictícios estão descritos em [backend/README.md](backend/README.md) e no [setup do backend](docs/engenharia/setup-backend.md). Com PHP e Composer instalados, dentro de `backend/`:
 
 ```bash

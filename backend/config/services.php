@@ -32,12 +32,14 @@ return [
     'ai' => [
         'provider' => env('AI_PROVIDER', 'gemini'),
         'timeout' => (int) env('AI_TIMEOUT', 40),
+        // so para maquina cujo PHP nao tem lista de certificados (curl.cainfo vazio, "error 60"): caminho do cacert.pem
+        'ca_bundle' => env('AI_CA_BUNDLE'),
     ],
 
     'gemini' => [
         'key' => env('GEMINI_API_KEY'),
-        // alias que acompanha o Flash vigente; fixe um id (ex.: o que o ai:check listar) se precisar de reproducao exata
-        'model' => env('GEMINI_MODEL', 'gemini-flash-latest'),
+        // em 26/11/2026 o 2.5 saiu para contas novas e o gemini-flash-latest/3.5-flash davam 503: o flash-lite respondeu estavel. Liste com ai:check --models
+        'model' => env('GEMINI_MODEL', 'gemini-3.5-flash-lite'),
         'base_url' => env('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta'),
     ],
 

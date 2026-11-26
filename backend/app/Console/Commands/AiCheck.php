@@ -47,7 +47,7 @@ class AiCheck extends Command
             return self::FAILURE;
         }
 
-        $response = Http::withHeaders(['x-goog-api-key' => $key])->get(rtrim((string) config('services.gemini.base_url'), '/').'/models?pageSize=200');
+        $response = Http::withHeaders(['x-goog-api-key' => $key])->withOptions(['verify' => config('services.ai.ca_bundle') ?: true])->get(rtrim((string) config('services.gemini.base_url'), '/').'/models?pageSize=200');
         if (! $response->successful()) {
             $this->error('Gemini respondeu '.$response->status().': '.$response->json('error.message'));
 

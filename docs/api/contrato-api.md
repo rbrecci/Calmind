@@ -565,7 +565,7 @@ Depois de confirmada, `summary` é a versão mais recente e `versions` traz toda
 4. **Histórico.** Lista das análises confirmadas do paciente e, na análise, as versões anteriores quando houve edição.
 5. **Rótulo "gerado por IA"** em todo texto que veio de sugestão (`origin: "ai_suggestion"`), mesmo depois de confirmado e editado.
 
-**Configuração do servidor** (`backend/.env`, nunca no repositório): `AI_PROVIDER=gemini`, `GEMINI_API_KEY=<chave do Google AI Studio>` e `GEMINI_MODEL` (padrão `gemini-flash-latest`). Com `AI_PROVIDER=simulated` o fluxo roda sem chave e sem rede, e o texto vem marcado como `[SIMULADO, sem IA real]`. Para testar a ligação com o Gemini de verdade: `php artisan ai:check` (usa um relato fictício, nunca lê o banco) e `php artisan ai:check --models` para listar os modelos disponíveis.
+**Configuração do servidor** (`backend/.env`, nunca no repositório): `AI_PROVIDER=gemini`, `GEMINI_API_KEY=<chave do Google AI Studio>` e `GEMINI_MODEL` (padrão `gemini-3.5-flash-lite`). Com `AI_PROVIDER=simulated` o fluxo roda sem chave e sem rede, e o texto vem marcado como `[SIMULADO, sem IA real]`. Para testar a ligação com o Gemini de verdade: `php artisan ai:check` (usa um relato fictício, nunca lê o banco) e `php artisan ai:check --models` para listar os modelos disponíveis.
 
 ---
 

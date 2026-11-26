@@ -26,6 +26,7 @@ class GeminiSummaryProvider implements SummaryProvider
 
         try {
             $response = Http::withHeaders(['x-goog-api-key' => $key])
+                ->withOptions(['verify' => config('services.ai.ca_bundle') ?: true])
                 ->timeout((int) config('services.ai.timeout'))
                 ->retry(1, 500, throw: false)
                 ->post($url, [

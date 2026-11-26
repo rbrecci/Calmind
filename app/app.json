@@ -41,6 +41,14 @@
         }
       ],
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "A Calmind usa suas fotos só para a foto de perfil e a capa que você escolher.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ],
+      [
         "expo-build-properties",
         {
           "android": {

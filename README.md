@@ -22,7 +22,7 @@ API Laravel e MySQL, painel web em Blade (administrador e psicólogo) e app Reac
 - **Só na API, ainda sem tela:** medicação, consentimento de IA, análise por IA e prontuário consolidado. A auditoria de leitura não tem tela.
 - **Publicação:** API em `https://calmind-api.vercel.app` ([como funciona](docs/engenharia/hospedagem-alwaysdata.md)).
 
-Detalhes, pendências e calendário: [`FinalSprint3.md`](FinalSprint3.md).
+Detalhes, pendências e calendário: [`FinalSprint3.md`](FinalSprint3.md). O que fazer quando o desenvolvimento terminar: [`AO-FINALIZAR.md`](AO-FINALIZAR.md).
 
 ## Os quatro compromissos que o produto não quebra
 

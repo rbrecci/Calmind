@@ -651,10 +651,6 @@ dialog.is-open::backdrop{background:#0006;backdrop-filter:blur(5px)}
 .xpanel:has(.xpanel-photo) .xpanel-body{padding-top:64px;background:linear-gradient(to top,#fff 0%,#fff 48%,#ffffffd9 70%,#fff0 100%)}
 @media(max-width:780px){.xpanel-photo{height:190px}.xpanel:has(.xpanel-photo) .xpanel-body{padding-top:18px;background:#fff}}
 
-/* ilustracoes: aparecem com fade suave, sem zoom nem corte (imagem inteira visivel) */
-.js .app-illustration[data-reveal]{scale:none;translate:0 14px}
+/* ilustracoes: o quadro inteiro aparece de uma vez (fade + leve subida), sem parallax e sem camada extra na imagem, para nao ter tile cortado ou borrado durante o scroll */
+.js .app-illustration[data-reveal]{scale:none;translate:0 14px;will-change:auto}
 .js .app-illustration[data-reveal].is-visible{translate:0 0}
-.js .app-illustration img{opacity:0;transition:opacity 1.1s var(--ease) .25s}
-.js .app-illustration.is-visible img{opacity:1}
-@media(prefers-reduced-motion:reduce){.js .app-illustration img{opacity:1;transition:none}}
-@media print{.js .app-illustration img{opacity:1!important}}

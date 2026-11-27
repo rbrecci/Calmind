@@ -19,9 +19,9 @@ const norm = (s) => String(s).toLowerCase().normalize('NFD')
 
 /* -- cor ------------------------------------------------------------------ */
 
-/* Fallback vindo da seção 2.2 do CONTEXTO.md. Só entra em ação se o estilo
+/* Fallback vindo da seção 5 de identidade-visual.md. Só entra em ação se o estilo
    não for encontrado pelo nome — e quando entra, grita no `avisos`, porque
-   hex solto na tela é exatamente o que a seção 4.4 diz que não pode haver. */
+   hex solto na tela não pode haver. */
 const FALLBACK = {
   'primario -1':'A858A9', 'primario':'F07EF2', 'primario +1':'DFB3F2',
   'secundario -1':'5BA958','secundario':'82F27E','secundario +1':'D6F2C2',
@@ -72,10 +72,10 @@ async function aplicarStroke(node, nome, peso) {
 
 /* -- tipografia ----------------------------------------------------------- */
 
-/* Escala da seção 2.1. Aplicada como fonte direta, de propósito: os 15 estilos
+/* Escala da seção 6 de identidade-visual.md. Aplicada como fonte direta, de propósito: os 15 estilos
    de texto do arquivo se chamam "* Quicksand", inclusive "Parágrafo Quicksand"
    e "Small Quicksand", que são corpo. Aplicar esses estilos daria Quicksand no
-   corpo e contrariaria a decisão. É a pendência 4 da seção 7 do CONTEXTO.
+   corpo e contrariaria a decisão.
    Quando ela for resolvida, dá para trocar isto por setTextStyleIdAsync. */
 const TIPO = {
   h1:['Quicksand','SemiBold',40], h2:['Quicksand','SemiBold',34],

@@ -2,7 +2,7 @@
 
 **TCC · Técnico em Desenvolvimento de Sistemas · SENAI-SP · 4º termo**
 **Calmind**: Saúde Mental & Acolhimento
-Versão 1, de 19/08/2026. Cobre os blocos que as semanas 1 a 4 da Sprint 2 implementam. A seção 3.8 (contrato v2, de 29/10/2026) acrescenta as rotas do fechamento de 30/10: consentimento, perfil e lista de pacientes, chat, agenda e notificações.
+Revisão de 27/11/2026. As seções 3.1 a 3.7 são a base (19/08); a seção 3.8 reúne o que entrou depois.
 
 > A versão executável deste contrato é a coleção `Calmind.postman_collection.json`, na mesma pasta. Este documento traz o que a coleção não expressa bem: as convenções que valem para **todos** os endpoints.
 >
@@ -80,7 +80,7 @@ Sempre no formato ISO 8601 com fuso, por exemplo `2026-08-19T21:30:00-03:00`. Nu
 
 ## 3. Índice de endpoints
 
-Cada linha tem os testes correspondentes na coleção do Postman.
+A coleção do Postman cobre as rotas. Chat, agenda, notificações, lista de pacientes, medicação, análise por IA e prontuário estão na seção 3.8.
 
 ### 3.1 Conta e autenticação
 
@@ -187,9 +187,7 @@ Não existe rota sob `/guardian`, e isso é decisão de produto, não esquecimen
 
 ---
 
-## 3.8 Contrato v2: rotas do fechamento de 30/10/2026
-
-Esta parte foi escrita em 29/10/2026 **antes** de o código existir, para o backend e as duas frentes do app serem feitos ao mesmo tempo. Quem implementa o backend cumpre este texto à risca. Quem constrói o app programa contra este texto, com mock, e não espera o servidor. Se o texto for insuficiente, a suposição mínima vai para o relatório da frente, nunca para uma conversa que bloqueia alguém.
+## 3.8 Rotas acrescentadas a partir de 29/10/2026
 
 Convenções herdadas da seção 2: erro `{message, errors?}`, datas ISO 8601 com offset `-03:00`, listas `{data, meta: {total, page, per_page}}`, `per_page` de 1 a 50 (exceto onde dito), toda rota sob `/api/v1`. Identificador de paciente em rota ou corpo é sempre o `users.id` (a API não expõe `patients.id`). Identificador de psicólogo vindo do catálogo e do vínculo é `psychologists.id`, como já é hoje.
 
@@ -446,9 +444,9 @@ Cada notificação traz também `actor_name`: o nome de quem pediu o vínculo em
 
 Preferências de notificação (CA-16.2) e push ficam fora desta versão.
 
-### 3.8.6 O que fica de fora do fechamento de 30/10
+### 3.8.6 Telas que o app ainda não tem
 
-Medicação (RF-27, RF-28, RF-29, RF-38, RF-39) e auditoria de leitura (RF-17) **entraram em 26/11/2026**, ver a seção 3.8.8. A análise por IA (RF-41, RF-42) entrou no mesmo dia, ver a seção 3.8.9, e o prontuário consolidado (RF-36), na 3.8.10. No app, as telas de medicação, consentimento de IA, análise e prontuário ainda não existem (os endpoints existem). Seguem de fora preferências de notificação, push e chat em tempo real, que o texto e o ABNT registram como evolução futura.
+Medicação, consentimento de IA, análise e prontuário existem na API (3.8.8 a 3.8.10), mas não no app. O que fica fora do produto está na seção 5.
 
 ### 3.8.7 Foto de perfil e capa (acrescentado em 25/11/2026)
 
@@ -464,7 +462,7 @@ O envio é `multipart/form-data` com o campo `image`: `jpeg`, `png` ou `webp`, a
 
 Quem pode ver no `GET`: a própria pessoa e o admin, sempre; foto e capa de psicólogo que está no catálogo (aprovado, com perfil publicado e conta ativa), qualquer usuário autenticado e ativo; psicólogo fora do catálogo (pendente, recusado, despublicado ou suspenso), só o paciente com vínculo pendente, ativo ou encerrado depois de aceito; foto e capa de paciente, só o psicólogo com vínculo pendente, ativo ou encerrado depois de aceito (`accepted_at` preenchido). A permissão é conferida antes da existência do arquivo: quem não pode ver recebe 403 mesmo quando não há imagem, para não revelar se ela existe.
 
-Os objetos que mostram uma pessoa ganham `avatar_url` e `cover_url`: o `/me`, cada item do catálogo, o `patient` da lista de pacientes, do detalhe do paciente e das solicitações, o `psychologist` do vínculo visto pelo paciente e as duas partes da consulta. O valor é a URL absoluta do `GET` acima, com `?v=` mudando a cada troca para o cache do app perceber, ou `null` sem imagem. Exemplo: `"avatar_url": "https://lettuce-impeach-arose.ngrok-free.dev/api/v1/users/7/avatar?v=6a4e7142d430"`. O `{id}` é sempre o `users.id`, nunca o `psychologists.id`.
+Os objetos que mostram uma pessoa ganham `avatar_url` e `cover_url`: o `/me`, cada item do catálogo, o `patient` da lista de pacientes, do detalhe do paciente e das solicitações, o `psychologist` do vínculo visto pelo paciente e as duas partes da consulta. O valor é a URL absoluta do `GET` acima, com `?v=` mudando a cada troca para o cache do app perceber, ou `null` sem imagem. Exemplo: `"avatar_url": "https://calmind-api.vercel.app/api/v1/users/7/avatar?v=6a4e7142d430"`. O `{id}` é sempre o `users.id`, nunca o `psychologists.id`.
 
 ### 3.8.8 Medicação e auditoria (acrescentado em 26/11/2026)
 
@@ -616,21 +614,15 @@ Cada item da `timeline` traz `type`, `at` (a data usada na ordem), `id` e `data`
 
 ---
 
----
-
 ## 4. A regra que este contrato existe para proteger
 
-**Nenhum endpoint sob `/psychologist` ou `/admin` consulta a tabela `reports`.** Todos leem a view `shared_reports`, definida no `schema.sql`.
-
-Escrito aqui, isso deixa de depender de alguém lembrar na hora de montar a query e passa a ser item conferível na revisão de código. A mesma regra vale para a rotina que monta o pacote enviado ao serviço de IA, na semana 8.
-
-O teste automatizado do RNF-08, previsto para a semana 4, verifica exatamente isso.
+**Nenhum endpoint sob `/psychologist` ou `/admin` consulta a tabela `reports`.** Todos leem a view `shared_reports`, definida no `schema.sql`, e a rotina que monta o pacote para a IA também. O `ReportPrivacyTest` (RNF-08) verifica.
 
 ---
 
-## 5. O que ainda não está neste contrato
+## 5. Fora deste contrato
 
-Chat, agenda, notificações, lista de pacientes e consentimento entraram na seção 3.8. Medicação, auditoria de leitura, análise por IA e prontuário consolidado entraram em 26/11/2026 (seções 3.8.8 a 3.8.10). Continuam de fora, como evolução futura:
+Ficam como evolução futura:
 
 | Bloco | Requisitos |
 |-------|------------|

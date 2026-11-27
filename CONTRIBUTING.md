@@ -3,8 +3,7 @@
 Regra de commit e Pull Request do grupo. Vale para todo mundo, inclusive para quem só mexe em
 documentação.
 
-Ninguém aqui tinha usado PR antes deste documento. Ele foi escrito assumindo isso: explica o que
-é, dá os comandos prontos e traz modelos onde você só troca os detalhes.
+Nada entra na `main` sem Pull Request.
 
 ---
 
@@ -33,9 +32,9 @@ feat(prototipo): 16 wireframes do fluxo principal, mobile-first
 
 ### O escopo é opcional
 
-Diz **onde** você mexeu. Use uma destas, que são as pastas que já existem:
+Diz **onde** você mexeu. Os mais usados:
 
-`prototipo` · `api` · `pesquisa` · `modelagem` · `planejamento` · `figma`
+`app` · `backend` · `api` · `prototipo` · `pesquisa` · `modelagem` · `planejamento`
 
 Se mexeu em várias, deixe sem escopo.
 
@@ -102,5 +101,3 @@ do frame Logos.
 ## O que ficou de fora
 As telas do psicologo. Entram no proximo PR.
 ```
-
----

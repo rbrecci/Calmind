@@ -1,5 +1,5 @@
 /* =============================================================================
-   CHAMADA 1 de 5 — diagnóstico do arquivo + pendência 1 do CONTEXTO.
+   CHAMADA 1 de 5: diagnóstico do arquivo + pendência 1 do design system.
 
    Este script é AUTÔNOMO: NÃO leve o _preludio.js junto.
 

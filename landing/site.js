@@ -143,13 +143,15 @@
   var revealSelectors = [
     '.section-heading', '.benefits .xpanel', '.step', '.audience-copy', '.privacy .card',
     '.testimonials figure', '.accordion details', '.closing .container > *',
-    '.page-grid .card', '.stack > section', '.status-box', '.cvv-box', '.form-result'
+    '.page-grid .card', '.stack > section', '.status-box', '.cvv-box', '.form-result',
+    '.priv-demo', '.footer-grid > *', '.swatch', '.logo-box', '.doc-callout', '.doc > h2'
   ];
   var targets = Array.prototype.slice.call(document.querySelectorAll(revealSelectors.join(',')));
   var panels = Array.prototype.slice.call(document.querySelectorAll('.app-panel'));
   targets.forEach(function (el) {
     var siblings = Array.prototype.filter.call(el.parentNode.children, function (n) { return n.matches && targets.indexOf(n) !== -1; });
-    el.style.setProperty('--d', Math.min(siblings.indexOf(el), 5) * (el.classList.contains('card') || el.classList.contains('xpanel') ? 120 : 90) + 'ms');
+    var idx = el.parentNode.classList.contains('doc') ? 0 : siblings.indexOf(el);
+    el.style.setProperty('--d', Math.min(idx, 5) * (el.classList.contains('card') || el.classList.contains('xpanel') ? 120 : 90) + 'ms');
     el.setAttribute('data-reveal', '');
   });
   panels.forEach(function (el) { el.setAttribute('data-reveal', 'scale'); });
@@ -164,6 +166,7 @@
     }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
     revealables.forEach(function (el) { io.observe(el); });
   }
+  window.__calmindReveal = true; /* avisa o failsafe do <head> que o reveal foi montado */
 
   /* parallax: o CSS usa view(); sem suporte, o JS escreve --p */
   var parallax = Array.prototype.slice.call(document.querySelectorAll('[data-parallax]'));

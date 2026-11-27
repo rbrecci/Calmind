@@ -1,8 +1,6 @@
 # landing
 
-Página de divulgação do Calmind. Aparece na tabela de stack do `README.md` da raiz e na semana 11 do cronograma.
-
-A implementação em HTML e CSS está disponível em `index.html`, com estilos em `style.css` e imagens e fontes locais em `assets/`. Abra `index.html` no navegador para visualizar a página. Login e cadastro são demonstrativos.
+Página de divulgação do Calmind, em HTML e CSS: `index.html`, estilos em `style.css`, imagens e fontes em `assets/`. Abra `index.html` no navegador. Login e cadastro são demonstrativos.
 
 ## O que ela pode e o que ela não pode dizer
 

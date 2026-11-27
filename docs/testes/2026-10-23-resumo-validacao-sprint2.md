@@ -9,7 +9,7 @@ O Newman passou nas pastas A/C/D/E/F após corrigir a coleção e sua preparaç�
 - Commit inicial da sessão: `228fd57`.
 - Correções e evidências publicadas no commit [b381ed6](https://github.com/rbrecci/Calmind/commit/b381ed649fbfd7b76d572ce0c8853aef59a91f50).
 - PR existente: [#18](https://github.com/rbrecci/Calmind/pull/18). Nenhum merge foi executado nesta sessão.
-- Foram lidos o [plano da Sprint 2](../planejamento/plano-mvp-sprint2-2026-10-22.md) e as [regras invioláveis](../engenharia/regras-inviolaveis.md).
+- Foram lidos o plano do MVP da Sprint 2 (no histórico do Git) e as [regras invioláveis](../engenharia/regras-inviolaveis.md).
 
 ## Ambiente e teste manual
 

@@ -1,76 +1,31 @@
-# Decisões abertas
+# Decisões
 
-**TCC · Técnico em Desenvolvimento de Sistemas · SENAI-SP · 4º termo**
-**Calmind**: Saúde Mental & Acolhimento
-Revisão de 04/11/2026.
+**Calmind**: Saúde Mental & Acolhimento. Revisão de 27/11/2026.
 
-> Substitui o antigo `decisoes-pendentes.md`, que foi removido na limpeza de 20/08/2026 porque estava 85% resolvido e dizia que MER e wireframes ainda não tinham começado. Este arquivo carrega só o que continua em aberto de verdade.
->
-> Regra: quando uma decisão fechar, ela sai daqui e entra no documento que ela afeta. Item fechado que continua nesta lista é ruído.
+> Decisão fechada sai da primeira tabela e é registrada na segunda. A numeração não é reaproveitada.
 
----
+## Abertas
 
-## 1. Trava agora, antes do marco M2 de 28/08
+| # | Decisão | Situação |
+|---|---------|----------|
+| DA-12 | O que o sistema faz diante de conteúdo de risco num relato | Nenhum RF cobre. É limitação a declarar na documentação final |
+| DA-13 | Teto de frequência de notificação | O sigilo está resolvido (a notificação leva tipo e identificador, nunca conteúdo). O teto não foi definido |
+| DA-16 | Existe versão 2026 do escopo, com pesos de nota? O rodapé do PDF diz 2024 | Perguntar ao professor |
 
-Nenhuma em aberto. A última, DA-01, fechou em 23/11/2026 e está na seção 6.
+## Fechadas
 
-## 2. Trava a Sprint 2
-
-| # | Decisão | Quem decide | Prazo |
-|---|---------|-------------|-------|
-| DA-04 | **Provedor e modelo de IA, e onde a chave fica.** Era a DP-11 | Grupo | Antes da semana 8 |
-| DA-05 | **Board do Scrum**: ferramenta e quem mantém. O repositório já está resolvido | Scrum Master | Semana 1 |
-| DA-06 | **Formato da data na API**: o Laravel serializa em UTC com `Z`, o `contrato-api.md` §2.4 pede offset `-03:00`. Os dois são ISO 8601, mas a coleção do Postman testa um só | Backend | Antes do primeiro endpoint |
-| DA-07 | **Formato do `meta` nas listas**: o `paginate()` do Laravel devolve `current_page`, `last_page` e outros; o contrato §2.5 escreveu `{total, page, per_page}` | Backend | Antes do primeiro endpoint de lista |
-| DA-08 | **Prazo de expiração e revogação do código de convite.** São as assunções A-02, A-03 e A-09 do `documento-requisitos.md`, hoje tratadas como parâmetro de configuração | Grupo | Antes de implementar RF-06 |
-
-## 3. Trava a Sprint 3
-
-| # | Decisão | Quem decide | Prazo |
-|---|---------|-------------|-------|
-| DA-09 | **Ferramenta e template do documento ABNT.** Era a DP-17 | Nicoly e Isabela | Até o fim da Sprint 2 |
-| DA-10 | **Quando o manual do usuário começa.** Era a DP-18. Manual escrito no fim custa o dobro | Nicoly e Isabela | Definir na semana 6 |
-
-## 4. Decisões de produto que a pesquisa de campo vai responder
-
-Estas não são decisões de mesa: já têm pergunta no `../pesquisa/roteiro-entrevistas.md` e serão respondidas pelas 4 entrevistas.
-
-| # | Questão | Onde é perguntada |
-|---|---------|-------------------|
-| DA-11 | **Critérios de busca do catálogo.** É a assunção A-01, a mais antiga em aberto do projeto | P-36 com as psicólogas, C-07 com os pacientes |
-| DA-12 | **O que o sistema faz diante de conteúdo de risco num relato.** Hoje nenhum RF cobre isso | P-12 e P-13 |
-| DA-13 | **Teto de frequência de notificação e sigilo do texto na tela de bloqueio** | C-30 e C-31 |
-
-## 5. Perguntas que dependem do professor
-
-| # | Pergunta | Situação |
-|---|----------|----------|
-| DA-16 | Existe versão 2026 do escopo, com pesos de nota? O rodapé do PDF diz 2024 | Perguntar em aula |
-| DA-17 | **Data e formato da entrega da Sprint 1.** Em 20/08/2026 o grupo soube que não é mais 21/08, e não há data nova. Sem ela o `cronograma.md` inteiro fica sem âncora | Perguntar em aula, é a mais urgente das três |
-
----
-
-## 6. Fechadas, para não reabrir por engano
-
-> A numeração não é reaproveitada, mesma convenção do `documento-requisitos.md`. A DA-14, que perguntava se o produto atende menor de idade, foi fechada em 20/08/2026 e virou as três últimas linhas desta tabela.
-
-| Decisão | Fechada em | Onde vive agora |
-|---------|-----------|-----------------|
-| Plataforma de cada aplicativo: app mobile, painel web | 19/08/2026 | `arranque-react-native.md` D1 |
-| Stack: React Native, Laravel, MySQL, Blade e Bootstrap | 19/08/2026 | `README.md`, seção Stack |
-| Um repositório só, com backend, app e docs separados | 19/08/2026 | `arranque-react-native.md` D3 |
-| Idioma do código: inglês nos identificadores | 19/08/2026 | `arranque-react-native.md` D4 |
-| Autenticação por token em toda requisição | 19/08/2026 | `../api/contrato-api.md` §2.2 |
-| Nome e slogan: Calmind, Saúde Mental & Acolhimento | 20/08/2026 | `arranque-react-native.md` D2 |
-| Idade mínima de 12 anos para conta de paciente | 20/08/2026 | DEC-16, RF-01 (CA-01.4) |
-| Menor de 18 informa contato do responsável; responsável sem acesso ao app | 20/08/2026 | DEC-17, RF-01 (CA-01.5), RF-36 (CA-36.5) |
-| Consentimento do responsável registrado pelo psicólogo, não por ele | 20/08/2026 | DEC-18, RF-49 |
-| Modelo de identidade, banco relacional, isolamento do relato privado | 19/08/2026 | `../diagramas/modelo-de-dados.md` |
-| Inventário de telas e fidelidade do protótipo | 19/08/2026 | `../prototipo/wireframes.html` |
-| Formalização da pesquisa de campo | 20/08/2026 | `../pesquisa/roteiro-entrevistas.md` |
-| Papéis do Scrum e divisão de trabalho | 19/08/2026 | `README.md`, seção Equipe |
-| Datas reais das três sprints | 18/08/2026 | `cronograma.md` |
-| DA-02: identificador do pacote do app, `com.tccsenai.calmind` | 04/11/2026 | `../../app/app.json` (`android.package`) |
-| DA-03: tráfego sem TLS liberado (`usesCleartextTraffic` via `expo-build-properties`) apenas para demonstração com dados fictícios. Limite de segurança: token e dados trafegam abertos na rede; precisa sair, com HTTPS na API, antes de qualquer uso real | 04/11/2026 | `../../app/app.json` (plugin `expo-build-properties`) |
-| DA-15: apresentação final na sexta 04/12/2026 | 23/11/2026 | `cronograma.md` §0.2 e `../../FinalSprint3.md` |
-| DA-01: na apresentação, o backend roda no notebook (XAMPP) e sai para a internet pelo ngrok grátis, com HTTPS e domínio fixo da conta; o APK final aponta para esse endereço e não libera mais HTTP sem criptografia (fecha também a pendência da DA-03). Railway descartada por custo: o teste grátis acabou e o plano pago custa US$ 5. Supabase e InfinityFree seguem descartados pelos motivos de 04/11 | 23/11/2026, reavaliada e mantida em 26/11 (a rede do SENAI bloqueia o ngrok: hotspot do celular no dia) | `../../FinalSprint3.md`, `../engenharia/README.md` e `../engenharia/ambiente-apresentacao.md` |
+| # | Decisão | Fechada em | Onde vive |
+|---|---------|-----------|-----------|
+| DA-01 | **Hospedagem:** API na alwaysdata, acessada pelo repasse `https://calmind-api.vercel.app`. O notebook com ngrok (decisão de 23/11) passa a ser o plano B | 27/11, após os testes de aceite | [hospedagem](../engenharia/hospedagem-alwaysdata.md) e [ambiente da apresentação](../engenharia/ambiente-apresentacao.md) |
+| DA-02 | Identificador do pacote: `com.tccsenai.calmind` | 04/11 | `app/app.json` |
+| DA-03 | HTTP sem TLS foi liberado em 04/11 só para demonstração e voltou a ser bloqueado com o HTTPS (`usesCleartextTraffic: false`) | 23/11 | `app/app.json` |
+| DA-04 | IA: Google Gemini, chave só no `.env` do servidor | 26/11 | [contrato, 3.8.9](../api/contrato-api.md) |
+| DA-05 | Board do Scrum no Miro | 27/08 | Miro |
+| DA-06 | Data na API com offset `-03:00` | 02/10 | [arquitetura](../engenharia/arquitetura-backend.md) |
+| DA-07 | `meta` das listas: `{total, page, per_page}` | 02/10 | [arquitetura](../engenharia/arquitetura-backend.md) |
+| DA-08 | Convite: 8 caracteres, 7 dias, uso único, revogável | 02/10 | [regras invioláveis](../engenharia/regras-inviolaveis.md) |
+| DA-09 | Documento ABNT em Word (`.docx`), versionado no repositório | 23/10 | [documento final](../documento-final/README.md) |
+| DA-10 | Manual do usuário: dois manuais, na reta final da Sprint 3 | 26/11 | [FinalSprint3](FinalSprint3.md) |
+| DA-11 | Filtros do catálogo: abordagem, especialidade, modalidade e região | 23/10 | [contrato, 3.4](../api/contrato-api.md) |
+| DA-15 | Apresentação final na sexta 04/12/2026 | 23/11 | [FinalSprint3](FinalSprint3.md) |
+| DA-17 | Entrega da Sprint 1: 24/09/2026 | 24/09 | [cronograma](cronograma.md) |

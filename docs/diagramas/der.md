@@ -52,6 +52,8 @@ erDiagram
         ENUM role "patient, psychologist ou admin"
         ENUM status "active ou suspended, default active"
         DATETIME suspended_at "NULL"
+        VARCHAR_255 avatar_path "NULL, disco privado"
+        VARCHAR_255 cover_path "NULL, disco privado"
         DATETIME created_at "default CURRENT_TIMESTAMP"
         DATETIME updated_at "ON UPDATE CURRENT_TIMESTAMP"
     }
@@ -172,6 +174,7 @@ erDiagram
         INT_UNSIGNED invitation_id FK "NULL"
         DATETIME requested_at "default CURRENT_TIMESTAMP"
         DATETIME responded_at "NULL"
+        DATETIME accepted_at "NULL em recusa e cancelamento"
         DATETIME ended_at "NULL"
         INT_UNSIGNED ended_by_user_id FK "NULL"
         INT_UNSIGNED active_patient_id UK "coluna gerada, vale patient_id só se active"

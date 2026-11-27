@@ -1252,21 +1252,16 @@ Isso é decisão de projeto, não omissão, e apoia-se em dois pontos. O primeir
 
 ---
 
-## 10. Pendências abertas ao fim desta versão
+## 10. Pendências abertas
 
-Nenhuma delas impede a aprovação deste documento, mas todas precisam de decisão antes do avanço das sprints.
+Revisão de 27/11/2026. Plataforma, filtros do catálogo, prazo do convite, idioma do código, papéis e cronograma, abertos na primeira versão, foram decididos ([registro](planejamento/decisoes-abertas.md)). Continuam sem definição, e os requisitos correspondentes não foram implementados:
 
-| # | Pendência | Requisitos afetados | Prazo recomendado |
-|---|-----------|---------------------|-------------------|
-| 1 | Plataforma de cada aplicativo (web ou mobile) | RF-16, RNF-59, RNF-61 | Antes da Sprint 2 |
-| 2 | Critérios definitivos de busca do catálogo | RF-09 | Antes da Sprint 2 |
-| 3 | Prazo de expiração e revogação do código de convite | RF-06, RF-07, RF-08, RNF-05 | Antes da Sprint 2 |
-| 4 | Prazos por categoria de dado na política de retenção | RF-47, RNF-14, RNF-15 | Antes da Sprint 3 |
-| 5 | Texto do contrato de prestação de serviços, validado com profissional | RF-48, RNF-24 | Antes da Sprint 3 |
-| 6 | Idioma do código e padrão de commits e ramos | RNF-51, RNF-52 | Antes da Sprint 2 |
-| 7 | Divisão de papéis e cronograma das 3 sprints | RNF-62 | Imediato |
+| # | Pendência | Requisitos afetados |
+|---|-----------|---------------------|
+| 1 | Prazos por categoria de dado na política de retenção | RF-47, RNF-14, RNF-15 |
+| 2 | Texto do contrato de prestação de serviços, validado com profissional | RF-48, RNF-24 |
 
-As definições técnicas em aberto da seção 8.2 do documento base (frontend web, mobile, backend, banco, provedor e modelo de IA, notificações, repositório e board) não bloqueiam este documento: RNF-68 exige, e a redação garante, que nenhum requisito aqui dependa de uma tecnologia específica ter sido escolhida.
+RNF-68 exige, e a redação garante, que nenhum requisito aqui dependa de uma tecnologia específica.
 
 ---
 

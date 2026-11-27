@@ -14,8 +14,7 @@ qualquer um destes é item de revisão de Pull Request, e PR que quebra um volta
 **1. Nenhuma rota sob `/psychologist` ou `/admin` consulta a tabela `reports`.** Todas leem a view
 `shared_reports`, definida em [`../diagramas/schema.sql`](../diagramas/schema.sql). O relato
 privado não aparece ali nem no conteúdo, nem na contagem. É o RNF-08, e é o teste mais importante
-do projeto inteiro. A mesma regra vale para a rotina que monta o pacote enviado ao serviço de IA,
-na Sprint 3.
+do projeto inteiro. A mesma regra vale para a rotina que monta o pacote enviado ao serviço de IA.
 
 **2. Relato privado pedido pelo psicólogo responde 404, nunca 403.** O 403 confirmaria que existe
 alguma coisa ali. O CA-23.5 exige que nem a existência seja perceptível. O mesmo vale para relato
@@ -99,7 +98,7 @@ Estes definem o produto. Não são detalhe de implementação.
 
 **20. A IA nunca age sozinha.** A análise só roda por ação explícita do psicólogo — nunca por
 agendamento, gatilho automático ou iniciativa do serviço. Nada vai ao prontuário sem confirmação
-dele. RNF-30 e RNF-31. Sprint 3, mas nenhuma estrutura criada agora pode abrir essa porta.
+dele. RNF-30 e RNF-31.
 
 **21. A plataforma não prescreve.** O vocabulário é **"registrar medicação em uso"** e **"lembrete
 de adesão"**. Em nenhum ponto, nem em comentário de código, nem em texto de tela, aparece

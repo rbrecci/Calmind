@@ -1,5 +1,7 @@
 # Arranque do cenário B: app React Native
 
+> **Documento histórico (19/08/2026), já executado.** Não use como estado atual. Fica no repositório porque o `app/README.md` aponta para a seção 6.
+
 **Decisão tomada em 19/08/2026 (quarta).** App mobile em React Native, backend Laravel com MySQL, painel do administrador em web sobre o mesmo backend, mais a landing page de divulgação.
 
 > Decidir na quarta em vez de na sexta comprou 2 dias na semana mais arriscada do projeto. Este documento diz o que fazer com eles.

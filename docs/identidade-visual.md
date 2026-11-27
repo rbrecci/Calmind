@@ -7,9 +7,6 @@ Trabalho de Conclusão de Curso · Técnico em Desenvolvimento de Sistemas · SE
 > propósito, o público-alvo, o logotipo, a paleta e a tipografia, e é a referência que vale para
 > o aplicativo, a landing page, a capa do documento final e os slides.
 >
-> O raciocínio de design por trás de cada decisão, com o histórico de quando e por que mudou,
-> está em [`CONTEXTO.md`](../CONTEXTO.md). Onde os dois divergirem, **este arquivo vence** — o
-> outro é diário de sessão, este é a especificação.
 
 ---
 
@@ -20,7 +17,7 @@ Trabalho de Conclusão de Curso · Técnico em Desenvolvimento de Sistemas · SE
 | **Nome** | Calmind |
 | **Slogan** | Saúde Mental & Acolhimento |
 | **Assinatura completa** | Calmind — Saúde Mental & Acolhimento |
-| **Identificador do pacote** | `com.<grupo>.calmind`, ainda em aberto (ver [`planejamento/arranque-react-native.md`](planejamento/arranque-react-native.md)) |
+| **Identificador do pacote** | `com.tccsenai.calmind` |
 
 O nome é a junção de **calm** e **mind**. Não é sigla, não tem acento e não se traduz: escreve-se
 `Calmind` em qualquer idioma, sempre com C maiúsculo e o resto minúsculo. Nunca `CalMind`,
@@ -280,18 +277,16 @@ rede.
 | Logotipo, 5 variantes em PNG | [`prototipo/assets/`](prototipo/assets/) |
 | Ilustrações do app, em SVG, e o script que as gera | [`prototipo/assets/ilustracoes/`](prototipo/assets/ilustracoes/) |
 | Telas em PDF, uma por arquivo | [`prototipo/telas-pdf/`](prototipo/telas-pdf/) |
+| Protótipo vigente, de 25/11 | [`prototipo/telas-25-11/`](prototipo/telas-25-11/) |
 | Wireframes navegáveis das 16 telas | [`prototipo/wireframes.html`](prototipo/wireframes.html) |
 | Mapa de UX do fluxo entre as telas | [`prototipo/fluxo-ux.html`](prototipo/fluxo-ux.html) |
 | Scripts que montam as telas no Figma | [`prototipo/figma/`](prototipo/figma/) |
-| Histórico e justificativa das decisões de design | [`../CONTEXTO.md`](../CONTEXTO.md) |
 
 ---
 
-## 8. Pendências de identidade abertas ao fim da Sprint 1
+## 8. Pendências de identidade
 
 | # | Pendência | Responsável |
 |---|---|---|
-| 1 | Logo em SVG, nomes de arquivo corrigidos e lockup horizontal (seção 4.3). O ícone do app ficou pronto em 24/11/2026 | Zanetti |
-| 2 | A paleta não tem neutro aprovado para *placeholder* e texto desabilitado. Hoje o placeholder usa `Dark +1`, que passa a 6,3:1 — funciona, mas não foi decidido, foi herdado | Grupo |
-| 3 | ~~A tela de login ainda tem rótulos, link e a palavra "Calmind" em rosa~~ Resolvido: rótulos e marca em `Dark`, e o símbolo colorido sobre o branco, que a regra 4.2.4 permite e cujo gradiente é a cor neutra de antes do login (seção 5.5) | Caio |
-| 4 | Definir o identificador do pacote, `com.<grupo>.calmind` | Grupo |
+| 1 | Logo em SVG, nomes de arquivo corrigidos e lockup horizontal (seção 4.3) | Zanetti |
+| 2 | A paleta não tem neutro aprovado para *placeholder* e texto desabilitado; hoje se usa `Dark +1` (6,3:1) | Grupo |

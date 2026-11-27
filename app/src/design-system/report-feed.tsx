@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { Appear } from './appear';
 import { Button } from './button';
-import { formatDayKey, groupByDay } from './calendar';
+import { capitalizeFirst, formatDayKey, groupByDay } from './calendar';
 import { formatTime } from './format-date';
 import { Icon } from './icon';
 import { MoodIcons, MoodLabels, type Mood } from './mood';
@@ -38,7 +38,7 @@ export function ReportFeed<T extends Item>({ tone, reports, moods, renderTag, re
     <View style={styles.feed}>
       {groups.map((group) => <View key={group.key} style={styles.group}>
         <View style={styles.dayRow}>
-          <Text style={styles.day} accessibilityRole="header">{formatDayKey(group.key)}</Text>
+          <Text style={styles.day} accessibilityRole="header">{capitalizeFirst(formatDayKey(group.key))}</Text>
           {moods[group.key] ? <Text variant="small" accessibilityLabel={`Humor: ${MoodLabels[moods[group.key]]}`}>
             {MoodIcons[moods[group.key]]} {MoodLabels[moods[group.key]]}
           </Text> : null}
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   feed: { gap: Spacing.three },
   group: { gap: Spacing.two },
   dayRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Spacing.two },
-  day: { marginRight: 'auto', textTransform: 'capitalize' },
+  day: { marginRight: 'auto' },
   card: {
     gap: Spacing.two, padding: Spacing.three, borderWidth: 1, borderLeftWidth: 4, borderColor: Colors.border,
     borderRadius: Radius.md, backgroundColor: Colors.background,

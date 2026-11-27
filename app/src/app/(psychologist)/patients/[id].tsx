@@ -5,7 +5,7 @@ import type { Mood, MoodEntry } from '@/api';
 import { psychologistApi } from '@/api/psychologist';
 import type { Appointment, PatientDetail, SharedReport, Task } from '@/api/psychologist/types';
 import {
-  ChoiceGroup, dayKey, EmptyState, formatDateTime, formatDayKey, formatMonth, formatShortDate, Icon, ListItem, MonthCalendar, monthRange,
+  ChoiceGroup, capitalizeFirst, dayKey, EmptyState, formatDateTime, formatDayKey, formatMonth, formatShortDate, Icon, ListItem, MonthCalendar, monthRange,
   ReportFeed, Skeleton, Spacing, StatusTag, statusTagKind, Text, type DayMark,
 } from '@/design-system';
 import { composeRecord } from '@/psychologist/domain';
@@ -61,7 +61,7 @@ function ReportsSection({ patientId, month, onMonthChange, data, error, retry }:
       onMonthChange={(next) => { setSelected(null); onMonthChange(next); }} />
     <ErrorNotice error={error} retry={retry} />
     {!current ? error ? null : <Skeleton /> : <>
-      <Text variant="h5" accessibilityRole="header">{selected ? formatDayKey(selected) : `Relatos de ${formatMonth(month)}`}</Text>
+      <Text variant="h5" accessibilityRole="header">{selected ? capitalizeFirst(formatDayKey(selected)) : `Relatos de ${formatMonth(month)}`}</Text>
       {selected ? <Action variant="secondary" icon="calendar" label="Ver o mês todo" onPress={() => setSelected(null)} /> : null}
       {visible.length ? <ReportFeed key={`${patientId}-${formatMonth(month)}-${selected}`} tone="psychologist" reports={visible} moods={moods} />
         : <Text color="textSecondary">{selected ? 'Nenhum relato compartilhado neste dia.' : 'Nenhum relato compartilhado neste mês.'}</Text>}

@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text as NativeText, View } from 'react-native';
 
-import { dayKey, formatDayKey, formatMonth, monthCells } from './calendar';
+import { capitalizeFirst, dayKey, formatDayKey, formatMonth, monthCells } from './calendar';
 import { Icon } from './icon';
 import { MoodIcons, MoodLabels, type Mood } from './mood';
 import { Text } from './text';
@@ -28,7 +28,7 @@ export function MonthCalendar({ tone, month, onMonthChange, selected, onSelect, 
         <Pressable accessibilityRole="button" accessibilityLabel="Mês anterior" onPress={() => shift(-1)} style={styles.arrow}>
           <Icon name="caret-left" />
         </Pressable>
-        <Text variant="h5" accessibilityRole="header" style={styles.monthTitle}>{formatMonth(month)}</Text>
+        <Text variant="h5" accessibilityRole="header" >{capitalizeFirst(formatMonth(month))}</Text>
         <Pressable accessibilityRole="button" accessibilityLabel="Próximo mês" accessibilityState={{ disabled: atCurrentMonth }}
           disabled={atCurrentMonth} onPress={() => shift(1)} style={[styles.arrow, atCurrentMonth && styles.off]}>
           <Icon name="caret-right" />
@@ -75,7 +75,6 @@ export function MonthCalendar({ tone, month, onMonthChange, selected, onSelect, 
 const styles = StyleSheet.create({
   card: { gap: Spacing.two, padding: Spacing.two, borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.md, backgroundColor: Colors.background },
   monthRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  monthTitle: { textTransform: 'capitalize' },
   arrow: { width: MinTouchTarget, height: MinTouchTarget, alignItems: 'center', justifyContent: 'center' },
   off: { opacity: 0.3 },
   grid: { flexDirection: 'row', flexWrap: 'wrap' },

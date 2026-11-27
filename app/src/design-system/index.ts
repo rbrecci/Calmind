@@ -19,7 +19,7 @@ export { EmptyState, type EmptyStateProps } from './empty-state';
 export { ErrorBanner } from './error-banner';
 export { ExpandableCard, type ExpandableCardProps } from './expandable-card';
 export { ActionSheet, type SheetAction } from './action-sheet';
-export { dayKey, formatDayKey, formatMonth, monthRange, parseDayKey } from './calendar';
+export { capitalizeFirst, dayKey, formatDayKey, formatMonth, monthRange, parseDayKey } from './calendar';
 export { MonthCalendar, type DayMark } from './month-calendar';
 export { ReportFeed } from './report-feed';
 export { MoodIcons, MoodLabels, MoodPicker, type Mood } from './mood';

@@ -5,7 +5,7 @@ import type { Mood } from '@/api';
 import { patientApi } from '@/api/patient';
 import type { PatientReport } from '@/api/patient/types';
 import {
-  Button, dayKey, EmptyState, formatDayKey, formatMonth, MonthCalendar, monthRange, MoodPicker, ReportFeed, Skeleton, StatusTag,
+  Button, capitalizeFirst, dayKey, EmptyState, formatDayKey, formatMonth, MonthCalendar, monthRange, MoodPicker, ReportFeed, Skeleton, StatusTag,
   statusTagKind, Text, type DayMark,
 } from '@/design-system';
 import { loadPatientPages } from '@/patient/load-pages';
@@ -90,7 +90,7 @@ export default function Reports() {
       {removing ? <Confirmation message={unpublishWarning(removing.used_in_analysis)} busy={busy} kind="destructive"
         confirm={() => void unpublish()} cancel={() => setRemoving(null)} /> : null}
       {!current ? <Skeleton /> : <>
-        <Text variant="h5" accessibilityRole="header">{selected ? formatDayKey(selected) : `Relatos de ${monthKey}`}</Text>
+        <Text variant="h5" accessibilityRole="header">{selected ? capitalizeFirst(formatDayKey(selected)) : `Relatos de ${monthKey}`}</Text>
         {selected ? <Button tone="patient" variant="secondary" icon="calendar" label="Ver o mês todo" onPress={() => setSelected(null)} /> : null}
         {visible.length ? <ReportFeed key={`${monthKey}-${selected}`} tone="patient" reports={visible} moods={moods}
           renderTag={(report) => <StatusTag kind={statusTagKind(reportStatus(report))} label={reportLabel[reportStatus(report)]} />}

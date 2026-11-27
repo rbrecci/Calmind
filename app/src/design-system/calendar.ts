@@ -36,6 +36,11 @@ export function monthCells(month: Date): (string | null)[] {
 const MONTHS = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
 const WEEKDAYS = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
 
+// Só a primeira letra: o `capitalize` do estilo escreveria "Novembro De 2026".
+export function capitalizeFirst(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 export function formatMonth(month: Date): string {
   return `${MONTHS[month.getMonth()]} de ${month.getFullYear()}`;
 }

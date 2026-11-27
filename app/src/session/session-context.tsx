@@ -9,6 +9,7 @@ import {
 } from 'react';
 
 import { api, ApiError, setAuthToken, type LoginInput, type Role, type User } from '@/api';
+import { setUnauthorizedHandler } from '@/api/auth-token';
 import { restoreSession, sessionUser, type SessionUser } from '@/session/restore-session';
 import { secureTokenStorage } from '@/session/token-storage';
 
@@ -50,6 +51,15 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  useEffect(() => {
+    setUnauthorizedHandler(() => {
+      setAuthToken(null);
+      setUser(null);
+      void secureTokenStorage.clear().catch(() => {});
+    });
+    return () => setUnauthorizedHandler(null);
   }, []);
 
   const signIn = useCallback(async (credentials: LoginInput) => {

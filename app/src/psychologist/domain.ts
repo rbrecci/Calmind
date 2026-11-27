@@ -120,9 +120,9 @@ function appointmentWhen(iso: string, now: Date): string {
   return formatDateTime(iso, now);
 }
 
-export function notificationText(type: string): string {
+export function notificationText(type: string, actorName?: string | null): string {
   if (type === 'message.received') return 'Você recebeu uma mensagem';
-  if (type === 'bond.requested') return 'Um paciente pediu vínculo com você';
+  if (type === 'bond.requested') return actorName ? `${actorName} pediu vínculo com você` : 'Um paciente pediu vínculo com você';
   if (type === 'appointment.upcoming') return 'Você tem uma consulta nas próximas 24 horas';
   if (type === 'bond.ended') return 'Um vínculo foi encerrado';
   return 'Você recebeu uma notificação';

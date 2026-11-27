@@ -56,7 +56,7 @@ export default function PatientCatalog() {
       {hasCatalogFilters(form) || hasCatalogFilters(applied) ? <Button tone="patient" variant="secondary" label="Limpar filtros" disabled={loading}
         onPress={() => apply(EMPTY_FILTERS)} /> : null}
     </Card> : null}
-    <Feedback loading={loading} error={error} retry={() => void reload()} />
+    <Feedback loading={loading} error={error} retry={() => void reload()} initial={data === null} />
     {data?.length === 0 && !loading && !error ? <Text accessibilityLiveRegion="polite">{hasCatalogFilters(applied)
       ? 'Nenhum profissional encontrado com esses filtros. Ajuste os filtros e busque de novo.'
       : 'Nenhum profissional disponível por enquanto.'}</Text> : null}

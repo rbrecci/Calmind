@@ -1,11 +1,11 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 
 import { ApiError } from '@/api';
 import { psychologistApi } from '@/api/psychologist';
 import type { Appointment, AppointmentInput } from '@/api/psychologist/types';
-import { ChoiceGroup, EmptyState, formatDateTime, Icon, Loading, RoleColors, Spacing, StatusTag, statusTagKind, Text } from '@/design-system';
+import { ChoiceGroup, Colors, EmptyState, formatDateTime, Icon, Loading, Radius, RoleColors, Spacing, StatusTag, statusTagKind, Text } from '@/design-system';
 import { calendarDays } from '@/patient/agenda';
 import { isAppointmentConflict, localAppointmentIso, splitAppointments } from '@/psychologist/domain';
 import { collectPages } from '@/psychologist/resource';
@@ -19,8 +19,7 @@ export default function Agenda() {
   const [month, setMonth] = useState(() => new Date());
   const params = useLocalSearchParams<{ bond_id?: string }>();
   const [bondId, setBondId] = useState<number | null>(params.bond_id ? Number(params.bond_id) : null);
-  // Formulário aberto: 'new' no topo da tela, o id da consulta quando ele abre dentro do cartão
-  // dela. Um só por vez.
+  // O formulário abre no modal para uma consulta por vez.
   const [form, setForm] = useState<'new' | number | null>(params.bond_id ? 'new' : null);
   const editing = typeof form === 'number' ? form : null;
   const [date, setDate] = useState('');
@@ -183,8 +182,7 @@ export default function Agenda() {
         </View>
       </View>
       {patients.length === 0 ? <Text>É preciso ter um vínculo ativo para agendar uma consulta.</Text>
-        : form === 'new' ? <Card>{renderForm()}</Card>
-          : <Action label="Agendar consulta" disabled={busy || conflict !== null} onPress={openNew} />}
+        : <Action label="Agendar consulta" disabled={busy} onPress={openNew} />}
       {!appointments.upcoming.length && !appointments.previous.length ? <EmptyState illustration="agenda" title="Nenhuma consulta agendada" /> : null}
       {([['Próximas', appointments.upcoming], ['Anteriores', appointments.previous]] as const).map(([title, items]) => items.length ? <Fragment key={title}>
         <Text variant="h4" accessibilityRole="header">{title}</Text>
@@ -196,8 +194,7 @@ export default function Agenda() {
           </View>
           <Text>{[formatDateTime(appointment.scheduled_at), appointment.modality === 'online' ? 'Online' : appointment.modality === 'presencial' ? 'Presencial' : null].filter(Boolean).join(' · ')}</Text>
           {appointment.notes ? <Text color="textSecondary">{appointment.notes}</Text> : null}
-          {form === appointment.id ? renderForm()
-            : activeBonds.has(appointment.bond_id) && (appointment.status === 'scheduled' || appointment.status === 'rescheduled') ? <View style={{ flexDirection: 'row', gap: Spacing.two }}>
+          {activeBonds.has(appointment.bond_id) && (appointment.status === 'scheduled' || appointment.status === 'rescheduled') ? <View style={{ flexDirection: 'row', gap: Spacing.two }}>
               <Action variant="secondary" label="Reagendar" accessibilityLabel={`Reagendar consulta de ${appointment.patient.name}`}
                 disabled={busy || conflict !== null} onPress={() => edit(appointment)} style={{ flex: 1 }} />
               <Action variant="destructive" label="Cancelar" accessibilityLabel={`Cancelar consulta de ${appointment.patient.name}`}
@@ -210,11 +207,23 @@ export default function Agenda() {
         </Card>)}
       </Fragment> : null)}
     </> : null}
+    <Modal visible={form !== null} transparent animationType="fade" onRequestClose={() => { if (!busy) reset(); }}>
+      <KeyboardAvoidingView style={styles.overlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <View style={styles.dialog} accessibilityViewIsModal>
+          <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.form}>
+            {renderForm()}
+          </ScrollView>
+        </View>
+      </KeyboardAvoidingView>
+    </Modal>
     {confirmation}
   </Page>;
 }
 
 const styles = StyleSheet.create({
+  overlay: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: Spacing.four, backgroundColor: 'rgba(0, 0, 0, 0.5)' },
+  dialog: { width: '100%', maxWidth: 560, maxHeight: '90%', padding: Spacing.four, backgroundColor: Colors.background, borderRadius: Radius.md },
+  form: { gap: Spacing.three, paddingBottom: Spacing.two },
   calendar: { gap: Spacing.two },
   monthRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   monthButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },

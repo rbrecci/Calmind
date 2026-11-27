@@ -37,7 +37,7 @@ export default function Notifications() {
     <ErrorNotice error={list.error} retry={list.reload} /><ErrorNotice error={error} />
     {list.data?.length === 0 ? <EmptyState illustration="notificacoes" title="Nenhuma notificação" /> : null}
     {list.data?.map((item) => {
-      const title = notificationText(item.type);
+      const title = notificationText(item.type, item.actor_name);
       const date = formatDateTime(item.created_at);
       return <ListItem key={item.id} tone="psychologist" title={title} description={date} unread={!item.read_at}
         accessibilityLabel={[title, item.read_at ? null : 'não lida', date].filter(Boolean).join(', ')}

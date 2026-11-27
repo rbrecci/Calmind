@@ -31,7 +31,7 @@ export default function Reports() {
     catch (e) { setActionError(errorMessage(e)); } finally { setBusy(false); }
   }
   return <PatientPage>
-    <Feedback loading={loading} error={error} retry={() => void reload()} initial={data === null} />
+    <Feedback loading={loading && data === null} error={error} retry={() => void reload()} initial />
     {actionError ? <Text accessibilityRole="alert" color="error">{actionError}</Text> : null}
     {data?.active && !error ? <Button tone="patient" label="Novo relato" onPress={() => router.push('/new-report')} /> : null}
     {data && !data.active ? <Text color="textSecondary">Sem vínculo ativo. Histórico somente para leitura.</Text> : null}

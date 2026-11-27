@@ -1,10 +1,10 @@
 import { useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { ApiError, imageHeaders } from '@/api';
 import { psychologistApi } from '@/api/psychologist';
 import type { Profile, ProfileInput } from '@/api/psychologist/types';
 import { modalityLabel } from '@/catalog/load-catalog';
-import { ChoiceGroup, Chip, ProfileHeader, Spacing, Text } from '@/design-system';
+import { ChoiceGroup, Chip, Colors, ProfileHeader, Radius, Spacing, Text } from '@/design-system';
 import { ProfileImageActions } from '@/profile/image-actions';
 import { useProfileImages } from '@/profile/use-profile-images';
 import { usePsychologistAccess } from '@/psychologist/access';
@@ -49,24 +49,35 @@ export default function ProfileScreen() {
       <Text>{current.profile_bio}</Text>
     </> : null}
     <ProfileImageActions tone="psychologist" images={images} />
-    <Action variant="secondary" label={editing ? 'Fechar edição' : 'Editar perfil'} onPress={() => setEditing(!editing)} />
-    {editing ? <>
-      <Field label="Abordagem" value={form.profile_approach ?? ''} onChangeText={(value) => setForm({ ...form, profile_approach: value })} error={fieldError('profile_approach')} />
-      <Field label="Especialidade" value={form.profile_specialty ?? ''} onChangeText={(value) => setForm({ ...form, profile_specialty: value })} error={fieldError('profile_specialty')} />
-      <ChoiceGroup tone="psychologist" label="Modalidade" value={form.profile_modality ?? null}
-        onChange={(modality) => setForm({ ...form, profile_modality: modality })} disabled={busy}
-        options={[{ value: 'online', label: 'Online' }, { value: 'presencial', label: 'Presencial' }, { value: 'ambos', label: 'Online e presencial' }]} />
-      <Field label="Região de atendimento" value={form.profile_region ?? ''} onChangeText={(value) => setForm({ ...form, profile_region: value })} error={fieldError('profile_region')} />
-      <Field label="Sobre você" multiline maxLength={3000} value={form.profile_bio ?? ''} onChangeText={(value) => setForm({ ...form, profile_bio: value })} error={fieldError('profile_bio')} />
-      <ErrorNotice error={error} /><FieldErrorsDisplay error={error} />
-      {saved ? <Text accessibilityLiveRegion="polite">Perfil salvo{current?.profile_published_at ? ' e publicado' : ''}.</Text> : null}
-      <Action label="Salvar perfil" loading={busy} onPress={() => { void save(false); }} />
-      <Action variant="secondary" label="Salvar e publicar no catálogo" disabled={busy} onPress={() => { void save(true); }} />
-      {saved ? <Action variant="secondary" label="Atualizar início" onPress={refresh} /> : null}
-    </> : null}
+    <Action variant="secondary" label="Editar perfil" onPress={() => setEditing(true)} />
+    <Modal visible={editing} transparent animationType="fade" onRequestClose={() => setEditing(false)}>
+      <KeyboardAvoidingView style={styles.overlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <View style={styles.dialog} accessibilityViewIsModal>
+          <Text variant="h4">Editar perfil</Text>
+          <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.form}>
+          <Field label="Abordagem" value={form.profile_approach ?? ''} onChangeText={(value) => setForm({ ...form, profile_approach: value })} error={fieldError('profile_approach')} />
+          <Field label="Especialidade" value={form.profile_specialty ?? ''} onChangeText={(value) => setForm({ ...form, profile_specialty: value })} error={fieldError('profile_specialty')} />
+          <ChoiceGroup tone="psychologist" label="Modalidade" value={form.profile_modality ?? null}
+            onChange={(modality) => setForm({ ...form, profile_modality: modality })} disabled={busy}
+            options={[{ value: 'online', label: 'Online' }, { value: 'presencial', label: 'Presencial' }, { value: 'ambos', label: 'Online e presencial' }]} />
+          <Field label="Região de atendimento" value={form.profile_region ?? ''} onChangeText={(value) => setForm({ ...form, profile_region: value })} error={fieldError('profile_region')} />
+          <Field label="Sobre você" multiline maxLength={3000} value={form.profile_bio ?? ''} onChangeText={(value) => setForm({ ...form, profile_bio: value })} error={fieldError('profile_bio')} />
+          <ErrorNotice error={error} /><FieldErrorsDisplay error={error} />
+          {saved ? <Text accessibilityLiveRegion="polite">Perfil salvo{current?.profile_published_at ? ' e publicado' : ''}.</Text> : null}
+          <Action label="Salvar perfil" loading={busy} onPress={() => { void save(false); }} />
+          <Action variant="secondary" label="Salvar e publicar no catálogo" disabled={busy} onPress={() => { void save(true); }} />
+          {saved ? <Action variant="secondary" label="Atualizar início" onPress={refresh} /> : null}
+          <Action variant="secondary" label="Fechar edição" disabled={busy} onPress={() => setEditing(false)} />
+          </ScrollView>
+        </View>
+      </KeyboardAvoidingView>
+    </Modal>
   </Page>;
 }
 
 const styles = StyleSheet.create({
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
+  overlay: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: Spacing.four, backgroundColor: 'rgba(0, 0, 0, 0.5)' },
+  dialog: { width: '100%', maxWidth: 560, maxHeight: '90%', padding: Spacing.four, backgroundColor: Colors.background, borderRadius: Radius.md, gap: Spacing.three },
+  form: { gap: Spacing.three, paddingBottom: Spacing.two },
 });

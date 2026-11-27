@@ -3,6 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Platform, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 
+import { Icon, type IconName } from './icon';
 import { EaseOut } from './motion';
 import { Text } from './text';
 import { FontFamily } from './typography';
@@ -26,6 +27,7 @@ export type ButtonProps = {
   accessibilityLabel?: string;
   style?: StyleProp<ViewStyle>;
   minHeight?: number;
+  heroIcon?: IconName;
 };
 
 export function Button({
@@ -37,6 +39,7 @@ export function Button({
   accessibilityLabel,
   style,
   minHeight = MinTouchTarget,
+  heroIcon,
 }: ButtonProps) {
   const reduced = useReducedMotion();
   // Quem encolhe é a superfície, não o Pressable: o alvo de toque fica do mesmo tamanho.
@@ -55,14 +58,14 @@ export function Button({
           transitionDuration: 120,
           transitionTimingFunction: EaseOut,
         }]}>
-          <Surface label={label} tone={tone} variant={variant} disabled={disabled} minHeight={minHeight} />
+          <Surface label={label} tone={tone} variant={variant} disabled={disabled} minHeight={minHeight} heroIcon={heroIcon} />
         </Animated.View>
       )}
     </Pressable>
   );
 }
 
-function Surface({ label, tone, variant, disabled, minHeight }: { label: string; tone: ButtonTone; variant: ButtonVariant; disabled: boolean; minHeight: number }) {
+function Surface({ label, tone, variant, disabled, minHeight, heroIcon }: { label: string; tone: ButtonTone; variant: ButtonVariant; disabled: boolean; minHeight: number; heroIcon?: IconName }) {
   if (disabled) {
     return (
       <View style={[styles.surface, { minHeight, backgroundColor: Colors.disabled }]}>
@@ -72,7 +75,7 @@ function Surface({ label, tone, variant, disabled, minHeight }: { label: string;
   }
 
   if (variant === 'hero') {
-    return <View style={[styles.surface, { minHeight, backgroundColor: Colors.background }]}><Text style={{ fontFamily: FontFamily.heading }}>{label}</Text></View>;
+    return <View style={[styles.surface, styles.heroContent, { minHeight, backgroundColor: Colors.background }]}><Text style={{ fontFamily: FontFamily.heading }}>{label}</Text>{heroIcon ? <Icon name={heroIcon} size={18} /> : null}</View>;
   }
 
   if (variant !== 'primary') {
@@ -140,6 +143,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  heroContent: { flexDirection: 'row', gap: Spacing.two },
   outline: {
     borderWidth: 2,
     borderRadius: Radius.control,

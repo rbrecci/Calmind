@@ -10,3 +10,13 @@ export function getAuthToken(): string | null {
 export function setAuthToken(token: string | null): void {
   authToken = token;
 }
+
+let unauthorizedHandler: (() => void) | null = null;
+
+export function setUnauthorizedHandler(handler: (() => void) | null): void {
+  unauthorizedHandler = handler;
+}
+
+export function notifyUnauthorized(token: string | null): void {
+  if (token && token === authToken) unauthorizedHandler?.();
+}

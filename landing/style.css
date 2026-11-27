@@ -647,3 +647,7 @@ dialog.is-open::backdrop{background:#0006;backdrop-filter:blur(5px)}
 .psychologist{background:linear-gradient(180deg,#f4f4f600 0%,#f4f4f600 55%,#f4f4f6 100%),linear-gradient(90deg,#f7e8f8 0%,#f4f4f6 51%)}
 .privacy{position:relative}
 .privacy::before{content:'';position:absolute;inset:0 0 auto;height:1px;background:linear-gradient(90deg,transparent,#e4dfea 30%,#e4dfea 70%,transparent)}
+/* fotos nos painéis de compromissos */
+.xpanel-photo{filter:saturate(.7) brightness(1.02)}
+.xpanel:has(.xpanel-photo) .xpanel-body{padding-top:64px;background:linear-gradient(to top,#fff 0%,#fff 48%,#ffffffd9 70%,#fff0 100%)}
+@media(max-width:780px){.xpanel-photo{height:190px}.xpanel:has(.xpanel-photo) .xpanel-body{padding-top:18px;background:#fff}}

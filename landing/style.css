@@ -694,3 +694,11 @@ dialog.is-open::backdrop{background:#0006;backdrop-filter:blur(5px)}
 }
 @media(prefers-reduced-motion:reduce){.how-step,.how-step::before,.how-dashes i{transition:none}}
 @media print{.js .how-step{opacity:1!important}}
+
+/* ilustracoes: sem mascara de corte, sem brilho e sem transform, so fade de opacidade.
+   Evita o navegador pintar a imagem por blocos (borrada/cortada) durante o scroll. */
+.app-illustration.screenshot{overflow:visible}
+.app-illustration.screenshot::after{display:none}
+.app-illustration:hover{transform:none}
+.app-illustration img{border-radius:inherit}
+.js .app-illustration[data-reveal]{translate:none;scale:none;will-change:auto;transition:opacity .9s var(--ease) var(--d,0ms)}

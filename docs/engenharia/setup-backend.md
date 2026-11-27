@@ -41,7 +41,7 @@ Sem senha, tire o `-p`. Preencha `DB_PASSWORD` antes de migrar, se o MySQL tiver
 
 ## 4. Modelo de dados
 
-O [`schema.sql`](../diagramas/schema.sql) é a referência do modelo (25 tabelas e a view `shared_reports`), e as migrations o reproduzem. A coluna gerada `bonds.active_patient_id` usa `PERSISTENT` no MariaDB e `STORED` no MySQL 8; na migration, `storedAs()` resolve por driver.
+O [`schema.sql`](../diagramas/schema.sql) é a referência do modelo (26 tabelas e a view `shared_reports`), e as migrations o reproduzem. A coluna gerada `bonds.active_patient_id` usa `PERSISTENT` no MariaDB e `STORED` no MySQL 8; na migration, `storedAs()` resolve por driver.
 
 ## 5. Massa de teste
 

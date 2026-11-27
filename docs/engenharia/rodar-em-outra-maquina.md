@@ -179,10 +179,30 @@ adb install -r android/app/build/outputs/apk/release/app-release.apk
 
 O `adb` fica em `%LOCALAPPDATA%\Android\Sdk\platform-tools\`.
 
+### Confira para onde o APK aponta
+
+O cache do Metro pode reaproveitar `EXPO_PUBLIC_*` de uma build anterior: em 27/11 um APK feito para a API local saiu apontando para o servidor publicado, com o login de demonstração antigo. Antes de gerar, aponte o temporário para uma pasta nova e use o Gradle sem daemon:
+
+```bash
+mkdir -p /c/cal/tmp && export TMP=C:/cal/tmp TEMP=C:/cal/tmp TMPDIR=C:/cal/tmp
+./gradlew.bat assembleRelease -PreactNativeArchitectures=arm64-v8a --max-workers=3 --no-daemon
+```
+
+Depois confira o pacote, antes de instalar ou passar adiante:
+
+```bash
+grep -a -o -E "https?://[a-zA-Z0-9.:-]+/api/v1" app/build/generated/assets/react/release/index.android.bundle | sort -u
+```
+
+### Testar no celular com a API desta máquina, pelo cabo
+
+Sem rede nem túnel: gere o APK com `EXPO_PUBLIC_API_URL=http://127.0.0.1:8000/api/v1` e `usesCleartextTraffic` ligado **só na cópia de build**, suba a API em `127.0.0.1:8000` e rode `adb reverse tcp:8000 tcp:8000`. Esse APK não serve para mais nada.
+
 ## 8. Quando algo não funciona
 
 | Sintoma | Causa e solução |
 |---|---|
+| Telas de relatos dão erro depois de atualizar o código | falta `php artisan migrate` no banco |
 | Nenhum login passa no celular | API ou túnel desligados: rode o `curl` da seção 5 |
 | Botões "Entrar como" dão senha errada | banco semeado com outra `CALMIND_DEMO_PASSWORD`: use o `.env` original e recrie o banco |
 | Foto de perfil não aparece | `APP_URL` em `localhost`: use o endereço do túnel e reinicie a API |

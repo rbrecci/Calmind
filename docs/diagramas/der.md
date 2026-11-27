@@ -226,6 +226,8 @@ erDiagram
     bonds ||--o{ messages : contém
     bonds ||--o{ appointments : agenda
     bonds ||--o{ medications : registra
+    bonds ||--o{ daily_moods : marca
+    patients ||--o{ daily_moods : sente
     patients ||--o{ reports : escreve
     users ||--o{ tasks : cria
     users ||--o{ messages : envia
@@ -241,6 +243,16 @@ erDiagram
         ENUM visibility "shared ou private, default shared, DEC-13"
         DATETIME unpublished_at "NULL, despublicado pelo paciente, RF-24"
         DATETIME created_at "default CURRENT_TIMESTAMP"
+    }
+
+    daily_moods {
+        INT_UNSIGNED id PK
+        INT_UNSIGNED bond_id FK,UK "NOT NULL, único com mood_date"
+        INT_UNSIGNED patient_id FK "NOT NULL"
+        ENUM mood "bad, neutral ou good"
+        DATE mood_date UK "NOT NULL, um humor por dia"
+        DATETIME created_at "default CURRENT_TIMESTAMP"
+        DATETIME updated_at "default CURRENT_TIMESTAMP"
     }
 
     tasks {
@@ -334,6 +346,8 @@ O relato privado não aparece **nem no conteúdo, nem na contagem** (RNF-08, DEC
 continua sendo um `UPDATE` de uma coluna. O que isso exige em troca, e sem o quê a garantia não
 existe: um teste automatizado que verifique que nenhuma consulta do perfil psicólogo referencia a
 tabela `reports` diretamente.
+
+**`daily_moods` é o humor do dia marcado pelo paciente.** Não é relato: não tem texto nem privacidade própria, e o psicólogo do vínculo o vê no calendário. O termo de consentimento diz isso.
 
 **Ausência de linha em `medication_intakes` significa não marcado.** O sistema nunca presume a
 tomada (CA-28.4).

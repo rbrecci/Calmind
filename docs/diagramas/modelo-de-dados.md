@@ -48,6 +48,8 @@ erDiagram
     bonds ||--o{ messages : contém
     bonds ||--o{ appointments : agenda
     bonds ||--o{ medications : registra
+    bonds ||--o{ daily_moods : marca
+    patients ||--o{ daily_moods : sente
     bonds ||--o{ analyses : resume
 
     medications ||--o{ medication_schedules : "tem horário"
@@ -169,6 +171,7 @@ Os dois convivem assim: a linha em `analyses` sempre existe, com quem pediu e qu
 | `service_contracts`, `contract_acceptances` | RF-48, RNF-24 |
 | `patients.guardian_*`, `guardian_consents` | RF-01, RF-49, DEC-16, DEC-17, DEC-18 |
 | `reports` mais a view `shared_reports` | RF-22, RF-23, RF-24, RNF-08 |
+| `daily_moods` | humor do dia, acrescentado em 27/11/2026 a pedido do grupo, sem requisito numerado |
 | `tasks` | RF-25, RF-37 |
 | `messages` | RF-15 |
 | `appointments` | RF-26, RF-40 |

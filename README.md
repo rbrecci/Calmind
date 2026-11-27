@@ -18,7 +18,7 @@ Pesquisa de campo com três entrevistadas sem relação entre si, duas psicólog
 
 API Laravel e MySQL, painel web em Blade (administrador e psicólogo) e app React Native com Expo (paciente e psicólogo).
 
-- **No app:** cadastro, aprovação de psicólogo, consentimento, catálogo, convite e vínculo, relatos com opção privada, tarefas, chat, agenda, notificações dentro do app e foto de perfil.
+- **No app:** cadastro, aprovação de psicólogo, consentimento, catálogo, convite e vínculo, relatos com opção privada, calendário com o humor do dia, tarefas, chat, agenda, notificações dentro do app, perfil com foto e banner e tela de conta.
 - **Só na API, ainda sem tela:** medicação, consentimento de IA, análise por IA e prontuário consolidado. A auditoria de leitura não tem tela.
 - **Publicação:** API em `https://calmind-api.vercel.app` ([como funciona](docs/engenharia/hospedagem-alwaysdata.md)).
 

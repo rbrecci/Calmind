@@ -40,4 +40,5 @@ As telas de referência são o [protótipo de 25/11](../prototipo/telas-25-11/).
 | App não acha o backend | URL em `localhost` |
 | Data errada na tela | data com `Z` em vez de offset |
 | Lista não renderiza | resposta sem o formato `{data, meta}` |
+| APK chama o servidor errado | cache do Metro com `EXPO_PUBLIC_*` antigas: veja [como conferir](rodar-em-outra-maquina.md#confira-para-onde-o-apk-aponta) |
 | `ninja: error: manifest 'build.ninja' still dirty` | build a partir de caminho longo: use o guia do APK |

@@ -6,6 +6,7 @@ Saídas datadas de execução, com o comando usado. O relatório consolidado da 
 
 | Evidência | O que prova | Resultado |
 |-----------|-------------|-----------|
+| [Newman, pastas 01 a 14, 27/11](2026-11-27-newman-ajustes-app.txt) | Coleção com humor do dia, período dos relatos, `bond_days` e `active_bonds` | Pasta 01: 9 requisições, 15 asserções. Pastas 02 a 14: 192 requisições, 360 asserções. 0 falhas |
 | [Newman, pastas 01 a 14, 26/11](2026-11-26-newman-completo.txt) | Coleção do Postman com medicação, análise por IA e prontuário. **A IA foi simulada** (`AI_PROVIDER=simulated`): prova o fluxo e as regras, não o Gemini | Pasta 01: 9 requisições, 15 asserções. Pastas 02 a 14: 185 requisições, 347 asserções. 0 falhas |
 | [Roteiro cruzado, testes e APK, 04/11](2026-11-04-roteiro-rnf-61.md) | RNF-61 com o app no Expo web | 18 de 18 verificações; 242 testes do backend; 161 do app; APK não executado em aparelho |
 | [php artisan test, 29/10](2026-10-29-php-artisan-test-fechamento.txt) | Suíte do backend | 220 testes, 3835 asserções |

@@ -26,7 +26,11 @@ php artisan migrate --force
 php artisan config:cache && php artisan route:cache && php artisan event:cache
 ```
 
-Mudou o `.env`? Rode a última linha de novo.
+Mudou o `.env`? Rode a última linha de novo. Antes de migrar, vale guardar uma cópia do banco com `mysqldump`.
+
+**Última atualização: 27/11/2026** (PR #26): tabela `daily_moods` e termo 1.1, que pede novo aceite. A cópia anterior ficou em `~/antes-ajustes.sql`.
+
+**Massa grande no servidor.** Em 27/11 também rodou `php artisan db:seed --class=ScaleDemoSeeder --force`, para ver o app cheio. As contas novas (`escala.*@example.com`) ficaram com a senha do seed, que está no repositório público. São dados de teste e **o banco precisa ser limpo antes da apresentação**.
 
 Para voltar o banco ao estado de partida (**apaga tudo o que foi criado nos testes**): `php artisan migrate:fresh --force` e depois a seção 4.4.
 

@@ -440,6 +440,10 @@ Tipos e quem recebe. Os tipos de evento são gravados pelo servidor no momento d
 | `task.due_soon` | paciente | id da tarefa (tarefa não concluída com prazo hoje) |
 | `appointment.upcoming` | paciente e psicólogo | id da consulta (consulta agendada ou remarcada nas próximas 24 horas) |
 
+Cada notificação traz também `actor_name`: o nome de quem pediu o vínculo em `bond.requested`, e `null` nos outros tipos (27/11).
+
+**Limite de tentativas (27/11).** `POST /auth/login` responde 429, com `Retry-After`, depois de 5 falhas em 1 minuto para o mesmo e-mail e IP, ou 30 falhas em 15 minutos para o mesmo e-mail. O acerto zera a contagem. Os logins do painel web usam o mesmo limite. `POST /auth/register` aceita 20 pedidos por minuto por IP.
+
 Preferências de notificação (CA-16.2) e push ficam fora desta versão.
 
 ### 3.8.6 O que fica de fora do fechamento de 30/10

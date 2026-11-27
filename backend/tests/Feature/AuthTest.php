@@ -18,6 +18,62 @@ class AuthTest extends TestCase
 
     private const INVALID_CREDENTIALS = 'Credenciais inválidas.';
 
+    // ---------------------------------------------------------------- limite de tentativas
+
+    public function test_login_is_blocked_after_five_failures_even_with_the_right_password(): void
+    {
+        $user = User::factory()->create();
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->postJson('/api/v1/auth/login', ['email' => $user->email, 'password' => 'senha-errada'])->assertUnauthorized();
+        }
+
+        $this->postJson('/api/v1/auth/login', ['email' => $user->email, 'password' => self::PASSWORD])
+            ->assertTooManyRequests()
+            ->assertHeader('Retry-After')
+            ->assertJsonPath('message', 'Muitas tentativas. Tente novamente em instantes.');
+
+        $this->travel(61)->seconds();
+        $this->postJson('/api/v1/auth/login', ['email' => $user->email, 'password' => self::PASSWORD])->assertOk();
+    }
+
+    public function test_successful_login_resets_the_failure_count(): void
+    {
+        $user = User::factory()->create();
+
+        foreach ([1, 2] as $round) {
+            for ($i = 0; $i < 4; $i++) {
+                $this->postJson('/api/v1/auth/login', ['email' => $user->email, 'password' => 'senha-errada'])->assertUnauthorized();
+            }
+            $this->postJson('/api/v1/auth/login', ['email' => $user->email, 'password' => self::PASSWORD])->assertOk();
+        }
+    }
+
+    public function test_changing_ip_does_not_escape_the_account_limit(): void
+    {
+        config(['calmind.auth.login_account_max_attempts' => 6]);
+        $user = User::factory()->create();
+
+        for ($i = 1; $i <= 6; $i++) {
+            $this->withServerVariables(['REMOTE_ADDR' => "10.0.0.$i"])
+                ->postJson('/api/v1/auth/login', ['email' => $user->email, 'password' => 'senha-errada'])->assertUnauthorized();
+        }
+
+        $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.99'])
+            ->postJson('/api/v1/auth/login', ['email' => $user->email, 'password' => self::PASSWORD])->assertTooManyRequests();
+    }
+
+    public function test_web_panel_login_is_also_limited(): void
+    {
+        foreach (['/admin/login' => 'a@example.com', '/psychologist/login' => 'b@example.com'] as $path => $email) {
+            $data = ['email' => $email, 'password' => 'senha-errada'];
+            for ($i = 0; $i < 5; $i++) {
+                $this->post($path, $data);
+            }
+            $this->post($path, $data)->assertSessionHasErrors(['email' => 'Muitas tentativas. Tente novamente em instantes.']);
+        }
+    }
+
     // ---------------------------------------------------------------- registro
 
     public function test_adult_patient_registers_with_patient_row_and_hashed_password(): void

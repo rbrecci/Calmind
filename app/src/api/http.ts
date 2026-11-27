@@ -1,4 +1,4 @@
-import { getAuthToken } from './auth-token.ts';
+import { getAuthToken, notifyUnauthorized } from './auth-token.ts';
 import {
   ApiError, type Api, type CatalogList, type FieldErrors, type ImageUpload, type PatientTask, type PatientTaskList, type User,
 } from './types.ts';
@@ -29,7 +29,7 @@ export async function request<T>(method: string, path: string, body?: unknown): 
   const token = getAuthToken();
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  return send<T>(url, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
+  return send<T>(url, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) }, path === '/auth/login' ? null : token);
 }
 
 // Envio de imagem em multipart, no campo `image`. Sem Content-Type: quem o escreve, com o
@@ -45,10 +45,10 @@ export async function uploadImage<T>(path: string, image: ImageUpload): Promise<
     // React Native aceita URI local, enquanto o DOM tipa esta parte como Blob.
     body.append('image', { uri: image.uri, name: image.name, type: image.mimeType } as unknown as Blob);
   }
-  return send<T>(url, { method: 'POST', headers, body });
+  return send<T>(url, { method: 'POST', headers, body }, token);
 }
 
-async function send<T>(url: string, init: RequestInit): Promise<T> {
+async function send<T>(url: string, init: RequestInit, token: string | null): Promise<T> {
   let response: Response;
   try {
     response = await fetch(url, init);
@@ -60,6 +60,7 @@ async function send<T>(url: string, init: RequestInit): Promise<T> {
   const payload: unknown = await response.json().catch(() => null);
 
   if (!response.ok) {
+    if (response.status === 401) notifyUnauthorized(token);
     const error = (payload ?? {}) as { message?: string; errors?: FieldErrors };
     throw new ApiError(
       response.status,

@@ -187,6 +187,10 @@ describe('composeRecord', () => {
 });
 
 describe('notificationText', () => {
+  test('inclui o nome de quem pediu vinculo quando disponivel', () => {
+    assert.equal(notificationText('bond.requested', 'Ana'), 'Ana pediu vínculo com você');
+    assert.equal(notificationText('bond.requested', null), 'Um paciente pediu vínculo com você');
+  });
   test('usa somente textos estáticos e tipo desconhecido recebe texto genérico', () => {
     assert.equal(notificationText('message.received'), 'Você recebeu uma mensagem');
     assert.equal(notificationText('bond.requested'), 'Um paciente pediu vínculo com você');

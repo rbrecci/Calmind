@@ -22,6 +22,7 @@ const SCREENS: Record<string, { title: string; icon: IconName; actions?: boolean
   'patients/[id]/chat': { title: 'Chat', icon: 'chat', actions: true },
   notifications: { title: 'Notificações', icon: 'bell' },
   settings: { title: 'Conta', icon: 'gear' },
+  profile: { title: 'Perfil', icon: 'user' },
   invitations: { title: 'Convite', icon: 'key' },
 };
 

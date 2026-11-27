@@ -18,7 +18,7 @@ const SCREENS: Record<string, { title: string; icon: IconName; actions?: boolean
   catalog: { title: 'Profissionais', icon: 'search', actions: true },
   notifications: { title: 'Notificações', icon: 'bell' },
   settings: { title: 'Conta', icon: 'gear' },
-  profile: { title: 'Meu perfil', icon: 'user' },
+  profile: { title: 'Perfil', icon: 'user' },
   'psychologist/[id]': { title: 'Perfil', icon: 'user', actions: true },
   invitation: { title: 'Convite', icon: 'key' },
   'new-report': { title: 'Novo relato', icon: 'pencil' },

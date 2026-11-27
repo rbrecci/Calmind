@@ -29,9 +29,9 @@ export default function PatientSettings() {
     catch (e) { setActionError(errorMessage(e)); } finally { setBusy(false); }
   }
   return <PatientPage>
-    <ListItem tone="patient" title="Meu perfil" onPress={() => router.push('/(patient)/profile')} />
+    <ListItem tone="patient" title="Meu perfil" onPress={() => router.navigate('/(patient)/profile')} />
     <Button tone="patient" variant="secondary" label="Sair da conta" onPress={() => void signOut()} />
-    <Feedback loading={loading} error={error} retry={() => void reload()} />
+    <Feedback loading={loading} error={error} retry={() => void reload()} initial={data === null} />
     {/* A destrutiva fica por último, e a confirmação aparece logo abaixo de quem a pediu. */}
     {bond?.status === 'active' && !error ? <Button tone="patient" variant="destructive" label="Encerrar vínculo" onPress={() => setEnding(true)} disabled={busy} /> : null}
     {actionError ? <Text accessibilityRole="alert" color="error">{actionError}</Text> : null}

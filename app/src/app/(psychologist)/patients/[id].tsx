@@ -41,7 +41,7 @@ function RecordSections({ patient, bondAction }: { patient: PatientDetail; bondA
     {bondAction}
     <ChoiceGroup variant="tabs" tone="psychologist" label="Seção do prontuário" value={section} onChange={setSection} options={SECTIONS} />
     {section === 'reports' ? <>
-      {reports.loading && !reports.data ? <Text>Carregando relatos...</Text> : null}
+      {reports.loading && !reports.data ? <Loading /> : null}
       <ErrorNotice error={reports.error} retry={reports.reload} />
       {reports.data?.length === 0 ? <Text>Nenhum relato compartilhado.</Text> : null}
       {record.reports.map((report) => <Card key={report.id}>
@@ -51,13 +51,13 @@ function RecordSections({ patient, bondAction }: { patient: PatientDetail; bondA
     </> : null}
     {/* Atribuir tarefa é o formulário no fim desta aba, junto das tarefas que ele afeta. */}
     {section === 'tasks' ? <>
-      {tasks.loading && !tasks.data ? <Text>Carregando tarefas...</Text> : null}
+      {tasks.loading && !tasks.data ? <Loading /> : null}
       <ErrorNotice error={tasks.error} retry={tasks.reload} />
       {tasks.data ? <TaskForm bondId={patient.bond_id} readonly={record.readOnly} tasks={record.tasks} onChanged={() => { void tasks.reload(); }} /> : null}
     </> : null}
     {section === 'appointments' ? <>
       {!record.readOnly ? <ListItem tone="psychologist" title="Agendar consulta" onPress={() => router.dismissTo({ pathname: '/(psychologist)/(tabs)/agenda', params: { bond_id: patient.bond_id } })} /> : null}
-      {appointments.loading && !appointments.data ? <Text>Carregando consultas...</Text> : null}
+      {appointments.loading && !appointments.data ? <Loading /> : null}
       <ErrorNotice error={appointments.error} retry={appointments.reload} />
       {appointments.data?.length === 0 ? <Text>Nenhuma consulta.</Text> : null}
       {record.appointments.map((appointment) => <Card key={appointment.id}>

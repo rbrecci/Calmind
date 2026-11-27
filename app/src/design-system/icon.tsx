@@ -14,6 +14,7 @@ import { KeyIcon } from 'phosphor-react-native/src/icons/Key';
 import { ListChecksIcon } from 'phosphor-react-native/src/icons/ListChecks';
 import { MagnifyingGlassIcon } from 'phosphor-react-native/src/icons/MagnifyingGlass';
 import { PencilSimpleIcon } from 'phosphor-react-native/src/icons/PencilSimple';
+import { TimerIcon } from 'phosphor-react-native/src/icons/Timer';
 import { UserIcon } from 'phosphor-react-native/src/icons/User';
 import { UserPlusIcon } from 'phosphor-react-native/src/icons/UserPlus';
 import { UsersIcon } from 'phosphor-react-native/src/icons/Users';
@@ -27,7 +28,7 @@ const icons = {
   calendar: CalendarBlankIcon, 'caret-left': CaretLeftIcon, 'caret-right': CaretRightIcon,
   chat: ChatCircleIcon, 'chart-bar': ChartBarIcon, check: CheckIcon, flame: FireIcon, gear: GearSixIcon,
   house: HouseIcon, key: KeyIcon, 'list-checks': ListChecksIcon, search: MagnifyingGlassIcon,
-  pencil: PencilSimpleIcon, user: UserIcon, 'user-plus': UserPlusIcon, users: UsersIcon,
+  pencil: PencilSimpleIcon, timer: TimerIcon, user: UserIcon, 'user-plus': UserPlusIcon, users: UsersIcon,
 } as const;
 
 export type IconName = keyof typeof icons;

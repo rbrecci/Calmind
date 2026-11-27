@@ -32,7 +32,7 @@ export default function PsychologistHome() {
   const headers = imageHeaders();
   const openRecord = (item: PatientSummary) => router.push(`/(psychologist)/patients/${item.patient.id}`);
   // Gerar convite é a ação principal da aba e fica fixo embaixo, acima da barra de abas.
-  return <ScrollingHeaderScreen tone="psychologist" onRefresh={async () => { await reload(); }}
+  return <ScrollingHeaderScreen tone="psychologist" loading={state.loading && !state.data} onRefresh={async () => { await reload(); }}
     compactHeader={<SideHeader tone="psychologist" title="Pacientes" icon="users" actions />}
     expandedHeader={<><SideHeader tone="psychologist" title="Pacientes" icon="users" actions flush />
       <Hero tone="psychologist" fullBleed>
@@ -44,7 +44,7 @@ export default function PsychologistHome() {
         <Button tone="psychologist" variant="hero" label="Gerar convite" style={styles.heroButton} onPress={() => router.push('/(psychologist)/invitations')} />
       </Hero></>}>
     {profile?.profile_published_at === null ? <Card><Text>Seu perfil ainda não foi publicado no catálogo.</Text>
-      <ListItem tone="psychologist" title="Editar e publicar perfil" onPress={() => router.push('/(psychologist)/(tabs)/profile')} /></Card> : null}
+      <ListItem tone="psychologist" title="Editar e publicar perfil" onPress={() => router.push('/(psychologist)/profile')} /></Card> : null}
     {state.loading && !state.data ? <Loading /> : null}
     <ErrorNotice error={state.error} retry={state.reload} />
     {state.data ? <>

@@ -12,7 +12,6 @@ export const unstable_settings = { anchor: 'dashboard' };
 const TABS = {
   dashboard: { title: 'Pacientes', icon: 'users' },
   agenda: { title: 'Agenda', icon: 'calendar' },
-  profile: { title: 'Perfil', icon: 'user' },
 } satisfies Record<string, { title: string; icon: IconName }>;
 
 function tabIcon(name: IconName) {
@@ -29,6 +28,5 @@ export default function PsychologistTabsLayout() {
   })}>
     <Tabs.Screen name="dashboard" options={{ title: TABS.dashboard.title, tabBarAccessibilityLabel: TABS.dashboard.title, tabBarIcon: tabIcon(TABS.dashboard.icon) }} />
     <Tabs.Screen name="agenda" options={{ title: TABS.agenda.title, tabBarAccessibilityLabel: TABS.agenda.title, tabBarIcon: tabIcon(TABS.agenda.icon) }} />
-    <Tabs.Screen name="profile" options={{ title: TABS.profile.title, tabBarAccessibilityLabel: TABS.profile.title, tabBarIcon: tabIcon(TABS.profile.icon) }} />
   </Tabs>;
 }

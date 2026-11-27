@@ -9,11 +9,9 @@ type Side = 'patient' | 'psychologist';
 
 // Os grupos não entram na URL, mas os dois lados têm "/notifications" e "/settings": o grupo
 // no caminho deixa claro de qual lado é a tela.
-// O avatar do paciente abre "Meu perfil"; o do psicólogo fica só como imagem, porque o perfil
-// dele já é uma aba.
 const ROUTES = {
   patient: { notifications: '/(patient)/notifications', settings: '/(patient)/settings', profile: '/(patient)/profile' },
-  psychologist: { notifications: '/(psychologist)/notifications', settings: '/(psychologist)/settings', profile: null },
+  psychologist: { notifications: '/(psychologist)/notifications', settings: '/(psychologist)/settings', profile: '/(psychologist)/profile' },
 } as const;
 
 const UnreadNotificationsContext = createContext<number | undefined>(undefined);
@@ -51,7 +49,7 @@ export function SideHeader({ tone, title, icon, onBack, actions = false, flush =
   return <AppHeader tone={tone} title={title} icon={icon} onBack={onBack} flush={flush} collapseProgress={collapseProgress}
     avatar={!onBack && name ? {
       name, uri: avatarUrl, headers: avatarUrl ? imageHeaders() : undefined,
-      onPress: profile ? () => router.push(profile) : undefined, accessibilityLabel: profile ? 'Meu perfil' : undefined,
+      onPress: () => router.navigate(profile), accessibilityLabel: 'Meu perfil',
     } : undefined}
     notifications={actions ? { count, onPress: () => router.push(routes.notifications) } : undefined}
     onSettings={actions ? () => router.push(routes.settings) : undefined} />;

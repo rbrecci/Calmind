@@ -9,6 +9,9 @@ return [
     'auth' => [
         // RNF-09: sessao expira por inatividade (meta de projeto: 30 minutos)
         'inactivity_minutes' => (int) env('AUTH_INACTIVITY_MINUTES', 30),
+        // Tentativas de login erradas: por e-mail e IP em 1 minuto, e por e-mail em 15 minutos
+        'login_max_attempts' => (int) env('LOGIN_MAX_ATTEMPTS', 5),
+        'login_account_max_attempts' => (int) env('LOGIN_ACCOUNT_MAX_ATTEMPTS', 30),
     ],
 
     'invitation' => [

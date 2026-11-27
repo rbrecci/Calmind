@@ -18,6 +18,7 @@ Evidências datadas de execução. Cada arquivo guarda a saída bruta de uma rod
 | Evidência | O que prova | Resultado |
 |-----------|-------------|-----------|
 | [php artisan test](2026-10-29-php-artisan-test-fechamento.txt) | Suíte do backend naquela data | 220 testes passando, 3835 asserções |
+| [Newman, pastas 01 a 14](2026-11-26-newman-completo.txt) | Coleção do Postman contra o código de 26/11, com medicação, análise por IA e prontuário. **A IA foi simulada** (`AI_PROVIDER=simulated`): prova o fluxo e as regras, não o Gemini | Pasta 01: 9 requisições, 15 asserções. Pastas 02 a 14: 185 requisições, 347 asserções. 0 falhas e exit 0 |
 | [Newman, pastas 01 a 10](2026-10-29-newman-fechamento.txt) | Coleção do Postman contra a API real, com consentimento registrado pela API, sem fixture de aceite. O arquivo traz duas execuções | Pasta 01: 9 requisições, 15 asserções. Pastas 02 a 10: 110 requisições, 213 asserções. 0 falhas e exit 0 nas duas |
 
 ## Fechamento (04/11/2026)

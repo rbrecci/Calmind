@@ -16,7 +16,7 @@ describe('escala tipográfica da identidade visual', () => {
     assert.equal(Typography.small.fontSize, 14);
   });
 
-  test('títulos usam Quicksand SemiBold e o corpo usa Poppins', () => {
+  test('títulos e corpo usam os pesos do protótipo Quicksand', () => {
     for (const variant of ['h1', 'h2', 'h3', 'h4', 'h5'] as const) {
       assert.equal(Typography[variant].fontFamily, FontFamily.heading, variant);
     }
@@ -24,6 +24,7 @@ describe('escala tipográfica da identidade visual', () => {
       assert.equal(Typography[variant].fontFamily, FontFamily.body, variant);
     }
     assert.equal(FontFamily.heading, 'Quicksand_600SemiBold');
+    assert.equal(FontFamily.body, 'Quicksand_400Regular');
   });
 
   // RNF-34: nenhum degrau da escala pode ficar abaixo do piso de leitura.

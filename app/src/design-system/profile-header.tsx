@@ -23,15 +23,15 @@ const RING = 4;
 export function ProfileHeader({ tone, name, subtitle, avatarUri, coverUri, headers }: ProfileHeaderProps) {
   return (
     <View>
-      <Cover tone={tone} uri={coverUri} headers={headers} height={140} style={styles.cover} />
-      <View style={styles.row}>
+      {coverUri ? <Cover tone={tone} uri={coverUri} headers={headers} height={140} style={styles.cover} /> : null}
+      <View style={[styles.row, !coverUri && styles.compactRow]}>
         {/* Anel branco: separa a foto da capa quando as duas são escuras. */}
         <View style={styles.ring}>
-          <Avatar tone={tone} name={name} size={AVATAR} uri={avatarUri} headers={headers} />
+          <Avatar tone={tone} name={name} size={coverUri ? AVATAR : 64} uri={avatarUri} headers={headers} />
         </View>
-        <View style={styles.texts}>
-          <Text variant="h4">{name}</Text>
-          {subtitle ? <Text color="textSecondary">{subtitle}</Text> : null}
+        <View style={[styles.texts, !coverUri && styles.compactTexts]}>
+          <Text variant="h5">{name}</Text>
+          {subtitle ? <Text variant="small" color="textSecondary">{subtitle}</Text> : null}
         </View>
       </View>
     </View>
@@ -39,6 +39,8 @@ export function ProfileHeader({ tone, name, subtitle, avatarUri, coverUri, heade
 }
 
 const styles = StyleSheet.create({
+  compactRow: { marginTop: 0, paddingHorizontal: 0, alignItems: 'center' },
+  compactTexts: { paddingTop: 0 },
   cover: { borderRadius: Radius.md },
   row: {
     flexDirection: 'row',

@@ -17,6 +17,7 @@ class NotificationResource extends JsonResource
             'id' => $attributes['id'],
             'type' => $attributes['type'],
             'resource_id' => $attributes['resource_id'],
+            'actor_name' => $attributes['actor_name'] ?? null,
             'created_at' => $attributes['created_at'],
             'read_at' => $attributes['read_at'] ?? null,
         ];

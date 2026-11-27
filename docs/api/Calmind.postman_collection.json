@@ -5894,6 +5894,3281 @@
           ]
         }
       ]
+    },
+    {
+      "name": "12 Medicacao",
+      "description": "RF-27, RF-28, RF-29, RF-38 e RF-39 (contrato 3.8.8). Usa o vinculo ativo da pasta 04. Os horarios sao 00:00 do dia da execucao, para a tomada ja estar vencida.",
+      "item": [
+        {
+          "name": "Sem origem da prescricao deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/medications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "medications"
+              ]
+            },
+            "description": "CA-38.2.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": \"{{idVinculo}}\",\n  \"name\": \"Sertralina\",\n  \"dosage\": \"50 mg\",\n  \"schedules\": [\n    {\n      \"weekday\": \"{{diaSemana}}\",\n      \"time_of_day\": \"00:00\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const local = (days) => new Date(Date.now() - 3 * 3600 * 1000 + days * 86400000);",
+                  "const day = (days) => local(days).toISOString().slice(0, 10);",
+                  "pm.collectionVariables.set('hoje', day(0));",
+                  "pm.collectionVariables.set('daquiUmaSemana', day(7));",
+                  "pm.collectionVariables.set('haUmaSemana', day(-7));",
+                  "pm.collectionVariables.set('haQuarentaDias', day(-40));",
+                  "pm.collectionVariables.set('amanha', day(1));",
+                  "pm.collectionVariables.set('daquiUmAno', day(365));",
+                  "pm.collectionVariables.set('diaSemana', local(0).getUTCDay());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "pm.test('erro em prescription_source', () => pm.expect(pm.response.json().errors).to.have.property('prescription_source'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Sem horario deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/medications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "medications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": \"{{idVinculo}}\",\n  \"name\": \"Sertralina\",\n  \"dosage\": \"50 mg\",\n  \"prescription_source\": \"Dr. Ficticio, psiquiatra\",\n  \"schedules\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "pm.test('erro em schedules', () => pm.expect(pm.response.json().errors).to.have.property('schedules'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Paciente nao registra medicacao",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/medications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "medications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": \"{{idVinculo}}\",\n  \"name\": \"Sertralina\",\n  \"dosage\": \"50 mg\",\n  \"prescription_source\": \"Dr. Ficticio, psiquiatra\",\n  \"schedules\": [\n    {\n      \"weekday\": \"{{diaSemana}}\",\n      \"time_of_day\": \"00:00\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Nao registra em vinculo encerrado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/medications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "medications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": \"{{idVinculoEncerrado}}\",\n  \"name\": \"Sertralina\",\n  \"dosage\": \"50 mg\",\n  \"prescription_source\": \"Dr. Ficticio, psiquiatra\",\n  \"schedules\": [\n    {\n      \"weekday\": \"{{diaSemana}}\",\n      \"time_of_day\": \"00:00\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Vinculo inexistente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/medications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "medications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": 999999999,\n  \"name\": \"Sertralina\",\n  \"dosage\": \"50 mg\",\n  \"prescription_source\": \"Dr. Ficticio, psiquiatra\",\n  \"schedules\": [\n    {\n      \"weekday\": \"{{diaSemana}}\",\n      \"time_of_day\": \"00:00\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar medicacao em uso",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/medications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "medications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": \"{{idVinculo}}\",\n  \"name\": \"Sertralina\",\n  \"dosage\": \"50 mg\",\n  \"prescription_source\": \"Dr. Ficticio, psiquiatra\",\n  \"schedules\": [\n    {\n      \"weekday\": \"{{diaSemana}}\",\n      \"time_of_day\": \"00:00\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.test('estado awaiting_confirmation', () => pm.expect(pm.response.json().status).to.eql('awaiting_confirmation'));",
+                  "pm.test('aviso de nao prescricao', () => pm.expect(pm.response.json().notice).to.include('não prescreve'));",
+                  "pm.collectionVariables.set('idMedicacao', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Medicacao nao confirmada nao tem horario",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/medications/doses?from={{hoje}}&to={{hoje}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "medications",
+                "doses"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{hoje}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{hoje}}"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('sem horario antes de confirmar', () => pm.expect(pm.response.json().data.map(x => x.medication_id)).to.not.include(Number(pm.collectionVariables.get('idMedicacao'))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Nao marca tomada antes de confirmar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/medications/{{idMedicacao}}/intakes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "medications",
+                "{{idMedicacao}}",
+                "intakes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduled_for\": \"{{hoje}} 00:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Lista do paciente traz a que aguarda primeiro",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/medications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "medications"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('primeira aguarda confirmacao', () => pm.expect(pm.response.json().data[0].status).to.eql('awaiting_confirmation'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Paciente le a medicacao",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/medications/{{idMedicacao}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "medications",
+                "{{idMedicacao}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Confirmar medicacao",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/medications/{{idMedicacao}}/confirm",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "medications",
+                "{{idMedicacao}}",
+                "confirm"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('estado active', () => pm.expect(pm.response.json().status).to.eql('active'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Confirmar de novo deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/medications/{{idMedicacao}}/confirm",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "medications",
+                "{{idMedicacao}}",
+                "confirm"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Recusar sem motivo deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/medications/{{idMedicacao}}/refuse",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "medications",
+                "{{idMedicacao}}",
+                "refuse"
+              ]
+            },
+            "description": "CA-27.4.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "pm.test('erro em reason', () => pm.expect(pm.response.json().errors).to.have.property('reason'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Horario previsto aparece como nao tomado",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/medications/doses?from={{hoje}}&to={{hoje}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "medications",
+                "doses"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{hoje}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{hoje}}"
+                }
+              ]
+            },
+            "description": "CA-28.4."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('nao presume a tomada', () => { const d = pm.response.json().data.find(x => x.medication_id === Number(pm.collectionVariables.get('idMedicacao'))); pm.expect(d.taken).to.eql(false); pm.expect(d.marked_at).to.eql(null); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Horario futuro deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/medications/{{idMedicacao}}/intakes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "medications",
+                "{{idMedicacao}}",
+                "intakes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduled_for\": \"{{daquiUmaSemana}} 00:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Horario fora da agenda deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/medications/{{idMedicacao}}/intakes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "medications",
+                "{{idMedicacao}}",
+                "intakes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduled_for\": \"{{hoje}} 00:01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Marcar tomada",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/medications/{{idMedicacao}}/intakes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "medications",
+                "{{idMedicacao}}",
+                "intakes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduled_for\": \"{{hoje}} 00:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('tomadaMarcadaEm', pm.response.json().marked_at);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Marcar de novo nao duplica",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/medications/{{idMedicacao}}/intakes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "medications",
+                "{{idMedicacao}}",
+                "intakes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduled_for\": \"{{hoje}} 00:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('preserva a marcacao', () => pm.expect(pm.response.json().marked_at).to.eql(pm.collectionVariables.get('tomadaMarcadaEm')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Horario marcado aparece como tomado",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/medications/doses?from={{hoje}}&to={{hoje}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "medications",
+                "doses"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{hoje}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{hoje}}"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('tomado', () => pm.expect(pm.response.json().data.find(x => x.medication_id === Number(pm.collectionVariables.get('idMedicacao'))).taken).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Suspender medicacao",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/medications/{{idMedicacao}}/suspend",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "medications",
+                "{{idMedicacao}}",
+                "suspend"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('estado suspended', () => pm.expect(pm.response.json().status).to.eql('suspended'));",
+                  "pm.test('autor e o paciente', () => pm.expect(pm.response.json().suspended_by).to.eql('patient'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Suspender de novo deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/medications/{{idMedicacao}}/suspend",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "medications",
+                "{{idMedicacao}}",
+                "suspend"
+              ]
+            },
+            "description": "CA-29.3."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Nao marca tomada de suspensa",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/medications/{{idMedicacao}}/intakes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "medications",
+                "{{idMedicacao}}",
+                "intakes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduled_for\": \"{{hoje}} 00:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Psicologo nao reativa suspensa",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/medications/{{idMedicacao}}/reactivate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "medications",
+                "{{idMedicacao}}",
+                "reactivate"
+              ]
+            },
+            "description": "CA-39.3."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Psicologo ve a suspensao",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/medications/{{idMedicacao}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "medications",
+                "{{idMedicacao}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('data e autor', () => { const b = pm.response.json(); pm.expect(b.suspended_at).to.match(/-03:00$/); pm.expect(b.suspended_by).to.eql('patient'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar medicacao que sera recusada",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/medications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "medications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": \"{{idVinculo}}\",\n  \"name\": \"Fluoxetina\",\n  \"dosage\": \"20 mg\",\n  \"prescription_source\": \"Dr. Ficticio, psiquiatra\",\n  \"schedules\": [\n    {\n      \"weekday\": \"{{diaSemana}}\",\n      \"time_of_day\": \"00:00\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.test('estado awaiting_confirmation', () => pm.expect(pm.response.json().status).to.eql('awaiting_confirmation'));",
+                  "pm.test('aviso de nao prescricao', () => pm.expect(pm.response.json().notice).to.include('não prescreve'));",
+                  "pm.collectionVariables.set('idMedicacaoRecusada', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Recusar com motivo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/medications/{{idMedicacaoRecusada}}/refuse",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "medications",
+                "{{idMedicacaoRecusada}}",
+                "refuse"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"O medico trocou o remedio.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('estado refused', () => pm.expect(pm.response.json().status).to.eql('refused'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Lista do psicologo mostra o motivo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/medications?bond_id={{idVinculo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "medications"
+              ],
+              "query": [
+                {
+                  "key": "bond_id",
+                  "value": "{{idVinculo}}"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('motivo visivel', () => pm.expect(pm.response.json().data.find(x => x.id === Number(pm.collectionVariables.get('idMedicacaoRecusada'))).refusal_reason).to.eql('O medico trocou o remedio.'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Lista de vinculo alheio ou inexistente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/medications?bond_id=999999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "medications"
+              ],
+              "query": [
+                {
+                  "key": "bond_id",
+                  "value": "999999999"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar medicacao que fica ativa",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/medications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "medications"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": \"{{idVinculo}}\",\n  \"name\": \"Escitalopram\",\n  \"dosage\": \"10 mg\",\n  \"prescription_source\": \"Dr. Ficticio, psiquiatra\",\n  \"schedules\": [\n    {\n      \"weekday\": \"{{diaSemana}}\",\n      \"time_of_day\": \"00:00\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.test('estado awaiting_confirmation', () => pm.expect(pm.response.json().status).to.eql('awaiting_confirmation'));",
+                  "pm.test('aviso de nao prescricao', () => pm.expect(pm.response.json().notice).to.include('não prescreve'));",
+                  "pm.collectionVariables.set('idMedicacaoAtiva', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Confirmar a que fica ativa",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/medications/{{idMedicacaoAtiva}}/confirm",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "medications",
+                "{{idMedicacaoAtiva}}",
+                "confirm"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('estado active', () => pm.expect(pm.response.json().status).to.eql('active'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Lembrete da medicacao ativa",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications?unread=1&per_page=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications"
+              ],
+              "query": [
+                {
+                  "key": "unread",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": "RF-28, CA-28.3. O lembrete nasce quando as notificacoes sao abertas."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('lembrete so da ativa', () => { const ids = pm.response.json().data.filter(x => x.type === 'medication.reminder').map(x => x.resource_id); pm.expect(ids).to.include(Number(pm.collectionVariables.get('idMedicacaoAtiva'))); pm.expect(ids).to.not.include(Number(pm.collectionVariables.get('idMedicacao'))); pm.expect(ids).to.not.include(Number(pm.collectionVariables.get('idMedicacaoRecusada'))); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Psicologo recebe as respostas do paciente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications?per_page=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "50"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('tres tipos', () => pm.expect(pm.response.json().data.map(x => x.type)).to.include.members(['medication.confirmed', 'medication.refused', 'medication.suspended']));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Medicacao sem token",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/medications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "medications"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "13 Analise por IA",
+      "description": "RF-04, RF-41 e RF-42 (contrato 3.8.9). Usa o aceite do termo de IA da pasta 02. Rodar com AI_PROVIDER=simulated para nao gastar cota; as assercoes nao dependem do texto devolvido.",
+      "item": [
+        {
+          "name": "Relato compartilhado para analisar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/reports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "reports"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"Dormi mal esta semana e fiquei ansioso antes da prova. Execucao {{runId}}.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const local = (days) => new Date(Date.now() - 3 * 3600 * 1000 + days * 86400000);",
+                  "const day = (days) => local(days).toISOString().slice(0, 10);",
+                  "pm.collectionVariables.set('hoje', day(0));",
+                  "pm.collectionVariables.set('daquiUmaSemana', day(7));",
+                  "pm.collectionVariables.set('haUmaSemana', day(-7));",
+                  "pm.collectionVariables.set('haQuarentaDias', day(-40));",
+                  "pm.collectionVariables.set('amanha', day(1));",
+                  "pm.collectionVariables.set('daquiUmAno', day(365));",
+                  "pm.collectionVariables.set('diaSemana', local(0).getUTCDay());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('idRelatoAnalise', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Periodo no futuro deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/analyses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "analyses"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": \"{{idVinculo}}\",\n  \"period_start\": \"{{haUmaSemana}}\",\n  \"period_end\": \"{{amanha}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "pm.test('erro em period_end', () => pm.expect(pm.response.json().errors).to.have.property('period_end'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Periodo maior que 31 dias deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/analyses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "analyses"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": \"{{idVinculo}}\",\n  \"period_start\": \"{{haQuarentaDias}}\",\n  \"period_end\": \"{{hoje}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Periodo sem relato deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/analyses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "analyses"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": \"{{idVinculo}}\",\n  \"period_start\": \"2020-01-01\",\n  \"period_end\": \"2020-01-07\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Paciente nao aciona a IA",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/analyses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "analyses"
+              ]
+            },
+            "description": "CA-42.3.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": \"{{idVinculo}}\",\n  \"period_start\": \"{{haUmaSemana}}\",\n  \"period_end\": \"{{hoje}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Nao analisa vinculo encerrado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/analyses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "analyses"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": \"{{idVinculoEncerrado}}\",\n  \"period_start\": \"{{haUmaSemana}}\",\n  \"period_end\": \"{{hoje}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Analise de vinculo inexistente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/analyses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "analyses"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": 999999999,\n  \"period_start\": \"{{haUmaSemana}}\",\n  \"period_end\": \"{{hoje}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Gerar sugestao",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/analyses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "analyses"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": \"{{idVinculo}}\",\n  \"period_start\": \"{{haUmaSemana}}\",\n  \"period_end\": \"{{hoje}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.test('estado generated', () => pm.expect(pm.response.json().status).to.eql('generated'));",
+                  "pm.test('rotulo de sugestao', () => { const b = pm.response.json(); pm.expect(b.origin).to.eql('ai_suggestion'); pm.expect(b.label).to.include('Sugestão gerada por IA'); pm.expect(b.summary).to.be.a('string').and.not.empty; });",
+                  "pm.collectionVariables.set('idAnalise', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Sugestao nao entra na lista",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/analyses?bond_id={{idVinculo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "analyses"
+              ],
+              "query": [
+                {
+                  "key": "bond_id",
+                  "value": "{{idVinculo}}"
+                }
+              ]
+            },
+            "description": "CA-42.2."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('so confirmadas', () => pm.expect(pm.response.json().data.map(x => x.id)).to.not.include(Number(pm.collectionVariables.get('idAnalise'))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Abrir a sugestao",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/analyses/{{idAnalise}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "analyses",
+                "{{idAnalise}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('estado generated', () => pm.expect(pm.response.json().status).to.eql('generated'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar antes de confirmar deve falhar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/analyses/{{idAnalise}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "analyses",
+                "{{idAnalise}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"Texto antes da hora.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Confirmar com edicao",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/analyses/{{idAnalise}}/confirm",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "analyses",
+                "{{idAnalise}}",
+                "confirm"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"Resumo revisado pela psicologa.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('estado confirmed', () => pm.expect(pm.response.json().status).to.eql('confirmed'));",
+                  "pm.test('guarda o texto e quem confirmou', () => { const b = pm.response.json(); pm.expect(b.summary).to.eql('Resumo revisado pela psicologa.'); pm.expect(b.versions).to.have.lengthOf(1); pm.expect(b.confirmed_by_user_id).to.eql(Number(pm.collectionVariables.get('idUsuarioPsicologo'))); pm.expect(b.confirmed_at).to.match(/-03:00$/); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Confirmar de novo deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/analyses/{{idAnalise}}/confirm",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "analyses",
+                "{{idAnalise}}",
+                "confirm"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Descartar confirmada deve falhar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/analyses/{{idAnalise}}/discard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "analyses",
+                "{{idAnalise}}",
+                "discard"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar sem texto deve falhar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/analyses/{{idAnalise}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "analyses",
+                "{{idAnalise}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "pm.test('erro em body', () => pm.expect(pm.response.json().errors).to.have.property('body'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar cria nova versao",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/analyses/{{idAnalise}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "analyses",
+                "{{idAnalise}}"
+              ]
+            },
+            "description": "CA-42.4.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"Resumo revisado, segunda versao.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('preserva a anterior', () => { const b = pm.response.json(); pm.expect(b.versions.map(v => v.body)).to.eql(['Resumo revisado pela psicologa.', 'Resumo revisado, segunda versao.']); pm.expect(b.summary).to.eql('Resumo revisado, segunda versao.'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Lista traz a confirmada",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/analyses?bond_id={{idVinculo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "analyses"
+              ],
+              "query": [
+                {
+                  "key": "bond_id",
+                  "value": "{{idVinculo}}"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('inclui a confirmada', () => pm.expect(pm.response.json().data.map(x => x.id)).to.include(Number(pm.collectionVariables.get('idAnalise'))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Gerar sugestao para descartar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/analyses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "analyses"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": \"{{idVinculo}}\",\n  \"period_start\": \"{{haUmaSemana}}\",\n  \"period_end\": \"{{hoje}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.test('estado generated', () => pm.expect(pm.response.json().status).to.eql('generated'));",
+                  "pm.test('rotulo de sugestao', () => { const b = pm.response.json(); pm.expect(b.origin).to.eql('ai_suggestion'); pm.expect(b.label).to.include('Sugestão gerada por IA'); pm.expect(b.summary).to.be.a('string').and.not.empty; });",
+                  "pm.collectionVariables.set('idAnaliseDescartada', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Descartar sugestao",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/analyses/{{idAnaliseDescartada}}/discard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "analyses",
+                "{{idAnaliseDescartada}}",
+                "discard"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Descartada nao existe mais",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/analyses/{{idAnaliseDescartada}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "analyses",
+                "{{idAnaliseDescartada}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Gerar sugestao que fica sem revisao",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/analyses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "analyses"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": \"{{idVinculo}}\",\n  \"period_start\": \"{{haUmaSemana}}\",\n  \"period_end\": \"{{hoje}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.test('estado generated', () => pm.expect(pm.response.json().status).to.eql('generated'));",
+                  "pm.test('rotulo de sugestao', () => { const b = pm.response.json(); pm.expect(b.origin).to.eql('ai_suggestion'); pm.expect(b.label).to.include('Sugestão gerada por IA'); pm.expect(b.summary).to.be.a('string').and.not.empty; });",
+                  "pm.collectionVariables.set('idAnalisePendente', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Revogar o termo de IA",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/consent-acceptances/{{idAceiteIA}}/revoke",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "consent-acceptances",
+                "{{idAceiteIA}}",
+                "revoke"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Sem consentimento de IA nao analisa",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/analyses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "analyses"
+              ]
+            },
+            "description": "CA-04.2 e CA-04.3.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": \"{{idVinculo}}\",\n  \"period_start\": \"{{haUmaSemana}}\",\n  \"period_end\": \"{{hoje}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Aceitar o termo de IA de novo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/consent-acceptances",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "consent-acceptances"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consent_term_id\": \"{{idTermoIA}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('reativa o mesmo aceite', () => { const b = pm.response.json(); pm.expect(b.revoked_at).to.eql(null); pm.expect(b.id).to.eql(Number(pm.collectionVariables.get('idAceiteIA'))); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Analises sem token",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/analyses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "analyses"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "14 Prontuario consolidado",
+      "description": "RF-36 (contrato 3.8.10). Le o que as pastas 05, 09, 12 e 13 criaram.",
+      "item": [
+        {
+          "name": "Tarefa para o prontuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/tasks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "tasks"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bond_id\": \"{{idVinculo}}\",\n  \"title\": \"Anotar o sono\",\n  \"due_date\": \"2030-12-31\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const local = (days) => new Date(Date.now() - 3 * 3600 * 1000 + days * 86400000);",
+                  "const day = (days) => local(days).toISOString().slice(0, 10);",
+                  "pm.collectionVariables.set('hoje', day(0));",
+                  "pm.collectionVariables.set('daquiUmaSemana', day(7));",
+                  "pm.collectionVariables.set('haUmaSemana', day(-7));",
+                  "pm.collectionVariables.set('haQuarentaDias', day(-40));",
+                  "pm.collectionVariables.set('amanha', day(1));",
+                  "pm.collectionVariables.set('daquiUmAno', day(365));",
+                  "pm.collectionVariables.set('diaSemana', local(0).getUTCDay());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('idTarefaProntuario', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Prontuario dos ultimos 30 dias",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/patients/{{idUsuarioPaciente}}/record",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "patients",
+                "{{idUsuarioPaciente}}",
+                "record"
+              ]
+            },
+            "description": "CA-36.4 e RF-42."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const ids = (type) => b.timeline.filter(x => x.type === type).map(x => x.id);",
+                  "pm.test('vinculo ativo em ordem asc', () => { pm.expect(b.bond_status).to.eql('active'); pm.expect(b.order).to.eql('asc'); const at = b.timeline.map(x => Date.parse(x.at)); pm.expect(at).to.eql([...at].sort((x, y) => x - y)); });",
+                  "pm.test('traz relato, tarefa, medicacao e analise', () => { pm.expect(ids('report')).to.include(Number(pm.collectionVariables.get('idRelatoAnalise'))); pm.expect(ids('task')).to.include(Number(pm.collectionVariables.get('idTarefaProntuario'))); pm.expect(ids('medication')).to.include(Number(pm.collectionVariables.get('idMedicacaoAtiva'))); pm.expect(ids('analysis')).to.include(Number(pm.collectionVariables.get('idAnalise'))); });",
+                  "pm.test('sem relato privado ou despublicado', () => { pm.expect(ids('report')).to.not.include(Number(pm.collectionVariables.get('idRelatoPrivado'))); pm.expect(ids('report')).to.not.include(Number(pm.collectionVariables.get('idRelatoCompartilhado'))); });",
+                  "pm.test('sem sugestao nao confirmada ou descartada', () => { pm.expect(ids('analysis')).to.not.include(Number(pm.collectionVariables.get('idAnalisePendente'))); pm.expect(ids('analysis')).to.not.include(Number(pm.collectionVariables.get('idAnaliseDescartada'))); });",
+                  "pm.test('sem tarefa arquivada', () => pm.expect(ids('task')).to.not.include(Number(pm.collectionVariables.get('idTarefa'))));",
+                  "pm.test('totals confere com a timeline', () => { for (const [type, total] of Object.entries(b.totals)) pm.expect(ids(type)).to.have.lengthOf(total); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Periodo futuro traz a consulta em ordem desc",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/patients/{{idUsuarioPaciente}}/record?from={{hoje}}&to={{daquiUmAno}}&order=desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "patients",
+                "{{idUsuarioPaciente}}",
+                "record"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{hoje}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{daquiUmAno}}"
+                },
+                {
+                  "key": "order",
+                  "value": "desc"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.test('tem consulta', () => pm.expect(b.timeline.map(x => x.type)).to.include('appointment'));",
+                  "pm.test('ordem desc', () => { const at = b.timeline.map(x => Date.parse(x.at)); pm.expect(at).to.eql([...at].sort((x, y) => y - x)); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ordem invalida",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/patients/{{idUsuarioPaciente}}/record?order=lado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "patients",
+                "{{idUsuarioPaciente}}",
+                "record"
+              ],
+              "query": [
+                {
+                  "key": "order",
+                  "value": "lado"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "pm.test('erro em order', () => pm.expect(pm.response.json().errors).to.have.property('order'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Fim antes do inicio",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/patients/{{idUsuarioPaciente}}/record?from={{hoje}}&to={{haUmaSemana}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "patients",
+                "{{idUsuarioPaciente}}",
+                "record"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{hoje}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{haUmaSemana}}"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "pm.test('erro em to', () => pm.expect(pm.response.json().errors).to.have.property('to'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Periodo acima de 366 dias",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/patients/{{idUsuarioPaciente}}/record?from=2020-01-01&to={{hoje}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "patients",
+                "{{idUsuarioPaciente}}",
+                "record"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2020-01-01"
+                },
+                {
+                  "key": "to",
+                  "value": "{{hoje}}"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "pm.test('erro em from', () => pm.expect(pm.response.json().errors).to.have.property('from'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Paciente nao le prontuario",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/patients/{{idUsuarioPaciente}}/record",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "patients",
+                "{{idUsuarioPaciente}}",
+                "record"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Prontuario de paciente sem vinculo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/patients/999999999/record",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "patients",
+                "999999999",
+                "record"
+              ]
+            },
+            "description": "CA-36.3."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Prontuario sem token",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/patients/{{idUsuarioPaciente}}/record",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "patients",
+                "{{idUsuarioPaciente}}",
+                "record"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
   ],
   "variable": [
@@ -6058,6 +9333,70 @@
     },
     {
       "key": "notificacaoLidaEm",
+      "value": ""
+    },
+    {
+      "key": "hoje",
+      "value": ""
+    },
+    {
+      "key": "daquiUmaSemana",
+      "value": ""
+    },
+    {
+      "key": "haUmaSemana",
+      "value": ""
+    },
+    {
+      "key": "haQuarentaDias",
+      "value": ""
+    },
+    {
+      "key": "amanha",
+      "value": ""
+    },
+    {
+      "key": "daquiUmAno",
+      "value": ""
+    },
+    {
+      "key": "diaSemana",
+      "value": ""
+    },
+    {
+      "key": "idMedicacao",
+      "value": ""
+    },
+    {
+      "key": "idMedicacaoRecusada",
+      "value": ""
+    },
+    {
+      "key": "idMedicacaoAtiva",
+      "value": ""
+    },
+    {
+      "key": "tomadaMarcadaEm",
+      "value": ""
+    },
+    {
+      "key": "idRelatoAnalise",
+      "value": ""
+    },
+    {
+      "key": "idAnalise",
+      "value": ""
+    },
+    {
+      "key": "idAnaliseDescartada",
+      "value": ""
+    },
+    {
+      "key": "idAnalisePendente",
+      "value": ""
+    },
+    {
+      "key": "idTarefaProntuario",
       "value": ""
     }
   ]

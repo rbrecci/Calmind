@@ -5,6 +5,7 @@ import Animated, { useReducedMotion } from 'react-native-reanimated';
 
 import { EaseOut } from './motion';
 import { Text } from './text';
+import { FontFamily } from './typography';
 import { ButtonVariants, Colors, MinTouchTarget, NeutralGradient, Radius, RoleColors, Spacing } from './tokens';
 
 // `neutral` é o botão das telas anteriores ao login, que não escolhem lado e usam o gradiente:
@@ -14,7 +15,7 @@ export type ButtonTone = 'neutral' | 'patient' | 'psychologist';
 
 // `primary` é a ação principal, cheia na cor do lado. `secondary` e `destructive` são contorno
 // e não mudam com o lado: as cores de lado reprovam como texto ou borda sobre o branco.
-export type ButtonVariant = 'primary' | 'secondary' | 'destructive';
+export type ButtonVariant = 'primary' | 'secondary' | 'destructive' | 'hero';
 
 export type ButtonProps = {
   label: string;
@@ -24,6 +25,7 @@ export type ButtonProps = {
   disabled?: boolean;
   accessibilityLabel?: string;
   style?: StyleProp<ViewStyle>;
+  minHeight?: number;
 };
 
 export function Button({
@@ -34,6 +36,7 @@ export function Button({
   disabled = false,
   accessibilityLabel,
   style,
+  minHeight = MinTouchTarget,
 }: ButtonProps) {
   const reduced = useReducedMotion();
   // Quem encolhe é a superfície, não o Pressable: o alvo de toque fica do mesmo tamanho.
@@ -44,7 +47,7 @@ export function Button({
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onPress}
-      style={[styles.pressable, style]}>
+      style={[styles.pressable, { minHeight }, style]}>
       {({ pressed }) => (
         <Animated.View style={[styles.clip, {
           transform: [{ scale: pressed && !disabled && !reduced ? 0.97 : 1 }],
@@ -52,26 +55,30 @@ export function Button({
           transitionDuration: 120,
           transitionTimingFunction: EaseOut,
         }]}>
-          <Surface label={label} tone={tone} variant={variant} disabled={disabled} />
+          <Surface label={label} tone={tone} variant={variant} disabled={disabled} minHeight={minHeight} />
         </Animated.View>
       )}
     </Pressable>
   );
 }
 
-function Surface({ label, tone, variant, disabled }: { label: string; tone: ButtonTone; variant: ButtonVariant; disabled: boolean }) {
+function Surface({ label, tone, variant, disabled, minHeight }: { label: string; tone: ButtonTone; variant: ButtonVariant; disabled: boolean; minHeight: number }) {
   if (disabled) {
     return (
-      <View style={[styles.surface, { backgroundColor: Colors.disabled }]}>
+      <View style={[styles.surface, { minHeight, backgroundColor: Colors.disabled }]}>
         <Text style={{ color: Colors.onDisabled }}>{label}</Text>
       </View>
     );
   }
 
+  if (variant === 'hero') {
+    return <View style={[styles.surface, { minHeight, backgroundColor: Colors.background }]}><Text style={{ fontFamily: FontFamily.heading }}>{label}</Text></View>;
+  }
+
   if (variant !== 'primary') {
     const colors = ButtonVariants[variant];
     return (
-      <View style={[styles.surface, styles.outline, { backgroundColor: colors.background, borderColor: colors.border }]}>
+      <View style={[styles.surface, styles.outline, { minHeight, backgroundColor: colors.background, borderColor: colors.border }]}>
         <Text style={{ color: colors.text }}>{label}</Text>
       </View>
     );
@@ -85,8 +92,8 @@ function Surface({ label, tone, variant, disabled }: { label: string; tone: Butt
         colors={NeutralGradient.colors}
         start={{ x: 0, y: 0.5 }}
         end={{ x: 1, y: 0.5 }}
-        style={styles.gradientBorder}>
-        <View style={styles.gradientInner}>
+        style={[styles.gradientBorder, { minHeight }]}>
+        <View style={[styles.gradientInner, { minHeight: minHeight - 4 }]}>
           <GradientLabel label={label} />
         </View>
       </LinearGradient>
@@ -95,7 +102,7 @@ function Surface({ label, tone, variant, disabled }: { label: string; tone: Butt
 
   // O texto sobre cor é sempre Dark: branco reprova o contraste em todas as cores (5.4).
   return (
-    <View style={[styles.surface, { backgroundColor: RoleColors[tone].accent }]}>
+    <View style={[styles.surface, { minHeight, backgroundColor: RoleColors[tone].accent }]}>
       <Text style={{ color: RoleColors[tone].onAccent }}>{label}</Text>
     </View>
   );
@@ -123,18 +130,19 @@ const styles = StyleSheet.create({
     minHeight: MinTouchTarget, // RNF-35
   },
   clip: {
-    borderRadius: Radius.md,
+    borderRadius: Radius.control,
     overflow: 'hidden',
   },
   surface: {
     minHeight: MinTouchTarget,
+    paddingVertical: Spacing.two,
     paddingHorizontal: Spacing.four,
     alignItems: 'center',
     justifyContent: 'center',
   },
   outline: {
     borderWidth: 2,
-    borderRadius: Radius.md,
+    borderRadius: Radius.control,
   },
   gradientBorder: {
     minHeight: MinTouchTarget,
@@ -144,7 +152,8 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     minHeight: MinTouchTarget - 4,
     paddingHorizontal: Spacing.four - 2,
-    borderRadius: Radius.md - 2,
+    borderRadius: Radius.control - 2,
+    paddingVertical: Spacing.two - 2,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: Colors.background,

@@ -25,6 +25,7 @@ export default function PatientConsent() {
       <Text>Sem o aceite, as funções clínicas ficam bloqueadas. Você pode sair da conta.</Text>
       <Button tone="patient" variant="secondary" label="Sair da conta" onPress={() => void signOut()} />
     </> : <>
+      <Text variant="h5">Tratamento dos seus dados de saúde</Text>
       <Text>{term?.body}</Text>
       {term ? <Text variant="small" color="textSecondary">Versão {term.version}, vigente desde {formatDate(term.effective_from)}</Text> : null}
       <CheckCard label="Li e aceito o termo" tag="obrigatório" checked={checked} disabled={busy} onChange={setChecked} />

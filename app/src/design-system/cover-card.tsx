@@ -22,7 +22,7 @@ export type CoverCardProps = {
   accessibilityLabel?: string;
 };
 
-const AVATAR = 64;
+const AVATAR = 52;
 const RING = 3;
 
 // Cartão de uma pessoa com capa, como "Seu vínculo" no início do paciente. Tocável inteiro (R4):
@@ -46,8 +46,8 @@ export function CoverCard({ tone, name, avatarUri, coverUri, headers, tag, descr
           {tag ? <View style={styles.tag}><StatusTag kind={tag.kind} label={tag.label} /></View> : null}
         </View>
         <View style={styles.texts}>
-          <Text variant="h5">{name}</Text>
-          {description ? <Text color="textSecondary">{description}</Text> : null}
+          <Text>{name}</Text>
+          {description ? <Text variant="small" color="textSecondary">{description}</Text> : null}
         </View>
       </Animated.View>}
     </Pressable>

@@ -7,6 +7,21 @@ function localDay(value: string): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
+// A grade começa no domingo e marca consultas no fuso do aparelho.
+export function calendarDays(month: Date, appointments: readonly { scheduled_at: string }[]) {
+  const year = month.getFullYear();
+  const index = month.getMonth();
+  const firstWeekday = new Date(year, index, 1).getDay();
+  const lastDay = new Date(year, index + 1, 0).getDate();
+  const marked = new Set(appointments.map((item) => localDay(item.scheduled_at)));
+  const length = Math.ceil((firstWeekday + lastDay) / 7) * 7;
+  return Array.from({ length }, (_, i) => {
+    const day = i - firstWeekday + 1;
+    if (day < 1 || day > lastDay) return null;
+    return { day, hasAppointment: marked.has(localDay(new Date(year, index, day).toISOString())) };
+  });
+}
+
 function group(items: Appointment[]): DayGroup[] {
   const days = new Map<string, Appointment[]>();
   for (const appointment of items) {

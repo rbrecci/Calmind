@@ -22,7 +22,7 @@ export function Shortcut({ tone, icon, label, badge, onPress, accessibilityLabel
       style={({ pressed }) => [styles.tile, pressed && { backgroundColor: Colors.surface }]}>
       <Icon name={icon} color={RoleColors[tone].shade} size={36} />
       <View style={styles.label}>
-        <Text>{label}</Text>
+        <Text variant="small" numberOfLines={1} style={styles.labelText}>{label}</Text>
         {badge ? <View style={[styles.badge, { backgroundColor: RoleColors[tone].accent }]}>
           <Text variant="small" style={{ color: RoleColors[tone].onAccent }}>{badge}</Text>
         </View> : null}
@@ -40,6 +40,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.three,
     borderRadius: Radius.md,
   },
-  label: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
+  label: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Spacing.one, maxWidth: '100%' },
+  labelText: { flexShrink: 1 },
   badge: { minWidth: 24, paddingHorizontal: Spacing.two, borderRadius: Radius.md, alignItems: 'center' },
 });

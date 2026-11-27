@@ -37,7 +37,7 @@ class NotificationTest extends TestCase
         $other = Notification::create(['user_id' => $bond->psychologist->user_id, 'type' => 'bond.requested', 'resource_id' => $bond->id]);
         $this->as($owner)->getJson('/api/v1/notifications?unread=1')->assertOk()->assertJsonPath('meta.total', 2)->assertJsonPath('data.0.id', $second->id);
         $read = $this->as($owner)->postJson("/api/v1/notifications/{$first->id}/read")->assertOk();
-        $this->assertSame(['id', 'type', 'resource_id', 'created_at', 'read_at'], array_keys($read->json()));
+        $this->assertSame(['id', 'type', 'resource_id', 'actor_name', 'created_at', 'read_at'], array_keys($read->json()));
         $this->travel(1)->minutes();
         $this->as($owner)->postJson("/api/v1/notifications/{$first->id}/read")->assertOk()->assertJsonPath('read_at', $read->json('read_at'));
         $this->as($owner)->postJson("/api/v1/notifications/{$other->id}/read")->assertNotFound();
@@ -61,6 +61,21 @@ class NotificationTest extends TestCase
             $this->assertDatabaseHas('notifications', ['user_id' => $patient->user_id, 'type' => $action === 'accept' ? 'bond.accepted' : 'bond.rejected', 'resource_id' => $bond->id]);
         }
         $this->assertDatabaseCount('notifications', 4);
+    }
+
+    public function test_bond_request_notification_carries_the_patient_name_only(): void
+    {
+        $bond = Bond::factory()->create(['status' => 'pending']);
+        $user = $bond->psychologist->user;
+        Notification::create(['user_id' => $user->id, 'type' => 'bond.requested', 'resource_id' => $bond->id]);
+        // vinculo de outro psicologo nao entrega nome
+        Notification::create(['user_id' => $user->id, 'type' => 'bond.requested', 'resource_id' => Bond::factory()->create()->id]);
+
+        $names = collect($this->as($user)->getJson('/api/v1/notifications')->assertOk()->json('data'))
+            ->pluck('actor_name', 'resource_id');
+
+        $this->assertSame($bond->patient->user->name, $names[$bond->id]);
+        $this->assertSame(1, $names->filter()->count());
     }
 
     public function test_task_assignment_notifies_without_task_content(): void

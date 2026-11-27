@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
+import { useWindowDimensions } from 'react-native';
 
 import { patientApi } from '@/api/patient';
 import type { Visibility } from '@/api/patient/types';
@@ -14,6 +15,7 @@ const VISIBILITY_OPTIONS = [
 
 export default function NewReport() {
   const router = useRouter();
+  const { height } = useWindowDimensions();
   const [visibility, setVisibility] = useState<Visibility>('shared');
   const [body, setBody] = useState('');
   const [busy, setBusy] = useState(false);
@@ -32,6 +34,6 @@ export default function NewReport() {
       {visibility === 'shared' ? 'Seu profissional poderá ler este relato. Você pode parar de compartilhar depois.' : 'Só você poderá ler este relato.'}
     </Text>
     <TextField label="Seu relato" accessibilityLabel="Texto do relato" value={body} onChangeText={setBody}
-      multiline numberOfLines={12} maxLength={10000} editable={!busy} error={error ?? undefined} />
+      multiline numberOfLines={Math.max(8, Math.min(18, Math.floor((height - 350) / 24)))} maxLength={10000} editable={!busy} error={error ?? undefined} />
   </PatientPage>;
 }

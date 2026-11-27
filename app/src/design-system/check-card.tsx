@@ -5,7 +5,7 @@ import { StatusTag } from './status-tag';
 import { Text } from './text';
 import { ButtonVariants, Colors, MinTouchTarget, Radius, Spacing } from './tokens';
 
-const CHECK: IconName = { ios: 'checkmark', android: 'check' };
+const CHECK: IconName = 'check';
 
 export type CheckCardProps = {
   label: string;

@@ -39,11 +39,11 @@ export function CodeField({ value, onChangeText, length, accessibilityLabel, edi
 const styles = StyleSheet.create({
   input: {
     ...Typography.h3,
-    minHeight: 72,
+    minHeight: 64,
     letterSpacing: Spacing.two,
     textAlign: 'center',
     borderWidth: 2,
-    borderRadius: Radius.md,
+    borderRadius: Radius.control,
     paddingHorizontal: Spacing.three,
     backgroundColor: Colors.background,
     color: Colors.text,

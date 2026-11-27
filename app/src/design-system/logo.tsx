@@ -1,4 +1,4 @@
-import { Image, StyleSheet } from 'react-native';
+import { Image, StyleSheet, type ColorValue } from 'react-native';
 import Animated, { css, useReducedMotion } from 'react-native-reanimated';
 
 import { EaseOut } from './motion';
@@ -15,10 +15,11 @@ export type LogoProps = {
   size?: number;
   // Entra uma vez ao montar. Com "reduzir movimento" no aparelho, só esmaece, sem escala.
   animated?: boolean;
+  tint?: ColorValue;
 };
 
 // Só o símbolo. É decorativo: o nome "Calmind" escrito ao lado é que o leitor de tela lê.
-export function Logo({ size = 112, animated = false }: LogoProps) {
+export function Logo({ size = 112, animated = false, tint }: LogoProps) {
   const reduced = useReducedMotion();
   const motion = animated ? {
     animationName: reduced ? fadeIn : entrance,
@@ -29,7 +30,7 @@ export function Logo({ size = 112, animated = false }: LogoProps) {
   return (
     <Animated.View accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants"
       style={[{ width: size, height: size }, motion]}>
-      <Image source={source} style={styles.image} resizeMode="contain" />
+      <Image source={source} style={styles.image} tintColor={tint} resizeMode="contain" />
     </Animated.View>
   );
 }

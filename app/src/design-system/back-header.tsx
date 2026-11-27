@@ -4,7 +4,7 @@ import { Icon, type IconName } from './icon';
 import { Text } from './text';
 import { Colors, MinTouchTarget, Spacing } from './tokens';
 
-const BACK: IconName = { ios: 'chevron.left', android: 'arrow_back_ios_new' };
+const BACK: IconName = 'caret-left';
 
 export type BackHeaderProps = {
   title: string;

@@ -6,7 +6,8 @@ use Illuminate\Support\Facades\Route;
 
 // Bloco A: autenticacao (dono: Rafael)
 
-Route::post('auth/register', [AuthController::class, 'register']);
+// Cadastro limitado por IP. O limite do login conta so as falhas e fica no LoginThrottle
+Route::post('auth/register', [AuthController::class, 'register'])->middleware('throttle:20,1');
 Route::post('auth/login', [AuthController::class, 'login']);
 
 // Logout fica fora da barreira de conta ativa: a conta suspensa precisa conseguir sair

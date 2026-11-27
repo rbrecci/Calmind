@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\BondController;
 use App\Http\Controllers\Api\V1\CatalogController;
 use App\Http\Controllers\Api\V1\InvitationController;
 use App\Http\Controllers\Api\V1\PatientDirectoryController;
+use App\Http\Controllers\Api\V1\PsychologistRecordController;
 use Illuminate\Support\Facades\Route;
 
 // Bloco D: convite e vinculo (dono: Rafael)
@@ -12,6 +13,7 @@ Route::middleware(['auth:sanctum', 'role:psychologist'])->prefix('psychologist')
     Route::get('bond-requests', [PatientDirectoryController::class, 'requests']);
     Route::get('patients', [PatientDirectoryController::class, 'index']);
     Route::get('patients/{id}', [PatientDirectoryController::class, 'show'])->whereNumber('id');
+    Route::get('patients/{id}/record', [PsychologistRecordController::class, 'show'])->whereNumber('id');
     Route::post('invitations', [InvitationController::class, 'store']);
     Route::delete('invitations/{id}', [InvitationController::class, 'destroy'])->whereNumber('id');
     Route::post('bond-requests/{id}/accept', [BondController::class, 'accept'])->whereNumber('id');

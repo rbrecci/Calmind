@@ -25,10 +25,13 @@ class NotificationService
             $this->materializeReminders($user);
         }
 
-        return Notification::where('user_id', $user->id)
+        $page = Notification::where('user_id', $user->id)
             ->when($filters['unread'] ?? false, fn ($query) => $query->whereNull('read_at'))
             ->orderByDesc('created_at')->orderByDesc('id')
             ->paginate($filters['per_page'] ?? 20, page: $filters['page'] ?? 1);
+        $this->attachActorNames($page->items());
+
+        return $page;
     }
 
     public function read(User $user, int $id): Notification
@@ -36,12 +39,36 @@ class NotificationService
         $notification = Notification::where('user_id', $user->id)->findOrFail($id);
         Notification::whereKey($id)->whereNull('read_at')->update(['read_at' => now()]);
 
-        return $notification->refresh();
+        $notification->refresh();
+        $this->attachActorNames([$notification]);
+
+        return $notification;
     }
 
     public function readAll(User $user): int
     {
         return Notification::where('user_id', $user->id)->whereNull('read_at')->update(['read_at' => now()]);
+    }
+
+    // So o pedido de vinculo leva nome: quem pediu. Nome nao e conteudo clinico (CA-16.1).
+    // O vinculo precisa ser do psicologo dono da notificacao
+    private function attachActorNames(array $notifications): void
+    {
+        $requests = collect($notifications)->where('type', 'bond.requested');
+
+        if ($requests->isEmpty()) {
+            return;
+        }
+
+        $names = Bond::query()
+            ->join('psychologists', 'psychologists.id', '=', 'bonds.psychologist_id')
+            ->join('patients', 'patients.id', '=', 'bonds.patient_id')
+            ->join('users', 'users.id', '=', 'patients.user_id')
+            ->whereIn('bonds.id', $requests->pluck('resource_id'))
+            ->where('psychologists.user_id', $requests->first()->user_id)
+            ->pluck('users.name', 'bonds.id');
+
+        $requests->each(fn (Notification $item) => $item->setAttribute('actor_name', $names[$item->resource_id] ?? null));
     }
 
     // RF-16: sem agendador no servidor, os lembretes nascem quando o usuario consulta as notificacoes

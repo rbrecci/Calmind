@@ -58,6 +58,7 @@ class ReportPrivacyTest extends TestCase
         'PUT psychologist/appointments/{}' => self::NONE,
         'POST psychologist/appointments/{}/cancel' => self::NONE,
         'GET psychologist/patients/{}/reports' => self::READS,
+        'GET psychologist/patients/{}/moods' => self::NONE,
         'GET psychologist/reports/{}' => self::READS,
         'POST psychologist/registration' => self::NONE,
         'PUT psychologist/profile' => self::NONE,

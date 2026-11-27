@@ -258,6 +258,21 @@ CREATE VIEW shared_reports AS
 -- 5. Ciclo semanal: tarefa, mensagem, consulta  (RF-15, RF-25, RF-26, RF-37, RF-40)
 -- ---------------------------------------------------------------------
 
+-- Humor do dia marcado pelo paciente; aparece no calendario dos dois lados do vinculo
+CREATE TABLE daily_moods (
+  id             INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  bond_id        INT UNSIGNED NOT NULL,
+  patient_id     INT UNSIGNED NOT NULL,
+  mood           ENUM('bad','neutral','good') NOT NULL,
+  mood_date      DATE         NOT NULL,
+  created_at     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_moods_bond_date (bond_id, mood_date),
+  KEY ix_moods_patient_date (patient_id, mood_date),
+  CONSTRAINT fk_moods_bond    FOREIGN KEY (bond_id) REFERENCES bonds(id) ON DELETE CASCADE,
+  CONSTRAINT fk_moods_patient FOREIGN KEY (patient_id) REFERENCES patients(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE tasks (
   id                 INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   bond_id            INT UNSIGNED NOT NULL,

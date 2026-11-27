@@ -22,6 +22,7 @@ class PatientBondResource extends JsonResource
             'responded_at' => $attributes['responded_at'] ?? null,
             'accepted_at' => $attributes['accepted_at'] ?? null,
             'ended_at' => $attributes['ended_at'] ?? null,
+            'bond_days' => $this->resource->durationInDays(),
             'psychologist' => [
                 'id' => $this->psychologist->id,
                 'name' => $this->psychologist->user->name,

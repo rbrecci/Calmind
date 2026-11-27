@@ -47,9 +47,11 @@ class ReportService
     }
 
     // CA-22.2: lista tudo do dono, privados e despublicados inclusive
-    public function paginate(User $user, int $perPage, int $page): LengthAwarePaginator
+    public function paginate(User $user, int $perPage, int $page, ?string $from = null, ?string $to = null): LengthAwarePaginator
     {
         return $this->ownedBy($this->patientOf($user))
+            ->when($from, fn (Builder $query) => $query->where('created_at', '>=', $from.' 00:00:00'))
+            ->when($to, fn (Builder $query) => $query->where('created_at', '<=', $to.' 23:59:59'))
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->paginate($perPage, page: $page);

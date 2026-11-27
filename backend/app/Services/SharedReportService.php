@@ -23,7 +23,7 @@ class SharedReportService
     public function __construct(private AuditService $audit) {}
 
     // RF-23, CA-23.1, CA-23.2: o total vem da propria view paginada, entao so conta o que o psicologo pode ver
-    public function listForPatient(User $psychologistUser, int $patientUserId, int $perPage, int $page): LengthAwarePaginator
+    public function listForPatient(User $psychologistUser, int $patientUserId, int $perPage, int $page, ?string $from = null, ?string $to = null): LengthAwarePaginator
     {
         $patient = Patient::where('user_id', $patientUserId)->first();
 
@@ -43,6 +43,8 @@ class SharedReportService
         }
 
         return SharedReport::whereIn('bond_id', $bondIds)
+            ->when($from, fn (Builder $query) => $query->where('created_at', '>=', $from.' 00:00:00'))
+            ->when($to, fn (Builder $query) => $query->where('created_at', '<=', $to.' 23:59:59'))
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->paginate($perPage, page: $page);

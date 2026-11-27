@@ -17,7 +17,7 @@ class PsychologistReportController extends Controller
     public function index(ListReportsRequest $request, string $id): SharedReportCollection
     {
         return new SharedReportCollection(
-            $this->sharedReports->listForPatient($request->user(), (int) $id, $request->perPage(), $request->page())
+            $this->sharedReports->listForPatient($request->user(), (int) $id, $request->perPage(), $request->page(), $request->from(), $request->to())
         );
     }
 

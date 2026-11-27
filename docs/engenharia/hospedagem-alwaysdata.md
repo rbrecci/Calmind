@@ -143,6 +143,25 @@ aparece no log de acesso do servidor. Acontece também sem senha, com `Invoke-Re
 passar. A causa não foi identificada. Próximo passo: reescrever as chamadas do script com `curl.exe`
 e testar também o app no celular pela rede móvel.
 
+## Repasse pela Vercel (27/11)
+
+Em 27/11 a rede do SENAI passou a bloquear `calmind.alwaysdata.net` (o DNS da rede devolve um endereço
+de bloqueio). O repasse está em `proxy/vercel.json`, publicado no projeto `calmind-api` com o endereço
+`https://calmind-api.vercel.app`, com o cache desligado. Para republicar, dentro de `proxy/`:
+`vercel deploy --prod --scope rb-recci`.
+
+Pela rede do SENAI, por esse endereço: testes 2, 3 e 5 passaram, assim como o login e o envio da foto.
+Ainda em 27/11 o `APP_URL` do servidor passou a ser `https://calmind-api.vercel.app`, e o script
+terminou sem falhas (testes 4 e 5). Pelo 4G, o endereço direto e o do repasse responderam (teste 6).
+Com isso os testes da seção 8 passaram. O estado "Onde parou em 26/11", acima, ficou superado.
+Para repetir:
+
+```powershell
+.\backend\scripts\testar-hospedagem.ps1 -BaseUrl https://calmind-api.vercel.app
+```
+
+Com o repasse, o APK usa `EXPO_PUBLIC_API_URL=https://calmind-api.vercel.app/api/v1`.
+
 ## Cuidado: `ai:check` pelo terminal falha
 
 O terminal SSH roda numa máquina diferente da que serve o site. Em 26/11, a chamada ao Gemini saída

@@ -1,12 +1,12 @@
 import { useCallback, useState } from 'react';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { Tabs } from 'expo-router/js-tabs';
 import { StyleSheet, View } from 'react-native';
 import { imageHeaders } from '@/api';
 import { psychologistApi } from '@/api/psychologist';
 import type { PatientSummary } from '@/api/psychologist/types';
 import { Button, EmptyState, formatShortDate, Hero, Icon, ListItem, PersonCard, ScrollingHeaderScreen, Skeleton, Spacing, Text } from '@/design-system';
 import { SideHeader } from '@/navigation/side-header';
+import { TabRoot } from '@/navigation/tab-root';
 import { useSession } from '@/session/session-context';
 import { firstName } from '@/patient/presentation';
 import { FontFamily } from '@/design-system/typography';
@@ -35,16 +35,14 @@ export default function PsychologistHome() {
   const invite = () => router.push('/(psychologist)/invitations');
   const data = state.data;
   const empty = data !== null && !data.active.length && !data.ended.length && !data.pending;
-  // Sem dados (carregando, erro ou nenhum paciente), a tela usa o cabeçalho comum da aba.
+  // Sem dados (carregando, erro ou nenhum paciente), a tela usa o cabeçalho comum.
   const plain = !data || empty;
-  const header = <Tabs.Screen options={{ headerShown: plain }} />;
   const unpublished = data?.profile.profile_published_at === null
     ? <ListItem tone="psychologist" icon="globe" title="Publicar perfil no catálogo" description="Seu perfil ainda não aparece para os pacientes"
       onPress={() => router.push('/(psychologist)/profile')} /> : null;
 
   if (plain) {
-    return <>
-      {header}
+    return <TabRoot header={<SideHeader tone="psychologist" title="Pacientes" icon="users" actions />}>
       <Page onRefresh={async () => { await reload(); }}>
         {state.loading && !data ? <Skeleton variant="home" /> : null}
         <ErrorNotice error={state.error} retry={state.reload} />
@@ -53,13 +51,11 @@ export default function PsychologistHome() {
           {unpublished}
         </EmptyState> : null}
       </Page>
-    </>;
+    </TabRoot>;
   }
 
   const total = data.profile.active_bonds ?? data.active.length;
-  return <>
-    {header}
-    <ScrollingHeaderScreen tone="psychologist" onRefresh={async () => { await reload(); }}
+  return <ScrollingHeaderScreen tone="psychologist" onRefresh={async () => { await reload(); }}
       compactHeader={<SideHeader tone="psychologist" title="Pacientes" icon="users" actions />}
       expandedHeader={<><SideHeader tone="psychologist" title="Pacientes" icon="users" actions flush />
         <Hero tone="psychologist" fullBleed>
@@ -85,8 +81,7 @@ export default function PsychologistHome() {
         avatarUri={item.patient.avatar_url} headers={headers}
         tag={{ kind: 'neutral', label: 'encerrado' }} description={item.ended_at ? `em ${formatShortDate(item.ended_at)}` : undefined}
         onPress={() => openRecord(item)} />) : null}
-    </ScrollingHeaderScreen>
-  </>;
+    </ScrollingHeaderScreen>;
 }
 
 const styles = StyleSheet.create({

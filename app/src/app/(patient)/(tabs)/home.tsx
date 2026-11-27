@@ -1,5 +1,4 @@
 import { useRouter } from 'expo-router';
-import { Tabs } from 'expo-router/js-tabs';
 import { useState } from 'react';
 import { StyleSheet, Text as NativeText, View } from 'react-native';
 
@@ -11,6 +10,7 @@ import {
 } from '@/design-system';
 import { FontFamily } from '@/design-system/typography';
 import { SideHeader } from '@/navigation/side-header';
+import { TabRoot } from '@/navigation/tab-root';
 import { nextAppointment } from '@/patient/agenda';
 import { selectBond } from '@/patient/bonds';
 import { bondDuration } from '@/patient/bonds-duration';
@@ -52,12 +52,9 @@ export default function PatientHome() {
   }
 
   // Com vínculo ativo o início tem o destaque que rola e traz o próprio cabeçalho; nos outros
-  // estados, o cabeçalho comum da aba.
-  const header = <Tabs.Screen options={{ headerShown: !active }} />;
-
+  // estados, o cabeçalho comum.
   if (!active) {
-    return <>
-      {header}
+    return <TabRoot header={<SideHeader tone="patient" title="Início" icon="house" actions />}>
       <PatientPage onRefresh={reload}>
         <Feedback loading={loading && data === null} error={error} retry={() => void reload()} initial skeleton="home" />
         {data && !error && bond?.status === 'pending' ? <EmptyState illustration="aguardando" title="Aguardando resposta"
@@ -71,16 +68,14 @@ export default function PatientHome() {
         {data && !error && bond?.status !== 'pending' ? <NoBond title="Você ainda não tem um psicólogo"
           description="Conecte-se a um profissional para registrar relatos, receber tarefas e conversar." /> : null}
       </PatientPage>
-    </>;
+    </TabRoot>;
   }
 
   const next = data?.summary?.next ?? null;
   const pending = data?.summary?.pending ?? 0;
   const first = firstName(name);
   const duration = bondDuration(bond.bond_days);
-  return <>
-    {header}
-    <ScrollingHeaderScreen onRefresh={reload}
+  return <ScrollingHeaderScreen onRefresh={reload}
       compactHeader={<SideHeader tone="patient" title="Início" icon="house" actions />}
       expandedHeader={<>
         <SideHeader tone="patient" title="Início" icon="house" actions flush />
@@ -113,8 +108,7 @@ export default function PatientHome() {
           onPress={() => router.navigate('/(patient)/(tabs)/tasks')} />
       </View>
       {loading && !data ? <Skeleton variant="home" /> : null}
-    </ScrollingHeaderScreen>
-  </>;
+    </ScrollingHeaderScreen>;
 }
 
 const styles = StyleSheet.create({

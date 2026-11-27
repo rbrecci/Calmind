@@ -32,10 +32,12 @@ export default function PatientChat() {
       setBody('');
       void controller?.send(draft);
     }} />;
+  const name = patient.data?.patient.name;
+  const headerOptions = useMemo(() => ({ title: name }), [name]);
   // O nome do paciente vai no cabeçalho, que diz "Chat" enquanto carrega; repetir na página
   // quebrava o título em duas linhas.
   return <Page footer={composer} stickToEnd>
-    {patient.data ? <Stack.Screen options={{ title: patient.data.patient.name }} /> : null}
+    {name ? <Stack.Screen options={headerOptions} /> : null}
     {patient.loading && !patient.data ? <Skeleton variant="chat" /> : null}
     <ErrorNotice error={patient.error} retry={patient.reload} />
     {patient.data ? <>

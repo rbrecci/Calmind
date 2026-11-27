@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { View } from 'react-native';
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import type { Mood, MoodEntry } from '@/api';
@@ -155,9 +155,12 @@ export default function PatientRecord() {
     catch (cause) { setError(cause); } finally { setBusy(false); }
   }
   const data = record.data;
+  // Objeto estável: um novo a cada renderização reaplicaria as opções sem parar.
+  const name = data?.patient.patient.name;
+  const headerOptions = useMemo(() => ({ title: name }), [name]);
   // O título do cabeçalho é o nome do paciente; enquanto carrega, "Prontuário".
   return <Page>
-    {data ? <Stack.Screen options={{ title: data.patient.patient.name }} /> : null}
+    {name ? <Stack.Screen options={headerOptions} /> : null}
     {record.loading && !data ? <Skeleton variant="detail" /> : null}
     <ErrorNotice error={record.error} retry={record.reload} />
     {/* Encerrar fica num item só, acima das abas: no fim da tela ele parecia parte da aba aberta e

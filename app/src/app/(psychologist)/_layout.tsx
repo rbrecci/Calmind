@@ -36,7 +36,9 @@ function PsychologistNavigator() {
     const profile = term.accepted ? await psychologistApi.profile() : null;
     return { term, profile };
   });
-  if (access.loading) return <Screen center><Loading /></Screen>;
+  // So na primeira carga. Numa atualizacao (Atualizar, salvar o perfil) a navegacao continua montada:
+  // desmontar e remontar deixa os parametros de rota sem consumir e as abas entram em laco.
+  if (access.loading && !access.data) return <Screen center><Loading /></Screen>;
   if (access.error || !access.data) return <Screen center><ErrorNotice error={access.error} retry={access.reload} />
     <Action variant="secondary" label="Sair da conta" onPress={() => { void signOut(); }} /></Screen>;
   const { term, profile } = access.data;

@@ -19,6 +19,9 @@ class ListReportsRequest extends FormRequest
     public function rules(): array
     {
         return [
+            // Recorte do calendario: um mes por vez, para a lista nao crescer sem limite
+            'from' => ['nullable', 'date_format:Y-m-d'],
+            'to' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:from'],
             'page' => ['nullable', 'integer', 'min:1'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:'.self::MAX_PER_PAGE],
         ];
@@ -27,6 +30,16 @@ class ListReportsRequest extends FormRequest
     public function perPage(): int
     {
         return (int) ($this->validated('per_page') ?? self::DEFAULT_PER_PAGE);
+    }
+
+    public function from(): ?string
+    {
+        return $this->validated('from');
+    }
+
+    public function to(): ?string
+    {
+        return $this->validated('to');
     }
 
     public function page(): int

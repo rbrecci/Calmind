@@ -29,7 +29,7 @@ class PatientReportController extends Controller
 
     public function index(ListReportsRequest $request): ReportCollection
     {
-        return new ReportCollection($this->reports->paginate($request->user(), $request->perPage(), $request->page()));
+        return new ReportCollection($this->reports->paginate($request->user(), $request->perPage(), $request->page(), $request->from(), $request->to()));
     }
 
     public function update(UpdateReportVisibilityRequest $request, string $id): ReportResource

@@ -20,17 +20,17 @@ export default function Consent() {
   }
   // "Continuar" só depois do aceite marcado: o cartão é o aceite, o botão só confirma.
   const footer = declined ? undefined
-    : <Button tone="neutral" label={busy ? 'Aguarde...' : 'Continuar'} disabled={busy || !checked} onPress={() => { void accept(); }} />;
+    : <Button tone="neutral" icon="check" label={busy ? 'Aguarde...' : 'Continuar'} disabled={busy || !checked} onPress={() => { void accept(); }} />;
   return <Screen scroll tone="neutral" footer={footer}>
     <Text variant="h4">Antes de começar</Text>
     {declined ? <><Text>Para continuar é necessário aceitar o termo. Você pode sair da conta.</Text>
-      <Action variant="secondary" label="Sair da conta" onPress={() => { void signOut(); }} /></> : <>
+      <Action variant="secondary" icon="sign-out" label="Sair da conta" onPress={() => { void signOut(); }} /></> : <>
       <Text variant="h5">Tratamento dos seus dados de saúde</Text>
       <Text>{term.body}</Text>
       <Text variant="small" color="textSecondary">Versão {term.version}, vigente desde {formatDate(term.effective_from)}</Text>
       <CheckCard label="Li e aceito o termo" tag="obrigatório" checked={checked} disabled={busy} onChange={setChecked} />
       <ErrorNotice error={error} retry={checked ? () => { void accept(); } : undefined} />
-      <Action variant="destructive" label="Não aceito" disabled={busy} onPress={() => { setError(null); setDeclined(true); }} />
+      <Action variant="destructive" icon="x" label="Não aceito" disabled={busy} onPress={() => { setError(null); setDeclined(true); }} />
     </>}
   </Screen>;
 }

@@ -1,12 +1,12 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useContext, useEffect, useRef, useState, type ReactNode } from 'react';
-import { Animated, Easing, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { Animated, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { BottomTabBarHeightContext } from 'expo-router/build/react-navigation/bottom-tabs';
-import { useReducedMotion } from 'react-native-reanimated';
+import Reanimated, { useReducedMotion } from 'react-native-reanimated';
 
 import { nextHeaderState, shouldCompleteHeaderScroll } from './header-transition';
 import { Colors, MaxContentWidth, Radius, ScreenGradients, Spacing } from './tokens';
-import { useScreenContentOpacity } from './motion';
+import { EaseOut, useScreenContentOpacity } from './motion';
 
 type Props = {
   expandedHeader: ReactNode;
@@ -20,7 +20,6 @@ type Props = {
 // O topo rola inteiro por trás da barra transparente nos cantos.
 // O conteúdo branco reserva a altura revelada para manter os cartões abaixo dela.
 export function ScrollingHeaderScreen({ expandedHeader, compactHeader, children, onRefresh, tone = 'patient', loading = false }: Props) {
-  const [reveal] = useState(() => new Animated.Value(0));
   const [expandedHeight, setExpandedHeight] = useState(0);
   const [headerHeight, setHeaderHeight] = useState(80);
   const [viewportHeight, setViewportHeight] = useState(0);
@@ -49,16 +48,6 @@ export function ScrollingHeaderScreen({ expandedHeader, compactHeader, children,
     }, 160);
   };
 
-  useEffect(() => {
-    const animation = Animated.timing(reveal, {
-      toValue: compact ? 1 : 0, duration: reduced ? 0 : 260,
-      easing: Easing.bezier(0.22, 1, 0.36, 1),
-      useNativeDriver: false, // A altura reserva espaço real para a barra.
-    });
-    animation.start();
-    return () => animation.stop();
-  }, [compact, reduced, reveal]);
-
   const refresh = () => {
     setRefreshing(true);
     void onRefresh().finally(() => setRefreshing(false));
@@ -66,10 +55,6 @@ export function ScrollingHeaderScreen({ expandedHeader, compactHeader, children,
 
   return <View style={styles.root} onLayout={(event) => setViewportHeight(event.nativeEvent.layout.height)}>
     <LinearGradient colors={ScreenGradients[tone].colors} locations={ScreenGradients[tone].locations} style={StyleSheet.absoluteFill} />
-    <Animated.View style={[styles.header, { height: reveal.interpolate({ inputRange: [0, 1], outputRange: [0, headerHeight] }), pointerEvents: compact ? 'auto' : 'none' }]}
-      accessibilityElementsHidden={!compact} importantForAccessibility={compact ? 'auto' : 'no-hide-descendants'}>
-      <View onLayout={(event) => setHeaderHeight(event.nativeEvent.layout.height)}>{compactHeader}</View>
-    </Animated.View>
     <Animated.View style={[styles.scroll, { opacity: contentOpacity }]}><ScrollView ref={scrollRef} style={styles.scroll} showsVerticalScrollIndicator={false} scrollEventThrottle={16}
       contentContainerStyle={styles.content}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
@@ -93,20 +78,31 @@ export function ScrollingHeaderScreen({ expandedHeader, compactHeader, children,
         <View style={[styles.surface, { minHeight: loading ? Math.max(0, viewportHeight - expandedHeight + Radius.lg) : viewportHeight + Radius.lg, paddingBottom: tabBarHeight + Spacing.four }]}>
           <LinearGradient colors={ScreenGradients[tone].colors} locations={ScreenGradients[tone].locations}
             style={[StyleSheet.absoluteFill, { top: -expandedHeight + Radius.lg }]} />
-          <Animated.View style={[styles.body, { paddingTop: reveal.interpolate({
-            // Compensa a sobreposição da curva quando o topo já saiu da tela.
-            inputRange: [0, 1], outputRange: [Spacing.page, Spacing.page + headerHeight + Radius.lg],
-          }) }]}>{children}</Animated.View>
+          {/* Compensa a sobreposição da curva quando o topo já saiu da tela. */}
+          <View style={[styles.body, compact && { paddingTop: Spacing.page + headerHeight + Radius.lg }]}>{children}</View>
         </View>
       </View>
     </ScrollView></Animated.View>
+    {/* A barra fica sempre montada e medida, só deslocada para fora da tela, e desce por
+        translação. Animar a altura a partir de zero não funcionava na build de release. Vem depois
+        da rolagem para desenhar por cima dela. */}
+    <Reanimated.View style={[styles.header, {
+      pointerEvents: compact ? 'auto' : 'none',
+      opacity: compact ? 1 : 0,
+      transform: [{ translateY: compact ? 0 : -headerHeight }],
+      transitionProperty: ['transform', 'opacity'],
+      transitionDuration: reduced ? 0 : 260,
+      transitionTimingFunction: EaseOut,
+    }]} accessibilityElementsHidden={!compact} importantForAccessibility={compact ? 'auto' : 'no-hide-descendants'}>
+      <View onLayout={(event) => setHeaderHeight(event.nativeEvent.layout.height)}>{compactHeader}</View>
+    </Reanimated.View>
   </View>;
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.background },
   scroll: { flex: 1 },
-  header: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 1, overflow: 'hidden', backgroundColor: 'transparent' },
+  header: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 1, backgroundColor: 'transparent' },
   content: { flexGrow: 1 },
   // A curva e o conteúdo compartilham um único degradê, sem uma tampa branca.
   surface: { marginTop: -Radius.lg, borderTopLeftRadius: Radius.lg, borderTopRightRadius: Radius.lg, overflow: 'hidden', backgroundColor: Colors.background },

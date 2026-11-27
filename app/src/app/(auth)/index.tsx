@@ -77,7 +77,7 @@ export default function EntryScreen() {
 
   // No cadastro o botão fica no rodapé, fora da rolagem e acima do teclado.
   const footer = step === 'register'
-    ? <Button label={submitting ? 'Criando conta...' : 'Criar conta'} disabled={submitting} onPress={submitRegister} />
+    ? <Button icon="user-plus" label={submitting ? 'Criando conta...' : 'Criar conta'} disabled={submitting} onPress={submitRegister} />
     : undefined;
 
   return (
@@ -93,14 +93,14 @@ export default function EntryScreen() {
             keyboardType="email-address" value={email} onChangeText={setEmail} error={fieldErrors.email?.[0]} />
           <TextField label="Senha" placeholder="Sua senha" autoCapitalize="none" autoComplete="current-password"
             secureTextEntry value={password} onChangeText={setPassword} error={fieldErrors.password?.[0]} />
-          <Button minHeight={FIELD_HEIGHT} label={submitting ? 'Entrando...' : 'Entrar'} disabled={submitting}
+          <Button minHeight={FIELD_HEIGHT} icon="arrow-right" label={submitting ? 'Entrando...' : 'Entrar'} disabled={submitting}
             onPress={() => submitLogin({ email, password })} />
           <View style={styles.separator}>
             <View style={styles.line} />
             <Text variant="small" color="textSecondary">ou</Text>
             <View style={styles.line} />
           </View>
-          <Button minHeight={FIELD_HEIGHT} label="Criar conta" disabled={submitting} onPress={() => goTo('choice')} />
+          <Button minHeight={FIELD_HEIGHT} icon="user-plus" label="Criar conta" disabled={submitting} onPress={() => goTo('choice')} />
           <Text variant="small" color="textSecondary" style={styles.center}>
             No cadastro você escolhe se é paciente ou psicólogo.
           </Text>
@@ -122,10 +122,10 @@ export default function EntryScreen() {
           <BackHeader title="Criar conta" backLabel="Voltar para entrar" onBack={() => goTo('login')} />
           <Text variant="h5">Como você vai usar o Calmind?</Text>
           <Text variant="small" color="textSecondary">Essa escolha não muda depois: a conta fica presa ao perfil.</Text>
-          <ChoiceCard tone="patient" title="Sou paciente"
+          <ChoiceCard tone="patient" icon="user" title="Sou paciente"
             description="Quero acompanhar meu processo, escrever relatos e falar com meu psicólogo."
             onPress={() => goTo('register', 'patient')} />
-          <ChoiceCard tone="psychologist" title="Sou psicólogo"
+          <ChoiceCard tone="psychologist" icon="users" title="Sou psicólogo"
             description="Tenho registro no CRP e quero atender pacientes pela plataforma."
             onPress={() => goTo('register', 'psychologist')} />
           <Text variant="small" color="textSecondary" style={styles.center}>

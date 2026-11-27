@@ -5,7 +5,7 @@ import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { ApiError } from '@/api';
 import { psychologistApi } from '@/api/psychologist';
 import type { Appointment, AppointmentInput } from '@/api/psychologist/types';
-import { ChoiceGroup, Colors, EmptyState, formatDateTime, Icon, Loading, Radius, RoleColors, Spacing, StatusTag, statusTagKind, Text } from '@/design-system';
+import { ChoiceGroup, Colors, EmptyState, formatDateTime, Icon, Radius, RoleColors, Skeleton, Spacing, StatusTag, statusTagKind, Text } from '@/design-system';
 import { calendarDays } from '@/patient/agenda';
 import { isAppointmentConflict, localAppointmentIso, splitAppointments } from '@/psychologist/domain';
 import { collectPages } from '@/psychologist/resource';
@@ -153,21 +153,27 @@ export default function Agenda() {
       <ErrorNotice error={error} />
       {conflict ? <>
         <Text color="error" accessibilityRole="alert">{errors?.confirm_conflict?.join(' ')}</Text>
-        <Action label="Agendar mesmo assim" disabled={busy} onPress={() => {
+        <Action icon="check" label="Agendar mesmo assim" disabled={busy} onPress={() => {
           void submit({ ...conflict.input, confirm_conflict: true }, conflict.id);
         }} />
-        <Action variant="secondary" label="Escolher outro horário" disabled={busy} onPress={() => { setConflict(null); setError(null); }} />
-      </> : <Action label={editing === null ? 'Agendar consulta' : 'Salvar reagendamento'}
+        <Action variant="secondary" icon="clock" label="Escolher outro horário" disabled={busy} onPress={() => { setConflict(null); setError(null); }} />
+      </> : <Action icon="check" label={editing === null ? 'Agendar consulta' : 'Salvar reagendamento'}
         disabled={busy || selectedBond === null || !activeBonds.has(selectedBond)} onPress={save} />}
-      <Action variant="secondary" label="Cancelar" accessibilityLabel="Cancelar e fechar o formulário" disabled={busy} onPress={reset} />
+      <Action variant="secondary" icon="x" label="Cancelar" accessibilityLabel="Cancelar e fechar o formulário" disabled={busy} onPress={reset} />
     </>;
   }
 
   return <Page>
-    {resource.loading && !resource.data ? <Loading /> : null}
+    {resource.loading && !resource.data ? <Skeleton variant="calendar" /> : null}
     <ErrorNotice error={resource.error} retry={resource.reload} />
     <ErrorNotice error={cancelError} />
-    {resource.data ? <>
+    {/* Sem vínculo e sem consulta não há o que mostrar: só a imagem e a mensagem. */}
+    {resource.data && !patients.length && !resource.data.appointments.length ? <EmptyState illustration="agenda" title="Sua agenda está vazia"
+      description="É preciso ter um vínculo ativo para agendar uma consulta." /> : null}
+    {resource.data && patients.length && !resource.data.appointments.length ? <EmptyState illustration="agenda" title="Nenhuma consulta agendada">
+      <Action icon="calendar-plus" label="Agendar consulta" disabled={busy} onPress={openNew} />
+    </EmptyState> : null}
+    {resource.data?.appointments.length ? <>
       <View style={styles.calendar}>
         <View style={styles.monthRow}>
           <Pressable accessibilityRole="button" accessibilityLabel="Mês anterior" style={styles.monthButton} onPress={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}><Icon name="caret-left" /></Pressable>
@@ -182,22 +188,22 @@ export default function Agenda() {
         </View>
       </View>
       {patients.length === 0 ? <Text>É preciso ter um vínculo ativo para agendar uma consulta.</Text>
-        : <Action label="Agendar consulta" disabled={busy} onPress={openNew} />}
-      {!appointments.upcoming.length && !appointments.previous.length ? <EmptyState illustration="agenda" title="Nenhuma consulta agendada" /> : null}
+        : <Action icon="calendar-plus" label="Agendar consulta" disabled={busy} onPress={openNew} />}
       {([['Próximas', appointments.upcoming], ['Anteriores', appointments.previous]] as const).map(([title, items]) => items.length ? <Fragment key={title}>
         <Text variant="h4" accessibilityRole="header">{title}</Text>
         {items.map((appointment) => <Card key={appointment.id}>
           {/* A etiqueta fica ao lado do nome, que é curto: ao lado de "data · Presencial" ela quebrava sozinha para baixo. */}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Spacing.two }}>
+            <Icon name="calendar" size={20} />
             <Text variant="h5">{appointment.patient.name}</Text>
             <StatusTag kind={statusTagKind(appointment.status)} label={statusText[appointment.status]} />
           </View>
           <Text>{[formatDateTime(appointment.scheduled_at), appointment.modality === 'online' ? 'Online' : appointment.modality === 'presencial' ? 'Presencial' : null].filter(Boolean).join(' · ')}</Text>
           {appointment.notes ? <Text color="textSecondary">{appointment.notes}</Text> : null}
           {activeBonds.has(appointment.bond_id) && (appointment.status === 'scheduled' || appointment.status === 'rescheduled') ? <View style={{ flexDirection: 'row', gap: Spacing.two }}>
-              <Action variant="secondary" label="Reagendar" accessibilityLabel={`Reagendar consulta de ${appointment.patient.name}`}
+              <Action variant="secondary" icon="calendar" label="Reagendar" accessibilityLabel={`Reagendar consulta de ${appointment.patient.name}`}
                 disabled={busy || conflict !== null} onPress={() => edit(appointment)} style={{ flex: 1 }} />
-              <Action variant="destructive" label="Cancelar" accessibilityLabel={`Cancelar consulta de ${appointment.patient.name}`}
+              <Action variant="destructive" icon="x" label="Cancelar" accessibilityLabel={`Cancelar consulta de ${appointment.patient.name}`}
                 disabled={busy || conflict !== null} style={{ flex: 1 }} onPress={() => {
                   ask('Cancelar consulta?', `Consulta de ${appointment.patient.name}, ${formatDateTime(appointment.scheduled_at)}.`,
                     () => { void cancel(appointment.id); }, 'destructive');

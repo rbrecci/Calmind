@@ -142,6 +142,13 @@ Campos do vínculo devolvidos por estas rotas: `id`, `status` (`pending`, `activ
 | GET | `/patient/reports` | RF-22 |
 | POST | `/patient/reports/{id}/unpublish` | RF-24 |
 | GET | `/psychologist/patients/{id}/reports` | RF-23, RNF-08 |
+| GET | `/patient/moods` | humor do dia |
+| PUT | `/patient/moods/today` | humor do dia |
+| GET | `/psychologist/patients/{id}/moods` | humor do dia |
+
+As duas listas de relato aceitam `from` e `to` (`AAAA-MM-DD`, inclusivos), usados pelo calendário do app para ler um mês por vez. `meta.total` conta o recorte pedido, sempre só o que o perfil pode ver.
+
+**Humor do dia.** `PUT /patient/moods/today` com `{ "mood": "bad" | "neutral" | "good" }` responde 200 `{ "date": "2026-11-27", "mood": "good" }`. A data é a de hoje no servidor; marcar de novo no mesmo dia troca o valor. Sem aceite do termo, 403; sem vínculo ativo, 409. Os dois `GET` respondem `{data, meta}` com itens `{ date, mood }`, mais recentes primeiro, e aceitam `from`, `to`, `page` e `per_page` (padrão 31, máximo 100). O psicólogo só vê o humor marcado nos vínculos dele (ativos ou encerrados); fora disso, 404, e toda tentativa entra na trilha de auditoria. O humor não é relato: não tem privacidade própria, e o app avisa o paciente de que o profissional o vê.
 
 ---
 
@@ -267,9 +274,12 @@ Cada registro (no POST e em cada item do GET) traz também o autor, para o psic�
   "profile_modality": "online",
   "profile_region": "São Paulo, SP",
   "profile_bio": "Texto escrito pelo profissional.",
-  "profile_published_at": "2026-10-20T10:00:00-03:00"
+  "profile_published_at": "2026-10-20T10:00:00-03:00",
+  "active_bonds": 2
 }
 ```
+
+`active_bonds` é a quantidade de vínculos ativos do profissional (pendente e encerrado não contam); vem também nas respostas de cadastro, edição e publicação do perfil.
 
 `approval_status` vale `pending`, `approved` ou `rejected`, e ganha o valor `not_submitted` **somente nesta rota**, quando o psicólogo ainda não enviou o CRP (não há linha em `psychologists`). Nesse caso `id`, `crp`, `approval_note`, todos os `profile_*` e `profile_published_at` vêm `null`. `approval_note` traz a justificativa da recusa quando `rejected`. `profile_published_at` preenchido significa perfil publicado no catálogo. Os campos `profile_*` têm os mesmos nomes e valores aceitos por `PUT /psychologist/profile`.
 
@@ -284,12 +294,13 @@ Cada registro (no POST e em cada item do GET) traz também o autor, para o psic�
   "responded_at": "2026-10-20T10:00:00-03:00",
   "accepted_at": "2026-10-20T10:00:00-03:00",
   "ended_at": null,
+  "bond_days": 12,
   "psychologist": { "id": 1, "name": "Hermione Granger", "crp": "06/000001" },
   "unread_messages": 2
 }
 ```
 
-`psychologist` traz também `approach`, `specialty`, `modality`, `region`, `bio`, `avatar_url` e `cover_url`, com os nomes do item do catálogo: com vínculo ativo o catálogo responde 403, e é daqui que o app tira o perfil do psicólogo. `unread_messages` conta mensagens do psicólogo ainda sem `read_at` neste vínculo. É esta rota que dá ao app o `bond_id` para chat e agenda.
+`bond_days` é o tempo de vínculo em dias de calendário desde `accepted_at`; no encerrado a contagem para em `ended_at`; `null` se o vínculo nunca ficou ativo. `psychologist` traz também `approach`, `specialty`, `modality`, `region`, `bio`, `avatar_url` e `cover_url`, com os nomes do item do catálogo: com vínculo ativo o catálogo responde 403, e é daqui que o app tira o perfil do psicólogo. `unread_messages` conta mensagens do psicólogo ainda sem `read_at` neste vínculo. É esta rota que dá ao app o `bond_id` para chat e agenda.
 
 `GET /psychologist/bond-requests`, 200 `{data, meta}`. Só solicitações `pending` dirigidas ao psicólogo autenticado, mais antigas primeiro:
 

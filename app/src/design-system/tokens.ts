@@ -42,6 +42,14 @@ export const RoleColors = {
   psychologist: { accent: Palette.primary.base, onAccent: Palette.dark.base, tint: Palette.primary.tint, shade: Palette.primary.shade },
 } as const;
 
+// Fundo do dia no calendário conforme o humor marcado. Texto Dark passa nos três; o rosto na
+// célula repete a informação para quem não distingue as cores.
+export const MoodColors = {
+  bad: Palette.danger.tint,
+  neutral: Palette.light.base,
+  good: Palette.secondary.tint,
+} as const;
+
 // Fundo contínuo do cabeçalho e do destaque, medido na referência do protótipo.
 export const HeaderGradients = {
   patient: ['#BCFEBA', '#BFFFBD', '#8DF58A'],

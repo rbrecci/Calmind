@@ -25,7 +25,7 @@ export default function NewReport() {
     try { await patientApi.createReport({ body, visibility }); router.dismissTo('/reports'); }
     catch (e) { setError(errorMessage(e)); } finally { setBusy(false); }
   }
-  const footer = <Button tone="patient" label={busy ? 'Salvando...' : 'Salvar relato'} disabled={busy || !body.trim()} onPress={() => void save()} />;
+  const footer = <Button tone="patient" icon="floppy-disk" label={busy ? 'Salvando...' : 'Salvar relato'} disabled={busy || !body.trim()} onPress={() => void save()} />;
   return <PatientPage footer={footer}>
     <ChoiceGroup variant="segmented" tone="patient" label="Quem pode ver" value={visibility} onChange={setVisibility}
       options={VISIBILITY_OPTIONS} disabled={busy} />

@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { StyleSheet } from 'react-native';
 
-import { Appear, Button, Colors, confirmationVariants, Loading, Radius, Screen, Spacing, Text, type ConfirmationKind } from '@/design-system';
+import { Appear, Button, Colors, confirmationVariants, Radius, Screen, Skeleton, Spacing, Text, type ConfirmationKind, type SkeletonVariant } from '@/design-system';
 
 // Tela empilhada já mostra o título no cabeçalho: repetir aqui seria dizer a mesma coisa duas vezes.
 export function PatientPage({ title, children, onRefresh, footer, stickToEnd, onScrollOffset, scrollExtraSpace }: {
@@ -28,13 +28,13 @@ export function Card({ children }: { children: ReactNode }) {
 
 // `initial`: ainda não há nada da tela para mostrar, e o carregando ocupa o lugar do conteúdo.
 // No recarregamento o conteúdo antigo continua na tela, e o aviso fica em texto para não empurrá-lo.
-export function Feedback({ loading, error, retry, initial = false }: {
-  loading: boolean; error: string | null; retry: () => void; initial?: boolean;
+export function Feedback({ loading, error, retry, initial = false, skeleton = 'list' }: {
+  loading: boolean; error: string | null; retry: () => void; initial?: boolean; skeleton?: SkeletonVariant;
 }) {
   return <>
-    {loading && initial ? <Loading /> : null}
+    {loading && initial ? <Skeleton variant={skeleton} /> : null}
     {error ? <><Text color="error" accessibilityRole="alert">{error}</Text>
-      <Button tone="patient" variant="secondary" label="Tentar de novo" onPress={retry} disabled={loading} /></> : null}
+      <Button tone="patient" variant="secondary" icon="arrow-clockwise" label="Tentar de novo" onPress={retry} disabled={loading} /></> : null}
   </>;
 }
 
@@ -44,8 +44,8 @@ export function Confirmation({ message, confirm, cancel, busy = false, kind }: {
   const variants = confirmationVariants(kind);
   return <Card>
     <Text accessibilityRole="alert" accessibilityLiveRegion="polite">{message}</Text>
-    <Button tone="patient" variant={variants.confirm} label={busy ? 'Aguarde...' : 'Confirmar'} disabled={busy} onPress={confirm} />
-    <Button tone="patient" variant={variants.cancel} label="Cancelar" disabled={busy} onPress={cancel} />
+    <Button tone="patient" variant={variants.confirm} icon="check" label={busy ? 'Aguarde...' : 'Confirmar'} disabled={busy} onPress={confirm} />
+    <Button tone="patient" variant={variants.cancel} icon="x" label="Cancelar" disabled={busy} onPress={cancel} />
   </Card>;
 }
 

@@ -302,9 +302,14 @@ export function createPsychologistMock({ scenario = 'com-pacientes', now = () =>
       bond.ended_at = stamp();
       return publicBond(bond);
     },
+    async moods(id, params) {
+      patientBond(id);
+      return page([], params);
+    },
     async reports(id, params) {
       patientBond(id);
-      return page([...(sharedReports.get(id) ?? [])].sort((a, b) => b.created_at.localeCompare(a.created_at) || b.id - a.id), params);
+      return page([...(sharedReports.get(id) ?? [])]
+        .filter((report) => (!params?.from || report.created_at.slice(0, 10) >= params.from) && (!params?.to || report.created_at.slice(0, 10) <= params.to)).sort((a, b) => b.created_at.localeCompare(a.created_at) || b.id - a.id), params);
     },
     async tasks(params = {}) {
       approved();

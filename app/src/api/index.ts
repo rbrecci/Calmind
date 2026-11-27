@@ -11,4 +11,4 @@ export const api: Api = useMock ? mockApi : httpApi;
 export { setAuthToken } from './auth-token.ts';
 export { imageHeaders } from './http.ts';
 export { ApiError } from './types.ts';
-export type { CatalogList, CatalogPsychologist, FieldErrors, ImageKind, ImageUpload, LoginInput, Modality, PatientTask, PatientTaskList, RegisterInput, Role, User, UserRole } from './types.ts';
+export type { CatalogList, CatalogPsychologist, FieldErrors, ImageKind, ImageUpload, LoginInput, Modality, Mood, MoodEntry, PatientTask, PatientTaskList, RegisterInput, Role, User, UserRole } from './types.ts';

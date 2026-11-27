@@ -28,7 +28,7 @@ export default function Invitation() {
       invalid={error !== null} onChangeText={(value) => { setCode(value); setError(null); }} onSubmitEditing={() => void redeem()} />
     {/* O alfabeto do backend (InvitationService::ALPHABET) deixa de fora O, I, 0 e 1. */}
     <Text variant="small" color="textSecondary">O código não usa as letras O e I nem os números 0 e 1, para não haver confusão ao anotar.</Text>
-    <Button tone="patient" label={busy ? 'Verificando...' : 'Vincular'} disabled={!ready} onPress={() => void redeem()} />
+    <Button tone="patient" icon="check" label={busy ? 'Verificando...' : 'Vincular'} disabled={!ready} onPress={() => void redeem()} />
     {error ? <ErrorBanner message={error} /> : null}
   </PatientPage>;
 }

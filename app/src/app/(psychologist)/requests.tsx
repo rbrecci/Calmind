@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { imageHeaders } from '@/api';
 import { psychologistApi } from '@/api/psychologist';
-import { formatDateTime, Loading, Text } from '@/design-system';
+import { Avatar, EmptyState, formatDateTime, Skeleton, Spacing, Text } from '@/design-system';
 import { collectPages } from '@/psychologist/resource';
 import { Action, Card, ErrorNotice, Page, useConfirmation, useResource } from '@/psychologist/ui';
 
@@ -9,6 +11,7 @@ export default function Requests() {
   const [error, setError] = useState<unknown>(null);
   const [busy, setBusy] = useState(false);
   const { ask, confirmation } = useConfirmation();
+  const headers = imageHeaders();
   async function respond(id: number, accept: boolean) {
     setBusy(true); setError(null);
     try {
@@ -17,15 +20,26 @@ export default function Requests() {
     } catch (cause) { setError(cause); } finally { setBusy(false); }
   }
   return <Page>
-    {list.loading && !list.data ? <Loading /> : null}
+    {list.loading && !list.data ? <Skeleton /> : null}
     <ErrorNotice error={list.error} retry={list.reload} /><ErrorNotice error={error} />
-    {list.data?.length === 0 ? <Text>Nenhuma solicitação pendente.</Text> : null}
-    {list.data?.map((item) => <Card key={item.id}><Text variant="h5">{item.patient.name}</Text>
-      <Text>Solicitado em {formatDateTime(item.requested_at)}</Text>
-      <Action label="Aceitar" accessibilityLabel={`Aceitar ${item.patient.name}`} disabled={busy}
+    {list.data?.length === 0 ? <EmptyState illustration="pacientes" title="Nenhuma solicitação pendente" /> : null}
+    {list.data?.map((item) => <Card key={item.id}>
+      <View style={styles.person}>
+        <Avatar tone="psychologist" name={item.patient.name} uri={item.patient.avatar_url} headers={headers} />
+        <View style={styles.texts}>
+          <Text variant="h5">{item.patient.name}</Text>
+          <Text variant="small" color="textSecondary">Solicitado em {formatDateTime(item.requested_at)}</Text>
+        </View>
+      </View>
+      <Action icon="check" label="Aceitar" accessibilityLabel={`Aceitar ${item.patient.name}`} disabled={busy}
         onPress={() => ask('Aceitar solicitação?', `Iniciar vínculo com ${item.patient.name}?`, () => { void respond(item.id, true); })} />
-      <Action variant="destructive" label="Recusar" accessibilityLabel={`Recusar ${item.patient.name}`} disabled={busy}
+      <Action variant="destructive" icon="x" label="Recusar" accessibilityLabel={`Recusar ${item.patient.name}`} disabled={busy}
         onPress={() => ask('Recusar solicitação?', `Recusar o pedido de ${item.patient.name}?`, () => { void respond(item.id, false); }, 'destructive')} />
     </Card>)}{confirmation}
   </Page>;
 }
+
+const styles = StyleSheet.create({
+  person: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
+  texts: { flex: 1 },
+});

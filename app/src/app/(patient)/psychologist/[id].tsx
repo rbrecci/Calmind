@@ -5,7 +5,7 @@ import { StyleSheet, View } from 'react-native';
 import { imageHeaders } from '@/api';
 import { patientApi } from '@/api/patient';
 import { modalityLabel } from '@/catalog/load-catalog';
-import { Button, Chip, ProfileHeader, Spacing, StatusTag, statusTagKind, Text } from '@/design-system';
+import { Button, Chip, EmptyState, ProfileHeader, Spacing, StatusTag, statusTagKind, Text } from '@/design-system';
 import { loadPatientPages } from '@/patient/load-pages';
 import { errorMessage } from '@/patient/presentation';
 import { needsCatalog, psychologistProfile } from '@/patient/psychologist-profile';
@@ -37,8 +37,8 @@ export default function PsychologistProfile() {
   const chips = profile ? [profile.specialty, profile.approach, profile.modality ? modalityLabel(profile.modality) : null, profile.region]
     .filter((value): value is string => Boolean(value)) : [];
   return <PatientPage>
-    <Feedback loading={loading} error={error} retry={() => void reload()} initial={data === null} />
-    {data && !profile && !error ? <Text>Este profissional não está disponível.</Text> : null}
+    <Feedback loading={loading && data === null} error={error} retry={() => void reload()} initial skeleton="profile" />
+    {data && !profile && !error ? <EmptyState illustration="pacientes" title="Este profissional não está disponível" /> : null}
     {profile ? <>
       <ProfileHeader tone="patient" name={profile.name} subtitle={`CRP ${profile.crp}`}
         avatarUri={profile.avatar_url} coverUri={profile.cover_url} headers={imageHeaders()} />
@@ -49,7 +49,7 @@ export default function PsychologistProfile() {
         <Text>{profile.bio}</Text>
       </> : null}
       {data?.canRequest ? <>
-        <Button tone="patient" label="Solicitar vínculo" accessibilityLabel={`Solicitar vínculo com ${profile.name}`}
+        <Button tone="patient" icon="user-plus" label="Solicitar vínculo" accessibilityLabel={`Solicitar vínculo com ${profile.name}`}
           disabled={busy} onPress={() => { setConfirming(true); setActionError(null); }} />
         {actionError ? <Text color="error" accessibilityRole="alert">{actionError}</Text> : null}
         {confirming ? <Confirmation message={`Solicitar vínculo com ${profile.name}? Você poderá acompanhar a resposta no início.`}

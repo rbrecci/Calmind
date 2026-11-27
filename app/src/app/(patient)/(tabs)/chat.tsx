@@ -9,6 +9,7 @@ import { Button, EmptyState, formatDate, formatDateTime, formatTime, formatUnrea
 import { bondsWithConversation, selectBond } from '@/patient/bonds';
 import { deliverMessage, lastOwnMessageId, mergeMessages, watchConversation } from '@/patient/conversation';
 import { loadPatientPages } from '@/patient/load-pages';
+import { NoBond } from '@/patient/no-bond';
 import { Card, Feedback, PatientPage } from '@/patient/ui';
 import { usePatientData } from '@/patient/use-patient-data';
 
@@ -63,25 +64,27 @@ export default function Chat() {
   const composer = bond?.status === 'active' ? failed !== null ? <Card>
     <Text accessibilityRole="alert" color="error">Não enviada. {sendError}</Text>
     <Text>{failed}</Text>
-    <Button tone="patient" label="Reenviar" disabled={sending} onPress={() => void send(failed)} />
-    <Button tone="patient" variant="secondary" label="Editar mensagem" disabled={sending} onPress={() => { setDraft(failed); setFailed(null); setSendError(null); }} />
+    <Button tone="patient" icon="arrow-clockwise" label="Reenviar" disabled={sending} onPress={() => void send(failed)} />
+    <Button tone="patient" variant="secondary" icon="pencil" label="Editar mensagem" disabled={sending} onPress={() => { setDraft(failed); setFailed(null); setSendError(null); }} />
   </Card> : <MessageComposer tone="patient" value={draft} onChangeText={setDraft} sending={sending}
     onSend={() => void send(draft)} /> : undefined;
-  return <PatientPage footer={composer} stickToEnd>
+  // Pedido que nunca virou vínculo não tem conversa: para a tela, é o mesmo que não ter vínculo.
+  const noBond = bonds.data !== null && !bonds.error && (!bond || (!bondId && !conversations.length));
+  return <PatientPage footer={composer} stickToEnd={!noBond}>
     <Tabs.Screen options={headerOptions} />
-    <Feedback loading={bonds.loading} error={bonds.error} retry={() => void bonds.reload()} initial={bonds.data === null} />
-    {!bonds.loading && !bonds.error && !bond ? <EmptyState illustration="conversa" title="Nenhum vínculo disponível" /> : null}
+    <Feedback loading={bonds.loading && bonds.data === null} error={bonds.error} retry={() => void bonds.reload()} initial skeleton="chat" />
+    {noBond ? <NoBond illustration="conversa" title="Nenhuma conversa ainda" description="A conversa abre quando um psicólogo aceitar o vínculo." /> : null}
     {/* A aba abre a conversa do vínculo atual; as anteriores continuam alcançáveis daqui. */}
     {conversations.length > 1 ? conversations.map((b) => {
       const title = `${b.status === 'active' ? 'Conversa' : 'Conversa anterior'} com ${b.psychologist.name}`;
       const since = b.status === 'active' ? undefined : formatDate(b.requested_at);
-      return <ListItem key={b.id} tone="patient" title={title} description={since} badge={b.unread_messages || undefined}
+      return <ListItem key={b.id} tone="patient" icon="chat" title={title} description={since} badge={b.unread_messages || undefined}
         accessibilityLabel={[title, formatUnread(b.unread_messages), since].filter(Boolean).join(', ')}
         onPress={() => router.setParams({ bondId: String(b.id) })} />;
     }) : null}
-    {bond ? <>
+    {bond && !noBond ? <>
       {bond.status !== 'active' ? <Text>Este vínculo não está ativo. Conversa somente para leitura.</Text> : null}
-      <Feedback loading={loading} error={error} retry={() => void watcher.current?.refresh()} initial={!messages.length} />
+      <Feedback loading={loading && !messages.length} error={error} retry={() => void watcher.current?.refresh()} initial skeleton="chat" />
       {!loading && !messages.length && !error ? <EmptyState illustration="conversa" title="Nenhuma mensagem ainda" /> : null}
       {/* O histórico monta junto com a primeira leva: o que já estava na conversa aparece parado,
           e só a mensagem que chega ou é enviada depois entra animada. */}

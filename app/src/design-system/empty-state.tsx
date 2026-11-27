@@ -14,7 +14,8 @@ export type EmptyStateProps = {
   children?: ReactNode;
 };
 
-// Tela inteira vazia. Seção pequena vazia continua texto: ilustração em toda seção vazia
+// Tela inteira vazia: ocupa a altura que sobra e centraliza a imagem e a mensagem. Quem usa não
+// mostra mais nada junto. Seção pequena vazia continua texto: ilustração em toda seção vazia
 // transforma a tela num mural.
 export function EmptyState({ illustration, title, description, children }: EmptyStateProps) {
   return (
@@ -28,6 +29,6 @@ export function EmptyState({ illustration, title, description, children }: Empty
 }
 
 const styles = StyleSheet.create({
-  container: { gap: Spacing.three, paddingVertical: Spacing.four },
+  container: { flexGrow: 1, justifyContent: 'center', alignSelf: 'stretch', gap: Spacing.three, paddingVertical: Spacing.four },
   text: { textAlign: 'center' },
 });

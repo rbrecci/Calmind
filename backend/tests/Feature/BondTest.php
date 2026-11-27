@@ -720,7 +720,7 @@ class BondTest extends TestCase
             ->assertJsonPath('data.1.responded_at', '2026-10-21T10:00:00-03:00')
             ->assertJsonPath('data.1.accepted_at', null);
         $this->assertSame(
-            ['id', 'status', 'origin', 'requested_at', 'responded_at', 'accepted_at', 'ended_at', 'psychologist', 'unread_messages'],
+            ['id', 'status', 'origin', 'requested_at', 'responded_at', 'accepted_at', 'ended_at', 'bond_days', 'psychologist', 'unread_messages'],
             array_keys($response->json('data.0'))
         );
     }

@@ -1,5 +1,5 @@
 import { getAuthToken } from '../auth-token.ts';
-import { ApiError, type CatalogPsychologist, type FieldErrors, type PatientTask } from '../types.ts';
+import { ApiError, type CatalogPsychologist, type FieldErrors, type Mood, type PatientTask } from '../types.ts';
 import type {
   Appointment, BondResult, CatalogFilters, CatalogQuery, ConsentAcceptance, ConsentTerm, Message, Page, PageQuery,
   PatientApi, PatientBond, PatientNotification, PatientReport, PatientScenario,
@@ -25,6 +25,10 @@ function page<T>(items: T[], query: PageQuery = {}, defaultSize = 20, maxSize = 
   if (!Number.isInteger(current) || current < 1) validation({ page: ['Informe uma página válida.'] });
   if (!Number.isInteger(size) || size < 1 || size > maxSize) validation({ per_page: [`Informe um valor entre 1 e ${maxSize}.`] });
   return structuredClone({ data: items.slice((current - 1) * size, current * size), meta: { total: items.length, page: current, per_page: size } });
+}
+
+function inPeriod(day: string, query: { from?: string; to?: string } = {}): boolean {
+  return (!query.from || day >= query.from) && (!query.to || day <= query.to);
 }
 
 function find<T extends { id: number }>(items: T[], id: number): T {
@@ -57,7 +61,7 @@ function seed(scenario: PatientScenario, userId: number) {
   const active = scenario === 'com-vinculo';
   const bonds: PatientBond[] = hasBond ? [{
     id: 8, status: active ? 'active' : 'pending', origin: 'catalog', requested_at: CREATED,
-    responded_at: active ? CREATED : null, accepted_at: active ? CREATED : null, ended_at: null,
+    responded_at: active ? CREATED : null, accepted_at: active ? CREATED : null, ended_at: null, bond_days: active ? 30 : null,
     psychologist: { ...find(PROFESSIONALS, 1) }, unread_messages: active ? 1 : 0,
   }] : [];
   const reports: PatientReport[] = active ? [
@@ -78,7 +82,8 @@ function seed(scenario: PatientScenario, userId: number) {
     { id: 2, type: 'task.assigned', resource_id: 1, created_at: CREATED, read_at: null },
     { id: 1, type: 'appointment.scheduled', resource_id: 1, created_at: CREATED, read_at: null },
   ] : [];
-  return { userId, bonds, reports, tasks, messages, appointments, notifications,
+  const moods = new Map<string, Mood>();
+  return { userId, moods, bonds, reports, tasks, messages, appointments, notifications,
     acceptance: null as ConsentAcceptance | null, failedAttempts: 0, blockedUntil: 0, invitationUsed: false };
 }
 
@@ -165,7 +170,21 @@ export function createPatientMock({ scenario = 'com-vinculo' }: { scenario?: Pat
       if (query.modality && !['online', 'presencial', 'ambos'].includes(query.modality)) validation({ modality: ['O valor escolhido é inválido.'] });
       return page(PROFESSIONALS.filter((p) => matchesCatalogFilters(p, query)), query);
     },
-    async reports(query) { return page(state().reports, query); },
+    async reports(query) {
+      return page(state().reports.filter((report) => inPeriod(report.created_at.slice(0, 10), query)), query);
+    },
+    async moods(query) {
+      const entries = [...state().moods].map(([date, mood]) => ({ date, mood })).filter((entry) => inPeriod(entry.date, query));
+      return page(entries.sort((a, b) => b.date.localeCompare(a.date)), query, 31, 100);
+    },
+    async markMood(mood) {
+      const s = state();
+      if (!s.bonds.some((b) => b.status === 'active')) throw new ApiError(409, 'É preciso ter um vínculo ativo para registrar seu humor.');
+      if (!['bad', 'neutral', 'good'].includes(mood)) validation({ mood: ['O valor escolhido é inválido.'] });
+      const date = now().slice(0, 10);
+      s.moods.set(date, mood);
+      return { date, mood };
+    },
     async createReport(input) {
       const s = state();
       if (!input.body.trim() || input.body.length > 10000) validation({ body: ['Escreva um relato de até 10000 caracteres.'] });

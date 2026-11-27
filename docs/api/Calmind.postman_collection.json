@@ -2695,6 +2695,348 @@
               }
             }
           ]
+        },
+        {
+          "name": "Humor do dia: paciente marca",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/moods/today",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "moods",
+                "today"
+              ]
+            },
+            "description": "Um humor por dia; a data e a do servidor.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mood\": \"good\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('devolve o humor marcado', () => pm.expect(pm.response.json().mood).to.eql('good'));",
+                  "pm.collectionVariables.set('diaHumor', pm.response.json().date);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Humor do dia: valor invalido",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/moods/today",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "moods",
+                "today"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mood\": \"great\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Humor do dia: paciente lista o periodo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/moods?from={{diaHumor}}&to={{diaHumor}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "moods"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{diaHumor}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{diaHumor}}"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('um registro no dia', () => pm.expect(pm.response.json().meta.total).to.eql(1));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Humor do dia: psicologo do vinculo ve",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/patients/{{idUsuarioPaciente}}/moods?from={{diaHumor}}&to={{diaHumor}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "patients",
+                "{{idUsuarioPaciente}}",
+                "moods"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{diaHumor}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{diaHumor}}"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('ve o humor marcado', () => pm.expect(pm.response.json().data[0].mood).to.eql('good'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Relatos por periodo: privado continua fora para o psicologo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/patients/{{idUsuarioPaciente}}/reports?from={{diaHumor}}&to={{diaHumor}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "patients",
+                "{{idUsuarioPaciente}}",
+                "reports"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{diaHumor}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{diaHumor}}"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('sem o relato privado', () => pm.expect(pm.response.json().data.map(r => r.id)).to.not.include(Number(pm.collectionVariables.get('idRelatoPrivado'))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Tempo de vinculo do paciente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patientToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient/bonds",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient",
+                "bonds"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('vinculo ativo informa os dias', () => pm.expect(pm.response.json().data[0].bond_days).to.be.a('number'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Quantidade de vinculos do psicologo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{psyToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/psychologist/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "psychologist",
+                "profile"
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('informa os vinculos ativos', () => pm.expect(pm.response.json().active_bonds).to.be.above(0));"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -3398,7 +3740,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('responde 200', () => pm.response.to.have.status(200));",
-                  "pm.test('campos do contrato', () => pm.expect(pm.response.json()).to.have.all.keys([\"id\",\"crp\",\"approval_status\",\"approval_note\",\"profile_approach\",\"profile_specialty\",\"profile_modality\",\"profile_region\",\"profile_bio\",\"profile_published_at\"]));",
+                  "pm.test('campos do contrato', () => pm.expect(pm.response.json()).to.have.all.keys([\"id\",\"crp\",\"approval_status\",\"approval_note\",\"profile_approach\",\"profile_specialty\",\"profile_modality\",\"profile_region\",\"profile_bio\",\"profile_published_at\",\"active_bonds\"]));",
                   "pm.test('aprovado com CRP', () => { const b = pm.response.json(); pm.expect(b.approval_status).to.eql('approved'); pm.expect(b.crp).to.match(new RegExp('^[0-9]{2}/[0-9]{6}$')); });"
                 ]
               }
@@ -5297,7 +5639,7 @@
                 "exec": [
                   "pm.test('responde 200', () => pm.response.to.have.status(200));",
                   "pm.test('lista com meta do contrato', () => { const b = pm.response.json(); pm.expect(b).to.have.all.keys('data', 'meta'); pm.expect(b.data).to.be.an('array'); pm.expect(b.meta).to.have.all.keys('total', 'page', 'per_page'); });",
-                  "pm.test('somente campos seguros', () => pm.response.json().data.forEach(n => { pm.expect(n).to.have.all.keys([\"id\",\"type\",\"resource_id\",\"created_at\",\"read_at\"]); pm.expect(n.read_at).to.eql(null); }));",
+                  "pm.test('somente campos seguros', () => pm.response.json().data.forEach(n => { pm.expect(n).to.have.all.keys([\"id\",\"type\",\"resource_id\",\"actor_name\",\"created_at\",\"read_at\"]); pm.expect(n.read_at).to.eql(null); }));",
                   "pm.test('eventos de tarefa mensagem agenda e vinculo', () => { const types = pm.response.json().data.map(n => n.type); ['task.assigned', 'message.received', 'appointment.scheduled', 'appointment.rescheduled', 'appointment.cancelled', 'bond.accepted'].forEach(t => pm.expect(types).to.include(t)); });",
                   "pm.collectionVariables.set('idNotificacao', pm.response.json().data[0].id);"
                 ]
@@ -5378,7 +5720,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('responde 200', () => pm.response.to.have.status(200));",
-                  "pm.test('campos do contrato', () => pm.expect(pm.response.json()).to.have.all.keys([\"id\",\"type\",\"resource_id\",\"created_at\",\"read_at\"]));",
+                  "pm.test('campos do contrato', () => pm.expect(pm.response.json()).to.have.all.keys([\"id\",\"type\",\"resource_id\",\"actor_name\",\"created_at\",\"read_at\"]));",
                   "pm.test('leitura registrada', () => pm.expect(pm.response.json().read_at).to.be.a('string'));",
                   "pm.collectionVariables.set('notificacaoLidaEm', pm.response.json().read_at);"
                 ]
@@ -9397,6 +9739,10 @@
     },
     {
       "key": "idTarefaProntuario",
+      "value": ""
+    },
+    {
+      "key": "diaHumor",
       "value": ""
     }
   ]

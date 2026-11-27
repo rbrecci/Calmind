@@ -60,6 +60,7 @@ class PsychologistRegistrationController extends Controller
             'profile_region' => $psychologist->profile_region,
             'profile_bio' => $psychologist->profile_bio,
             'profile_published_at' => $psychologist->profile_published_at?->toIso8601String(),
+            'active_bonds' => $psychologist->activeBondsCount(),
         ];
     }
 }

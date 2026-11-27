@@ -57,4 +57,10 @@ class Psychologist extends BaseModel
     {
         return $this->hasMany(Bond::class);
     }
+
+    // Vinculos ativos agora; pedido pendente e vinculo encerrado nao entram
+    public function activeBondsCount(): int
+    {
+        return Bond::where('psychologist_id', $this->id)->where('status', 'active')->count();
+    }
 }

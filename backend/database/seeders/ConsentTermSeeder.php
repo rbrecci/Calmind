@@ -20,18 +20,7 @@ class ConsentTermSeeder extends Seeder
         ConsentTerm::create([
             'type' => 'general',
             'version' => '1.0',
-            'body' => implode("\n\n", [
-                'O Calmind é uma plataforma de apoio ao acompanhamento psicológico. Ela aproxima paciente e psicólogo entre as sessões, com relatos, tarefas, mensagens e agenda de consultas.',
-                'O Calmind não é serviço de emergência e não substitui a sessão com o seu psicólogo. Em crise ou risco à vida, ligue para o CVV no 188 (gratuito, 24 horas) ou para o SAMU no 192.',
-                'Dados coletados: seu cadastro (nome, e-mail, data de nascimento e, para psicólogos, o número do CRP), os relatos que você escreve, as mensagens trocadas no vínculo, as tarefas e a agenda de consultas.',
-                'Quem vê o quê: o relato marcado como privado fica visível só para você. O relato compartilhado, as tarefas, as mensagens e as consultas ficam visíveis para o psicólogo com quem você tem vínculo ativo. Outros pacientes e psicólogos não têm acesso a esse conteúdo.',
-                'Esses dados, incluindo os de saúde, são tratados com base no seu consentimento, conforme a Lei Geral de Proteção de Dados Pessoais (Lei 13.709/2018). Eles servem só ao acompanhamento e nunca são usados para publicidade nem vendidos.',
-                'Você pode revogar este consentimento a qualquer momento e pedir acesso, correção ou exclusão dos seus dados. Sem o consentimento vigente, as funções clínicas da plataforma ficam bloqueadas.',
-                'O psicólogo vinculado está sujeito ao sigilo profissional previsto no Código de Ética Profissional do Psicólogo (Resolução CFP 010/2005), e esse sigilo vale para tudo o que você registra aqui.',
-                'Paciente menor de 18 anos só usa a plataforma com o consentimento do pai, da mãe ou do responsável legal, registrado pelo psicólogo.',
-                'Para psicólogos: ao aceitar, você declara ter inscrição ativa no Conselho Regional de Psicologia (CRP), se compromete a guardar sigilo sobre o que seus pacientes registram e a usar a plataforma de forma ética, só para acompanhar os pacientes com quem tem vínculo.',
-                self::ACADEMIC_NOTICE,
-            ]),
+            'body' => self::generalBody(),
             'effective_from' => now()->subMonth(),
             'published_by_user_id' => $admin->id,
         ]);
@@ -51,6 +40,23 @@ class ConsentTermSeeder extends Seeder
             ]),
             'effective_from' => now()->subMonth(),
             'published_by_user_id' => $admin->id,
+        ]);
+    }
+
+    // Texto do termo geral vigente. A migration que publica a versao nova usa o mesmo texto.
+    public static function generalBody(): string
+    {
+        return implode("\n\n", [
+            'O Calmind é uma plataforma de apoio ao acompanhamento psicológico. Ela aproxima paciente e psicólogo entre as sessões, com relatos, tarefas, mensagens e agenda de consultas.',
+            'O Calmind não é serviço de emergência e não substitui a sessão com o seu psicólogo. Em crise ou risco à vida, ligue para o CVV no 188 (gratuito, 24 horas) ou para o SAMU no 192.',
+            'Dados coletados: seu cadastro (nome, e-mail, data de nascimento e, para psicólogos, o número do CRP), os relatos que você escreve, o humor que você marca no calendário, as mensagens trocadas no vínculo, as tarefas e a agenda de consultas.',
+            'Quem vê o quê: o relato marcado como privado fica visível só para você. O relato compartilhado, o humor marcado, as tarefas, as mensagens e as consultas ficam visíveis para o psicólogo com quem você tem vínculo ativo. Outros pacientes e psicólogos não têm acesso a esse conteúdo.',
+            'Esses dados, incluindo os de saúde, são tratados com base no seu consentimento, conforme a Lei Geral de Proteção de Dados Pessoais (Lei 13.709/2018). Eles servem só ao acompanhamento e nunca são usados para publicidade nem vendidos.',
+            'Você pode revogar este consentimento a qualquer momento e pedir acesso, correção ou exclusão dos seus dados. Sem o consentimento vigente, as funções clínicas da plataforma ficam bloqueadas.',
+            'O psicólogo vinculado está sujeito ao sigilo profissional previsto no Código de Ética Profissional do Psicólogo (Resolução CFP 010/2005), e esse sigilo vale para tudo o que você registra aqui.',
+            'Paciente menor de 18 anos só usa a plataforma com o consentimento do pai, da mãe ou do responsável legal, registrado pelo psicólogo.',
+            'Para psicólogos: ao aceitar, você declara ter inscrição ativa no Conselho Regional de Psicologia (CRP), se compromete a guardar sigilo sobre o que seus pacientes registram e a usar a plataforma de forma ética, só para acompanhar os pacientes com quem tem vínculo.',
+            self::ACADEMIC_NOTICE,
         ]);
     }
 }

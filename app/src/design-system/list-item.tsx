@@ -4,7 +4,7 @@ import Animated from 'react-native-reanimated';
 import type { ButtonTone } from './button';
 import { EaseOut } from './motion';
 import { Text } from './text';
-import { Icon } from './icon';
+import { Icon, type IconName } from './icon';
 import { Colors, MinTouchTarget, Radius, RoleColors, Spacing } from './tokens';
 import { FontFamily } from './typography';
 
@@ -22,6 +22,8 @@ export type ListItemProps = {
   tone?: ButtonTone;
   disabled?: boolean;
   accessibilityLabel?: string;
+  // Desenho à esquerda, num círculo no tom claro do lado.
+  icon?: IconName;
 };
 
 // Linha de menu que leva a outra tela. A seta Phosphor à direita indica a navegação.
@@ -35,6 +37,7 @@ export function ListItem({
   tone = 'neutral',
   disabled = false,
   accessibilityLabel,
+  icon,
 }: ListItemProps) {
   // O leitor de tela lê a linha inteira como um botão só, então o contador entra no nome.
   const label = accessibilityLabel ?? [title, badge === undefined ? null : String(badge), description, detail].filter(Boolean).join(', ');
@@ -60,6 +63,10 @@ export function ListItem({
         {/* Dark e não a cor do lado: o ponto é a única marca visual da não lida, e as cores de lado
             reprovam o contraste de 3:1 sobre o branco. */}
         {unread ? <View style={styles.dot} /> : null}
+
+        {icon ? <View style={[styles.icon, { backgroundColor: tone === 'neutral' ? Colors.surface : RoleColors[tone].tint }]}>
+          <Icon name={icon} size={20} />
+        </View> : null}
 
         <View style={styles.texts}>
           <Text color={disabled ? 'textSecondary' : 'text'} style={unread ? styles.unreadTitle : undefined}>{title}</Text>
@@ -91,6 +98,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     borderRadius: Radius.md,
   },
+  icon: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   texts: {
     flex: 1,
     gap: Spacing.half,

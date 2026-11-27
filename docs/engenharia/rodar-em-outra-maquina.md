@@ -97,6 +97,17 @@ O `PresentationSeeder` deixa, no vínculo de Elizabeth Bennet com Hermione Grang
 
 Rodar de novo (`php artisan db:seed --class=PresentationSeeder`) não duplica nem desfaz o que mudou no ensaio. Para voltar ao estado de partida, recrie o banco. Enquanto o app não tiver a tela de medicação, o lembrete aparece só como "Você tem uma nova notificação".
 
+### Massa grande, para ver as telas cheias
+
+Opcional, depois do seed padrão. Cria cerca de 40 pacientes ativos, 12 encerrados e 8 pedidos pendentes para Hermione, seis meses de relatos, humor, tarefas, conversa e agenda para Elizabeth, e 30 perfis no catálogo. Tudo fictício; rodar de novo não duplica.
+
+```bash
+php artisan db:seed --class=ScaleDemoSeeder
+sh scripts/preparar-demo.sh   # troca a senha pública das contas novas
+```
+
+Não use no banco da apresentação sem querer essa quantidade na tela.
+
 ## 5. Ligar o servidor
 
 Três processos, cada um num terminal, nesta ordem:

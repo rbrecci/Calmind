@@ -27,6 +27,12 @@ Fonte de verdade: [`docs/identidade-visual.md`](../../../docs/identidade-visual.
 | `illustration.tsx` | Ilustração decorativa por nome (`Illustration`), 360:260, que entra e depois respira devagar |
 | `empty-state.tsx` | Tela inteira vazia (`EmptyState`): ilustração, título curto, descrição e ação opcionais |
 | `loading.tsx` | Carregando de tela inteira (`Loading`): logo pequeno pulsando e o texto "Carregando" |
+| `calendar.ts`, `month-calendar.tsx` | Contas de dia e mês e o calendário de um mês (`MonthCalendar`), com o fundo pelo humor e o ponto de relato |
+| `mood.tsx` | Os três humores e a escolha do dia (`MoodPicker`) |
+| `report-feed.tsx` | Relatos agrupados por dia em cartões compactos (`ReportFeed`), com "Ler mais" e "Mostrar mais" |
+| `skeleton.tsx` | Esqueleto de carregamento (`Skeleton`), um desenho por tipo de tela |
+| `action-sheet.tsx` | Folha que sobe do rodapé (`ActionSheet`), como o editar do perfil |
+| `section.tsx` | Grupo com título (`Section`), como na tela de conta |
 | `appear.tsx` | `Appear`, caixa que esmaece ao montar (cartões; `rise` sobe 8 pontos, nas mensagens), e `SkipInitialAppear`, que deixa parado o que já estava ali |
 | `motion.ts` | Curvas de movimento (ease-out e ease-in-out) nos dois formatos que o Reanimated pede |
 | `app-header.tsx` | Cabeçalho das telas depois do login (`AppHeader`): barra na cor do lado com a base arredondada, ícone e título no centro, avatar ou voltar à esquerda, sino e engrenagem à direita |

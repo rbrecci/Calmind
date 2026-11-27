@@ -18,6 +18,13 @@ export { MessageBubble, MessageDay, type MessageBubbleProps } from './conversati
 export { EmptyState, type EmptyStateProps } from './empty-state';
 export { ErrorBanner } from './error-banner';
 export { ExpandableCard, type ExpandableCardProps } from './expandable-card';
+export { ActionSheet, type SheetAction } from './action-sheet';
+export { capitalizeFirst, dayKey, formatDayKey, formatMonth, monthRange, parseDayKey } from './calendar';
+export { MonthCalendar, type DayMark } from './month-calendar';
+export { ReportFeed } from './report-feed';
+export { MoodIcons, MoodLabels, MoodPicker, type Mood } from './mood';
+export { Skeleton, type SkeletonVariant } from './skeleton';
+export { Section } from './section';
 export { formatDate, formatDateTime, formatDayHeading, formatShortDate, formatTaskDate, formatTime, formatWeekdayDate, taskDeadlineTag } from './format-date';
 export { Hero, type HeroProps } from './hero';
 export { Icon, type IconName, type IconProps } from './icon';

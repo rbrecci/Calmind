@@ -35,6 +35,18 @@ class Bond extends BaseModel
         ];
     }
 
+    // Dias de calendario desde o aceite; encerrado para no dia do fim. Nulo se nunca ficou ativo.
+    public function durationInDays(): ?int
+    {
+        if ($this->accepted_at === null) {
+            return null;
+        }
+
+        $end = $this->ended_at ?? now();
+
+        return (int) $this->accepted_at->copy()->startOfDay()->diffInDays($end->copy()->startOfDay());
+    }
+
     public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);

@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
 
 import { psychologistApi } from '@/api/psychologist';
-import { Colors, EmptyState, formatDateTime, formatTime, groupMessagesByDay, Loading, MessageBubble, MessageComposer, MessageDay, Radius, RoleColors, SkipInitialAppear, Spacing, Text } from '@/design-system';
+import { Colors, EmptyState, formatDateTime, formatTime, groupMessagesByDay, MessageBubble, MessageComposer, MessageDay, Radius, RoleColors, Skeleton, SkipInitialAppear, Spacing, Text } from '@/design-system';
 import { createChatController, type ChatState } from '@/psychologist/chat-state';
 import { lastOwnMessageId } from '@/psychologist/domain';
 import { Action, ErrorNotice, Page, useResource } from '@/psychologist/ui';
@@ -32,15 +32,17 @@ export default function PatientChat() {
       setBody('');
       void controller?.send(draft);
     }} />;
+  const name = patient.data?.patient.name;
+  const headerOptions = useMemo(() => ({ title: name }), [name]);
   // O nome do paciente vai no cabeçalho, que diz "Chat" enquanto carrega; repetir na página
   // quebrava o título em duas linhas.
   return <Page footer={composer} stickToEnd>
-    {patient.data ? <Stack.Screen options={{ title: patient.data.patient.name }} /> : null}
-    {patient.loading && !patient.data ? <Loading /> : null}
+    {name ? <Stack.Screen options={headerOptions} /> : null}
+    {patient.loading && !patient.data ? <Skeleton variant="chat" /> : null}
     <ErrorNotice error={patient.error} retry={patient.reload} />
     {patient.data ? <>
       {/* Na volta à tela as mensagens continuam aí: o logo só entra quando não há nenhuma. */}
-      {state.loading && !state.messages.length ? <Loading /> : null}
+      {state.loading && !state.messages.length ? <Skeleton variant="chat" /> : null}
       <ErrorNotice error={state.error} retry={() => { void controller?.reload(); }} />
       {!state.loading && !state.error && state.messages.length === 0 ? <EmptyState illustration="conversa" title="Nenhuma mensagem ainda" /> : null}
       {/* O histórico monta junto com a primeira leva: o que já estava na conversa aparece parado,
@@ -62,7 +64,7 @@ export default function PatientChat() {
         <Text color={draft.status === 'failed' ? 'error' : 'textSecondary'} accessibilityLiveRegion="polite">
           {draft.status === 'failed' ? `Não enviada. ${draft.error ?? ''}` : 'Enviando...'}
         </Text>
-        {draft.status === 'failed' && !readOnly ? <Action variant="secondary" label="Reenviar mensagem" onPress={() => { void controller?.retry(draft.id); }} /> : null}
+        {draft.status === 'failed' && !readOnly ? <Action variant="secondary" icon="arrow-clockwise" label="Reenviar mensagem" onPress={() => { void controller?.retry(draft.id); }} /> : null}
       </View>)}
     </> : null}
   </Page>;

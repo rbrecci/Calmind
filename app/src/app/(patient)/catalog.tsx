@@ -7,7 +7,7 @@ import { patientApi } from '@/api/patient';
 import type { CatalogFilters, CatalogQuery } from '@/api/patient/types';
 import { catalogQuery, countCatalogFilters, hasCatalogFilters } from '@/catalog/catalog-filters';
 import { modalityLabel } from '@/catalog/load-catalog';
-import { Button, Chip, PersonCard, Spacing, Text, TextField } from '@/design-system';
+import { Button, Chip, EmptyState, PersonCard, Spacing, Text, TextField } from '@/design-system';
 import { loadPatientPages } from '@/patient/load-pages';
 import { Card, Feedback, PatientPage } from '@/patient/ui';
 import { usePatientData } from '@/patient/use-patient-data';
@@ -52,14 +52,14 @@ export default function PatientCatalog() {
     {!error && showFilters ? <Card>
       <TextField label="Especialidade" value={form.specialty} onChangeText={(specialty) => setForm({ ...form, specialty })} maxLength={120} />
       <TextField label="Região" value={form.region} onChangeText={(region) => setForm({ ...form, region })} maxLength={120} />
-      <Button tone="patient" label="Buscar" disabled={loading} onPress={() => { apply(form); setShowFilters(false); }} />
-      {hasCatalogFilters(form) || hasCatalogFilters(applied) ? <Button tone="patient" variant="secondary" label="Limpar filtros" disabled={loading}
+      <Button tone="patient" icon="search" label="Buscar" disabled={loading} onPress={() => { apply(form); setShowFilters(false); }} />
+      {hasCatalogFilters(form) || hasCatalogFilters(applied) ? <Button tone="patient" variant="secondary" icon="x" label="Limpar filtros" disabled={loading}
         onPress={() => apply(EMPTY_FILTERS)} /> : null}
     </Card> : null}
-    <Feedback loading={loading} error={error} retry={() => void reload()} initial={data === null} />
-    {data?.length === 0 && !loading && !error ? <Text accessibilityLiveRegion="polite">{hasCatalogFilters(applied)
-      ? 'Nenhum profissional encontrado com esses filtros. Ajuste os filtros e busque de novo.'
-      : 'Nenhum profissional disponível por enquanto.'}</Text> : null}
+    <Feedback loading={loading && data === null} error={error} retry={() => void reload()} initial />
+    {data?.length === 0 && !loading && !error ? <EmptyState illustration="pacientes"
+      title={hasCatalogFilters(applied) ? 'Nenhum profissional encontrado' : 'Nenhum profissional disponível'}
+      description={hasCatalogFilters(applied) ? 'Ajuste os filtros e busque de novo.' : undefined} /> : null}
     {!error ? data?.map((p) => <PersonCard key={p.id} tone="patient" name={p.name} avatarUri={p.avatar_url} headers={headers}
       tag={{ kind: 'neutral', label: `CRP ${p.crp}` }}
       description={[p.approach, modalityLabel(p.modality)].filter(Boolean).join(' · ') || undefined}

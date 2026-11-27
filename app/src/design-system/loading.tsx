@@ -29,5 +29,5 @@ export function Loading() {
 }
 
 const styles = StyleSheet.create({
-  container: { alignItems: 'center', gap: Spacing.two, paddingVertical: Spacing.six },
+  container: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', gap: Spacing.two, paddingVertical: Spacing.six },
 });

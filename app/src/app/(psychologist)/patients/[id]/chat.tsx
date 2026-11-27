@@ -40,7 +40,7 @@ export default function PatientChat() {
     <ErrorNotice error={patient.error} retry={patient.reload} />
     {patient.data ? <>
       {/* Na volta à tela as mensagens continuam aí: o logo só entra quando não há nenhuma. */}
-      {state.loading ? state.messages.length ? <Text>Carregando mensagens...</Text> : <Loading /> : null}
+      {state.loading && !state.messages.length ? <Loading /> : null}
       <ErrorNotice error={state.error} retry={() => { void controller?.reload(); }} />
       {!state.loading && !state.error && state.messages.length === 0 ? <EmptyState illustration="conversa" title="Nenhuma mensagem ainda" /> : null}
       {/* O histórico monta junto com a primeira leva: o que já estava na conversa aparece parado,

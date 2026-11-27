@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { ApiError } from '@/api';
 import { psychologistApi } from '@/api/psychologist';
 import type { GuardianConsentInput } from '@/api/psychologist/types';
-import { formatDate, formatDateTime, Text } from '@/design-system';
+import { formatDate, formatDateTime, Loading, Text } from '@/design-system';
 import { formatDueDate } from '@/psychologist/domain';
 import { collectPages } from '@/psychologist/resource';
 import { Action, Card, ErrorNotice, Field, useResource } from '@/psychologist/ui';
@@ -29,7 +29,7 @@ export function GuardianConsentSection({ patientId, guardianName }: { patientId:
     } catch (cause) { setError(cause); } finally { submitting.current = false; setBusy(false); }
   }
   return <><Text variant="h4">Consentimento do responsável</Text>
-    {list.loading && !list.data ? <Text>Carregando registros...</Text> : null}
+    {list.loading && !list.data ? <Loading /> : null}
     <ErrorNotice error={list.error} retry={list.reload} />
     {list.data?.length === 0 ? <Text>Nenhum registro de consentimento do responsável.</Text> : null}
     {list.data?.map((item) => <Card key={item.id}><Text>{item.guardian_name}</Text>

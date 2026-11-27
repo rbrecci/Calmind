@@ -62,7 +62,7 @@ export default function PatientHome() {
   const refresh = async () => { await Promise.all([reload(), summary.reload()]); };
   const first = firstName(name);
   const openProfile = (target: PatientBond) => router.push({ pathname: '/(patient)/psychologist/[id]', params: { id: String(target.psychologist.id) } });
-  return <ScrollingHeaderScreen onRefresh={refresh}
+  return <ScrollingHeaderScreen loading={loading && data === null} onRefresh={refresh}
     compactHeader={<SideHeader tone="patient" title="Início" icon={'house'} actions />}
     expandedHeader={<>
     <SideHeader tone="patient" title="Início" icon={'house'} actions flush />
@@ -72,10 +72,17 @@ export default function PatientHome() {
         <View style={styles.streakHeading}><Text variant="h4" style={styles.heroText}>Sua Sequência</Text><Icon name={'flame'} size={20} /></View>
         <Text variant="h4" style={styles.heroText}>70 Dias</Text>
       </View> : null}
-      {bond?.status === 'active' ? <Button tone="patient" variant="hero" label="Iniciar Relato" style={styles.heroButton}
+      {bond?.status === 'active' ? <View>
+        <View style={styles.streakHeading}>
+          <Text variant="h4" style={styles.heroText}>Tempo de vínculo</Text>
+          <Icon name="timer" size={24} />
+        </View>
+        <Text variant="h4" style={styles.heroText}>156 dias</Text>
+      </View> : null}
+      {bond?.status === 'active' ? <Button tone="patient" variant="hero" heroIcon="pencil" label="Iniciar Relato" style={styles.heroButton}
         onPress={() => router.push('/new-report')} /> : null}
     </Hero></>}>
-    <Feedback loading={loading} error={error} retry={() => void reload()} initial={data === null} />
+    <Feedback loading={loading && data === null} error={error} retry={() => void reload()} initial />
     {data && !error ? <>
       {bond?.status === 'pending' ? <Illustration name="aguardando" /> : null}
       {bond ? <>
@@ -92,7 +99,7 @@ export default function PatientHome() {
         <View style={styles.shortcuts}>
           <Shortcut tone="patient" icon={AGENDA} label="Agenda" onPress={() => router.push('/(patient)/agenda')} />
           <View style={styles.shortcutDivider} />
-          <Shortcut tone="patient" icon={PROFILE} label="Perfil" onPress={() => router.push('/(patient)/profile')} />
+          <Shortcut tone="patient" icon={PROFILE} label="Perfil" onPress={() => router.navigate('/(patient)/profile')} />
           <View style={styles.shortcutDivider} />
           <Shortcut tone="patient" icon={TASKS} label="Tarefas" badge={pending || undefined}
             accessibilityLabel={pending ? `Tarefas, ${pending} ${pending === 1 ? 'pendente' : 'pendentes'}` : 'Tarefas'}

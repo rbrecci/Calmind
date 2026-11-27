@@ -89,11 +89,11 @@ export function Screen({
       onContentSizeChange={followEnd}
       // O teclado abrindo encolhe a rolagem e esconderia as últimas mensagens.
       onLayout={followEnd}>
-      <View style={styles.content}>{children}</View>
+      <View style={[styles.content, !center && styles.contentFill]}>{children}</View>
     </ScrollView>
   ) : (
     <View style={[containerStyle, styles.fill]}>
-      <View style={styles.content}>{children}</View>
+      <View style={[styles.content, !center && styles.contentFill]}>{children}</View>
     </View>
   );
 
@@ -141,6 +141,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     gap: Spacing.three,
   },
+  contentFill: { flexGrow: 1 },
   // Sem faixa nem borda: o rodapé fica sobre o fundo da tela, como no protótipo. A rolagem
   // termina acima dele, então nada passa por baixo.
   footer: {

@@ -9,7 +9,7 @@ export function PatientPage({ title, children, onRefresh, footer, stickToEnd, on
   onScrollOffset?: (offset: number) => void; scrollExtraSpace?: number;
 }) {
   // O indicador acompanha só o gesto: o recarregamento de quando a aba ganha foco já aparece no
-  // "Carregando..." e não precisa de um segundo aviso no topo.
+  // indicador de rolagem, sem inserir aviso de texto no conteúdo.
   const [refreshing, setRefreshing] = useState(false);
   const refresh = onRefresh ? () => {
     setRefreshing(true);
@@ -32,7 +32,7 @@ export function Feedback({ loading, error, retry, initial = false }: {
   loading: boolean; error: string | null; retry: () => void; initial?: boolean;
 }) {
   return <>
-    {loading ? initial ? <Loading /> : <Text accessibilityLiveRegion="polite">Carregando...</Text> : null}
+    {loading && initial ? <Loading /> : null}
     {error ? <><Text color="error" accessibilityRole="alert">{error}</Text>
       <Button tone="patient" variant="secondary" label="Tentar de novo" onPress={retry} disabled={loading} /></> : null}
   </>;

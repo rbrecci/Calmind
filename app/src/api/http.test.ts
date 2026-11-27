@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { afterEach, beforeEach, describe, test } from 'node:test';
 
-import { setAuthToken } from './auth-token.ts';
+import { setAuthToken, setUnauthorizedHandler } from './auth-token.ts';
 import { httpApi, imageHeaders } from './http.ts';
 import { ApiError } from './types.ts';
 
@@ -26,7 +26,18 @@ describe('cliente HTTP', () => {
 
   afterEach(() => {
     globalThis.fetch = realFetch;
+    setUnauthorizedHandler(null);
     setAuthToken(null);
+  });
+
+  test('avisa sobre sessao expirada em 401 autenticado, mas nao em login', async () => {
+    let expired = 0;
+    setUnauthorizedHandler(() => { expired++; });
+    respondWith(401, { message: 'Nao autenticado.' });
+    await assert.rejects(httpApi.catalogPsychologists());
+    assert.equal(expired, 1);
+    await assert.rejects(httpApi.login({ email: 'teste@calmind.test', password: 'incorreta' }));
+    assert.equal(expired, 1);
   });
 
   test('catalogPsychologists faz GET em /catalog/psychologists com o token', async () => {

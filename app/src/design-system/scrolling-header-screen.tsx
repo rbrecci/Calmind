@@ -14,11 +14,12 @@ type Props = {
   children: ReactNode;
   onRefresh: () => Promise<void>;
   tone?: 'patient' | 'psychologist';
+  loading?: boolean;
 };
 
 // O topo rola inteiro por trás da barra transparente nos cantos.
 // O conteúdo branco reserva a altura revelada para manter os cartões abaixo dela.
-export function ScrollingHeaderScreen({ expandedHeader, compactHeader, children, onRefresh, tone = 'patient' }: Props) {
+export function ScrollingHeaderScreen({ expandedHeader, compactHeader, children, onRefresh, tone = 'patient', loading = false }: Props) {
   const [reveal] = useState(() => new Animated.Value(0));
   const [expandedHeight, setExpandedHeight] = useState(0);
   const [headerHeight, setHeaderHeight] = useState(80);
@@ -89,7 +90,7 @@ export function ScrollingHeaderScreen({ expandedHeader, compactHeader, children,
       }}>
       <View>
         <View onLayout={(event) => setExpandedHeight(event.nativeEvent.layout.height)}>{expandedHeader}</View>
-        <View style={[styles.surface, { minHeight: viewportHeight + Radius.lg, paddingBottom: tabBarHeight + Spacing.four }]}>
+        <View style={[styles.surface, { minHeight: loading ? Math.max(0, viewportHeight - expandedHeight + Radius.lg) : viewportHeight + Radius.lg, paddingBottom: tabBarHeight + Spacing.four }]}>
           <LinearGradient colors={ScreenGradients[tone].colors} locations={ScreenGradients[tone].locations}
             style={[StyleSheet.absoluteFill, { top: -expandedHeight + Radius.lg }]} />
           <Animated.View style={[styles.body, { paddingTop: reveal.interpolate({
@@ -109,5 +110,5 @@ const styles = StyleSheet.create({
   content: { flexGrow: 1 },
   // A curva e o conteúdo compartilham um único degradê, sem uma tampa branca.
   surface: { marginTop: -Radius.lg, borderTopLeftRadius: Radius.lg, borderTopRightRadius: Radius.lg, overflow: 'hidden', backgroundColor: Colors.background },
-  body: { width: '100%', maxWidth: MaxContentWidth + Spacing.page * 2, alignSelf: 'center', padding: Spacing.page, gap: Spacing.three },
+  body: { flexGrow: 1, width: '100%', maxWidth: MaxContentWidth + Spacing.page * 2, alignSelf: 'center', padding: Spacing.page, gap: Spacing.three },
 });

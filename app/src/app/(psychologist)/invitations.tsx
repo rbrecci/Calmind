@@ -28,9 +28,9 @@ export default function Invitations() {
     <ErrorNotice error={error} />
     {invitation ? <Card><Text selectable variant="h2" accessibilityLabel={`Código do convite ${invitation.code}`}>{invitation.code}</Text>
       <Text>Válido até {formatDateTime(invitation.expires_at)}</Text>
-      <Action variant="destructive" label="Revogar convite" disabled={busy}
+      <Action variant="destructive" icon="trash" label="Revogar convite" disabled={busy}
         onPress={() => ask('Revogar convite?', 'Este código deixará de permitir um novo vínculo.', () => { void revoke(); }, 'destructive')} />
-    </Card> : <Action label="Gerar convite" loading={busy} onPress={() => { void create(); }} />}
+    </Card> : <Action icon="key" label="Gerar convite" loading={busy} onPress={() => { void create(); }} />}
     {confirmation}
   </Page>;
 }

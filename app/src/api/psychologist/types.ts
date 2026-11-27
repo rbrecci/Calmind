@@ -1,4 +1,4 @@
-import type { ProfileImages } from '../types.ts';
+import type { MoodEntry, ProfileImages } from '../types.ts';
 
 export type PageParams = { page?: number; per_page?: number };
 export type Page<T> = { data: T[]; meta: { total: number; page: number; per_page: number } };
@@ -14,6 +14,8 @@ export type Profile = {
   profile_region: string | null;
   profile_bio: string | null;
   profile_published_at: string | null;
+  // Quantidade de vínculos ativos, contada pelo servidor.
+  active_bonds?: number;
 };
 export type ProfileInput = Partial<Pick<Profile, 'profile_approach' | 'profile_specialty' | 'profile_modality' | 'profile_region' | 'profile_bio'>>;
 export type DocumentUpload = { uri: string; name: string; mimeType?: string; size?: number; file?: File };
@@ -95,7 +97,8 @@ export type PsychologistApi = {
   createInvitation(): Promise<Invitation>;
   revokeInvitation(id: number): Promise<RevokedInvitation>;
   endBond(id: number): Promise<Bond>;
-  reports(patientId: number, params?: PageParams): Promise<Page<SharedReport>>;
+  reports(patientId: number, params?: PageParams & { from?: string; to?: string }): Promise<Page<SharedReport>>;
+  moods(patientId: number, params?: PageParams & { from?: string; to?: string }): Promise<Page<MoodEntry>>;
   tasks(params?: PageParams & { bond_id?: number }): Promise<Page<Task>>;
   createTask(input: TaskInput): Promise<Task>;
   updateTask(id: number, input: TaskUpdate): Promise<Task>;

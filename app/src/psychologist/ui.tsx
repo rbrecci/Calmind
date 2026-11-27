@@ -1,26 +1,31 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Modal, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { ApiError } from '@/api';
-import { Appear, Button, Colors, confirmationVariants, Radius, Screen, Spacing, Text, TextField, type ButtonVariant, type ConfirmationKind } from '@/design-system';
+import { Appear, Button, Colors, confirmationVariants, Radius, Screen, Spacing, Text, TextField, type ButtonVariant, type ConfirmationKind, type IconName } from '@/design-system';
 import type { TextFieldProps } from '@/design-system/text-field';
 import { createResource, type ResourceState } from './resource';
 
 // O título fica no cabeçalho, nas abas e nas telas empilhadas: repetir aqui seria dizer a mesma coisa duas vezes.
-export function Page({ children, footer, stickToEnd }: {
-  children: ReactNode; footer?: ReactNode; stickToEnd?: boolean;
+export function Page({ children, footer, stickToEnd, onRefresh }: {
+  children: ReactNode; footer?: ReactNode; stickToEnd?: boolean; onRefresh?: () => Promise<void>;
 }) {
-  return <Screen scroll footer={footer} stickToEnd={stickToEnd}>{children}</Screen>;
+  const [refreshing, setRefreshing] = useState(false);
+  const refresh = onRefresh ? () => {
+    setRefreshing(true);
+    void onRefresh().finally(() => setRefreshing(false));
+  } : undefined;
+  return <Screen scroll footer={footer} stickToEnd={stickToEnd} refreshing={refreshing} onRefresh={refresh}>{children}</Screen>;
 }
 
 export function Card({ children }: { children: ReactNode }) {
   return <Appear style={styles.card}>{children}</Appear>;
 }
 
-export function Action({ label, onPress, disabled = false, loading = false, variant, accessibilityLabel, style }: {
-  label: string; onPress: () => void; disabled?: boolean; loading?: boolean; variant?: ButtonVariant; accessibilityLabel?: string;
+export function Action({ label, onPress, disabled = false, loading = false, variant, accessibilityLabel, style, icon }: {
+  icon?: IconName; label: string; onPress: () => void; disabled?: boolean; loading?: boolean; variant?: ButtonVariant; accessibilityLabel?: string;
   style?: StyleProp<ViewStyle>;
 }) {
-  return <Button tone="psychologist" variant={variant} label={loading ? 'Aguarde...' : label}
+  return <Button tone="psychologist" variant={variant} icon={icon} label={loading ? 'Aguarde...' : label}
     accessibilityLabel={accessibilityLabel ?? label} onPress={onPress} disabled={disabled || loading} style={style} />;
 }
 
@@ -35,7 +40,7 @@ export function errorMessage(error: unknown): string {
 export function ErrorNotice({ error, retry }: { error: unknown; retry?: () => void }) {
   if (!error) return null;
   return <View style={styles.group}><Text color="error" accessibilityRole="alert">{errorMessage(error)}</Text>
-    {retry ? <Action variant="secondary" label="Tentar de novo" onPress={retry} /> : null}</View>;
+    {retry ? <Action variant="secondary" icon="arrow-clockwise" label="Tentar de novo" onPress={retry} /> : null}</View>;
 }
 
 export function FieldErrorsDisplay({ error }: { error: unknown }) {
@@ -68,8 +73,8 @@ export function useConfirmation() {
     onRequestClose={() => setPending(null)}>
     <View style={styles.modal}><View style={styles.dialog} accessibilityViewIsModal>
       <Text variant="h4">{pending?.title}</Text><Text>{pending?.message}</Text>
-      <Action variant={variants.confirm} label="Confirmar" onPress={() => { const action = pending?.action; setPending(null); action?.(); }} />
-      <Action variant={variants.cancel} label="Voltar" onPress={() => setPending(null)} />
+      <Action variant={variants.confirm} icon="check" label="Confirmar" onPress={() => { const action = pending?.action; setPending(null); action?.(); }} />
+      <Action variant={variants.cancel} icon="caret-left" label="Voltar" onPress={() => setPending(null)} />
     </View></View>
   </Modal>;
   return { ask, confirmation };

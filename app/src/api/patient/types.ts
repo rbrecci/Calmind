@@ -1,6 +1,8 @@
-import type { CatalogPsychologist, Modality, PatientTask, ProfileImages } from '../types.ts';
+import type { CatalogPsychologist, Modality, Mood, MoodEntry, PatientTask, ProfileImages } from '../types.ts';
 
 export type PageQuery = { page?: number; per_page?: number };
+// Recorte por dia ("AAAA-MM-DD"), inclusivo, usado pelo calendário.
+export type PeriodQuery = PageQuery & { from?: string; to?: string };
 // Os mesmos filtros do CatalogIndexRequest. Nada de preço, nota ou ranking (CA-09.3).
 export type CatalogFilters = { approach?: string; specialty?: string; region?: string; modality?: Modality };
 export type CatalogQuery = PageQuery & CatalogFilters;
@@ -27,6 +29,8 @@ export type PatientBond = Omit<BondResult, 'psychologist_id' | 'patient_user_id'
   psychologist: { id: number; name: string; crp: string } & ProfileImages
     & Partial<Pick<CatalogPsychologist, 'approach' | 'specialty' | 'modality' | 'region' | 'bio'>>;
   unread_messages: number;
+  // Dias de vínculo, contados pelo servidor; nulo se nunca ficou ativo.
+  bond_days?: number | null;
 };
 export type Visibility = 'shared' | 'private';
 export type PatientReport = {
@@ -56,7 +60,9 @@ export type PatientApi = {
   endBond(id: number): Promise<BondResult>;
   cancelBondRequest(id: number): Promise<BondResult>;
   catalogPsychologists(query?: CatalogQuery): Promise<Page<CatalogPsychologist>>;
-  reports(query?: PageQuery): Promise<Page<PatientReport>>;
+  reports(query?: PeriodQuery): Promise<Page<PatientReport>>;
+  moods(query?: PeriodQuery): Promise<Page<MoodEntry>>;
+  markMood(mood: Mood): Promise<MoodEntry>;
   createReport(input: { body: string; visibility?: Visibility }): Promise<PatientReport>;
   changeVisibility(id: number, visibility: Visibility): Promise<PatientReport>;
   unpublishReport(id: number): Promise<PatientReport>;

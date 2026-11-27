@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { patientApi } from '@/api/patient';
 import type { PatientNotification } from '@/api/patient/types';
 import { Button, EmptyState, formatDateTime, ListItem, Text } from '@/design-system';
+import { notificationIcon } from '@/navigation/notification-icon';
 import { loadPatientPages } from '@/patient/load-pages';
 import { notificationRoute, notificationText } from '@/patient/notifications';
 import { errorMessage } from '@/patient/presentation';
@@ -28,14 +29,14 @@ export default function Notifications() {
     } catch (e) { setActionError(errorMessage(e)); } finally { setBusy(false); }
   }
   return <PatientPage>
-    <Feedback loading={loading} error={error} retry={() => void reload()} initial={data === null} />
+    <Feedback loading={loading && data === null} error={error} retry={() => void reload()} initial />
     {actionError ? <Text accessibilityRole="alert" color="error">{actionError}</Text> : null}
-    {data?.some((n) => !n.read_at) ? <Button tone="patient" variant="secondary" label="Marcar todas como lidas" disabled={busy || loading} onPress={() => void read()} /> : null}
+    {data?.some((n) => !n.read_at) ? <Button tone="patient" variant="secondary" icon="checks" label="Marcar todas como lidas" disabled={busy || loading} onPress={() => void read()} /> : null}
     {data?.length === 0 && !error ? <EmptyState illustration="notificacoes" title="Nenhuma notificação" /> : null}
     {!error ? data?.map((notification) => {
       const title = notificationText(notification.type);
       const date = formatDateTime(notification.created_at);
-      return <ListItem key={notification.id} tone="patient" title={title} description={date} unread={!notification.read_at}
+      return <ListItem key={notification.id} tone="patient" icon={notificationIcon(notification.type)} title={title} description={date} unread={!notification.read_at}
         accessibilityLabel={[title, notification.read_at ? null : 'não lida', date].filter(Boolean).join(', ')}
         disabled={busy} onPress={() => void read(notification)} />;
     }) : null}

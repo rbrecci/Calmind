@@ -17,6 +17,10 @@ export type User = ProfileImages & {
 
 export type ImageKind = 'avatar' | 'cover';
 
+// Humor do dia, que pinta o calendário dos relatos. `date` é "AAAA-MM-DD".
+export type Mood = 'bad' | 'neutral' | 'good';
+export type MoodEntry = { date: string; mood: Mood };
+
 // Imagem escolhida no aparelho. Na web o seletor entrega o `File`; no celular, só a URI local.
 export type ImageUpload = { uri: string; name: string; mimeType: string; file?: File };
 

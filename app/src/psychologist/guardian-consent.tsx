@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { ApiError } from '@/api';
 import { psychologistApi } from '@/api/psychologist';
 import type { GuardianConsentInput } from '@/api/psychologist/types';
-import { formatDate, formatDateTime, Loading, Text } from '@/design-system';
+import { formatDate, formatDateTime, Skeleton, Text } from '@/design-system';
 import { formatDueDate } from '@/psychologist/domain';
 import { collectPages } from '@/psychologist/resource';
 import { Action, Card, ErrorNotice, Field, useResource } from '@/psychologist/ui';
@@ -29,7 +29,7 @@ export function GuardianConsentSection({ patientId, guardianName }: { patientId:
     } catch (cause) { setError(cause); } finally { submitting.current = false; setBusy(false); }
   }
   return <><Text variant="h4">Consentimento do responsável</Text>
-    {list.loading && !list.data ? <Loading /> : null}
+    {list.loading && !list.data ? <Skeleton /> : null}
     <ErrorNotice error={list.error} retry={list.reload} />
     {list.data?.length === 0 ? <Text>Nenhum registro de consentimento do responsável.</Text> : null}
     {list.data?.map((item) => <Card key={item.id}><Text>{item.guardian_name}</Text>
@@ -43,7 +43,7 @@ export function GuardianConsentSection({ patientId, guardianName }: { patientId:
       {(Object.keys(methods) as (keyof typeof methods)[]).map((value) => <Action key={value} variant="secondary" label={methods[value]} disabled={busy} onPress={() => setMethod(value)} />)}
       {errors?.method ? <Text color="error">{errors.method.join(' ')}</Text> : null}
       <Field label="Observação do registro (opcional)" value={note} onChangeText={setNote} multiline editable={!busy} error={errors?.note?.join(' ')} />
-      <ErrorNotice error={error} /><Action label="Registrar consentimento" loading={busy} onPress={() => { void save(); }} />
+      <ErrorNotice error={error} /><Action icon="shield-check" label="Registrar consentimento" loading={busy} onPress={() => { void save(); }} />
     </Card>
   </>;
 }

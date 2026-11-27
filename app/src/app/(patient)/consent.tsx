@@ -18,19 +18,19 @@ export default function PatientConsent() {
   }
   // "Continuar" só depois do aceite marcado: o cartão é o aceite, o botão só confirma.
   const footer = declined ? undefined
-    : <Button tone="neutral" label={busy ? 'Registrando aceite...' : 'Continuar'} disabled={busy || !checked} onPress={() => void submit()} />;
+    : <Button tone="neutral" icon="check" label={busy ? 'Registrando aceite...' : 'Continuar'} disabled={busy || !checked} onPress={() => void submit()} />;
   return <Screen scroll tone="neutral" footer={footer}>
     <Text variant="h4">Antes de começar</Text>
     {declined ? <>
       <Text>Sem o aceite, as funções clínicas ficam bloqueadas. Você pode sair da conta.</Text>
-      <Button tone="patient" variant="secondary" label="Sair da conta" onPress={() => void signOut()} />
+      <Button tone="patient" variant="secondary" icon="sign-out" label="Sair da conta" onPress={() => void signOut()} />
     </> : <>
       <Text variant="h5">Tratamento dos seus dados de saúde</Text>
       <Text>{term?.body}</Text>
       {term ? <Text variant="small" color="textSecondary">Versão {term.version}, vigente desde {formatDate(term.effective_from)}</Text> : null}
       <CheckCard label="Li e aceito o termo" tag="obrigatório" checked={checked} disabled={busy} onChange={setChecked} />
       {error ? <Text accessibilityRole="alert" color="error">{error}</Text> : null}
-      <Button tone="patient" variant="destructive" label="Não aceito" disabled={busy} onPress={() => setDeclined(true)} />
+      <Button tone="patient" variant="destructive" icon="x" label="Não aceito" disabled={busy} onPress={() => setDeclined(true)} />
     </>}
   </Screen>;
 }

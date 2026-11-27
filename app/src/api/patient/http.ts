@@ -20,6 +20,8 @@ export function createPatientHttp(request: PatientRequest): PatientApi {
     cancelBondRequest: (id) => request('DELETE', `/patient/bonds/requests/${id}`),
     catalogPsychologists: (query) => request('GET', queryPath('/catalog/psychologists', query)),
     reports: (query) => request('GET', queryPath('/patient/reports', query)),
+    moods: (query) => request('GET', queryPath('/patient/moods', query)),
+    markMood: (mood) => request('PUT', '/patient/moods/today', { mood }),
     createReport: (input) => request('POST', '/patient/reports', input),
     changeVisibility: (id, visibility) => request('PATCH', `/patient/reports/${id}`, { visibility }),
     unpublishReport: (id) => request('POST', `/patient/reports/${id}/unpublish`),

@@ -55,6 +55,7 @@ export function createPsychologistHttp(request: Request): PsychologistApi {
     revokeInvitation: (id) => request('DELETE', `/psychologist/invitations/${id}`),
     endBond: (id) => request('POST', `/bonds/${id}/end`),
     reports: (id, params) => request('GET', query(`/psychologist/patients/${id}/reports`, params)),
+    moods: (id, params) => request('GET', query(`/psychologist/patients/${id}/moods`, params)),
     tasks: (params) => request('GET', query('/psychologist/tasks', params)),
     createTask: (input) => request('POST', '/psychologist/tasks', input),
     updateTask: (id, input) => request('PUT', `/psychologist/tasks/${id}`, input),

@@ -8,7 +8,7 @@ export default function Review() {
   const { signOut } = useSession();
   return <Screen center><Text variant="h3">Seu cadastro está em análise</Text>
     <Text>Assim que a análise terminar, você poderá acessar sua área.</Text>
-    <Action label="Atualizar" onPress={refresh} />
-    <Action variant="secondary" label="Sair da conta" onPress={() => { void signOut(); }} />
+    <Action icon="arrow-clockwise" label="Atualizar" onPress={refresh} />
+    <Action variant="secondary" icon="sign-out" label="Sair da conta" onPress={() => { void signOut(); }} />
   </Screen>;
 }

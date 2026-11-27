@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { patientApi } from '@/api/patient';
 import { Button, EmptyState, ExpandableCard, taskDeadlineTag, Text } from '@/design-system';
 import { loadPatientPages } from '@/patient/load-pages';
+import { NoBond } from '@/patient/no-bond';
 import { errorMessage } from '@/patient/presentation';
 import { splitTasks } from '@/patient/tasks';
 import { Feedback, PatientPage } from '@/patient/ui';
@@ -33,21 +34,23 @@ export default function Tasks() {
     const body = [
       task.description ? <Text key="description" color="textSecondary">{task.description}</Text> : null,
       !active ? <Text key="readonly" variant="small" color="textSecondary">Vínculo encerrado. Somente leitura.</Text> : null,
-      active && task.status === 'pending' ? <Button key="complete" tone="patient" variant="secondary" label={workingId === task.id ? 'Concluindo...' : 'Marcar como concluída'}
+      active && task.status === 'pending' ? <Button key="complete" tone="patient" variant="secondary" icon="check-circle" label={workingId === task.id ? 'Concluindo...' : 'Marcar como concluída'}
         accessibilityLabel={`Marcar como concluída: ${task.title}`} disabled={workingId !== null || loading} onPress={() => void complete(task.id)} /> : null,
     ].filter(Boolean);
     // A seção ("Pendentes", "Concluídas") diz o estado; a etiqueta diz o prazo ou o dia em que foi feita.
-    return <ExpandableCard key={task.id} title={task.title} tag={taskDeadlineTag(task)} muted={task.status === 'completed'}
+    return <ExpandableCard key={task.id} icon={task.status === 'completed' ? 'check-circle' : 'list-checks'} title={task.title} tag={taskDeadlineTag(task)} muted={task.status === 'completed'}
       expanded={expanded} onToggle={() => setOpenId(expanded ? null : task.id)}>
       {body.length ? body : null}
     </ExpandableCard>;
   }
   return <PatientPage onRefresh={reload}>
-    <Feedback loading={loading} error={error} retry={() => void reload()} initial={data === null} />
+    <Feedback loading={loading && data === null} error={error} retry={() => void reload()} initial />
     {actionError ? <Text accessibilityRole="alert" color="error">{actionError}</Text> : null}
     {/* Sem `!loading`: o vazio fica na tela enquanto a aba recarrega, como a lista fica, e a
         ilustração não refaz a entrada a cada visita. */}
-    {data && !data.tasks.pending.length && !data.tasks.completed.length && !error ? <EmptyState illustration="tarefas" title="Nenhuma tarefa por enquanto" /> : null}
+    {data && !data.tasks.pending.length && !data.tasks.completed.length && !error ? data.bonds.some((b) => b.status === 'active')
+      ? <EmptyState illustration="tarefas" title="Nenhuma tarefa por enquanto" description="Quando seu psicólogo enviar uma, ela aparece aqui." />
+      : <NoBond illustration="tarefas" title="Nenhuma tarefa por aqui" description="As tarefas são enviadas pelo psicólogo com quem você tem vínculo." /> : null}
     {!error && data && (data.tasks.pending.length || data.tasks.completed.length) ? <>
       <Text variant="h5" accessibilityRole="header">Pendentes</Text>
       {data.tasks.pending.length ? data.tasks.pending.map(renderTask) : <Text color="textSecondary">Nenhuma tarefa pendente.</Text>}

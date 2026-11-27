@@ -1,6 +1,6 @@
 import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Platform, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Platform, Pressable, StyleSheet, View, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 
 import { Icon, type IconName } from './icon';
@@ -27,7 +27,8 @@ export type ButtonProps = {
   accessibilityLabel?: string;
   style?: StyleProp<ViewStyle>;
   minHeight?: number;
-  heroIcon?: IconName;
+  // Desenho antes do rótulo (no destaque do início, depois). Sempre decorativo.
+  icon?: IconName;
 };
 
 export function Button({
@@ -39,7 +40,7 @@ export function Button({
   accessibilityLabel,
   style,
   minHeight = MinTouchTarget,
-  heroIcon,
+  icon,
 }: ButtonProps) {
   const reduced = useReducedMotion();
   // Quem encolhe é a superfície, não o Pressable: o alvo de toque fica do mesmo tamanho.
@@ -58,31 +59,39 @@ export function Button({
           transitionDuration: 120,
           transitionTimingFunction: EaseOut,
         }]}>
-          <Surface label={label} tone={tone} variant={variant} disabled={disabled} minHeight={minHeight} heroIcon={heroIcon} />
+          <Surface label={label} tone={tone} variant={variant} disabled={disabled} minHeight={minHeight} icon={icon} />
         </Animated.View>
       )}
     </Pressable>
   );
 }
 
-function Surface({ label, tone, variant, disabled, minHeight, heroIcon }: { label: string; tone: ButtonTone; variant: ButtonVariant; disabled: boolean; minHeight: number; heroIcon?: IconName }) {
+function Surface({ label, tone, variant, disabled, minHeight, icon }: { label: string; tone: ButtonTone; variant: ButtonVariant; disabled: boolean; minHeight: number; icon?: IconName }) {
+  const content = (color: string, textStyle?: TextStyle) => <View style={styles.content}>
+    {icon ? <Icon name={icon} size={20} color={color} /> : null}
+    <Text style={[{ color, flexShrink: 1 }, textStyle]}>{label}</Text>
+  </View>;
+
   if (disabled) {
     return (
       <View style={[styles.surface, { minHeight, backgroundColor: Colors.disabled }]}>
-        <Text style={{ color: Colors.onDisabled }}>{label}</Text>
+        {content(Colors.onDisabled)}
       </View>
     );
   }
 
   if (variant === 'hero') {
-    return <View style={[styles.surface, styles.heroContent, { minHeight, backgroundColor: Colors.background }]}><Text style={{ fontFamily: FontFamily.heading }}>{label}</Text>{heroIcon ? <Icon name={heroIcon} size={18} /> : null}</View>;
+    return <View style={[styles.surface, styles.content, { minHeight, backgroundColor: Colors.background }]}>
+      <Text style={{ fontFamily: FontFamily.heading }}>{label}</Text>
+      {icon ? <Icon name={icon} size={18} /> : null}
+    </View>;
   }
 
   if (variant !== 'primary') {
     const colors = ButtonVariants[variant];
     return (
       <View style={[styles.surface, styles.outline, { minHeight, backgroundColor: colors.background, borderColor: colors.border }]}>
-        <Text style={{ color: colors.text }}>{label}</Text>
+        {content(colors.text)}
       </View>
     );
   }
@@ -97,7 +106,10 @@ function Surface({ label, tone, variant, disabled, minHeight, heroIcon }: { labe
         end={{ x: 1, y: 0.5 }}
         style={[styles.gradientBorder, { minHeight }]}>
         <View style={[styles.gradientInner, { minHeight: minHeight - 4 }]}>
-          <GradientLabel label={label} />
+          <View style={styles.content}>
+            {icon ? <Icon name={icon} size={20} color={NeutralGradient.textFallback} /> : null}
+            <GradientLabel label={label} />
+          </View>
         </View>
       </LinearGradient>
     );
@@ -106,7 +118,7 @@ function Surface({ label, tone, variant, disabled, minHeight, heroIcon }: { labe
   // O texto sobre cor é sempre Dark: branco reprova o contraste em todas as cores (5.4).
   return (
     <View style={[styles.surface, { minHeight, backgroundColor: RoleColors[tone].accent }]}>
-      <Text style={{ color: RoleColors[tone].onAccent }}>{label}</Text>
+      {content(RoleColors[tone].onAccent)}
     </View>
   );
 }
@@ -143,7 +155,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  heroContent: { flexDirection: 'row', gap: Spacing.two },
+  content: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Spacing.two, maxWidth: '100%' },
   outline: {
     borderWidth: 2,
     borderRadius: Radius.control,

@@ -14,12 +14,13 @@ export type ChoiceCardProps = {
   description: string;
   tone: 'patient' | 'psychologist';
   onPress: () => void;
+  icon?: IconName;
 };
 
 // Cartão grande tocável inteiro, para escolher entre caminhos, como "Sou paciente" e "Sou
 // psicólogo". O fundo vai do branco ao tom claro do lado. Título e descrição em Dark: o texto
 // de apoio cinza reprova sobre o tom claro do psicólogo (3,5:1).
-export function ChoiceCard({ title, description, tone, onPress }: ChoiceCardProps) {
+export function ChoiceCard({ title, description, tone, onPress, icon }: ChoiceCardProps) {
   const reduced = useReducedMotion();
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={`${title}. ${description}`} onPress={onPress}>
@@ -32,6 +33,7 @@ export function ChoiceCard({ title, description, tone, onPress }: ChoiceCardProp
         }]}>
           <LinearGradient colors={[Colors.background, RoleColors[tone].tint]} start={{ x: 0.2, y: 0 }} end={{ x: 1, y: 1 }}
             style={StyleSheet.absoluteFill} />
+          {icon ? <View style={[styles.icon, { backgroundColor: RoleColors[tone].tint }]}><Icon name={icon} size={24} /></View> : null}
           <View style={styles.texts}>
             <Text variant="h5">{title}</Text>
             <Text variant="small">{description}</Text>
@@ -55,6 +57,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.md,
     overflow: 'hidden',
   },
+  icon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   texts: {
     flex: 1,
     gap: Spacing.two,

@@ -35,7 +35,7 @@ export default function Registration() {
     catch (cause) { setError(cause); } finally { submitting.current = false; setBusy(false); }
   }
   // O envio fica no rodapé, fora da rolagem e acima do teclado, como nos outros cadastros.
-  const footer = <Action label={profile?.approval_status === 'rejected' ? 'Reenviar para análise' : 'Enviar para análise'} loading={busy} onPress={() => { void submit(); }} />;
+  const footer = <Action icon="upload-simple" label={profile?.approval_status === 'rejected' ? 'Reenviar para análise' : 'Enviar para análise'} loading={busy} onPress={() => { void submit(); }} />;
   return <Screen scroll footer={footer}><Text variant="h4">Seu registro no CRP</Text>
     {profile?.approval_status === 'rejected' ? <>
       <ErrorBanner message="Seu cadastro foi recusado. Confira a justificativa e reenvie os dados." />
@@ -44,10 +44,10 @@ export default function Registration() {
     <Field label="Número de registro" placeholder="4 a 7 dígitos" keyboardType="number-pad" maxLength={7} value={number} onChangeText={setNumber} error={fieldError('crp_number')} editable={!busy} />
     <Text variant="small">Documento comprobatório</Text>
     {document ? <Text>{document.name}</Text> : null}
-    <Action variant="secondary" label={document ? 'Trocar documento' : 'Selecionar documento'} disabled={busy} onPress={() => { void chooseDocument(); }} />
+    <Action variant="secondary" icon="article" label={document ? 'Trocar documento' : 'Selecionar documento'} disabled={busy} onPress={() => { void chooseDocument(); }} />
     <Text variant="small" color="textSecondary">PDF, JPG ou PNG, de até 5 MB. O cadastro passa por conferência antes de o perfil ir ao ar.</Text>
     {fieldError('document') ? <Text color="error" accessibilityRole="alert">{fieldError('document')}</Text> : null}
     <ErrorNotice error={error} />
-    <Action variant="secondary" label="Sair da conta" disabled={busy} onPress={() => { void signOut(); }} />
+    <Action variant="secondary" icon="sign-out" label="Sair da conta" disabled={busy} onPress={() => { void signOut(); }} />
   </Screen>;
 }

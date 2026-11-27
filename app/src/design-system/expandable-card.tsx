@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Appear } from './appear';
 import type { StatusTagKind } from './status-kind';
+import { Icon, type IconName } from './icon';
 import { StatusTag } from './status-tag';
 import { Text } from './text';
 import { Colors, MinTouchTarget, Radius, Spacing } from './tokens';
@@ -17,11 +18,12 @@ export type ExpandableCardProps = {
   muted?: boolean;
   // O que aparece com o cartão aberto: descrição e ação.
   children?: ReactNode;
+  icon?: IconName;
 };
 
 // Cartão compacto que abre no lugar: fechado mostra só o título e a etiqueta; aberto, o resto.
 // A linha do título é o botão, e o que abre fica fora dele, para a ação de dentro ser tocável.
-export function ExpandableCard({ title, tag, expanded, onToggle, muted = false, children }: ExpandableCardProps) {
+export function ExpandableCard({ title, tag, expanded, onToggle, muted = false, children, icon }: ExpandableCardProps) {
   return (
     <Appear style={styles.card}>
       <Pressable
@@ -31,6 +33,7 @@ export function ExpandableCard({ title, tag, expanded, onToggle, muted = false, 
         aria-expanded={expanded}
         onPress={onToggle}
         style={styles.header}>
+        {icon ? <Icon name={icon} size={22} color={muted ? Colors.textSecondary : Colors.text} /> : null}
         <Text color={muted ? 'textSecondary' : 'text'} style={styles.title}>{title}</Text>
         {tag ? <StatusTag kind={tag.kind} label={tag.label} /> : null}
       </Pressable>

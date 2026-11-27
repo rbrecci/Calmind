@@ -4,6 +4,7 @@ import Animated from 'react-native-reanimated';
 import type { ButtonTone } from './button';
 import { EaseOut } from './motion';
 import { Text } from './text';
+import { Icon } from './icon';
 import { Colors, MinTouchTarget, Radius, RoleColors, Spacing } from './tokens';
 import { FontFamily } from './typography';
 
@@ -23,8 +24,7 @@ export type ListItemProps = {
   accessibilityLabel?: string;
 };
 
-// Linha de menu que leva a outra tela. A seta à direita é o que diz "isto abre algo"; sem ela
-// o item parece texto solto. O app não tem biblioteca de ícone, por isso a seta é caractere.
+// Linha de menu que leva a outra tela. A seta Phosphor à direita indica a navegação.
 export function ListItem({
   title,
   onPress,
@@ -73,9 +73,7 @@ export function ListItem({
           </View>
         ) : null}
 
-        <Text variant="h4" color="textSecondary" importantForAccessibility="no" accessibilityElementsHidden>
-          ›
-        </Text>
+        <Icon name="caret-right" color={Colors.textSecondary} size={20} />
       </Animated.View>}
     </Pressable>
   );

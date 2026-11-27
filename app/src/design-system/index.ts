@@ -30,6 +30,7 @@ export { groupMessagesByDay, type MessageDayGroup } from './message-days';
 export { PersonCard, type PersonCardProps } from './person-card';
 export { ProfileHeader, type ProfileHeaderProps } from './profile-header';
 export { Screen, ScreenToneContext } from './screen';
+export { ScrollingHeaderScreen } from './scrolling-header-screen';
 export { Shortcut, type ShortcutProps } from './shortcut';
 export { statusTagKind, type StatusTagKind, type TaggedStatus } from './status-kind';
 export { StatusTag, type StatusTagProps } from './status-tag';

@@ -7,7 +7,7 @@ import { EaseOut } from './motion';
 import { Text } from './text';
 import { Colors, MinTouchTarget, Radius, RoleColors, Spacing } from './tokens';
 
-const CHEVRON: IconName = { ios: 'chevron.right', android: 'chevron_right' };
+const CHEVRON: IconName = 'caret-right';
 
 export type ChoiceCardProps = {
   title: string;

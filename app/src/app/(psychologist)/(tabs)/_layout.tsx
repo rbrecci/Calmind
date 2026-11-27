@@ -10,9 +10,9 @@ export const unstable_settings = { anchor: 'dashboard' };
 // O mesmo ícone vai na aba e no cabeçalho da tela dela. As notificações saíram das abas: o
 // contador delas está no sino do cabeçalho.
 const TABS = {
-  dashboard: { title: 'Pacientes', icon: { ios: 'person.2', android: 'group' } },
-  agenda: { title: 'Agenda', icon: { ios: 'calendar', android: 'calendar_month' } },
-  profile: { title: 'Perfil', icon: { ios: 'person', android: 'person' } },
+  dashboard: { title: 'Pacientes', icon: 'users' },
+  agenda: { title: 'Agenda', icon: 'calendar' },
+  profile: { title: 'Perfil', icon: 'user' },
 } satisfies Record<string, { title: string; icon: IconName }>;
 
 function tabIcon(name: IconName) {
@@ -23,6 +23,8 @@ function tabIcon(name: IconName) {
 
 export default function PsychologistTabsLayout() {
   return <Tabs tabBar={(props) => <TabBar {...props} tone="psychologist" />} screenOptions={({ route }) => ({
+    animation: 'none',
+    headerShown: route.name !== 'dashboard',
     header: ({ options }) => <SideHeader tone="psychologist" title={options.title ?? ''} icon={TABS[route.name as keyof typeof TABS]?.icon} actions />,
   })}>
     <Tabs.Screen name="dashboard" options={{ title: TABS.dashboard.title, tabBarAccessibilityLabel: TABS.dashboard.title, tabBarIcon: tabIcon(TABS.dashboard.icon) }} />

@@ -1,24 +1,27 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text as NativeText, View } from 'react-native';
 
 import { imageHeaders } from '@/api';
 import { patientApi } from '@/api/patient';
 import type { PatientBond } from '@/api/patient/types';
 import {
-  Button, ChoiceCard, CoverCard, formatDateTime, Hero, Illustration, Shortcut, Spacing, statusTagKind, Text, type IconName, type StatusTagKind,
+  Button, ChoiceCard, CoverCard, formatDateTime, Hero, Icon, Illustration, Palette, ScrollingHeaderScreen, Shortcut, Spacing, statusTagKind, Text, type IconName, type StatusTagKind,
 } from '@/design-system';
 import { nextAppointment } from '@/patient/agenda';
 import { bondStatusText, selectBond } from '@/patient/bonds';
 import { loadPatientPages } from '@/patient/load-pages';
 import { errorMessage, firstName } from '@/patient/presentation';
 import { splitTasks } from '@/patient/tasks';
-import { Confirmation, Feedback, PatientPage } from '@/patient/ui';
+import { Confirmation, Feedback } from '@/patient/ui';
+import { SideHeader } from '@/navigation/side-header';
 import { usePatientData } from '@/patient/use-patient-data';
 import { useSession } from '@/session/session-context';
+import { FontFamily } from '@/design-system/typography';
 
-const AGENDA: IconName = { ios: 'calendar', android: 'calendar_month' };
-const TASKS: IconName = { ios: 'checklist', android: 'checklist' };
+const AGENDA: IconName = 'calendar';
+const PROFILE: IconName = 'user';
+const TASKS: IconName = 'list-checks';
 
 // As notificações saíram daqui: o contador delas está no sino do cabeçalho.
 async function loadHome() {
@@ -59,17 +62,24 @@ export default function PatientHome() {
   const refresh = async () => { await Promise.all([reload(), summary.reload()]); };
   const first = firstName(name);
   const openProfile = (target: PatientBond) => router.push({ pathname: '/(patient)/psychologist/[id]', params: { id: String(target.psychologist.id) } });
-  return <PatientPage onRefresh={refresh}>
-    <Hero tone="patient">
-      <Text variant="h3">{first ? `Olá, ${first}!` : 'Olá!'}{'\n'}Como está seu dia?</Text>
-      {bond?.status === 'active' ? <Button tone="patient" variant="secondary" label="Iniciar relato" style={styles.heroButton}
+  return <ScrollingHeaderScreen onRefresh={refresh}
+    compactHeader={<SideHeader tone="patient" title="Início" icon={'house'} actions />}
+    expandedHeader={<>
+    <SideHeader tone="patient" title="Início" icon={'house'} actions flush />
+    <Hero tone="patient" fullBleed>
+      <Text variant="h4" style={styles.heroText}>{first ? `Olá, ${first}!` : 'Olá!'}{'\n'}Como está seu dia?</Text>
+      {process.env.EXPO_PUBLIC_USE_MOCK === 'true' ? <View>
+        <View style={styles.streakHeading}><Text variant="h4" style={styles.heroText}>Sua Sequência</Text><Icon name={'flame'} size={20} /></View>
+        <Text variant="h4" style={styles.heroText}>70 Dias</Text>
+      </View> : null}
+      {bond?.status === 'active' ? <Button tone="patient" variant="hero" label="Iniciar Relato" style={styles.heroButton}
         onPress={() => router.push('/new-report')} /> : null}
-    </Hero>
+    </Hero></>}>
     <Feedback loading={loading} error={error} retry={() => void reload()} initial={data === null} />
     {data && !error ? <>
       {bond?.status === 'pending' ? <Illustration name="aguardando" /> : null}
       {bond ? <>
-        <Text variant="h5">Seu vínculo</Text>
+        <Text variant="h5">Seu <NativeText style={styles.boldWord}>Vínculo</NativeText></Text>
         <CoverCard tone="patient" name={bond.psychologist.name} tag={bondTag(bond)}
           avatarUri={bond.psychologist.avatar_url} coverUri={bond.psychologist.cover_url} headers={imageHeaders()}
           // Sem próxima consulta, a linha some (R2).
@@ -78,9 +88,12 @@ export default function PatientHome() {
           onPress={() => openProfile(bond)} />
       </> : null}
       {bond?.status === 'active' ? <>
-        <Text variant="h5">Seus atalhos</Text>
+        <Text variant="h5" style={styles.shortcutsTitle}>Seus <NativeText style={styles.boldWord}>Atalhos</NativeText></Text>
         <View style={styles.shortcuts}>
           <Shortcut tone="patient" icon={AGENDA} label="Agenda" onPress={() => router.push('/(patient)/agenda')} />
+          <View style={styles.shortcutDivider} />
+          <Shortcut tone="patient" icon={PROFILE} label="Perfil" onPress={() => router.push('/(patient)/profile')} />
+          <View style={styles.shortcutDivider} />
           <Shortcut tone="patient" icon={TASKS} label="Tarefas" badge={pending || undefined}
             accessibilityLabel={pending ? `Tarefas, ${pending} ${pending === 1 ? 'pendente' : 'pendentes'}` : 'Tarefas'}
             onPress={() => router.navigate('/(patient)/(tabs)/tasks')} />
@@ -103,11 +116,16 @@ export default function PatientHome() {
       {cancelling ? <Confirmation message="Retirar esta solicitação? Você poderá escolher outro profissional depois."
         kind="destructive" confirm={() => void cancelRequest()} cancel={() => setCancelling(false)} busy={busy} /> : null}
     </> : null}
-  </PatientPage>;
+  </ScrollingHeaderScreen>;
 }
 
 const styles = StyleSheet.create({
-  heroButton: { alignSelf: 'flex-start', minWidth: 200 },
-  shortcuts: { flexDirection: 'row', gap: Spacing.two },
+  heroText: { fontFamily: FontFamily.bold },
+  boldWord: { fontFamily: FontFamily.bold },
+  shortcutsTitle: { marginTop: Spacing.two },
+  heroButton: { alignSelf: 'flex-start', minWidth: 200, marginTop: Spacing.two },
+  shortcuts: { flexDirection: 'row', alignItems: 'stretch' },
+  streakHeading: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
+  shortcutDivider: { width: 1, marginVertical: Spacing.three, backgroundColor: Palette.secondary.shade },
   center: { textAlign: 'center' },
 });

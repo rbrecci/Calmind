@@ -4,7 +4,7 @@ import { BottomTabBarHeightCallbackContext, type BottomTabBarProps } from 'expo-
 import { CommonActions } from 'expo-router/react-navigation';
 
 import { Text } from './text';
-import { Colors, MinTouchTarget, Palette, Radius, RoleColors, Spacing } from './tokens';
+import { Colors, MaxContentWidth, MinTouchTarget, Palette, Radius, RoleColors, Spacing } from './tokens';
 import { FontFamily } from './typography';
 
 export type TabBarProps = BottomTabBarProps & { tone: 'patient' | 'psychologist' };
@@ -21,10 +21,9 @@ export function TabBar({ tone, state, descriptors, navigation, insets }: TabBarP
   const colors = RoleColors[tone];
   return (
     <View
-      pointerEvents="box-none"
       style={[styles.root, { paddingBottom: insets.bottom + Spacing.three }]}
       onLayout={(event) => onHeightChange?.(event.nativeEvent.layout.height)}>
-      <View style={styles.card} accessibilityRole="tablist">
+      <View style={[styles.card, { borderColor: colors.shade }]} accessibilityRole="tablist">
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
           const focused = state.index === index;
@@ -44,7 +43,7 @@ export function TabBar({ tone, state, descriptors, navigation, insets }: TabBarP
               onPress={onPress}
               onLongPress={() => navigation.emit({ type: 'tabLongPress', target: route.key })}
               style={styles.item}>
-              <View style={[styles.pill, focused && { backgroundColor: colors.tint }]}>
+              <View style={styles.pill}>
                 {options.tabBarIcon?.({ focused, color: focused ? colors.shade : Colors.textSecondary, size: 24 })}
                 {/* Contador na cor do lado com texto Dark: o vermelho com branco padrão reprova. */}
                 {options.tabBarBadge !== undefined ? (
@@ -67,13 +66,17 @@ export function TabBar({ tone, state, descriptors, navigation, insets }: TabBarP
 
 const styles = StyleSheet.create({
   root: {
+    pointerEvents: 'box-none',
     position: 'absolute',
     left: 0,
     right: 0,
     bottom: 0,
-    paddingHorizontal: Spacing.four,
+    paddingHorizontal: Spacing.page,
   },
   card: {
+    width: '100%',
+    maxWidth: MaxContentWidth,
+    alignSelf: 'center',
     flexDirection: 'row',
     paddingVertical: Spacing.two,
     paddingHorizontal: Spacing.one,

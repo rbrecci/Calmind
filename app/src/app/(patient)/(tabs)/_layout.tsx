@@ -14,10 +14,10 @@ export const unstable_settings = { anchor: 'home' };
 
 // O mesmo ícone vai na aba e no cabeçalho da tela dela.
 const TABS = {
-  home: { title: 'Início', icon: { ios: 'house', android: 'home' } },
-  reports: { title: 'Relatos', icon: { ios: 'list.bullet.rectangle', android: 'article' } },
-  tasks: { title: 'Tarefas', icon: { ios: 'checklist', android: 'checklist' } },
-  chat: { title: 'Conversa', icon: { ios: 'bubble.left', android: 'chat_bubble' } },
+  home: { title: 'Início', icon: 'house' },
+  reports: { title: 'Relatos', icon: 'article' },
+  tasks: { title: 'Tarefas', icon: 'list-checks' },
+  chat: { title: 'Conversa', icon: 'chat' },
 } satisfies Record<string, { title: string; icon: IconName }>;
 
 function tabIcon(name: IconName) {
@@ -38,9 +38,11 @@ export default function PatientTabsLayout() {
     return () => { current = false; };
   }, [pathname]);
   return <Tabs tabBar={(props) => <TabBar {...props} tone="patient" />} screenOptions={({ route }) => ({
+    animation: 'none',
+    headerShown: route.name !== 'home',
     // O início tem o bloco de destaque colado ao cabeçalho, que ali fica com a base reta.
     header: ({ options }) => <SideHeader tone="patient" title={options.title ?? ''} icon={TABS[route.name as keyof typeof TABS]?.icon} actions
-      flush={route.name === 'home'} />,
+      />,
   })}>
     <Tabs.Screen name="home" options={{ title: TABS.home.title, tabBarAccessibilityLabel: TABS.home.title, tabBarIcon: tabIcon(TABS.home.icon) }} />
     <Tabs.Screen name="reports" options={{ title: TABS.reports.title, tabBarAccessibilityLabel: TABS.reports.title, tabBarIcon: tabIcon(TABS.reports.icon) }} />

@@ -6,11 +6,11 @@ import { Avatar } from './avatar';
 import { formatUnread } from './counts';
 import { Icon, type IconName } from './icon';
 import { Text } from './text';
-import { Colors, MinTouchTarget, Radius, RoleColors, Spacing } from './tokens';
+import { Colors, HeaderGradients, MaxContentWidth, MinTouchTarget, Radius, Spacing } from './tokens';
 
-const BACK: IconName = { ios: 'chevron.left', android: 'arrow_back_ios_new' };
-const BELL: IconName = { ios: 'bell', android: 'notifications' };
-const GEAR: IconName = { ios: 'gearshape', android: 'settings' };
+const BACK: IconName = 'caret-left';
+const BELL: IconName = 'bell';
+const GEAR: IconName = 'gear';
 
 export type AppHeaderProps = {
   tone: 'patient' | 'psychologist';
@@ -26,29 +26,27 @@ export type AppHeaderProps = {
   onSettings?: () => void;
   // Base reta, sem o arredondado: o bloco de destaque do início continua a cor logo abaixo.
   flush?: boolean;
+  collapseProgress?: number;
 };
 
 // Cabeçalho das telas depois do login: barra na cor do lado, cobrindo a área da barra de
 // status, com a base arredondada. O ponto mais claro fica no alto e no centro, como no
 // protótipo: a base do lado nas pontas, o tom claro no meio, e a base de novo embaixo.
 // Texto e ícones são Dark, que passa sobre os dois tons (5.4).
-export function AppHeader({ tone, title, icon, onBack, avatar, notifications, onSettings, flush = false }: AppHeaderProps) {
+export function AppHeader({ tone, title, icon, onBack, avatar, notifications, onSettings, flush = false, collapseProgress }: AppHeaderProps) {
   const insets = useSafeAreaInsets();
-  const colors = RoleColors[tone];
   const count = notifications?.count ?? 0;
   const avatarImage = avatar ? <Avatar tone={tone} size={40} name={avatar.name} uri={avatar.uri} headers={avatar.headers}
     accessibilityLabel={avatar.onPress ? undefined : avatar.name} /> : null;
   return (
-    <View style={[styles.root, flush && styles.flush, { paddingTop: insets.top + Spacing.two }]}>
+    <View style={[styles.root, flush && styles.flush, collapseProgress !== undefined && {
+      borderBottomLeftRadius: Radius.lg * collapseProgress,
+      borderBottomRightRadius: Radius.lg * collapseProgress,
+    }, { paddingTop: insets.top + Spacing.two }]}>
       <LinearGradient
-        colors={[colors.accent, colors.tint, colors.accent]}
+        colors={HeaderGradients[tone]}
         start={{ x: 0, y: 0.5 }}
         end={{ x: 1, y: 0.5 }}
-        style={StyleSheet.absoluteFill}
-      />
-      <LinearGradient
-        colors={[`${colors.accent}00`, colors.accent]}
-        locations={[0.2, 1]}
         style={StyleSheet.absoluteFill}
       />
       <View style={styles.row}>
@@ -98,6 +96,9 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 0,
   },
   row: {
+    width: '100%',
+    maxWidth: MaxContentWidth,
+    alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
     minHeight: MinTouchTarget,

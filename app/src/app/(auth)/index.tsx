@@ -7,6 +7,7 @@ import { BackHeader, Button, ChoiceCard, Colors, ErrorBanner, Logo, RoleColors, 
 import { DEMO_ACCOUNTS, demoCredentials, demoEnv, isDemoLoginEnabled } from '@/auth/demo-accounts';
 import { authErrorMessage, buildRegisterInput, isMinor, validateRegisterForm } from '@/auth/register-form';
 import { useSession } from '@/session/session-context';
+import { FIELD_HEIGHT } from '@/design-system/text-field';
 
 type Step = 'login' | 'choice' | 'register';
 
@@ -80,27 +81,26 @@ export default function EntryScreen() {
     : undefined;
 
   return (
-    <Screen scroll center={step === 'login'} footer={footer}>
+    <Screen scroll center={step === 'login'} footer={footer} tone={step === 'register' ? selectedRole : 'neutral'}>
       {step === 'login' ? (
         <>
           <View style={styles.brand}>
             <Logo animated />
-            <Text variant="h1">Calmind</Text>
-            <Text variant="small" color="textSecondary">Saúde Mental & Acolhimento</Text>
+            <Text variant="small" color="textSecondary" accessibilityLabel="Calmind, Saúde Mental e Acolhimento">Saúde Mental & Acolhimento</Text>
           </View>
           {message ? <ErrorBanner message={message} /> : null}
           <TextField label="E-mail" placeholder="seu@email.com" autoCapitalize="none" autoComplete="email"
             keyboardType="email-address" value={email} onChangeText={setEmail} error={fieldErrors.email?.[0]} />
           <TextField label="Senha" placeholder="Sua senha" autoCapitalize="none" autoComplete="current-password"
             secureTextEntry value={password} onChangeText={setPassword} error={fieldErrors.password?.[0]} />
-          <Button label={submitting ? 'Entrando...' : 'Entrar'} disabled={submitting}
+          <Button minHeight={FIELD_HEIGHT} label={submitting ? 'Entrando...' : 'Entrar'} disabled={submitting}
             onPress={() => submitLogin({ email, password })} />
           <View style={styles.separator}>
             <View style={styles.line} />
             <Text variant="small" color="textSecondary">ou</Text>
             <View style={styles.line} />
           </View>
-          <Button variant="secondary" label="Criar conta" disabled={submitting} onPress={() => goTo('choice')} />
+          <Button minHeight={FIELD_HEIGHT} label="Criar conta" disabled={submitting} onPress={() => goTo('choice')} />
           <Text variant="small" color="textSecondary" style={styles.center}>
             No cadastro você escolhe se é paciente ou psicólogo.
           </Text>

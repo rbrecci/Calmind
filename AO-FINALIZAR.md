@@ -34,8 +34,8 @@ O histórico de commits é preservado, porque a contribuição de cada integrant
 
 | Fica | Sai |
 |------|-----|
-| `app/`, `backend/`, `landing/`, `proxy/` | `Sprint2.md`, `FinalSprint3.md` e este arquivo |
-| `README.md` e `CONTRIBUTING.md` | `docs/planejamento/` |
+| `app/`, `backend/`, `landing/`, `proxy/` | Este arquivo |
+| `README.md` e `CONTRIBUTING.md` | `docs/planejamento/` (inclui `Sprint2.md` e `FinalSprint3.md`) |
 | Requisitos, identidade visual, modelo de negócio e diagramas | `docs/documento-base-sprint1.md` |
 | Contrato da API e coleção do Postman | `docs/api/rodar-newman-sprint2.ps1` |
 | Guias de engenharia e hospedagem | Evidências intermediárias em `docs/testes/` |

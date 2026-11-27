@@ -22,7 +22,7 @@ API Laravel e MySQL, painel web em Blade (administrador e psicólogo) e app Reac
 - **Só na API, ainda sem tela:** medicação, consentimento de IA, análise por IA e prontuário consolidado. A auditoria de leitura não tem tela.
 - **Publicação:** API em `https://calmind-api.vercel.app` ([como funciona](docs/engenharia/hospedagem-alwaysdata.md)).
 
-Detalhes, pendências e calendário: [`FinalSprint3.md`](FinalSprint3.md). O que fazer quando o desenvolvimento terminar: [`AO-FINALIZAR.md`](AO-FINALIZAR.md).
+Detalhes, pendências e calendário: [`FinalSprint3.md`](docs/planejamento/FinalSprint3.md). O que fazer quando o desenvolvimento terminar: [`AO-FINALIZAR.md`](AO-FINALIZAR.md).
 
 ## Os quatro compromissos que o produto não quebra
 
@@ -53,7 +53,7 @@ Detalhes, pendências e calendário: [`FinalSprint3.md`](FinalSprint3.md). O que
 | Diagramas de modelagem | 1 | [`docs/diagramas/`](docs/diagramas/) | MER, DER e estados prontos |
 | Wireframes e protótipo | 1 | [`docs/prototipo/`](docs/prototipo/): 16 [wireframes](docs/prototipo/wireframes.html), [mapa de UX](docs/prototipo/fluxo-ux.html), [PDFs](docs/prototipo/telas-pdf/) e o [protótipo de 25/11](docs/prototipo/telas-25-11/) | Pronto |
 | Coleta e análise dos requisitos | 1 | [`docs/pesquisa/`](docs/pesquisa/) e [documento base](docs/documento-base-sprint1.md) | 2 sínteses de pacientes no repositório; as das psicólogas não estão versionadas |
-| Backend, frontend e primeiros testes | 2 | [`Sprint2.md`](Sprint2.md) | Entregue em 23/10 |
+| Backend, frontend e primeiros testes | 2 | [`Sprint2.md`](docs/planejamento/Sprint2.md) | Entregue em 23/10 |
 | Sistema completo | 3 | [`backend/`](backend/) e [`app/`](app/) | Em fechamento |
 | Documentação técnica em ABNT | 3 | [`CALMIND_ABNT.docx`](docs/documento-final/CALMIND_ABNT.docx) | Falta atualizar (parado em 23/10) |
 | Manual do usuário | 3 | [`docs/manual/`](docs/manual/) | Pendente |
@@ -87,7 +87,7 @@ docs/
 ├── diagramas/      MER, DER, DDL e provas do modelo
 ├── engenharia/     setup, arquitetura, hospedagem e apresentação
 ├── pesquisa/       roteiros, formulário e sínteses anonimizadas
-├── planejamento/   cronograma, decisões e registro da Sprint 2
+├── planejamento/   cronograma, decisões, Sprint 2 e fechamento da Sprint 3
 ├── prototipo/      wireframes, telas, logo e scripts do Figma
 ├── testes/         evidências datadas
 └── documento-final/, manual/, apresentacao/

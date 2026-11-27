@@ -11,20 +11,20 @@ A API está publicada na alwaysdata e passou nos testes de aceite em 27/11, aces
 | Entregável | Estado | O que falta |
 |---|---|---|
 | Sistema completo | Backend completo nos requisitos Must; app sem algumas telas | APK final e testes no celular |
-| Relatório de testes | Só [evidências soltas](docs/testes/README.md) | Juntar em um relatório |
+| Relatório de testes | Só [evidências soltas](../testes/README.md) | Juntar em um relatório |
 | Documento ABNT | Parado em 23/10 | Atualizar com o estado atual |
 | Manual do usuário | Não começou | Escrever os dois manuais |
 | Apresentação | Não começou | Slides e dois ensaios |
 
 ## O sistema hoje
 
-**No app (API real, testado em celular Android pelo 4G em 24/11, antes dos redesenhos):** login, cadastro, aprovação de psicólogo, catálogo, convite, vínculo, consentimento geral, relatos, tarefas, chat, agenda e notificações dentro do app. O visual segue o [protótipo de 25/11](docs/prototipo/telas-25-11/), com foto de perfil e capa.
+**No app (API real, testado em celular Android pelo 4G em 24/11, antes dos redesenhos):** login, cadastro, aprovação de psicólogo, catálogo, convite, vínculo, consentimento geral, relatos, tarefas, chat, agenda e notificações dentro do app. O visual segue o [protótipo de 25/11](../prototipo/telas-25-11/), com foto de perfil e capa.
 
-**Pronto na API e sem tela no app (Caio):** medicação, consentimento de IA, análise por IA e prontuário consolidado. O que o app precisa fazer está nas seções 3.8.8 a 3.8.10 do [contrato](docs/api/contrato-api.md). A auditoria de leitura não tem tela.
+**Pronto na API e sem tela no app (Caio):** medicação, consentimento de IA, análise por IA e prontuário consolidado. O que o app precisa fazer está nas seções 3.8.8 a 3.8.10 do [contrato](../api/contrato-api.md). A auditoria de leitura não tem tela.
 
 **Fica como evolução futura:** push, preferências de notificação, chat em tempo real, denúncias (RF-18, RF-45), nova versão de termo pelo administrador (RF-46), aceite do contrato de serviço (RF-48), exportação dos dados (RF-31) e política de retenção (RF-47). Também ficou de fora do app a "sequência de dias" do protótipo e o calendário mensal na agenda do paciente.
 
-**Testes automatizados:** 335 no backend (26/11) e 284 no app (25/11), todos passando naquelas datas. Roteiro do [RNF-61](docs/testes/2026-11-04-roteiro-rnf-61.md): 18 de 18 em 04/11, antes dos redesenhos.
+**Testes automatizados:** 335 no backend (26/11) e 284 no app (25/11), todos passando naquelas datas. Roteiro do [RNF-61](../testes/2026-11-04-roteiro-rnf-61.md): 18 de 18 em 04/11, antes dos redesenhos.
 
 **Nunca testado:** iPhone, upload de documento do cadastro pelo celular, escolha e recorte de foto no celular e o roteiro do RNF-61 depois dos redesenhos.
 
@@ -38,7 +38,7 @@ A API está publicada na alwaysdata e passou nos testes de aceite em 27/11, aces
 
 | Quem | Tarefas |
 |---|---|
-| Rafael | Gerar o APK com o endereço publicado, testar no celular e passar ao grupo. Gerar o APK reserva do [plano B](docs/engenharia/ambiente-apresentacao.md). Guardar cópia da `APP_KEY` do servidor |
+| Rafael | Gerar o APK com o endereço publicado, testar no celular e passar ao grupo. Gerar o APK reserva do [plano B](../engenharia/ambiente-apresentacao.md). Guardar cópia da `APP_KEY` do servidor |
 | Caio | Telas que faltam. Testar o fluxo do paciente no celular. Board e atas prontos para a banca. Perguntar ao professor sobre o escopo de 2026 (DA-16) e o formato de entrega |
 | Mariana | Testar o fluxo do psicólogo no celular e o upload de documento do cadastro |
 | Zanetti | Lista de requisitos Must: atendido, parcial ou cortado. Revisar o que o ABNT diz sobre Policies e expiração de token (a expiração por inatividade está implementada; a única Policy é a de foto de perfil, o resto fica nos middlewares e Services) |
@@ -64,7 +64,7 @@ Dias de aula em negrito.
 
 ## Avisos
 
-- O [checklist da apresentação](docs/engenharia/ambiente-apresentacao.md) cobre o APK, os planos de contingência e a manhã do dia.
+- O [checklist da apresentação](../engenharia/ambiente-apresentacao.md) cobre o APK, os planos de contingência e a manhã do dia.
 - O APK de teste tem os botões "Entrar como" e a senha de demonstração embutida. O APK da banca sai com `EXPO_PUBLIC_DEMO_LOGIN=false` e a senha vazia.
 - `backend/.env` e `app/.env.local` não estão no git. Leve por pendrive ou cofre de senhas.
 - A frente oficial é a `main`; cada um trabalha na própria branch e entra por PR.

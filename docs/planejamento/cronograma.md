@@ -2,14 +2,14 @@
 
 **Calmind**: Saúde Mental & Acolhimento. Revisão de 27/11/2026.
 
-O calendário até a apresentação está em [`FinalSprint3.md`](../../FinalSprint3.md). Este arquivo guarda o que não muda: sprints, disponibilidade e ritos.
+O calendário até a apresentação está em [`FinalSprint3.md`](FinalSprint3.md). Este arquivo guarda o que não muda: sprints, disponibilidade e ritos.
 
 ## Sprints
 
 | Sprint | Entrega | Foco |
 |--------|---------|------|
 | 1 | 24/09/2026 | Identidade da marca, requisitos, modelagem e protótipo |
-| 2 | 23/10/2026 ([índice](../../Sprint2.md)) | Backend, aplicativo e primeiros testes |
+| 2 | 23/10/2026 ([índice](Sprint2.md)) | Backend, aplicativo e primeiros testes |
 | 3 | apresentação em **04/12/2026** | Sistema completo, testes, documentação final e apresentação |
 
 ## Equipe e disponibilidade

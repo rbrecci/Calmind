@@ -25,7 +25,7 @@
 | DA-07 | `meta` das listas: `{total, page, per_page}` | 02/10 | [arquitetura](../engenharia/arquitetura-backend.md) |
 | DA-08 | Convite: 8 caracteres, 7 dias, uso único, revogável | 02/10 | [regras invioláveis](../engenharia/regras-inviolaveis.md) |
 | DA-09 | Documento ABNT em Word (`.docx`), versionado no repositório | 23/10 | [documento final](../documento-final/README.md) |
-| DA-10 | Manual do usuário: dois manuais, na reta final da Sprint 3 | 26/11 | [FinalSprint3](../../FinalSprint3.md) |
+| DA-10 | Manual do usuário: dois manuais, na reta final da Sprint 3 | 26/11 | [FinalSprint3](FinalSprint3.md) |
 | DA-11 | Filtros do catálogo: abordagem, especialidade, modalidade e região | 23/10 | [contrato, 3.4](../api/contrato-api.md) |
-| DA-15 | Apresentação final na sexta 04/12/2026 | 23/11 | [FinalSprint3](../../FinalSprint3.md) |
+| DA-15 | Apresentação final na sexta 04/12/2026 | 23/11 | [FinalSprint3](FinalSprint3.md) |
 | DA-17 | Entrega da Sprint 1: 24/09/2026 | 24/09 | [cronograma](cronograma.md) |

@@ -141,7 +141,7 @@
 
   /* reveal ao rolar, com escalonamento entre irmãos */
   var revealSelectors = [
-    '.section-heading', '.benefits .xpanel', '.step', '.audience-copy', '.privacy .card',
+    '.section-heading', '.benefits .xpanel', '.audience-copy', '.privacy .card',
     '.testimonials figure', '.accordion details', '.closing .container > *',
     '.page-grid .card', '.stack > section', '.status-box', '.cvv-box', '.form-result',
     '.priv-demo', '.footer-grid > *', '.swatch', '.logo-box', '.doc-callout', '.doc > h2'
@@ -167,6 +167,43 @@
     revealables.forEach(function (el) { io.observe(el); });
   }
   window.__calmindReveal = true; /* avisa o failsafe do <head> que o reveal foi montado */
+
+
+  /* Como funciona: contador, tracos e linha do tempo seguem a rolagem */
+  (function () {
+    var wrap = document.querySelector('.how-steps');
+    var side = document.querySelector('.how-side');
+    if (!wrap || !side) return;
+    var items = Array.prototype.slice.call(wrap.querySelectorAll('.how-step'));
+    var current = side.querySelector('.how-current');
+    var dashes = Array.prototype.slice.call(side.querySelectorAll('.how-dashes i'));
+    var active = -1, frame = 0;
+    function pad(n) { return n < 10 ? '0' + n : String(n); }
+    function setActive(i) {
+      if (i === active) return;
+      active = i;
+      items.forEach(function (el, k) { el.classList.toggle('is-active', k === i); });
+      dashes.forEach(function (el, k) { el.classList.toggle('is-on', k <= i); });
+      if (current) {
+        current.textContent = pad(i + 1);
+        if (!reduced() && current.animate) current.animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 450, easing: 'cubic-bezier(.22,1,.36,1)' });
+      }
+    }
+    function update() {
+      frame = 0;
+      var vh = window.innerHeight;
+      var idx = 0;
+      items.forEach(function (el, k) { if (el.getBoundingClientRect().top < vh * 0.55) idx = k; });
+      setActive(idx);
+      var r = wrap.getBoundingClientRect();
+      var fill = Math.max(0, Math.min(r.height, vh * 0.5 - r.top));
+      wrap.style.setProperty('--fill', fill + 'px');
+    }
+    function request() { if (!frame) frame = requestAnimationFrame(update); }
+    window.addEventListener('scroll', request, { passive: true });
+    window.addEventListener('resize', request);
+    update();
+  })();
 
   /* parallax: o CSS usa view(); sem suporte, o JS escreve --p */
   var parallax = Array.prototype.slice.call(document.querySelectorAll('[data-parallax]'));

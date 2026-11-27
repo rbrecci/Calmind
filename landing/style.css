@@ -246,8 +246,9 @@ button,a{touch-action:manipulation}
 @supports((animation-timeline:view()) and (animation-range:entry)){[data-parallax]:not([data-parallax-js]){animation:parallax-scroll linear both;animation-timeline:view();animation-range:entry 0% exit 100%}}
 
 /* reveal ao rolar (só com JS: sem JS o conteúdo fica visível) */
-.js [data-reveal]{opacity:0;translate:0 24px;transition:opacity .75s var(--ease),translate .75s var(--ease);transition-delay:var(--d,0ms)}
-.js [data-reveal].is-visible{opacity:1;translate:0 0}
+.js [data-reveal]{opacity:0;translate:0 20px;will-change:opacity,translate;transition:opacity .75s var(--ease),translate .75s var(--ease);transition-delay:var(--d,0ms)}
+.js [data-reveal].is-visible{opacity:1;translate:0 0;will-change:auto}
+@media print{.js [data-reveal]{opacity:1!important;translate:none!important;scale:none!important}}
 .js [data-reveal=scale]{translate:none;scale:.94;transition:opacity .9s var(--ease),scale .9s var(--ease);transition-delay:var(--d,0ms)}
 .js [data-reveal=scale].is-visible{scale:1}
 

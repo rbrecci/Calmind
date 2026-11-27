@@ -660,8 +660,8 @@ dialog.is-open::backdrop{background:#0006;backdrop-filter:blur(5px)}
 .how-side .section-heading{text-align:left;margin:0}
 .how-side .section-heading h2::after{margin-left:0}
 .how-counter{display:none;align-items:baseline;gap:8px;margin:30px 0 0;font-family:Quicksand,'Trebuchet MS',sans-serif;line-height:1}
-.how-current{display:inline-block;font-size:clamp(44px,4.4vw,60px);font-weight:400;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums}
-.how-total{font-size:clamp(16px,1.5vw,20px);color:#8a8a93}
+.how-current{display:inline-block;font-size:clamp(34px,3.3vw,44px);font-weight:400;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums}
+.how-total{font-size:clamp(14px,1.2vw,17px);color:#8a8a93}
 .how-dashes{display:none;gap:10px;margin-top:18px}
 .how-dashes i{display:block;block-size:4px;inline-size:30px;border-radius:4px;background:#e1dbe6;transition:inline-size .5s var(--ease),background .5s ease}
 .how-dashes i.is-on{inline-size:48px;background:#c08fcb}

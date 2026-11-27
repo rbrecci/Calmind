@@ -239,32 +239,14 @@ Os relatos do paciente são dado de saúde. Enviá-los a um serviço de IA exige
 | O que você procura | Onde está |
 |--------------------|-----------|
 | Decisões ainda em aberto | [`planejamento/decisoes-abertas.md`](planejamento/decisoes-abertas.md) |
-| Situação de cada entregável da regulamentação | tabela no `README.md` da raiz |
+| Situação de cada entregável da regulamentação | tabela no [`README.md`](../README.md) da raiz |
 | Decisões de stack já fechadas | [`planejamento/arranque-react-native.md`](planejamento/arranque-react-native.md), seção 8 |
 
-O que este documento continua sendo dono: o problema, a visão, os fluxos, as 15 decisões de produto (DEC-01 a DEC-15), os riscos e as restrições legais. Isso não mudou e não sai daqui.
+O que este documento continua sendo dono: o problema, a visão, os fluxos, as 18 decisões de produto (DEC-01 a DEC-18), os riscos e as restrições legais. Isso não mudou e não sai daqui.
 
 ---
 
-## 9. Situação dos passos definidos nesta versão
-
-| # | Passo | Situação em 20/08/2026 |
-|---|-------|------------------------|
-| 1 | Definir MVP | Concluído, seção 4 |
-| 2 | Formalizar pesquisa de campo: roteiro, dores, personas | Roteiro e ferramenta prontos em `pesquisa/`. Entrevistas ainda não aplicadas, personas dependem delas |
-| 3 | Escrever RF e RNF numerados com prioridade MoSCoW | Concluído, 49 RF e 68 RNF em `documento-requisitos.md` |
-| 4 | Diagrama de casos de uso | **Não feito.** É o único item de diagramação da Sprint 1 que não existe: `diagramas/modelo-de-dados.md` tem MER e diagrama de estados, casos de uso não |
-| 5 | MER e DER | Concluído, com DER executável e quatro provas em `diagramas/` |
-| 6 | Wireframes das telas principais | Concluído, 16 telas em `prototipo/wireframes.html` |
-| 7 | Fechar stack, repositório, board e papéis | Stack, repositório e papéis fechados. Board é a decisão DA-05 |
-
-**Entregáveis da Sprint 1 conforme o escopo oficial:** Documento de Requisitos · Diagramas iniciais (MER, DER) · Wireframes ou mockups da interface.
-
-O escopo oficial cobra "MER, DER e outros de modelagem". MER e DER estão entregues; o "e outros" é onde o diagrama de casos de uso caberia, e a entrega é 21/08.
-
----
-
-## 10. Glossário
+## 9. Glossário
 
 | Termo | Definição |
 |-------|-----------|

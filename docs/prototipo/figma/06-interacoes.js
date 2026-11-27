@@ -9,7 +9,7 @@
    ATENÇÃO: este é o único script da pasta que depende de IDs de nó do arquivo
    vivo. Todos os outros resolvem tudo por nome. Se as telas forem reconstruídas
    do zero, os IDs mudam e a tabela `ligacoes` abaixo precisa ser refeita — os
-   IDs atuais estão na seção 6 do CONTEXTO.md.
+   IDs atuais estão no README desta pasta.
 
    Por isso ele também não roda no `verificar.js`: contra a API simulada, todo
    ID daria "frame nao existe", e o teste não diria nada. A proteção dele é

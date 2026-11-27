@@ -117,5 +117,5 @@ return {
   fontesCarregadas: fontesCarregadas,
   avisos: avisos,
   conferir: 'pendência 5: olhar os selos Danger ao lado do rosa nas telas 13 e 14',
-  proximo: 'nenhum — as 14 telas estão montadas. Atualizar o CONTEXTO.md.'
+  proximo: 'nenhum: as 14 telas estão montadas. Nada a rodar.'
 };

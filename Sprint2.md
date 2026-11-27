@@ -2,7 +2,7 @@
 
 **TCC, Técnico em Desenvolvimento de Sistemas, SENAI-SP.** Entrega em 23/10/2026.
 
-Este arquivo é um índice: diz onde cada parte da Sprint 2 está no repositório e como conferir.
+Registro da entrega: onde cada parte da Sprint 2 está e como foi conferida. Números e limites são de 23/10; o estado atual está em [`FinalSprint3.md`](FinalSprint3.md).
 
 ## Visão geral
 
@@ -61,41 +61,7 @@ Aplicativo em Expo e React Native, ligado à API real.
 
 O administrador aprova um psicólogo no painel web e ele passa a aparecer no catálogo do aplicativo, na mesma sessão. O passo a passo, com os comandos e as capturas de tela, está em [`docs/testes/2026-10-23-roteiro-i2.md`](docs/testes/2026-10-23-roteiro-i2.md). As imagens estão em [`docs/testes/capturas-i2/`](docs/testes/capturas-i2/).
 
-## 5. Como conferir
-
-### Rodar o sistema
-
-Detalhes em [`backend/README.md`](backend/README.md) e [`docs/engenharia/setup-backend.md`](docs/engenharia/setup-backend.md).
-
-```bash
-# back-end (dentro de backend/)
-composer install
-cp .env.example .env
-php artisan key:generate
-php artisan migrate --seed
-php artisan serve
-
-# aplicativo (dentro de app/)
-npm ci
-cp .env.example .env
-npx expo start
-```
-
-As contas de demonstração estão em [`UserSeeder.php`](backend/database/seeders/UserSeeder.php).
-
-### Rodar os testes
-
-```bash
-# dentro de backend/
-php artisan test
-
-# dentro de app/
-npm test
-npm run lint
-npx tsc --noEmit
-```
-
-## 6. Testes e evidências
+## 5. Testes e evidências
 
 Índice em [`docs/testes/README.md`](docs/testes/README.md). Saídas brutas de 23/10/2026:
 
@@ -110,14 +76,14 @@ npx tsc --noEmit
 - **Testes automatizados do back-end:** [`backend/tests/Feature/`](backend/tests/Feature/). O isolamento dos relatos privados está em [`ReportPrivacyTest.php`](backend/tests/Feature/ReportPrivacyTest.php).
 - **Comando do Newman:** [`docs/api/rodar-newman-sprint2.ps1`](docs/api/rodar-newman-sprint2.ps1)
 
-## 7. Documentação
+## 6. Documentação
 
 - **Documento ABNT:** [`docs/documento-final/CALMIND_ABNT.docx`](docs/documento-final/CALMIND_ABNT.docx)
 - **Requisitos:** [`docs/documento-requisitos.md`](docs/documento-requisitos.md)
-- **Plano e log de etapas da Sprint 2:** [`docs/planejamento/etapas-sprint2.md`](docs/planejamento/etapas-sprint2.md)
-- **Plano do MVP:** [`docs/planejamento/plano-mvp-sprint2-2026-10-22.md`](docs/planejamento/plano-mvp-sprint2-2026-10-22.md)
-- **Engenharia (regras e convenções):** [`docs/engenharia/`](docs/engenharia/README.md)
+- **Log de etapas:** [`docs/planejamento/etapas-sprint2.md`](docs/planejamento/etapas-sprint2.md)
+- **Engenharia:** [`docs/engenharia/`](docs/engenharia/README.md)
+- **Como rodar:** [README da raiz](README.md#como-executar)
 
-## 8. Landing page
+## 7. Landing page
 
 Página de apresentação do projeto em [`landing/index.html`](landing/index.html), com instruções em [`landing/README.md`](landing/README.md).

@@ -1,18 +1,13 @@
 # Documentação técnica final, em ABNT
 
-Entregável da Sprint 3 e guarda-chuva de todo o resto. Ferramenta e template são a decisão DA-09 em [`../planejamento/decisoes-abertas.md`](../planejamento/decisoes-abertas.md).
+O documento é o [`CALMIND_ABNT.docx`](CALMIND_ABNT.docx). Descreve o estado de 23/10/2026 e precisa ser atualizado até 01/12 ([o que mudou](../../FinalSprint3.md)). **Só a Isabela edita o arquivo**, para não dar conflito em binário.
 
-**Quase nada aqui precisa ser escrito do zero.** O documento final é costura do que já existe:
-
-| Capítulo provável | Vem de |
-|-------------------|--------|
-| Problema e justificativa | `../documento-base-sprint1.md` seção 1 |
-| Pesquisa de campo, personas | `../pesquisa/` |
-| Requisitos | `../documento-requisitos.md` |
-| Modelagem | `../diagramas/` |
-| Protótipo | `../prototipo/wireframes.html` |
-| Arquitetura e API | `../api/contrato-api.md` |
-| Testes | `../testes/` |
-| Limitações e evolução futura | `../documento-requisitos.md` seção 9 |
-
-O capítulo de limitações conhecidas é o que separa trabalho maduro de trabalho ingênuo. O limite de uso de aplicativos foi cortado com análise de viabilidade escrita, e o modelo não tem psicólogo Responsável Técnico registrado no CRP. Declarar isso conta a favor, não contra.
+| Assunto | Fonte |
+|---------|-------|
+| Problema e justificativa | [documento base](../documento-base-sprint1.md), seção 1 |
+| Pesquisa de campo | [`../pesquisa/`](../pesquisa/) |
+| Requisitos | [documento de requisitos](../documento-requisitos.md) |
+| Modelagem | [`../diagramas/`](../diagramas/) |
+| Arquitetura, rotas e hospedagem | [`../engenharia/`](../engenharia/README.md) e [contrato](../api/contrato-api.md) |
+| Testes | [`../testes/`](../testes/README.md) |
+| Limitações e evolução futura | [requisitos](../documento-requisitos.md), seção 9, e [FinalSprint3](../../FinalSprint3.md) |

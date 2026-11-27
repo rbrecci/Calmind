@@ -2,9 +2,9 @@
 
 **TCC · Técnico em Desenvolvimento de Sistemas · SENAI-SP · 4º termo**
 **Calmind**: Saúde Mental & Acolhimento
-Sprint 1, entregável de diagramação. Revisão de 19/08/2026.
+Sprint 1, entregável de diagramação. Revisão de 27/11/2026.
 
-> **Rascunho para revisão de Rafael e Zanetti.** O modelo abaixo cobre todos os requisitos Must do `documento-requisitos.md`. Cada decisão de modelagem está justificada na seção 4, e o DDL executável está em `schema.sql`, testado contra o MariaDB da máquina do grupo.
+> O modelo abaixo cobre todos os requisitos Must do `documento-requisitos.md`. Cada decisão de modelagem está justificada na seção 4, e o DDL executável está em `schema.sql`, testado no MariaDB 10.4 do XAMPP.
 
 ---
 
@@ -16,8 +16,6 @@ Sprint 1, entregável de diagramação. Revisão de 19/08/2026.
 | 2 | Banco relacional MySQL, compatível com o MariaDB 10.4 do XAMPP do grupo | DP-03 |
 | 3 | Idioma dos identificadores: **inglês** em tabela, coluna e campo de API. Português apenas no texto que o usuário lê | DP-14 |
 | 4 | Isolamento do relato privado por coluna de visibilidade **mais uma view exclusiva** para o lado do psicólogo | DP-06, ver seção 4.2 |
-
-**Se o grupo discordar da decisão 3, é agora.** Depois que as migrations existirem, renomear coluna custa caro.
 
 ---
 

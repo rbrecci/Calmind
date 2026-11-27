@@ -37,6 +37,8 @@ CREATE TABLE users (
   role            ENUM('patient','psychologist','admin') NOT NULL,
   status          ENUM('active','suspended') NOT NULL DEFAULT 'active', -- RF-45
   suspended_at    DATETIME        NULL,
+  avatar_path     VARCHAR(255)    NULL,              -- disco privado, sai so por rota autenticada
+  cover_path      VARCHAR(255)    NULL,
   created_at      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY uq_users_email (email),
@@ -191,6 +193,7 @@ CREATE TABLE bonds (
   invitation_id   INT UNSIGNED NULL,
   requested_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   responded_at    DATETIME     NULL,
+  accepted_at     DATETIME     NULL,          -- nulo em recusa e cancelamento
   ended_at        DATETIME     NULL,
   ended_by_user_id INT UNSIGNED NULL,
   active_patient_id INT UNSIGNED AS (IF(status = 'active', patient_id, NULL)) PERSISTENT,
@@ -434,6 +437,7 @@ CREATE TABLE notifications (
   created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   read_at    DATETIME     NULL,
   KEY ix_notif_user (user_id, read_at, created_at),
+  KEY ix_notif_reminder (user_id, type, resource_id),
   CONSTRAINT fk_notif_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

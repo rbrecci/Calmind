@@ -25,7 +25,7 @@ O Calmind ataca justamente este "entre-sessões", atuando como uma ponte de cont
 ### 3. Atores do Ecossistema
 *   **Paciente:** Usuário em acompanhamento. Restrito a no máximo **1 vínculo ativo** por vez para espelhar a prática clínica e simplificar a modelagem. Idade mínima de **12 anos** (autonomia de escrita e regime de consentimento LGPD diferenciado).
 *   **Psicólogo:** Profissional validado com CRP ativo (aprovado manualmente por um administrador). Pode manter **N vínculos ativos** com múltiplos pacientes.
-*   **Administrador:** Perfil de controle interno. Responsável por triar e aprovar os cadastros de novos psicólogos com seus documentos e gerenciar denúncias.
+*   **Administrador:** Perfil de controle interno. Responsável por triar e aprovar os cadastros de novos psicólogos com seus documentos e gerenciar denúncias (previsto nos requisitos, ainda não implementado).
 *   **Responsável Legal (Não-Ator):** Não possui conta ou login. Informado de forma obrigatória para pacientes menores de idade (12 a 17 anos), sendo o consentimento obtido fora do sistema e registrado administrativamente pelo psicólogo.
 
 ---
@@ -45,7 +45,7 @@ A marca Calmind e sua operação se diferenciam por quatro compromissos inegoci�
 2.  **Ausência de Transações Financeiras (DEC-07 / RF-20):**
     Não há processamento de pagamentos, taxas, cobranças ou registro de honorários dentro do ecossistema do app. Isso reduz a complexidade regulatória do projeto pedagógico e mantém o foco estritamente clínico e assistencial.
 3.  **Sigilo e Privacidade de Dados por Arquitetura (DEC-12 / RNF-08):**
-    A garantia do relato privado do paciente vive no banco de dados (provada por testes automatizados em cada integração), e não apenas no layout de telas. O paciente define o que deseja compartilhar. Relatos marcados como privados são invisíveis ao psicólogo, não constam na contagem do diário, não são enviados à IA e ficam restritos apenas ao dispositivo/exportação pessoal do paciente.
+    A garantia do relato privado do paciente vive no banco de dados (provada por teste automatizado), e não apenas no layout de telas. O paciente define o que deseja compartilhar. Relatos marcados como privados são invisíveis ao psicólogo, não constam na contagem do diário e não são enviados à IA. Ficam no servidor, cifrados em repouso, e só o paciente os lê.
 4.  **IA de Apoio sob Controle Humano (DEC-04 / DEC-05 / RNF-30):**
     A inteligência artificial nunca roda de forma automática, reativa ou independente. O resumo semanal de relatos compartilhados só é gerado sob iniciativa explícita e manual do psicólogo. Nenhuma análise gerada é gravada no prontuário sem a revisão, edição e confirmação intencional do profissional humano.
 
@@ -57,4 +57,3 @@ A marca Calmind e sua operação se diferenciam por quatro compromissos inegoci�
 *   **Prescrição Responsável:** A marca se posiciona estritamente fora do escopo de prescrever medicamentos (uma atribuição estritamente médica/psiquiátrica). O psicólogo apenas registra medicações preexistentes informadas e o paciente deve confirmar voluntariamente para ativar os lembretes de tomada de dose. Telas de medicação exibem de forma permanente avisos legais claros de não-prescrição.
 
 ---
-_Documento técnico gerado para formalização do ecossistema Calmind._
